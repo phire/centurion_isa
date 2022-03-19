@@ -258,3 +258,9 @@ Known syscalls:
     7a 01 02 - block until keypress, takes no arguments (probally returns the input char too)
     72 01 0e - exit syscall
 
+## Day two:
+
+First, I wrote up these logs so there is a record of the steps I took.
+
+Next, I'm planning to write a hacky disassembler in python. Now that we have an idea about relative
+branch instructions, an automated tool starts to become useful
