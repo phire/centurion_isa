@@ -1,0 +1,260 @@
+## Day 1:
+
+The information from Key about the system was an extremely useful starting point.
+
+The first things I took note of was:
+
+ * the program counter and address space is 16bit.
+ * general memory is in the range 0x0100 to 0xefff
+ * IO devices are in the range 0xf000 to 0xffff
+
+I started with throwing DIAG_F1 in a hex editor and immediately noticed lots of things that looked
+suspicious like IO addresses. There were sections of the dump where the repeating patterns of
+
+    A1 Fn nn
+
+stood out like a sore thumb. This gives out us our first candidate instruction:
+
+    0b10100001 NNNN - Do something with memory NNNN
+
+Because there instruction butt right up next to each other ie:
+
+    76
+    3a
+    a1 f1 09
+    a1 f1 0b
+    a1 f1 0d
+    a1 f1 0f
+    81 f1 10
+    c0 0f
+    42 31
+
+We can make the assumption that this is an instruction that operate directly on memory (instead of
+loading the address into an index register, and a second instruction using the index register to do
+the actual memory op.
+It's also likely a write.
+
+At this point I decided to look at the bootstrap ROM, because Ken Romaine gave a lot of useful
+information about it's function in his comment on the video part 7.
+
+My bootstrap takeaways:
+  * the bootstrap is the PROM sitting on the backplane (bit of a weird place)
+  * It lives at address 0xfc00
+  * It's job is to interact with:
+    * the first MUX board (at 0xf200) for a minimal serial terminal user interface on mux port 0
+    * The buttons/switches on the front panel
+    * the hawk disk controller at ~0xf140-0xf14f
+
+  * Depending on the buttons/switches, it load an IPL off the selected disk
+    * Sectors 0 to F are loaded to 0x0100
+    * Will loop doing RTZ and retrying if there is a failure
+
+This detailed information, plus bootstrap's small size and constrained scope, it is an ideal candidate
+for ISA reversing.
+
+So I throw BPN-TBP18S42N into a hex editor and quickly find the 0xf2nn and 0xf14n addresses that I'm expecting.
+
+At this point, I dump it out to a text file and start splitting up bytes that look like instructions
+onto their own line, and adding comments.
+Due to some weirdness,  I decide that this bootstrap ROM is backwards comapred to the DIAG rom and reverse it
+with a small python program. Things start to make significantly more sense.
+
+Some of the memory instructions are using opcodes other than A1. 81, 91 and b1 are seen.
+Ken Romaine's docs say there are 16 interrupt banks of 8 registers (each 16 bit), and that all
+memory writes are 8 bit, so lets assume there will be 3 bits dedicated to selected which register
+is written to memory and our assumed instruction to:
+
+    0b1rrr0001 NNNN - Write 8bits of register R to absolute memory address NNNN
+
+At this point, I'm also making the assumption that execution starts at the start of bootstrap (0xfc00)
+because I haven't seen anything looking like a reset vector, and the start of both bootstrap and
+DIAG_F1 look kind of like initialization code (setting MMIO registers to known values)
+
+Splitting the bytes in bootstrap up into assumed instructions produces some candidates for one, two
+and three byte instructions, but I kind of stall out on progress. At this stage of ISA Reversing,
+I'm really looking for control flow instructions along of:
+
+  * relative conditional branches
+  * relative unconditional branches
+  * absolute jumps
+  * absolute calls
+  * returns
+
+Finding and understanding these will give us a good idea of program control flow, and give us more
+clues about where the variable length instructions start.
+
+So, I started looking at the DIAG_F2, DIAG_F3 and DIAG_F4 roms. The good thing about these roms is
+that they have lots of ASCII strings. Especially F3 and F4, so I'll focus on those.
+
+What they don't have is an entry point. Bootstrap and F1 both look like they might start execution
+at 0x0000, but at 0x0000, F2/F3/F4 have a list test entries, with a 16 bit address, followed by a
+null-terminated ascii string. The list is terminated by a 16 bit null value.
+
+The 16 bit values are all in the range 0x0040 to 0x0700, and these are 0x800 byte roms, so we can make
+some assumptions.
+
+ * Execution on the DIAG board starts on the F1 chip.
+ * It initializes the serial terminal, enumerates one or more of the other roms and prints out a
+ * numbered list of tests for the user to select.
+ * When the user selects a test, F1 transfers control to `rom base address + address entry point`
+ * There are also other modes to select tests via dip switches and get output via leds.
+
+With these assumptions we get series of entry points, one per test. And we can start looking for
+similarities and differences in the function body.
+
+Notably, the last test right at the end of each F2/F3/F4 is a ROM self test (presumably a checksum)
+We have 3 versions of it, so we can compare differences.
+
+#### Function calls
+
+The other thing that stands out is F3 and F4 each contain a section of common code before the first
+test's entry point, which is going to give us a good clue about how function calls stand out.
+
+the first instruction that stood out as being call, was 90 NN NN. However, we already have evidence
+to suggest this is actually a load immediate instrction.
+
+In F3/F4, the next bytes after 90 NN NN (where NNNN looks like a function address) are always 50 80
+and the byte after that is commonly B1 or 7d.
+
+This hints that the call pattern these roms are using is something like:
+
+    90 NN NN ; R1 = 0xNNNN
+    50 80 ; PC = R1 + Rb; Rl = NextPC
+
+    Where Rb is the base address of this rom, set by the F1 ROM before transferring execution
+    and Rl is the register where the return address is stored.
+
+or more likely
+
+    90 NN NN ; R1 = 0xNNNN
+    50 80 ; R1 = R1 + Rb
+    7d ; PC = R1, Rl = Next PC
+
+    Rl is probably R1
+
+    and these are tail calls
+
+    90 NN NN ; R1 = 0xNNNN
+    50 80 ; R1 = R1 + Rb
+    b1 ; PC = R1 AKA, branch to register
+
+It seems the return instruction is 09 (which might actually be branch to register R1)
+
+It seems the F3/F4 roms are using this call pattern because they don't know their own base address
+Prephaps the code was written with the assumption that you could put these chips in any ROM socket
+of the diag board, and they would work at whatever hard-coded address they ended up at.
+
+Bootstrap, F1 and F2 don't use this function call pattern.
+
+#### ROM self test (relative branches)
+
+The F3 and F4 rom tests are almost identical. The only differences are:
+
+The address of the single function they call.
+A load immediate instrction which matches the length of the data in this rom.
+
+This function is quite short, and probally functions by looping from Rb + 0 to Rb + RomEnd, adding or
+xoring all bytes. The last non-zero byte in each rom is different, and is probably set to whatever
+results in the loop producing zero.
+
+The self test function in F2 is slightly different. It doesn't call out to a common function and
+it directly pokes the MUX registers to output data to the serial terminal. F3/F4 seem to use what
+looks like a syscall to do this (which we will cover later)
+
+These 3 versions of the rom test are perfect to work out relative branch instruction.
+
+this is my understanding of the F3/F4 self test at this point:
+
+    55 86
+    3a
+    85 61
+    40 10
+    d0 07 96 ; r5 = 0x796 ; address of last byte of data in this rom
+    50 82
+    51 62
+    15 f3
+    8b 41 01
+    15 18
+    7a 01 12 ; print syscall
+    "\n\r*** PASS ***\0" ; Null terminate string embedded in program control flow
+                        ; The print syscall consumes it and resumed execution afterwards.
+
+    a1 f1 0a ; r2 -> [0xf10a] (mux regsiter?)
+    72 01 0e ; exit syscall?
+
+
+    7a 01 12 ; print sycall
+    "*** FAIL ***\0"
+
+    a1 f1 0b ; r2 -> [0xf10b] (mux regsiter?)
+    a1 f1 0c ; r2 -> [0xf10c] (mux regsiter?)
+    72 01 0e ; exit syscall
+
+We want to find at least two branches. Backwards branches are easier to spot, as they use negative
+numbers. We want a small negative number, so an instruction with operand like 0xf0 would be perfect.
+
+The best candidate is 15 f3, which would be branch -13 bytes. We can also see a second 15 instrction, 15 18
+which is a good candidate for a positive 24 byte skipping over the pass branch to the fail code.
+
+We can insert lables and extrapolate to get
+
+    55 86
+    3a
+
+checksum_loop:
+    85 61
+    40 10
+    d0 07 96 ; r5 = 0x796 ; address of last byte of data in this rom
+    50 82
+    51 62
+    15 f3 ; conditional branch to checksum_loop
+    8b 41 01 ; this somehow sets the flags for the following branch
+    15 18 ; conditional branch to checksum_fail
+
+checksum_pass:
+    7a 01 12 ; print syscall
+    "\n\r*** PASS ***\0" ; Null terminate string embedded in program control flow
+                        ; The print syscall consumes it and resumed execution afterwards.
+
+    a1 f1 0a ; r2 -> [0xf10a] (mux regsiter?)
+    72 01 0e ; exit syscall?
+
+checksum_fail:
+    7a 01 12 ; print sycall
+    "*** FAIL ***\0"
+
+    a1 f1 0b ; r2 -> [0xf10b] (mux regsiter?)
+    a1 f1 0c ; r2 -> [0xf10c] (mux regsiter?)
+    72 01 0e ; exit syscall
+
+It is likely there are more version of the conditional branch instruction. Cross checking
+
+The F2 version of checksum is then useful for finding more types of relative branches
+
+Instead of using syscalls, it has it's own loop for writing bytes to the serial terminal.
+
+It still embeds strings like above, but instead abuses the relative call instructions to record the string
+address and jump to the send loop, which allows us to discover the relative call instruction.
+
+    7B NN
+
+#### syscalls pattern
+
+The F3 and F4 roms use what look like syscalls. It is not currently known where these syscalls are
+implemented, or even if these are actually syscalls, and not just a "call register" instruction.
+
+But they probally point somewhere in the F1 rom. The syscall pattern
+
+    7a 01 NN
+    <0 or more bytes of Call data>
+
+where NN are typically even numbers in the range 0x0 to 0x20
+
+The exit syscall uses a opcode 72 instead.
+
+Known syscalls:
+
+    7a 01 12 - print to stdout, takes null terminated string.
+    7a 01 02 - block until keypress, takes no arguments (probally returns the input char too)
+    72 01 0e - exit syscall
+

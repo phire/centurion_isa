@@ -1,0 +1,13 @@
+1rrr0001 = Write register r to 16bit memory address
+1rrr0000 IIII = load immediate to register r
+
+0x15 / 0x11, 1 byte signed conditional branches. Probably eight of them from 0x10 to 0x17
+
+0x09, return?
+
+
+0x7a NN NN = syscall
+0x7b NN = 1 byte relative call
+0x7d = call register R1 (put return address in R1?)
+
+0xb1 = unconditional branch to regsiter r1
