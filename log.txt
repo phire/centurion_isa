@@ -264,3 +264,12 @@ First, I wrote up these logs so there is a record of the steps I took.
 
 Next, I'm planning to write a hacky disassembler in python. Now that we have an idea about relative
 branch instructions, an automated tool starts to become useful
+
+...
+
+Ok, variable length instructions make this a lot harder. I have a disassembler, it's flexible, it
+can follow branches. But I'm not really liking the instructions I have programmed into it.
+
+I'm reasonably happy about control flow instructions, but suspicious about my 16bit store instruction.
+And I really need to find ALU instructions.
+
