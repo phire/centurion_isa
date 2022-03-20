@@ -7,10 +7,10 @@ base_address = 0xfc00
 
 entry_points = [
     0xfc00,
-    0xfc31,
-    0xfc3c,
-    0xfd5a,
-    0xfd6d,
+    #0xfc31,
+    #0xfc3c,
+    #0xfd5a,
+    #0xfd6d,
 ]
 
 if __name__ == "__main__":

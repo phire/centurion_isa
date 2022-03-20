@@ -4,7 +4,7 @@ from disassemble import *
 import struct
 
 filename = "Diag_F3_Rev_1.0.BIN"
-filename = "Diag_F4_1133CMD.BIN"
+#filename = "Diag_F4_1133CMD.BIN"
 base_address = 0x8000 # Complete guess. Seems to be position independant
 
 entry_points = []

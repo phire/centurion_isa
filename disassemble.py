@@ -113,6 +113,9 @@ def relative_branch_unconditional(next_pc, S, **kwargs):
 def relative_call(next_pc, S, **kwargs):
     return [next_pc, next_pc + S]
 
+def abolsute_branch_uncondtionional(N, **kwargs):
+    return [N]
+
 def kill_branch(**kwargs):
     return []
 
@@ -125,7 +128,7 @@ class B(I):
     def to_string(self, dict):
         if self.newpc == kill_branch:
             return self.name
-        if self.newpc == relative_branch:
+        if self.newpc == relative_branch or self.newpc == relative_branch_unconditional:
             dest = dict["next_pc"] + dict["S"]
         elif self.newpc == relative_call:
             dest = dict["next_pc"] + dict["S"]
@@ -140,23 +143,37 @@ class B(I):
 
 
 instructions = [
-    I("1rrr0000 NNNNNNNN NNNNNNNN", "li r{r}, {N:#04x}"),
-    I("1rrr0001 NNNNNNNN NNNNNNNN", "str r{r}, {N:#04x}"),
+    I("10000000 NNNNNNNN", "li r0, {N:#03x}"),
+    I("10010000 NNNNNNNN NNNNNNNN", "90 r1, {N:#04x}"),
+    I("10100001 NNNNNNNN NNNNNNNN", "st r0, {N:#04x}"),
+    I("10000001 NNNNNNNN NNNNNNNN", "ld r0, {N:#04x}"),
+    I("11010000 NNNNNNNN NNNNNNNN", "cmp r0, {N:#04x}"),
+    I("10110001 NNNNNNNN NNNNNNNN", "b1 r0, {N:#04x}"),
+
+    I("10000101 xxxxxxxx", "ld r?, [r?++]"),
+
     B("00010101 SSSSSSSS", "beq", relative_branch),
     B("00010001 SSSSSSSS", "bne", relative_branch),
-    B("00010xxx SSSSSSSS", "b? ({x})", relative_branch),
-    I("010bbbaa axxxxxxx", "add r{a}, r{b} ({x})"),
+    B("0001xxxx SSSSSSSS", "b? ({x})", relative_branch),
+   # I("010bbbaa axxxxxxx", "add r{a}, r{b} ({x})"),
+    B("01110011 SSSSSSSS", "jump", relative_branch_unconditional),
+
+    I("01000000 xxxxxxxx", "alu?"),
+    I("01010000 xxxxxxxx", "add r?, r?"),
+    I("01010001 xxxxxxxx", "sub? r?, r?"),
+    I("01010101 xxxxxxxx", "alu5 r?, r?"),
 
     B("01111011 SSSSSSSS", "call", relative_call),
     B("00001001", "ret 9", kill_branch),
-    B("00001000", "ret 8", kill_branch),
-    B("10110001", "b r1", kill_branch),
+ #   B("00001000", "ret 8", kill_branch),
+
+    B("01110001 NNNNNNNN NNNNNNNN", "jump {N:#04x}", abolsute_branch_uncondtionional),
     I("01111101", "call r1"),
-    I("01111010 NNNNNNNN NNNNNNNN", "syscall"), # This might actually only be 2 bytes
-    B("01110010 00000001 00001110", "syscall_exit", kill_branch),
+    I("01111010 NNNNNNNN NNNNNNNN", "call [{N:#04x}]"),
+    B("01110010 NNNNNNNN NNNNNNNN", "jump [{N:#04x}] ;", kill_branch),
     I("00111010", "di ?"),
     I("01010101"),
-    I("10000aaa SSSSSSSS", "addi r{a}, {S}"),
+
     I("10001011 xxxxxxxx"),
     I("xxxxxxxx"),
 ]
@@ -198,14 +215,22 @@ def recursive_disassemble(memory, entry):
         if len(info.next_pc) == 0:
             return
 
+        global label_id
+
         for next_pc in info.next_pc[1:]:
             if memory_addr_info[next_pc].label == None:
-                global label_id
                 memory_addr_info[next_pc].label = f"L{label_id}"
                 label_id += 1
             recursive_disassemble(memory, next_pc)
 
-        pc = info.next_pc[0]
+        next_pc = info.next_pc[0]
+
+        if next_pc != pc + len(info.bytes):
+            if memory_addr_info[next_pc].label == None:
+                memory_addr_info[next_pc].label = f"L{label_id}"
+                label_id += 1
+
+        pc = next_pc
 
 def disassemble(memory, entry_points):
     for entry in entry_points:

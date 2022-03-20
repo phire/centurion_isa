@@ -273,3 +273,140 @@ can follow branches. But I'm not really liking the instructions I have programme
 I'm reasonably happy about control flow instructions, but suspicious about my 16bit store instruction.
 And I really need to find ALU instructions.
 
+## Day three:
+
+Big info dump from Ken here: https://discord.com/channels/768194223576842281/953305332912893973/954796823908843602
+
+Which points out something I've been ignoring. This serial interface doesn't have a FIFO, and it's
+reasonably slow. So our serial write code needs to poll the status register to make sure the previous
+byte is sent before sending the next byte.
+
+And the my current assumptions haven't found a read instruction, my listings have writes to both
+f200 and f201 in serial send code.
+
+So out with our previous write instruction 1rrr0001. It might actually be 10100rrr, but I'm getting
+a feeling these memory instructions might not be fully orthogonal.
+
+So for now we will assume:
+
+  a1 - 10100001 NN NN is write some register to NNNN
+  81 - 10000001 NN NN is read NNNN to some register
+
+
+With those new assumptions, we can take a look at F2's send byte function and get:
+
+    send_string:
+    wait_status:
+        81 f2 00 ; ld r? f200
+        ; These two instructions somehow mask off unwanted status bits,
+        ; or otherwise prepare status for the conditional branch
+        2c ; might be shr r?
+        2c ; might be shr r?
+        11 f9 ; b?? conditional branch wait_status
+
+        85 41 ; something like ld r1, [r?++]. Sets flags
+        15 01 ; bnz send_byte
+        09 ; ret
+    send_byte:
+        a1 f2 01 ; st r?, 0xf201
+        73 ef ; unconditional branch send_string
+
+The fact that 85 41 is a two byte instruction, kind of messes up any hope that the load/store
+instructions are orthogonal. There isn't really a sane way to make the 81 instruction select
+between 7 registers without conflicting with the encoding of this 85 instruction.
+
+#### Diag memory map
+
+Nakazoto has been beeping out the Diag board, and he finally got it far enough that I think I can see
+how it maps the ROMs and it's IO into the memory map.
+
+https://cdn.discordapp.com/attachments/953305332912893973/954946213038411916/Diag_Schema_-_Schematic.png
+
+The A, B and C lines of the two 74LS138 chips are feed directly from the backplane (via bus transceivers).
+Chances are these lines are A11, A12, A13. The outputs of the 74LS138s control 13 rom sockets (each
+with a 0x800 or 2KB rom), plus a 14th slot where the IO lives.
+
+This indicates that all ROMs are mapped into the memory map sequentially, and that these is no bank
+switching (though, we would need to know how the 138s are enabled to be sure)
+
+If we assume this rom board maps in at 0x8000, then 0x8000 + 14 * 0x800 is 0xf000, which happens to
+be the start of IO.
+Essentially, this Diag board has been designed with the maximum number of ROM sockets that it could
+have if mapped them sequentially starting from 0x8000.
+
+It's probally mapped at 0x8000, because this takes up a full 0x7000 bytes of memory, and it doesn't
+look like there is enough logic to map it anywhere other than 0x0000 or 0x8000. And if it was mapped
+at 0x0000, then it would conflict with the registers which are mapped from 0x0000 to 0x0100.
+Besides, 0x8000 is a classic place to map ROMs in this era of computing.
+
+--------------
+
+
+At this point I coincidentally started looking at bootstrap again, trying to make the dissembler output
+of the entry point look sane.
+
+The second instruction in was a relative jump that skipped over 3 bytes, and the first instrction
+kind of looked like a conditional branch, but with a 1a code that I wasn't sure was a branch.
+
+But when I set it up in my dissembler, I immediately noticed that it jumped into those 3 skipped bytes
+and those 3 skipped bytes (71 80 81) looked like they might be an absolute jump to 0x8001.
+
+when implemented, I got this output for the bootstrap entry point"
+
+    fc00:    1a 02              b? (10) L0
+    fc02:    73 03              jump L2
+
+    L0:
+    fc04:    71 80 01           jump 0x8001 L1
+
+    L2:
+    fc07:    80 c5              li r0, 0xc5
+    fc09:    a1 f2 00           st r0, 0xf200
+    fc0c:    80 8c              li r0, 0x8c
+    fc0e:    a1 f2 01           st r0, 0xf201
+    fc11:    0e                 unknown
+    fc12:    0e                 unknown
+    fc13:    90 10 00           90 r1, 0x1000
+    fc16:    5f                 unknown
+    fc17:    7b 79              call L3
+    fc19:    c4                 unknown
+    fc1a:    bd                 unknown
+    fc1b:    00                 unknown
+    fc1c:    7b 72              call L19
+    fc1e:    c0                 unknown
+    fc1f:    c6                 unknown
+    fc20:    71 fc 00           jump 0xfc00 L20
+
+
+We can see that this code at the start of bootstrap checks some condition, and if it's true, it jumps
+to address 0x8001, which is the second byte into F1, if our Diag memory map from above it correct.
+(and the first byte of F1 is empty, so it fits)
+
+Otherwise it calls some functions that try to boot off the disk drive and if they fail, it loops,
+checking if it should branch to diag or retry booting off disk.
+
+
+this unknown conditional branch is weird, there is no compare instruction. I'm guessing it might be
+a branch instruction that is feed directly from an external an IO line, kind of like the 6502's
+set-overflow pin, which can be used to control the branch direction of a conditional branch from
+outside the cpu.
+
+If so, It would theoretically be wired to some signal on the backplane, which the Diag board would
+assert when plugged in (potentially controlled by a dip switch, or it's button?)
+
+
+#### Death of the syscalls
+
+I so wanted syscalls to be a thing. They probally still are, but Diag doesn't use them.
+
+Turns out the thing I and assumed was a syscall was simply the indirect call instruction.
+Takes a 16bit address, reads a 16bit value from that address and calls it.
+each test in F3/F4 calls a function in F3/F4 that calculates the absolute function pointers
+and writes them to the table at memory starting from 0x0102. 0x0100 is probally written by F1
+as a way of returning control to F1 after the test.
+
+Good news is that the init function gives us the second instruction we know for sure that is
+writing to memory, B1 NN NN
+
+Chances are A1 is write r0 to NNNN, and B1 is write r1 to NNNN.
+

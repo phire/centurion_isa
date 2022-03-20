@@ -99,8 +99,11 @@
 00000580: 15 0c 61 bf fe 91 bf fc d0 07 74 58 75 20 a1 f1  ..a.......tXu ..  ..a?~.?|P.tXu !q
 00000590: 0a 90 bf fc 5f 95 a1 5e 65 a1 90 00 7d 50 80 75  ...._..^e...}P.u  ..?|_.!^e!..}P.u
 000005a0: 00 05 b1 05 b3 05 b5 05 b7 05 b9 00 00 00 00 00  ................  ..1.3.5.7.9.....
-000005b0: 00 ff ff 55 55 aa aa 00 00 80 01 90 07 cc 50 80  ...UU.........P.  ...UU**......LP.
-000005c0: 7d 00 9b 9c 8c c3 d0 d5 ad b6 a0 cd c1 d0 d0 c9  }...............  }....CPU-6 MAPPI
+000005b0: 00 ff ff 55 55 aa aa 00 00 80 01
+
+90 07 cc
+50 80 7d
+000005c1:    00 9b 9c 8c c3 d0 d5 ad b6 a0 cd c1 d0 d0 c9  }...............  }....CPU-6 MAPPI
 000005d0: ce c7 a0 d2 c1 cd a0 d4 c5 d3 d4 ac a0 c3 cf ce  ................  NG RAM TEST, CON
 000005e0: d4 d2 cf cc ad c3 a0 d4 cf a0 c5 d8 c9 d4 8d 8a  ................  TROL-C TO EXIT..
 000005f0: 00 22 32 15 3a 90 07 cc 50 80 7d 00 8d 8a aa aa  ."2.:...P.}.....  ."2.:..LP.}...**
@@ -159,7 +162,7 @@ loop:
 000007a1:
     81 f2 01
     75 40
-    7b 24 ; relative call sendloop (address of string ends up in r0)
+    7b 24 ; relative call send_string (address of string ends up in r0)
     8d 8a aa aa aa a0 c3 c8 c5 c3 cb a0 d3 d5 cd a0 c5 d2 d2 cf d2 a0 aa aa aa 8d 8a 00 "\d\n*** CHECK SUM ERROR ***\r\n\0"
 
     a1 f1 0b
@@ -168,17 +171,22 @@ loop:
 
 000007cc:
 
-send_loop:
-    81 f2 00 ; r0 -> [0xf200]
-    2c
-    2c
-    11 f9 ; condtional jump send_loop
+send_string:
+wait_status:
+    81 f2 00 ; ld r? f200
+    ; These two instructions somehow mask off unwanted status bits,
+    ; or otherwise prepare status for the conditional branch
+    2c ; might be shr r?
+    2c ; might be shr r?
+    11 f9 ; b?? conditional branch wait_status
 
-    85 41
-    15 01
+    85 41 ; something like ld r1, [r?++]. Sets flags
+    15 01 ; bnz send_byte
     09 ; ret
+send_byte:
+    a1 f2 01 ; st r?, 0xf201
+    73 ef ; unconditional branch send_string
 
-    a1 f2 01 ; r2 -> [0xf201]
-    73 ef 82 00 00
+    82 00 00
 000007e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................  ................
 000007f0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................  ................
