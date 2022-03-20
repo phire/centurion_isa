@@ -408,5 +408,32 @@ as a way of returning control to F1 after the test.
 Good news is that the init function gives us the second instruction we know for sure that is
 writing to memory, B1 NN NN
 
-Chances are A1 is write r0 to NNNN, and B1 is write r1 to NNNN.
+Chances are A1 is write r0 to NNNN, and B1 is write r1 to NNNN
+
+--------------
+
+Oh, I'm stupid. This is a 16 bit write instruction. It needs to be 16bit for this Init function to
+make sense.
+
+I'm now coming to the conclusion that this CPU has a very strong sense of an Accumulator, with
+large numbers of instructions directly operating on it.
+
+So new assumptions:
+
+    80 NN - load 8bit immediate into A
+    90 NN NN - load 16bit immediate into A
+    81 NN NN - read 8 bits from memory into A
+    91 NN NN - read 16 bits from memory into A
+    A1 NN NN - write 8 bits of A to [NNNN]
+    B1 NN NN - write 16 bits of A to [NNNN]
+
+---------------
+
+Knowing how the function calls in the F3/F4 roms work, I set about making wrapper disassembler scripts
+for them.
+
+These scripts allow me to manually specify things (function names, entry points, comments) for the
+disassembler to add to the output during each run.
+
+**F3 and F4 share a lot of common code.**
 

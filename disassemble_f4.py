@@ -1,24 +1,21 @@
 #!/usr/bin/env python3
 
-filename = "Diag_F3_Rev_1.0.BIN"
+filename = "Diag_F4_1133CMD.BIN"
+base_address = 0x9800
 
 from diag_common import *
 
-
-base_address = 0x9000
-
-
 functions = [
-    (0x09a, 0x112, "WriteString"),
-    (0x0b0, 0x102, "ReadChar"),
-    (0x0ba, 0x110, "Fn_0ba"),
-    (0x0c5, 0x10a, "Fn_0c5"), # often called just before WriteString
-    (0x0f6, 0x104, "FinishTest"), # Prints Pass or Fail. checks 0x108 to see if test passed or failed
-    (0x128, 0x10e, "PressSpaceThenExit"),
-    (0x164, 0x106, "PrintCtrlCToExit"), # prints out "(CONTROL-C TO EXIT)"
-    (0x180,     0, "Init"),
-    (0x1e3, 0x118, "Fn_1e3"),
-    (0x286, 0x10c, "Fn_286"),
+    (0x0a5, 0x112, "WriteString"),
+    (0x0bb, 0x102, "ReadChar"),
+    (0x0c5, 0x110, "Fn_0c5"),
+    (0x0d0, 0x10a, "Fn_0d0"),
+    (0x101, 0x104, "FinishTest"), # Prints Pass or Fail. checks 0x108 to see if test passed or failed
+    (0x133, 0x10e, "PressSpaceThenExit"),
+    (0x16f, 0x106, "PrintCtrlCToExit"), # prints out "(CONTROL-C TO EXIT)"
+    (0x18b, 0x100, "Init"),
+    (0x1ee, 0x118, "Fn_1ee"), # not called
+    (0x291, 0x10c, "Fn_291"), # not called
 ]
 
 if __name__ == "__main__":
@@ -34,12 +31,6 @@ if __name__ == "__main__":
         memory_addr_info[indirect_addr].label = name
         entry_points.append(base_address + addr)
 
-    # print(entry_points)
-
-    # for entry in entry_points:
-    #     print(f"({entry & 0xfff:#05x}, \"\"),")
-
-    # exit()
 
     body_addr = parse_header(memory, base_address, base_address)
 

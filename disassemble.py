@@ -143,38 +143,58 @@ class B(I):
 
 
 instructions = [
-    I("10000000 NNNNNNNN", "li r0, {N:#03x}"),
-    I("10010000 NNNNNNNN NNNNNNNN", "90 r1, {N:#04x}"),
-    I("10100001 NNNNNNNN NNNNNNNN", "st r0, {N:#04x}"),
-    I("10000001 NNNNNNNN NNNNNNNN", "ld r0, {N:#04x}"),
-    I("11010000 NNNNNNNN NNNNNNNN", "cmp r0, {N:#04x}"),
-    I("10110001 NNNNNNNN NNNNNNNN", "b1 r0, {N:#04x}"),
+    I("10000000 NNNNNNNN", "lib A, {N:#04x}"),
+    I("10010000 NNNNNNNN NNNNNNNN", "liw A, {N:#06x}"),
+    I("10000001 NNNNNNNN NNNNNNNN", "ldb A, {N:#06x}"),
+    I("10010001 NNNNNNNN NNNNNNNN", "ldw A, {N:#06x}"),
+    I("10100001 NNNNNNNN NNNNNNNN", "stb A, {N:#06x}"),
+    I("10110001 NNNNNNNN NNNNNNNN", "stw A, {N:#06x}"),
+
+    I("11010000 NNNNNNNN NNNNNNNN", "cmp A, {N:#06x}"),
 
     I("10000101 xxxxxxxx", "ld r?, [r?++]"),
 
     B("00010101 SSSSSSSS", "beq", relative_branch),
     B("00010001 SSSSSSSS", "bne", relative_branch),
+    I("00010000"), # This might be a single byte instruction, and not a branch. Disabling for now
     B("0001xxxx SSSSSSSS", "b? ({x})", relative_branch),
    # I("010bbbaa axxxxxxx", "add r{a}, r{b} ({x})"),
     B("01110011 SSSSSSSS", "jump", relative_branch_unconditional),
+
+    I("00111010", "xor A, A"),
 
     I("01000000 xxxxxxxx", "alu?"),
     I("01010000 xxxxxxxx", "add r?, r?"),
     I("01010001 xxxxxxxx", "sub? r?, r?"),
     I("01010101 xxxxxxxx", "alu5 r?, r?"),
 
+
+
     B("01111011 SSSSSSSS", "call", relative_call),
     B("00001001", "ret 9", kill_branch),
  #   B("00001000", "ret 8", kill_branch),
 
-    B("01110001 NNNNNNNN NNNNNNNN", "jump {N:#04x}", abolsute_branch_uncondtionional),
-    I("01111101", "call r1"),
-    I("01111010 NNNNNNNN NNNNNNNN", "call [{N:#04x}]"),
-    B("01110010 NNNNNNNN NNNNNNNN", "jump [{N:#04x}] ;", kill_branch),
-    I("00111010", "di ?"),
+    B("01110001 NNNNNNNN NNNNNNNN", "jump {N:#06x}", abolsute_branch_uncondtionional),
+    I("01111101 NNNNNNNN", "call A + {N:#04x}"),
+    I("01111010 NNNNNNNN NNNNNNNN", "call [{N:#06x}]"),
+    I("10100010 NNNNNNNN NNNNNNNN", "call_alt [{N:#06x}]"), # weird alternative call
+    B("01110010 NNNNNNNN NNNNNNNN", "jump [{N:#06x}] ;", kill_branch),
+
     I("01010101"),
 
+    # Unknown two byte instructions
+
+    # these 3 are probally the same
+    I("10100101 xxxxxxxx"),
+    I("11110101 xxxxxxxx"),
+    I("10110101 xxxxxxxx"),
+
+    I("01101101 xxxxxxxx"),
+
     I("10001011 xxxxxxxx"),
+
+
+
     I("xxxxxxxx"),
 ]
 
