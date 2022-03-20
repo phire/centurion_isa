@@ -1,459 +1,339 @@
-
-L20:
-fc00:    1a 02              b? (10) L0
-fc02:    73 03              jump L2
+fc00:    1a 02        bEX L0
+fc02:    73 03        jump L2
 
 L0:
-fc04:    71 80 01           jump 0x8001 L1
+fc04:    71 80 01     jump 0x8001 L1
 
 L2:
-fc07:    80 c5              li r0, 0xc5
-fc09:    a1 f2 00           st r0, 0xf200
-fc0c:    80 8c              li r0, 0x8c
-fc0e:    a1 f2 01           st r0, 0xf201
-fc11:    0e                 unknown
-fc12:    0e                 unknown
-fc13:    90 10 00           90 r1, 0x1000
-fc16:    5f                 unknown
-fc17:    7b 79              call L3
-fc19:    c4                 unknown
-fc1a:    bd                 unknown
-fc1b:    00                 unknown
-fc1c:    7b 72              call L19
-fc1e:    c0                 unknown
-fc1f:    c6                 unknown
-fc20:    71 fc 00           jump 0xfc00 L20
-fc23:    85
-fc24:    41
-fc25:    a1
-fc26:    f8
-fc27:    00
-fc28:    81
-fc29:    f8
-fc2a:    01
-fc2b:    29
-fc2c:    15
-fc2d:    fa
-fc2e:    84
-fc2f:    f6
-fc30:    09
-fc31:    85
-fc32:    41
-fc33:    a1
-fc34:    f1
-fc35:    48
-fc36:    84
-fc37:    df
-fc38:    2c
-fc39:    10
-fc3a:    fb
-fc3b:    09
-fc3c:    73
-fc3d:    a0
-fc3e:    a5
-fc3f:    a2
-fc40:    49
-fc41:    e5
-fc42:    a2
-fc43:    14
-fc44:    0a
-fc45:    c0
-fc46:    c3
-fc47:    49
-fc48:    14
-fc49:    05
-fc4a:    c0
-fc4b:    c8
-fc4c:    49
-fc4d:    15
-fc4e:    50
-fc4f:    7b
-fc50:    72
-fc51:    c0
-fc52:    50
-fc53:    40
-fc54:    31
-fc55:    16
-fc56:    48
-fc57:    c5
-fc58:    a1
-fc59:    16
-fc5a:    7f
-fc5b:    18
-fc5c:    7f
-fc5d:    c0
-fc5e:    03
-fc5f:    49
-fc60:    90
-fc61:    1f
-fc62:    40
-fc63:    5e
-fc64:    90
-fc65:    81
-fc66:    00
-fc67:    b5
-fc68:    81
-fc69:    80
-fc6a:    84
-fc6b:    a5
-fc6c:    81
-fc6d:    85
-fc6e:    a1
-fc6f:    14
-fc70:    04
-fc71:    c0
-fc72:    0f
-fc73:    40
-fc74:    31
-fc75:    a5
-fc76:    81
-fc77:    80
-fc78:    83
-fc79:    a5
-fc7a:    81
-fc7b:    3a
-fc7c:    b5
-fc7d:    81
-fc7e:    80
-fc7f:    85
-fc80:    18
-fc81:    3d
-fc82:    d0
-fc83:    0f
-fc84:    00
-fc85:    f5
-fc86:    a2
-fc87:    32
-fc88:    20
-fc89:    f5
-fc8a:    a2
-fc8b:    c0
-fc8c:    88
-fc8d:    e5
-fc8e:    a2
-fc8f:    d0
+fc07:    80 c5        lib A, 0xc5
+fc09:    a1 f2 00     stb A, 0xf200
+fc0c:    80 8c        lib A, 0x8c
+fc0e:    a1 f2 01     stb A, 0xf201
+fc11:    0e           unknown
+fc12:    0e           unknown
 
-L19:
-fc90:    83                 unknown
-fc91:    00                 unknown
+L33:
+fc13:    90 10 00     liw A, 0x1000
+fc16:    5f           unknown
+fc17:    7b 79        call WriteString
+fc19:    "D=\0"
+fc1c:    7b 72        call L20
+fc1e:    c0 c6        subb A, 0xc6
+fc20:    49           unknown
+fc21:    e5           unknown
+fc22:    a2 14 0a     call_alt [0x140a]
+fc25:    c0 c3        subb A, 0xc3
+fc27:    49           unknown
+fc28:    14 05        bne L23
+fc2a:    c0 c8        subb A, 0xc8
+fc2c:    49           unknown
+fc2d:    15 50        beq L5
+
+L23:
+fc2f:    7b 72        call L21
+fc31:    c0 50        subb A, 0x50
+fc33:    40 31        unknown
+fc35:    16 48        b6 L5
+fc37:    c5           unknown
+fc38:    a1 16 7f     stb A, 0x167f
+fc3b:    18 7f        b8 L24
+fc3d:    c0 03        subb A, 0x03
+fc3f:    49           unknown
+fc40:    18 3d        b8 L5
+fc42:    d0 0f 00     subw A, 0x0f00
+fc45:    f5 a2        unknown
+fc47:    32 20        unknown
+fc49:    f5 a2        unknown
+fc4b:    c0 88        subb A, 0x88
+fc4d:    e5           unknown
+fc4e:    a2 d0 83     call_alt [0xd083]
+fc51:    00           unknown
+fc52:    f5 a2        unknown
+fc54:    d0 81 00     subw A, 0x8100
+fc57:    06           flag6
+
+L29:
+fc58:    27 30        unknown
+fc5a:    29           unknown
+fc5b:    17 fb        b7 L29
+fc5d:    f5 a2        unknown
+fc5f:    2f 14        unknown
+fc61:    2f 06        unknown
+fc63:    2f a0        unknown
+fc65:    90 ff f6     liw A, 0xfff6
+fc68:    2f 02        unknown
+fc6a:    7b 22        call L30
+fc6c:    43 90        unknown
+fc6e:    01           flag1
+fc6f:    00           unknown
+fc70:    2f 00        unknown
+fc72:    90 f0 ff     liw A, 0xf0ff
+fc75:    2f 02        unknown
+fc77:    7b 15        call L30
+fc79:    45           unknown
+fc7a:    15 03        beq L5
+fc7c:    71 01 03     jump 0x0103 L14
+
+L5:
+fc7f:    7b 11        call WriteString
+fc81:    "\r\nERROR\r\n\0"
+fc8b:    07           flag7
+fc8c:    73 85        jump L33
+
+L30:
+fc8e:    73 73        jump L31
+
+L20:
+fc90:    73 11        jump L21
+
+WriteString:
+fc92:    81 f2 00     ldb A, 0xf200
+fc95:    2c           unknown
+fc96:    2c           unknown
+fc97:    11 f9        b1 WriteString
+fc99:    85 41        ld r?, [r?++]
+fc9b:    15 01        beq L3
+fc9d:    09           ret 9
 
 L3:
-fc92:    f5                 unknown
+fc9e:    a1 f2 01     stb A, 0xf201
+fca1:    73 ef        jump WriteString
 
-L7:
-fc93:    a2                 unknown
-fc94:    d0 81 00           cmp r0, 0x8100
-fc97:    06                 unknown
+L21:
+fca3:    84           unknown
+fca4:    ee           unknown
+fca5:    2c           unknown
+fca6:    11 fb        b1 L21
+fca8:    84           unknown
+fca9:    f5 c0        unknown
+fcab:    80 43        lib A, 0x43
+fcad:    31 c0        unknown
+fcaf:    e0           unknown
+fcb0:    49           unknown
+fcb1:    16 04        b6 L22
+fcb3:    c0 df        subb A, 0xdf
+fcb5:    42           unknown
+fcb6:    31
+
+L22:
+fcb7:    a4           unknown
+fcb8:    e6           unknown
+fcb9:    09           ret 9
+fcba:    73
+fcbb:    62
+
+L24:
+fcbc:    73 02        jump L25
 
 L4:
-fc98:    27                 unknown
-fc99:    30                 unknown
-fc9a:    29                 unknown
-fc9b:    17 fb              b? (7) L4
-fc9d:    f5                 unknown
-fc9e:    a2                 unknown
-fc9f:    2f                 unknown
-fca0:    a5                 unknown
-fca1:    81 2a a5           ld r0, 0x2aa5
-fca4:    81 d0 01           ld r0, 0xd001
-fca7:    90 f5 81           90 r1, 0xf581
-fcaa:    28                 unknown
-fcab:    c0                 unknown
-fcac:    0e                 unknown
-fcad:    49                 unknown
-fcae:    15 f3              beq L5
-fcb0:    80 ff              li r0, 0xff
-fcb2:    a5                 unknown
-fcb3:    81 80 08           ld r0, 0x8008
-fcb6:    7b 4e              call L6
-fcb8:    80 41              li r0, 0x41
-fcba:    a1 f8 08           st r0, 0xf808
-fcbd:    0e                 unknown
-fcbe:    2a                 unknown
-fcbf:    a1 14 2f           st r0, 0x142f
-fcc2:    06                 unknown
-fcc3:    2f                 unknown
-fcc4:    a0                 unknown
-fcc5:    90 ff f6           90 r1, 0xfff6
-fcc8:    2f                 unknown
-fcc9:    02                 unknown
-fcca:    7b 22              call L8
-fccc:    43                 unknown
-fccd:    90 01 00           90 r1, 0x100
-fcd0:    2f                 unknown
-fcd1:    00                 unknown
-fcd2:    90 f0 ff           90 r1, 0xf0ff
-fcd5:    2f                 unknown
-fcd6:    02                 unknown
-fcd7:    7b 15              call L8
+fcbe:    73 bf        jump L5
 
-L18:
-fcd9:    45                 unknown
-fcda:    15 03              beq L17
-fcdc:    71 01 03           jump 0x103 L15
+L25:
+fcc0:    c0 07        subb A, 0x07
+fcc2:    49           unknown
+fcc3:    18 ba        b8 L5
+fcc5:    a1 f1 40     stb A, 0xf140
+fcc8:    94 2d        unknown
+fcca:    d0 00 10     subw A, 0x0010
+fccd:    5a           unknown
+fcce:    14 af        bne L5
+fcd0:    3a           xor A, A
+fcd1:    b1 f1 41     stw A, 0xf141
+fcd4:    7b 3b        call L26
+fcd6:    03           flag3
 
-L17:
-fcdf:    7b f8              call L18
-fce1:    08                 unknown
-fce2:    0e                 unknown
-fce3:    a1 f8 08           st r0, 0xf808
-fce6:    0e                 unknown
-fce7:    90 1f 40           90 r1, 0x1f40
-fcea:    2f                 unknown
-fceb:    00                 unknown
-fcec:    51 80              sub? r?, r?
+L28:
+fcd7:    94 1e        unknown
+fcd9:    d0 04 00     subw A, 0x0400
+fcdc:    5a           unknown
+fcdd:    15 a0        beq L5
+fcdf:    d0 00 20     subw A, 0x0020
+fce2:    5a           unknown
+fce3:    14 f2        bne L28
+fce5:    2f 04        unknown
+fce7:    2f 06        unknown
+fce9:    90 01 00     liw A, 0x0100
+fcec:    2f 00        unknown
+fcee:    90 ea 1f     liw A, 0xea1f
+fcf1:    2f 02        unknown
+fcf3:    7b 1c        call L26
+fcf5:    00           unknown
+fcf6:    81 f1 44     ldb A, 0xf144
+fcf9:    15 84        beq L5
+fcfb:    71 01 03     jump 0x0103 L14
+fcfe:    7b
+fcff:    2f
+fd00:    71
+fd01:    fc
+fd02:    00
 
-L8:
-fcee:    3b                 unknown
-fcef:    2f                 unknown
-fcf0:    02                 unknown
-fcf1:    2f                 unknown
-fcf2:    34                 unknown
-fcf3:    2f                 unknown
-fcf4:    06                 unknown
-fcf5:    80 43              li r0, 0x43
-fcf7:    a1 f8 08           st r0, 0xf808
-fcfa:    0e                 unknown
-fcfb:    0e                 unknown
-fcfc:    7b 20              call L9
-fcfe:    73 02              jump L16
-fd00:    11
+L31:
+fd03:    85 41        ld r?, [r?++]
+fd05:    a1 f8 00     stb A, 0xf800
 
-s_error:
-fd01:    "\r\nERROR\r\n\0"
-fd0b:    07                 unknown
-fd0c:    73 85              jump L7
-fd0e:    73
-fd0f:    73
-fd10:    73
-fd11:    11
-fd12:    81
-fd13:    f2
-fd14:    00
-fd15:    2c
-fd16:    2c
-fd17:    11
-fd18:    f9
-fd19:    85
-fd1a:    41
-fd1b:    15
-fd1c:    01
-fd1d:    09
+L32:
+fd08:    81 f8 01     ldb A, 0xf801
+fd0b:    29           unknown
+fd0c:    15 fa        beq L32
+fd0e:    84           unknown
+fd0f:    f6           unknown
+fd10:    09           ret 9
 
-L9:
-fd1e:    a1 f2 73           st r0, 0xf273
-fd21:    9a                 unknown
-fd22:    90 01 00           90 r1, 0x100
-fd25:    2f                 unknown
-fd26:    00                 unknown
-fd27:    90 ea 1f           90 r1, 0xea1f
-fd2a:    2f                 unknown
-fd2b:    02                 unknown
-fd2c:    2f                 unknown
-fd2d:    34                 unknown
-fd2e:    2f                 unknown
-fd2f:    06                 unknown
-fd30:    80 45              li r0, 0x45
+L26:
+fd11:    85 41        ld r?, [r?++]
+fd13:    a1 f1 48     stb A, 0xf148
 
-L14:
-fd32:    a1 f8 08           st r0, 0xf808
-fd35:    80 08              li r0, 0x8
-fd37:    7b 0d              call L10
-fd39:    7b 03              call L13
-fd3b:    71 01 03           jump 0x103 L15
-
-L13:
-fd3e:    81 f8 01           ld r0, 0xf801
-fd41:    73 ef              jump L14
-
-L11:
-fd43:    84                 unknown
-fd44:    ee                 unknown
-fd45:    2c                 unknown
-
-L10:
-fd46:    11 fb              bne L11
-fd48:    84                 unknown
-fd49:    f5                 unknown
-fd4a:    c0                 unknown
-fd4b:    80 43              li r0, 0x43
-fd4d:    31                 unknown
-fd4e:    c0                 unknown
-fd4f:    e0                 unknown
-fd50:    49                 unknown
-fd51:    16 04              b? (6) L12
-fd53:    c0                 unknown
-fd54:    df                 unknown
-fd55:    42                 unknown
-fd56:    31                 unknown
+L27:
+fd16:    84           unknown
+fd17:    df           unknown
+fd18:    2c           unknown
+fd19:    10 fb        b0 L27
+fd1b:    09           ret 9
 
 L12:
-fd57:    a4                 unknown
-fd58:    e6                 unknown
-fd59:    09                 ret 9
-fd5a:    73
-fd5b:    62
-fd5c:    73
-fd5d:    02
-fd5e:    73
-fd5f:    bf
-fd60:    08
-fd61:    15
-fd62:    01
-fd63:    09
-fd64:    73
-fd65:    da
-fd66:    c1
-fd67:    f8
-fd68:    09
-fd69:    4a
-fd6a:    15
-fd6b:    fa
-fd6c:    09
-fd6d:    8c
-fd6e:    00
-fd6f:    8b
-fd70:    00
-fd71:    95
-fd72:    41
-fd73:    b3
-fd74:    03
-fd75:    79
-fd76:    4c
-fd77:    93
-fd78:    47
-fd79:    be
-fd7a:    6d
-fd7b:    a2
-fd7c:    32
-fd7d:    40
-fd7e:    79
-fd7f:    4c
-fd80:    c0
-fd81:    07
-fd82:    49
-fd83:    18
-fd84:    ba
-fd85:    a1
-fd86:    f1
-fd87:    40
-fd88:    94
-fd89:    2d
-fd8a:    d0
-fd8b:    00
-fd8c:    10
-fd8d:    5a
-fd8e:    14
-fd8f:    af
-fd90:    3a
-fd91:    b1
-fd92:    f1
-fd93:    41
-fd94:    7b
-fd95:    3b
-fd96:    03
-fd97:    94
-fd98:    1e
-fd99:    d0
-fd9a:    04
-fd9b:    00
-fd9c:    5a
-fd9d:    15
-fd9e:    a0
-fd9f:    d0
-fda0:    e7
-fda1:    4d
-fda2:    14
-fda3:    2a
-fda4:    c0
-fda5:    8d
-fda6:    49
-fda7:    14
-fda8:    25
-fda9:    c0
-fdaa:    b0
-fdab:    49
-fdac:    16
-fdad:    25
-fdae:    80
-fdaf:    09
-fdb0:    41
-fdb1:    31
-fdb2:    19
-fdb3:    0e
-fdb4:    80
-fdb5:    11
-fdb6:    41
-fdb7:    31
-fdb8:    16
-fdb9:    19
-fdba:    c0
-fdbb:    05
-fdbc:    49
-fdbd:    18
-fdbe:    14
-fdbf:    c0
-fdc0:    00
-fdc1:    20
-fdc2:    5a
-fdc3:    14
-fdc4:    f2
-fdc5:    2f
-fdc6:    04
-fdc7:    2f
-fdc8:    06
-fdc9:    90
-fdca:    01
-fdcb:    00
-fdcc:    2f
-fdcd:    00
-fdce:    90
-fdcf:    ea
-fdd0:    1f
-fdd1:    2f
-fdd2:    02
-fdd3:    7b
-fdd4:    1c
-fdd5:    00
-fdd6:    81
-fdd7:    f1
-fdd8:    44
-fdd9:    15
-fdda:    84
-fddb:    71
-fddc:    01
-fddd:    03
-fdde:    7b
-fddf:    2f
-fde0:    0a
-fde1:    48
-fde2:    80
-fde3:    04
-fde4:    07
-fde5:    37
-fde6:    40
-fde7:    29
-fde8:    18
-fde9:    fa
-fdea:    40
-fdeb:    35
-fdec:    73
-fded:    d0
-fdee:    55
-fdef:    40
-fdf0:    65
-fdf1:    a1
-fdf2:    09
-fdf3:    65
-fdf4:    a1
-fdf5:    73
-fdf6:    be
-fdf7:    d5
-fdf8:    41
-fdf9:    7d
-fdfa:    80
-fdfb:    0c
-fdfc:    d0
-fdfd:    4b
-fdfe:    65
-fdff:    f5
+fd1c:    73 a0        jump L4
+fd1e:    a5 a2        unknown
+fd20:    90 1f 40     liw A, 0x1f40
+fd23:    5e           unknown
+fd24:    90 81 00     liw A, 0x8100
+fd27:    b5 81        unknown
+fd29:    80 84        lib A, 0x84
+fd2b:    a5 81        unknown
+fd2d:    85 a1        ld r?, [r?++]
+fd2f:    14 04        bne L6
+fd31:    c0 0f        subb A, 0x0f
+fd33:    40 31        unknown
+
+L6:
+fd35:    a5 81        unknown
+fd37:    80 83        lib A, 0x83
+fd39:    a5 81        unknown
+fd3b:    3a           xor A, A
+fd3c:    b5 81        unknown
+fd3e:    80 85        lib A, 0x85
+fd40:    a5 81        unknown
+fd42:    2a           unknown
+
+L7:
+fd43:    a5 81        unknown
+fd45:    d0 01 90     subw A, 0x0190
+fd48:    f5 81        unknown
+fd4a:    28           unknown
+fd4b:    c0 0e        subb A, 0x0e
+fd4d:    49           unknown
+fd4e:    15 f3        beq L7
+fd50:    80 ff        lib A, 0xff
+fd52:    a5 81        unknown
+fd54:    80 08        lib A, 0x08
+fd56:    7b 4e        call L8
+fd58:    80 41        lib A, 0x41
+fd5a:    a1 f8 08     stb A, 0xf808
+fd5d:    0e           unknown
+fd5e:    2a           unknown
+fd5f:    a1 f8 08     stb A, 0xf808
+fd62:    0e           unknown
+fd63:    a1 f8 08     stb A, 0xf808
+fd66:    0e           unknown
+fd67:    90 1f 40     liw A, 0x1f40
+fd6a:    2f 00        unknown
+fd6c:    51 80        sub? r?, r?
+fd6e:    3b           unknown
+fd6f:    2f 02        unknown
+fd71:    2f 34        unknown
+fd73:    2f 06        unknown
+fd75:    80 43        lib A, 0x43
+fd77:    a1 f8 08     stb A, 0xf808
+fd7a:    0e           unknown
+fd7b:    0e           unknown
+fd7c:    7b 20        call L9
+fd7e:    73 02        jump L13
+
+L11:
+fd80:    73 9a        jump L12
+
+L13:
+fd82:    90 01 00     liw A, 0x0100
+fd85:    2f 00        unknown
+fd87:    90 ea 1f     liw A, 0xea1f
+fd8a:    2f 02        unknown
+fd8c:    2f 34        unknown
+fd8e:    2f 06        unknown
+fd90:    80 45        lib A, 0x45
+fd92:    a1 f8 08     stb A, 0xf808
+fd95:    80 08        lib A, 0x08
+fd97:    7b 0d        call L8
+fd99:    7b 03        call L9
+fd9b:    71 01 03     jump 0x0103 L14
+
+L9:
+fd9e:    81 f8 08     ldb A, 0xf808
+fda1:    15 01        beq L10
+fda3:    09           ret 9
+
+L10:
+fda4:    73 da        jump L11
+
+L8:
+fda6:    c1 f8 09     c1 A, 0xf809
+fda9:    4a           unknown
+fdaa:    15 fa        beq L8
+fdac:    09           ret 9
+fdad:    8c           unknown
+fdae:    00           unknown
+fdaf:    8b 00        unknown
+fdb1:    95           unknown
+fdb2:    41 b3        unknown
+fdb4:    03           flag3
+fdb5:    79           unknown
+fdb6:    4c           unknown
+fdb7:    93           unknown
+fdb8:    47           unknown
+fdb9:    be           unknown
+fdba:    6d a2        unknown
+fdbc:    32 40        unknown
+
+L19:
+fdbe:    79           unknown
+fdbf:    4c           unknown
+fdc0:    e7           unknown
+fdc1:    4d           unknown
+fdc2:    14 2a        bne L15
+fdc4:    c0 8d        subb A, 0x8d
+fdc6:    49           unknown
+fdc7:    14 25        bne L15
+fdc9:    c0 b0        subb A, 0xb0
+fdcb:    49           unknown
+fdcc:    16 25        b6 L16
+fdce:    80 09        lib A, 0x09
+fdd0:    41 31        unknown
+fdd2:    19 0e        b9 L17
+fdd4:    80 11        lib A, 0x11
+fdd6:    41 31        unknown
+fdd8:    16 19        b6 L16
+fdda:    c0 05        subb A, 0x05
+fddc:    49           unknown
+fddd:    18 14        b8 L16
+fddf:    c0 0a        subb A, 0x0a
+fde1:    48           unknown
+
+L17:
+fde2:    80 04        lib A, 0x04
+
+L18:
+fde4:    07           flag7
+fde5:    37 40        unknown
+fde7:    29           unknown
+fde8:    18 fa        b8 L18
+fdea:    40 35        unknown
+fdec:    73 d0        jump L19
+
+L15:
+fdee:    55 40        alu5 r?, r?
+fdf0:    65           unknown
+fdf1:    a1 09 65     stb A, 0x0965
+fdf4:    a1 73 be     stb A, 0x73be
+fdf7:    d5           unknown
+fdf8:    41 7d        unknown
+fdfa:    80 0c        lib A, 0x0c
+fdfc:    d0 4b 65     subw A, 0x4b65
+fdff:    f5 00        unknown

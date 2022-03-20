@@ -51,8 +51,6 @@ if __name__ == "__main__":
 
    # scan_calls(memory, base_address, base_address)
 
-    print(entry_points)
-
     for (addr, name) in functions:
         memory_addr_info[base_address + addr].label = name
         entry_points.append(base_address + addr)

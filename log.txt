@@ -469,3 +469,35 @@ The two most useful part of the tests for today was:
 
  I managed to stub in a good chunk of multi-byte instruction.
 
+## Unscrambling the bootstrap rom.
+
+We are already assuming the bootstrap rom's address lines are inverted (which means the dump needs
+to be reversed) but things still don't quite make sense.
+
+There are long stretches that do make sense. The code at the start looks right, we have the
+"\r\nERROR\r\n" string. We have most of the WriteString code from Diag_F2, but it goes off the rails
+near the end. Instead of writing the char to 0xf201, it writes the char to 0xf273.
+
+Looking at where it goes wrong, it's on a 32 byte boundary. So something is probally wrong with
+address line A5.
+
+Looking at the rom in a hex editor, I manage to spot the code sections I expect both before and after
+my WriteString code block.
+
+At this point my brain power is running out, and I sit here trying random permutations of address
+lines trying to get the right answer for over an hour.
+
+I eventually get the right answer:
+
+    BUS A8 is wired to ROM A5
+    BUS A5 is wired to ROM A6
+    BUS A6 is wired to ROM A7
+    BUS A7 is wired to ROM A8
+
+And we get a bootrom disassembly that makes a lot more sense. Notably, WriteString is called for
+both the "D=" prompt during init, and for the ERROR text.
+
+Still don't have the complete control flow, I had to add a bunch of extra entry points.
+But getting closer.
+
+---------------------
