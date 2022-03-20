@@ -41,6 +41,13 @@ if __name__ == "__main__":
 
     # exit()
 
+    entry_points.append(0x92d7)
+    entry_points.append(0x9395)
+    entry_points.append(0x9395)
+    entry_points.append(0x95f1)
+    entry_points.append(0x96a4)
+    entry_points.append(0x9750)
+
     body_addr = parse_header(memory, base_address, base_address)
 
     scan_strings(memory, body_addr)

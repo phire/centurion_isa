@@ -31,10 +31,13 @@ if __name__ == "__main__":
         memory_addr_info[indirect_addr].label = name
         entry_points.append(base_address + addr)
 
-
     body_addr = parse_header(memory, base_address, base_address)
 
     scan_strings(memory, body_addr)
 
+    entry_points.append(0x9ae2)
+    entry_points.append(0x9d45)
+    entry_points.append(0x9e08)
+    entry_points.append(0x9ea7)
 
     disassemble(memory, entry_points)

@@ -60,7 +60,6 @@ def add_string(mem, address):
     address += 1
     entry_points.append(address)
 
-
 def scan_strings(mem, address):
     while True:
         if mem[address] == 0x7a and mem[address+1] == 0x01 and mem[address+2] == 0x12:

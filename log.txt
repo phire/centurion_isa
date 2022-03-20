@@ -461,3 +461,11 @@ you the address where the instruction test failed, which can be used to further 
 
 Are field technicians expected to repair CPU boards in the field? chances are they get swapped out and
 sent back to the main company for repair by an expert.
+
+The two most useful part of the tests for today was:
+
+ * the tests of all conditional branch instructions (except for the sense switch instructions)
+ * the instruction length tests.
+
+ I managed to stub in a good chunk of multi-byte instruction.
+

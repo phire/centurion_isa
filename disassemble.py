@@ -13,6 +13,7 @@ class MemInfo:
         self.label = None
         self.visited = False
         self.type = None
+        self.comment = None
 
 memory_addr_info = defaultdict(MemInfo)
 
@@ -143,27 +144,57 @@ class B(I):
 
 
 instructions = [
-    I("10000000 NNNNNNNN", "lib A, {N:#04x}"),
-    I("10010000 NNNNNNNN NNNNNNNN", "liw A, {N:#06x}"),
-    I("10000001 NNNNNNNN NNNNNNNN", "ldb A, {N:#06x}"),
-    I("10010001 NNNNNNNN NNNNNNNN", "ldw A, {N:#06x}"),
-    I("10100001 NNNNNNNN NNNNNNNN", "stb A, {N:#06x}"),
-    I("10110001 NNNNNNNN NNNNNNNN", "stw A, {N:#06x}"),
+    #B("00000000", "HALT", kill_branch),
 
-    I("11010000 NNNNNNNN NNNNNNNN", "cmp A, {N:#06x}"),
+    I("10000000 NNNNNNNN", "lib A, {N:#04x}"),          # 80
+    I("10010000 NNNNNNNN NNNNNNNN", "liw A, {N:#06x}"), # 90
+    I("11000000 NNNNNNNN", "subb A, {N:#04x}"),         # C0
+    I("11010000 NNNNNNNN NNNNNNNN", "subw A, {N:#06x}"),# D0
+
+    I("10000001 NNNNNNNN NNNNNNNN", "ldb A, {N:#06x}"), # 81
+    I("10010001 NNNNNNNN NNNNNNNN", "ldw A, {N:#06x}"), # 91
+    I("10100001 NNNNNNNN NNNNNNNN", "stb A, {N:#06x}"), # A1
+    I("10110001 NNNNNNNN NNNNNNNN", "stw A, {N:#06x}"), # B1
+
+    I("11000001 NNNNNNNN NNNNNNNN", "c1 A, {N:#06x}"),  # C1 - Appears to be a second read byte?
+
+    # unknown 3 byte instructions, in the order tested by instruction test rom
+    I("01100000 NNNNNNNN NNNNNNNN", "60 A, {N:#06x}"),  # 60 ???
+    I("10110000 NNNNNNNN NNNNNNNN", "b0 A, {N:#06x}"),  # b0 ??????? (might be a two byte instruction)
+    I("11010001 NNNNNNNN NNNNNNNN", "d1 A, {N:#06x}"),  # D1 ???
+    I("01100001 NNNNNNNN NNNNNNNN", "61 A, {N:#06x}"),  # 61
+    I("11110001 NNNNNNNN NNNNNNNN", "f1 A, {N:#06x}"),  # F1 ???
+    I("01101001 NNNNNNNN NNNNNNNN", "69 A, {N:#06x}"),  # 69
+    I("10010010 NNNNNNNN NNNNNNNN", "92 A, {N:#06x}"),  # 92
+    I("11010010 NNNNNNNN NNNNNNNN", "d2 A, {N:#06x}"),  # D2
+
 
     I("10000101 xxxxxxxx", "ld r?, [r?++]"),
 
+    B("00010000 SSSSSSSS", "b0", relative_branch),
+    B("00010001 SSSSSSSS", "b1", relative_branch),
+    B("00010010 SSSSSSSS", "b2", relative_branch),
+    B("00010011 SSSSSSSS", "b3", relative_branch),
+    B("00010100 SSSSSSSS", "bne", relative_branch),
     B("00010101 SSSSSSSS", "beq", relative_branch),
-    B("00010001 SSSSSSSS", "bne", relative_branch),
-    I("00010000"), # This might be a single byte instruction, and not a branch. Disabling for now
-    B("0001xxxx SSSSSSSS", "b? ({x})", relative_branch),
-   # I("010bbbaa axxxxxxx", "add r{a}, r{b} ({x})"),
+    B("00010110 SSSSSSSS", "b6", relative_branch),
+    B("00010111 SSSSSSSS", "b7", relative_branch),
+    B("00011000 SSSSSSSS", "b8", relative_branch),
+    B("00011001 SSSSSSSS", "b9", relative_branch),
+    B("00011010 SSSSSSSS", "bEX", relative_branch),
+
+    B("00011100 SSSSSSSS", "b??", relative_branch), # Test rom doesn't test this directly. But it appares
+                                                    # to use it as a sentinel when testing instruction lenghts
+                                                    # It might be a sence switch branch, and will mess things
+                                                    # up either way
+
     B("01110011 SSSSSSSS", "jump", relative_branch_unconditional),
 
     I("00111010", "xor A, A"),
 
-    I("01000000 xxxxxxxx", "alu?"),
+    # I("00110101 xxxxxxxx"),
+    # I("00110110 xxxxxxxx"),
+
     I("01010000 xxxxxxxx", "add r?, r?"),
     I("01010001 xxxxxxxx", "sub? r?, r?"),
     I("01010101 xxxxxxxx", "alu5 r?, r?"),
@@ -192,6 +223,45 @@ instructions = [
     I("01101101 xxxxxxxx"),
 
     I("10001011 xxxxxxxx"),
+    I("00100110 xxxxxxxx"),
+    I("00101111 xxxxxxxx"),
+    I("10000011 xxxxxxxx"),
+
+    # In the order tested by insturction test
+    I("00100010 xxxxxxxx"),
+    I("00100000 xxxxxxxx"),
+    I("00100001 xxxxxxxx"),
+    I("00110010 xxxxxxxx"),
+    I("00110000 xxxxxxxx"),
+    I("00110001 xxxxxxxx"),
+    I("00100011 xxxxxxxx"),
+    I("00100100 xxxxxxxx"),
+    I("00100111 xxxxxxxx"),
+    I("00110011 xxxxxxxx"),
+    I("00110110 xxxxxxxx"),
+    I("00110101 xxxxxxxx"),
+    I("00110100 xxxxxxxx"),
+    I("00110111 xxxxxxxx"),
+    I("00100101 xxxxxxxx"),
+    I("01000001 xxxxxxxx"),
+    I("01000000 xxxxxxxx"),
+    I("01000011 xxxxxxxx"),
+    I("01000100 xxxxxxxx"),
+    I("01010011 xxxxxxxx"),
+    I("01010100 xxxxxxxx"),
+    I("11010001 xxxxxxxx"),
+    I("10010100 xxxxxxxx"),
+    I("11010100 xxxxxxxx"),
+
+    # Flag instructions:
+    I("00000001", "flag1"),
+    I("00000010", "flag2"),
+    I("00000011", "flag3"),
+    I("00000100", "flag4"),
+    I("00000101", "flag5"),
+    I("00000110", "flag6"),
+    I("00000111", "flag7"),
+    I("00001000", "flag8"),
 
 
 
@@ -309,18 +379,28 @@ def disassemble(memory, entry_points):
             str = f"{i:04x}:    "
             for b in inst.bytes:
                 str += f"{b:02x} "
-            while len(str) < 28:
+            while len(str) < 22:
                 str += " "
 
             str += inst.__repr__()
-            print(str)
 
+            if info.comment:
+                indent = len(str)
+                lines = info.comment.split("\n")
+                str += f" ; {lines[0]}"
+                for line in lines[1:]:
+                    str += "\n" + " " * indent + f" ; {line}"
+
+            print(str)
             i += len(inst.bytes)
 
         else:
             print(f"{i:04x}:    {memory[i]:02x}")
             i += 1
 
+def apply_comments(comments):
+    for addr, comment in comments:
+        memory_addr_info[addr].comment = comment
 
 if __name__ == "__main__":
     # print(disassemble_instruction( b"\x1510", 0).next_pc)]
