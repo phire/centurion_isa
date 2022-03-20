@@ -17,6 +17,9 @@ entry_points = [
 
 functions = [
     (0xfc92, "WriteString"),
+    (0xfc90, "ReadCharTrampoline"),
+    (0xfca3, "ReadChar"),
+
 ]
 
 def add_string(mem, address):

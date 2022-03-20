@@ -1,3 +1,5 @@
+
+L21:
 fc00:    1a 02        bEX L0
 fc02:    73 03        jump L2
 
@@ -17,7 +19,7 @@ fc13:    90 10 00     liw A, 0x1000
 fc16:    5f           unknown
 fc17:    7b 79        call WriteString
 fc19:    "D=\0"
-fc1c:    7b 72        call L20
+fc1c:    7b 72        call ReadCharTrampoline
 fc1e:    c0 c6        subb A, 0xc6
 fc20:    49           unknown
 fc21:    e5           unknown
@@ -30,7 +32,7 @@ fc2c:    49           unknown
 fc2d:    15 50        beq L5
 
 L23:
-fc2f:    7b 72        call L21
+fc2f:    7b 72        call ReadChar
 fc31:    c0 50        subb A, 0x50
 fc33:    40 31        unknown
 fc35:    16 48        b6 L5
@@ -83,8 +85,8 @@ fc8c:    73 85        jump L33
 L30:
 fc8e:    73 73        jump L31
 
-L20:
-fc90:    73 11        jump L21
+ReadCharTrampoline:
+fc90:    73 11        jump ReadChar
 
 WriteString:
 fc92:    81 f2 00     ldb A, 0xf200
@@ -99,16 +101,14 @@ L3:
 fc9e:    a1 f2 01     stb A, 0xf201
 fca1:    73 ef        jump WriteString
 
-L21:
-fca3:    84           unknown
-fca4:    ee           unknown
+ReadChar:
+fca3:    84 ee        ldb A, [[pc-18]]
 fca5:    2c           unknown
-fca6:    11 fb        b1 L21
-fca8:    84           unknown
-fca9:    f5 c0        unknown
-fcab:    80 43        lib A, 0x43
-fcad:    31 c0        unknown
-fcaf:    e0           unknown
+fca6:    11 fb        b1 ReadChar
+fca8:    84 f5        ldb A, [[pc-11]]
+fcaa:    c0 80        subb A, 0x80
+fcac:    43 31        unknown
+fcae:    c0 e0        subb A, 0xe0
 fcb0:    49           unknown
 fcb1:    16 04        b6 L22
 fcb3:    c0 df        subb A, 0xdf
@@ -161,11 +161,8 @@ fcf5:    00           unknown
 fcf6:    81 f1 44     ldb A, 0xf144
 fcf9:    15 84        beq L5
 fcfb:    71 01 03     jump 0x0103 L14
-fcfe:    7b
-fcff:    2f
-fd00:    71
-fd01:    fc
-fd02:    00
+fcfe:    7b 2f        call L20
+fd00:    71 fc 00     jump 0xfc00 L21
 
 L31:
 fd03:    85 41        ld r?, [r?++]
@@ -175,8 +172,7 @@ L32:
 fd08:    81 f8 01     ldb A, 0xf801
 fd0b:    29           unknown
 fd0c:    15 fa        beq L32
-fd0e:    84           unknown
-fd0f:    f6           unknown
+fd0e:    84 f6        ldb A, [[pc-10]]
 fd10:    09           ret 9
 
 L26:
@@ -184,8 +180,7 @@ fd11:    85 41        ld r?, [r?++]
 fd13:    a1 f1 48     stb A, 0xf148
 
 L27:
-fd16:    84           unknown
-fd17:    df           unknown
+fd16:    84 df        ldb A, [[pc-33]]
 fd18:    2c           unknown
 fd19:    10 fb        b0 L27
 fd1b:    09           ret 9
@@ -200,6 +195,8 @@ fd27:    b5 81        unknown
 fd29:    80 84        lib A, 0x84
 fd2b:    a5 81        unknown
 fd2d:    85 a1        ld r?, [r?++]
+
+L20:
 fd2f:    14 04        bne L6
 fd31:    c0 0f        subb A, 0x0f
 fd33:    40 31        unknown

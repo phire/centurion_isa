@@ -501,3 +501,11 @@ Still don't have the complete control flow, I had to add a bunch of extra entry 
 But getting closer.
 
 ---------------------
+
+Lol, this cpu has an instruction that takes an 8bit signed offset, loads a 16bit address from
+pc+offset, then loads an 8bit value from that address.
+And the programmer of the bootstrap ROM is using it to save one byte each time a MMIO register is
+referenced twice within a short range. They pointed right at the operand of the first MMIO access
+instrction.
+
+classic 70s CISC machines

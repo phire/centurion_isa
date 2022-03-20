@@ -213,6 +213,8 @@ instructions = [
 
     I("01010101"),
 
+    I("10000100 SSSSSSSS", "ldb A, [[pc{S:+n}]]"),
+
     # Unknown two byte instructions
 
     # these 3 are probally the same
