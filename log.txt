@@ -437,3 +437,27 @@ disassembler to add to the output during each run.
 
 **F3 and F4 share a lot of common code.**
 
+## CPU instruction tests.
+
+Perhaps I spent too long ignoring the F2 rom. This was mostly because it was different from F3/F4.
+But the strings indicate it has a CPU instruction test, so I really should take a look at it.
+
+We need a wrapper script for it, and since scan_strings doesn't work for it, I deicide to manually
+enter the strings.
+
+One of the first things I notice is that the 7d instruction actually takes a one byte argument
+(not sure if signed or unsigned), though in the common, ldw A, fn_address; add_base_address, 7d
+pattern, it's always zero.
+
+Then looking at the instruction tests themselves, they start off with a strong pattern of
+ unconditional branch + 1, followed by a 00 opcode.
+
+This strongly suggest that 00 is halt.
+It could also theoretically be a software interrupt, but I don't see any sign of an interrupt
+handler that prints out information about the failed test. Probally the technician was supposed to
+operate this instruction test by watching the front panel. If the run light stays on, the cpu is good.
+If the halt light comes on, then the cpu test is a fail. The address LEDs will then actually tell
+you the address where the instruction test failed, which can be used to further diagnose the problem.
+
+Are field technicians expected to repair CPU boards in the field? chances are they get swapped out and
+sent back to the main company for repair by an expert.
