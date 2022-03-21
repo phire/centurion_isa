@@ -13,13 +13,21 @@ entry_points = [
     0xfd1c,
     0xfd1e,
     0xfdad,
+    0xfcfe,
+    0xfcba,
 ]
 
 functions = [
     (0xfc92, "WriteString"),
-    (0xfc90, "ReadCharTrampoline"),
+    (0xfc90, "ReadCharTramp"),
     (0xfca3, "ReadChar"),
+    (0xfd11, "DiskCommand"), # takes arguments from pc
+]
 
+comments = [
+    (0xfc1e, "A == 'F'"),
+    (0xfc25, "A == 'C'"),
+    (0xfc2a, "A == 'H'"),
 ]
 
 def add_string(mem, address):
@@ -47,5 +55,7 @@ if __name__ == "__main__":
 
     add_string(memory, 0xfc19) # "D=?\0"
     add_string(memory, 0xfc81) # "\r\nERROR\r\n\0"
+
+    apply_comments(comments)
 
     disassemble(memory, entry_points)

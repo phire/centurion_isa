@@ -117,6 +117,9 @@ def relative_call(next_pc, S, **kwargs):
 def abolsute_branch_uncondtionional(N, **kwargs):
     return [N]
 
+def abolsute_call(next_pc, N, **kwargs):
+    return [next_pc, N]
+
 def kill_branch(**kwargs):
     return []
 
@@ -144,12 +147,13 @@ class B(I):
 
 
 instructions = [
-    B("00000000", "HALT", kill_branch),
+    #B("00000000", "HALT", kill_branch),
+    I("00000000", "HALT"),
 
     I("10000000 NNNNNNNN", "lib A, {N:#04x}"),          # 80
     I("10010000 NNNNNNNN NNNNNNNN", "liw A, {N:#06x}"), # 90
-    I("11000000 NNNNNNNN", "subb A, {N:#04x}"),         # C0
-    I("11010000 NNNNNNNN NNNNNNNN", "subw A, {N:#06x}"),# D0
+    I("11000000 NNNNNNNN", "cmpb A, {N:#04x}"),         # C0
+    I("11010000 NNNNNNNN NNNNNNNN", "cmpw A, {N:#06x}"),# D0
 
     I("10000001 NNNNNNNN NNNNNNNN", "ldb A, {N:#06x}"), # 81
     I("10010001 NNNNNNNN NNNNNNNN", "ldw A, {N:#06x}"), # 91
@@ -167,6 +171,10 @@ instructions = [
     I("01101001 NNNNNNNN NNNNNNNN", "69 A, {N:#06x}"),  # 69
     I("10010010 NNNNNNNN NNNNNNNN", "92 A, {N:#06x}"),  # 92
     I("11010010 NNNNNNNN NNNNNNNN", "d2 A, {N:#06x}"),  # D2
+
+    # not in test rom
+
+    I("11100001 NNNNNNNN NNNNNNNN", "e1 A, {N:#06x}"),  # E1
 
 
     I("10000101 xxxxxxxx", "ld r?, [r?++]"),
@@ -207,6 +215,7 @@ instructions = [
 
     B("01110001 NNNNNNNN NNNNNNNN", "jump {N:#06x}", abolsute_branch_uncondtionional),
     I("01111101 NNNNNNNN", "call A + {N:#04x}"),
+    B("01111001 NNNNNNNN NNNNNNNN", "call", abolsute_call),
     I("01111010 NNNNNNNN NNNNNNNN", "call [{N:#06x}]"),
     I("10100010 NNNNNNNN NNNNNNNN", "call_alt [{N:#06x}]"), # weird alternative call
     B("01110010 NNNNNNNN NNNNNNNN", "jump [{N:#06x}] ;", kill_branch),
@@ -228,6 +237,7 @@ instructions = [
     I("00100110 xxxxxxxx"),
     I("00101111 xxxxxxxx"),
     I("10000011 xxxxxxxx"),
+    I("11100101 xxxxxxxx"),
 
     # In the order tested by insturction test
     I("00100010 xxxxxxxx"),
@@ -256,7 +266,6 @@ instructions = [
     I("11010100 xxxxxxxx"),
 
     # Flag instructions:
-    I("00000001", "flag1"),
     I("00000010", "flag2"),
     I("00000011", "flag3"),
     I("00000100", "flag4"),
@@ -265,6 +274,9 @@ instructions = [
     I("00000111", "flag7"),
     I("00001000", "flag8"),
 
+
+    I("00000001", "nop"),
+    I("00001110", "delay 4.5ms"),
 
 
     I("xxxxxxxx"),
