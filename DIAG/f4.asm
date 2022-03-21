@@ -32,7 +32,7 @@ TEST_7:
 
 WriteString:
 98a5:    85 41        ld r?, [r?++]
-98a7:    15 01        beq L0
+98a7:    15 01        b_nz L0
 98a9:    09           ret 9
 
 L0:
@@ -65,32 +65,32 @@ Fn_0c5:
 
 Fn_0d0:
 98d0:    a5 a2        unknown
-98d2:    c0 f0        cmpb A, 0xf0
+98d2:    c0 f0        lib B, 0xf0
 98d4:    42           unknown
 98d5:    31 07        unknown
 98d7:    26 10        unknown
 98d9:    2c           unknown
 98da:    2c           unknown
 98db:    2c           unknown
-98dc:    c0 b0        cmpb A, 0xb0
+98dc:    c0 b0        lib B, 0xb0
 98de:    40 31        unknown
-98e0:    c0 b9        cmpb A, 0xb9
+98e0:    c0 b9        lib B, 0xb9
 98e2:    49           unknown
 98e3:    19 04        b9 L2
-98e5:    c0 07        cmpb A, 0x07
+98e5:    c0 07        lib B, 0x07
 98e7:    40 31        unknown
 
 L2:
 98e9:    7b c3        call L1
 98eb:    85 a1        ld r?, [r?++]
-98ed:    c0 0f        cmpb A, 0x0f
+98ed:    c0 0f        lib B, 0x0f
 98ef:    42           unknown
 98f0:    31 c0        unknown
 98f2:    b0 40 31     b0 A, 0x4031
-98f5:    c0 b9        cmpb A, 0xb9
+98f5:    c0 b9        lib B, 0xb9
 98f7:    49           unknown
 98f8:    19 04        b9 L3
-98fa:    c0 07        cmpb A, 0x07
+98fa:    c0 07        lib B, 0x07
 98fc:    40 31        unknown
 
 L3:
@@ -103,13 +103,13 @@ FinishTest:
 9907:    2c           unknown
 9908:    11 57        b1 L4
 990a:    81 f2 01     ldb A, 0xf201
-990d:    c0 80        cmpb A, 0x80
+990d:    c0 80        lib B, 0x80
 990f:    43 31        unknown
-9911:    c0 83        cmpb A, 0x83
+9911:    c0 83        lib B, 0x83
 9913:    49           unknown
-9914:    15 4b        beq L4
+9914:    15 4b        b_nz L4
 9916:    81 01 08     ldb A, 0x0108
-9919:    14 32        bne L5
+9919:    14 32        b_z L5
 991b:    7a 01 12     call [0x0112]
 991e:    "\r\n*** FAIL ***\0"
 992d:    a1 f1 0b     stb A, 0xf10b
@@ -142,7 +142,7 @@ PrintCtrlCToExit:
 998a:    09           ret 9
 
 Init:
-998b:    3a           xor A, A
+998b:    3a           clear A
 998c:    b1 01 08     stw A, 0x0108
 998f:    90 01 ee     liw A, 0x01ee
 9992:    50 80        add r?, r?
@@ -178,14 +178,13 @@ L7:
 99dc:    95           unknown
 99dd:    41 b1        unknown
 99df:    01           nop
-99e0:    14 38        bne L6
+99e0:    14 38        b_z L6
 99e2:    b1 01 16     stw A, 0x0116
 99e5:    55 40        alu5 r?, r?
 99e7:    65           unknown
 99e8:    a1 69 01     stb A, 0x6901
 99eb:    00           HALT
-99ec:    75           unknown
-99ed:    00           HALT
+99ec:    75 00        unknown jump Fn_1ee
 
 Fn_1ee:
 99ee:    7a 01 0c     call [0x010c]
@@ -198,10 +197,10 @@ L14:
 99f8:    16 c0        b6 L7
 99fa:    08           flag8
 99fb:    4a           unknown
-99fc:    14 2b        bne L8
+99fc:    14 2b        b_z L8
 99fe:    0e           delay 4.5ms
 99ff:    3f           unknown
-9a00:    15 f4        beq L14
+9a00:    15 f4        b_nz L14
 9a02:    7a 01 12     call [0x0112]
 9a05:    "*** BUSY DID NOT CLEAR ***\0"
 9a20:    a1 f1 0b     stb A, 0xf10b
@@ -216,7 +215,7 @@ L13:
 9a2d:    10 2b        b0 L9
 9a2f:    0e           delay 4.5ms
 9a30:    3f           unknown
-9a31:    15 f9        beq L13
+9a31:    15 f9        b_nz L13
 9a33:    7a 01 12     call [0x0112]
 9a36:    "*** FOUT NEVER CAME ON ***\0"
 9a51:    a1 f1 0b     stb A, 0xf10b
@@ -227,7 +226,7 @@ L9:
 9a5a:    03           flag3
 9a5b:    82           unknown
 9a5c:    01           nop
-9a5d:    14 15        bne L10
+9a5d:    14 15        b_z L10
 9a5f:    03           flag3
 9a60:    65           unknown
 9a61:    a1 09 a5     stb A, 0x09a5
@@ -262,7 +261,7 @@ L24:
 9a9c:    11 2d        b1 L16
 9a9e:    0e           delay 4.5ms
 9a9f:    3f           unknown
-9aa0:    15 f5        beq L24
+9aa0:    15 f5        b_nz L24
 9aa2:    7a 01 12     call [0x0112]
 9aa5:    "*** FIN DID NOT GO OFF ***\r\n\0"
 9ac2:    a1 f1 0b     stb A, 0xf10b
@@ -296,7 +295,7 @@ L17:
 9ae5:    32 60        unknown
 9ae7:    60 0f 00     60 A, 0x0f00
 9aea:    55 60        alu5 r?, r?
-9aec:    d0 01 1c     cmpw A, 0x011c
+9aec:    d0 01 1c     liw B, 0x011c
 
 L18:
 9aef:    a5 21        unknown
@@ -304,7 +303,7 @@ L18:
 9af2:    28           unknown
 9af3:    28           unknown
 9af4:    3f           unknown
-9af5:    15 f8        beq L18
+9af5:    15 f8        b_nz L18
 9af7:    90 f0 ff     liw A, 0xf0ff
 9afa:    2f 02        unknown
 9afc:    90 01 1c     liw A, 0x011c
@@ -327,15 +326,15 @@ L18:
 9b25:    a2 01 14     call_alt [0x0114]
 9b28:    7a 01 18     call [0x0118]
 9b2b:    60 0f 00     60 A, 0x0f00
-9b2e:    3a           xor A, A
+9b2e:    3a           clear A
 
 L21:
-9b2f:    d0 01 1c     cmpw A, 0x011c
+9b2f:    d0 01 1c     liw B, 0x011c
 
 L19:
 9b32:    a5 21        unknown
 9b34:    3f           unknown
-9b35:    15 fb        beq L19
+9b35:    15 fb        b_nz L19
 9b37:    90 f0 ff     liw A, 0xf0ff
 9b3a:    2f 02        unknown
 9b3c:    90 01 1c     liw A, 0x011c
@@ -361,18 +360,18 @@ L48:
 9b68:    7a 01 18     call [0x0118]
 9b6b:    b5 a2        unknown
 9b6d:    60 0f 00     60 A, 0x0f00
-9b70:    d0 01 1c     cmpw A, 0x011c
+9b70:    d0 01 1c     liw B, 0x011c
 9b73:    55 60        alu5 r?, r?
 9b75:    45           unknown
 9b76:    10 85        b0 L20
 9b78:    21 bd        unknown
 9b7a:    41 01        unknown
-9b7c:    15 12        beq L22
+9b7c:    15 12        b_nz L22
 9b7e:    20 00        unknown
 9b80:    20 00        unknown
 9b82:    20 00        unknown
 9b84:    3f           unknown
-9b85:    15 f0        beq L23
+9b85:    15 f0        b_nz L23
 9b87:    95           unknown
 9b88:    a1 20 70     stb A, 0x2070
 9b8b:    7a 01 04     call [0x0104]
@@ -409,7 +408,7 @@ Entry_01133_CMD_SEEK_TEST:
 9be0:    f8           unknown
 9be1:    08           flag8
 9be2:    7a 01 06     call [0x0106]
-9be5:    d0 41 4d     cmpw A, 0x414d
+9be5:    d0 41 4d     liw B, 0x414d
 9be8:    90 81 00     liw A, 0x8100
 9beb:    b5 21        unknown
 9bed:    90 82 ff     liw A, 0x82ff
@@ -435,12 +434,12 @@ L25:
 9c14:    a2 01 14     call_alt [0x0114]
 9c17:    7a 01 18     call [0x0118]
 9c1a:    12 ed        b2 L26
-9c1c:    d0 41 4f     cmpw A, 0x414f
+9c1c:    d0 41 4f     liw B, 0x414f
 9c1f:    90 84 00     liw A, 0x8400
 9c22:    b5 21        unknown
 9c24:    80 83        lib A, 0x83
 9c26:    a5 21        unknown
-9c28:    3a           xor A, A
+9c28:    3a           clear A
 9c29:    b5 21        unknown
 9c2b:    39           unknown
 9c2c:    a9           unknown
@@ -480,10 +479,10 @@ L27:
 9c75:    d1 41 52     d1 A, 0x4152
 9c78:    50 20        add r?, r?
 9c7a:    b1 41 52     stw A, 0x4152
-9c7d:    d0 03 36     cmpw A, 0x0336
+9c7d:    d0 03 36     liw B, 0x0336
 9c80:    59           unknown
-9c81:    15 af        beq L29
-9c83:    3a           xor A, A
+9c81:    15 af        b_nz L29
+9c83:    3a           clear A
 9c84:    39           unknown
 9c85:    b1 41 b1     stw A, 0x41b1
 9c88:    80 10        lib A, 0x10
@@ -513,11 +512,11 @@ L28:
 9cb5:    b5 61        unknown
 9cb7:    80 83        lib A, 0x83
 9cb9:    a5 61        unknown
-9cbb:    3a           xor A, A
+9cbb:    3a           clear A
 9cbc:    b5 61        unknown
 9cbe:    80 85        lib A, 0x85
 9cc0:    a5 61        unknown
-9cc2:    d0 10 00     cmpw A, 0x1000
+9cc2:    d0 10 00     liw B, 0x1000
 
 L30:
 9cc5:    e5 61        unknown
@@ -525,7 +524,7 @@ L30:
 9cca:    b5 61        unknown
 9ccc:    20 30        unknown
 9cce:    21 20        unknown
-9cd0:    15 f3        beq L30
+9cd0:    15 f3        b_nz L30
 9cd2:    80 ff        lib A, 0xff
 9cd4:    ab           unknown
 
@@ -564,13 +563,13 @@ L31:
 
 L32:
 9d24:    91 41 52     ldw A, 0x4152
-9d27:    15 01        beq L33
+9d27:    15 01        b_nz L33
 9d29:    38           unknown
 
 L33:
 9d2a:    3d           unknown
 9d2b:    b1 41 52     stw A, 0x4152
-9d2e:    d0 03 36     cmpw A, 0x0336
+9d2e:    d0 03 36     liw B, 0x0336
 9d31:    59           unknown
 9d32:    19 a1        b9 L34
 9d34:    a1 f1 0a     stb A, 0xf10a
@@ -585,7 +584,7 @@ Entry_FINCH_SEEK_TEST:
 9d43:    f8           unknown
 9d44:    00           HALT
 9d45:    7a 01 06     call [0x0106]
-9d48:    d0 41 4d     cmpw A, 0x414d
+9d48:    d0 41 4d     liw B, 0x414d
 9d4b:    90 81 02     liw A, 0x8102
 9d4e:    b5 21        unknown
 9d50:    90 84 00     liw A, 0x8400
@@ -613,12 +612,12 @@ L35:
 9d7c:    a2 01 14     call_alt [0x0114]
 9d7f:    7a 01 18     call [0x0118]
 9d82:    12 ed        b2 L36
-9d84:    d0 41 4f     cmpw A, 0x414f
+9d84:    d0 41 4f     liw B, 0x414f
 9d87:    90 84 00     liw A, 0x8400
 9d8a:    b5 21        unknown
 9d8c:    80 83        lib A, 0x83
 9d8e:    a5 21        unknown
-9d90:    3a           xor A, A
+9d90:    3a           clear A
 9d91:    b5 21        unknown
 9d93:    39           unknown
 9d94:    a9           unknown
@@ -656,10 +655,10 @@ L37:
 9ddd:    91 41 52     ldw A, 0x4152
 9de0:    38           unknown
 9de1:    b1 41 52     stw A, 0x4152
-9de4:    d0 02 5c     cmpw A, 0x025c
+9de4:    d0 02 5c     liw B, 0x025c
 9de7:    59           unknown
-9de8:    15 b0        beq L39
-9dea:    3a           xor A, A
+9de8:    15 b0        b_nz L39
+9dea:    3a           clear A
 9deb:    39           unknown
 9dec:    b1 41 b1     stw A, 0x41b1
 9def:    73 a9        jump L39
@@ -688,11 +687,11 @@ Entry_FINCH_READ_TEST:
 9e17:    b5 61        unknown
 9e19:    80 83        lib A, 0x83
 9e1b:    a5 61        unknown
-9e1d:    3a           xor A, A
+9e1d:    3a           clear A
 9e1e:    b5 61        unknown
 9e20:    80 8a        lib A, 0x8a
 9e22:    a5 61        unknown
-9e24:    d0 10 00     cmpw A, 0x1000
+9e24:    d0 10 00     liw B, 0x1000
 
 L40:
 9e27:    e5 61        unknown
@@ -700,7 +699,7 @@ L40:
 9e2c:    b5 61        unknown
 9e2e:    20 30        unknown
 9e30:    21 20        unknown
-9e32:    15 f3        beq L40
+9e32:    15 f3        b_nz L40
 9e34:    80 ff        lib A, 0xff
 9e36:    ab           unknown
 
@@ -739,13 +738,13 @@ L41:
 
 L42:
 9e86:    91 41 52     ldw A, 0x4152
-9e89:    15 01        beq L43
+9e89:    15 01        b_nz L43
 9e8b:    38           unknown
 
 L43:
 9e8c:    3d           unknown
 9e8d:    b1 41 52     stw A, 0x4152
-9e90:    d0 02 5d     cmpw A, 0x025d
+9e90:    d0 02 5d     liw B, 0x025d
 9e93:    59           unknown
 9e94:    19 a1        b9 L44
 9e96:    a1 f1 0a     stb A, 0xf10a
@@ -760,18 +759,18 @@ Entry_ROM_SELF_TEST:
 9ea5:    00           HALT
 9ea6:    00           HALT
 9ea7:    55 86        alu5 r?, r?
-9ea9:    3a           xor A, A
+9ea9:    3a           clear A
 
 L45:
 9eaa:    85 61        ld r?, [r?++]
 9eac:    40 10        unknown
-9eae:    d0 06 ed     cmpw A, 0x06ed
+9eae:    d0 06 ed     liw B, 0x06ed
 9eb1:    50 82        add r?, r?
 9eb3:    51 62        sub? r?, r?
-9eb5:    15 f3        beq L45
+9eb5:    15 f3        b_nz L45
 9eb7:    8b 41        unknown
 9eb9:    01           nop
-9eba:    15 18        beq L46
+9eba:    15 18        b_nz L46
 9ebc:    7a 01 12     call [0x0112]
 9ebf:    "\n\r*** PASS ***\0"
 9ece:    a1 f1 0a     stb A, 0xf10a

@@ -16,7 +16,7 @@ TEST_3:
 
 Entry_CPU_INSTRUCTION_TEST:
 8849:    90 07 cc     liw A, 0x07cc
-884c:    50 80        add r?, r?
+884c:    50 80        add A, indexBase
 884e:    7d 00        call A + 0x00
 8850:    "\x1b\x1c\x0cCPU INSTRUCTION TEST, CONTROL-C TO EXIT\r\n\0"
 887d:    6d a2        unknown
@@ -26,7 +26,7 @@ Entry_CPU_INSTRUCTION_TEST:
                                    ; Which it will use later to test other multi-byte insturctions
                                    ; If the operand isn't consuemed, then a HALT instruction will be executed
 8886:    90 05 a1     liw A, 0x05a1
-8889:    50 80        add r?, r?
+8889:    50 80        add A, indexBase
 888b:    5c           unknown ; This might be installing an exception handler?
 888c:    90 00 10     liw A, 0x0010
 
@@ -34,10 +34,10 @@ L11:
 888f:    c5           unknown
 8890:    61 e5 01     61 A, 0xe501
 8893:    3f           unknown
-8894:    15 f9        beq L11 ; clearing all regsiters?
+8894:    15 f9        b_nz L11 ; clearing all regsiters?
 8896:    03           flag3
 8897:    07           flag7
-8898:    c0 01        cmpb A, 0x01 ; if A is empty. This would set the overflow flag
+8898:    c0 01        lib B, 0x01 ; if A is empty. This would set the overflow flag
 889a:    11 01        b1 L12 ; Some tests for all the branch instructions
 889c:    00           HALT
 
@@ -50,7 +50,7 @@ L13:
 88a2:    00           HALT
 
 L14:
-88a3:    15 01        beq L15
+88a3:    15 01        b_nz L15
 88a5:    00           HALT
 
 L15:
@@ -73,8 +73,8 @@ L18:
 88b2:    00           HALT
 
 L245:
-88b3:    14 02        bne L19
-88b5:    15 01        beq L244
+88b3:    14 02        b_z L19
+88b5:    15 01        b_nz L244
 
 L19:
 88b7:    00           HALT
@@ -173,7 +173,7 @@ L36:
 88ff:    00           HALT
 
 L37:
-8900:    14 01        bne L38
+8900:    14 01        b_z L38
 8902:    00           HALT
 
 L38:
@@ -213,7 +213,7 @@ L45:
 891f:    00           HALT
 
 L46:
-8920:    14 01        bne L47
+8920:    14 01        b_z L47
 8922:    00           HALT
 
 L47:
@@ -239,7 +239,7 @@ L51:
 8935:    00           HALT
 
 L52:
-8936:    14 01        bne L53
+8936:    14 01        b_z L53
 8938:    00           HALT
 
 L53:
@@ -265,7 +265,7 @@ L57:
 894b:    00           HALT
 
 L58:
-894c:    14 01        bne L59
+894c:    14 01        b_z L59
 894e:    00           HALT
 
 L59:
@@ -281,7 +281,7 @@ L60:
 8958:    00           HALT
 
 L61:
-8959:    14 01        bne L62
+8959:    14 01        b_z L62
 895b:    00           HALT
 
 L62:
@@ -307,7 +307,7 @@ L66:
 896e:    00           HALT
 
 L67:
-896f:    14 01        bne L68
+896f:    14 01        b_z L68
 8971:    00           HALT
 
 L68:
@@ -333,7 +333,7 @@ L72:
 8984:    00           HALT
 
 L73:
-8985:    14 01        bne L74
+8985:    14 01        b_z L74
 8987:    00           HALT
 
 L74:
@@ -348,7 +348,7 @@ L75:
 8991:    00           HALT
 
 L76:
-8992:    14 01        bne L77
+8992:    14 01        b_z L77
 8994:    00           HALT
 
 L77:
@@ -374,7 +374,7 @@ L81:
 89a7:    00           HALT
 
 L82:
-89a8:    14 01        bne L83
+89a8:    14 01        b_z L83
 89aa:    00           HALT
 
 L83:
@@ -400,7 +400,7 @@ L87:
 89bd:    00           HALT
 
 L88:
-89be:    14 01        bne L89
+89be:    14 01        b_z L89
 89c0:    00           HALT
 
 L89:
@@ -458,7 +458,7 @@ L100:
 89f0:    00           HALT
 
 L101:
-89f1:    14 01        bne L102
+89f1:    14 01        b_z L102
 89f3:    00           HALT
 
 L102:
@@ -490,7 +490,7 @@ L107:
 
 L108:
 8a0c:    23 b0        unknown
-8a0e:    14 01        bne L109
+8a0e:    14 01        b_z L109
 8a10:    00           HALT
 
 L109:
@@ -552,7 +552,7 @@ L121:
 8a43:    00           HALT
 
 L122:
-8a44:    14 01        bne L123
+8a44:    14 01        b_z L123
 8a46:    00           HALT
 
 L123:
@@ -584,7 +584,7 @@ L128:
 
 L129:
 8a5f:    33 60        unknown
-8a61:    14 01        bne L130
+8a61:    14 01        b_z L130
 8a63:    00           HALT
 
 L130:
@@ -593,7 +593,7 @@ L130:
 
 L131:
 8a67:    32 40        unknown
-8a69:    14 01        bne L132
+8a69:    14 01        b_z L132
 8a6b:    00           HALT
 
 L132:
@@ -603,7 +603,7 @@ L132:
 
 L133:
 8a70:    3f           unknown
-8a71:    14 01        bne L134
+8a71:    14 01        b_z L134
 8a73:    00           HALT
 
 L134:
@@ -613,11 +613,11 @@ L134:
 
 L135:
 8a78:    3e           unknown
-8a79:    14 01        bne L136
+8a79:    14 01        b_z L136
 8a7b:    00           HALT
 
 L136:
-8a7c:    3a           xor A, A
+8a7c:    3a           clear A
 8a7d:    3b           unknown
 8a7e:    3c           unknown
 8a7f:    39           unknown
@@ -626,7 +626,7 @@ L136:
 8a82:    38           unknown
 8a83:    38           unknown
 8a84:    38           unknown
-8a85:    14 01        bne L137
+8a85:    14 01        b_z L137
 8a87:    00           HALT
 
 L137:
@@ -638,7 +638,7 @@ L138:
 8a8d:    00           HALT
 
 L139:
-8a8e:    3a           xor A, A
+8a8e:    3a           clear A
 8a8f:    80 aa        lib A, 0xaa
 8a91:    11 01        b1 L140
 8a93:    00           HALT
@@ -666,11 +666,11 @@ L144:
 
 L145:
 8aa5:    80 00        lib A, 0x00
-8aa7:    14 01        bne L146
+8aa7:    14 01        b_z L146
 8aa9:    00           HALT
 
 L146:
-8aaa:    c0 80        cmpb A, 0x80
+8aaa:    c0 80        lib B, 0x80
 8aac:    10 01        b0 L147
 8aae:    00           HALT
 
@@ -684,11 +684,11 @@ L148:
 
 L149:
 8ab5:    25 30        unknown
-8ab7:    14 01        bne L150
+8ab7:    14 01        b_z L150
 8ab9:    00           HALT
 
 L150:
-8aba:    3a           xor A, A
+8aba:    3a           clear A
 8abb:    90 aa aa     liw A, 0xaaaa
 8abe:    11 01        b1 L151
 8ac0:    00           HALT
@@ -716,7 +716,7 @@ L155:
 
 L156:
 8ad2:    90 00 00     liw A, 0x0000
-8ad5:    14 01        bne L157
+8ad5:    14 01        b_z L157
 8ad7:    00           HALT
 
 L157:
@@ -734,14 +734,14 @@ L159:
 
 L160:
 8ae4:    35 40        unknown
-8ae6:    14 01        bne L161
+8ae6:    14 01        b_z L161
 8ae8:    00           HALT
 
 L161:
 8ae9:    80 aa        lib A, 0xaa
-8aeb:    c0 aa        cmpb A, 0xaa
+8aeb:    c0 aa        lib B, 0xaa
 8aed:    41 13        unknown
-8aef:    14 01        bne L162
+8aef:    14 01        b_z L162
 8af1:    00           HALT
 
 L162:
@@ -753,7 +753,7 @@ L163:
 8af7:    00           HALT
 
 L164:
-8af8:    c0 55        cmpb A, 0x55
+8af8:    c0 55        lib B, 0x55
 8afa:    40 31        unknown
 8afc:    11 01        b1 L165
 8afe:    00           HALT
@@ -764,7 +764,7 @@ L165:
 
 L166:
 8b02:    2b           unknown
-8b03:    14 01        bne L167
+8b03:    14 01        b_z L167
 8b05:    00           HALT
 
 L167:
@@ -779,7 +779,7 @@ L168:
 
 L169:
 8b10:    2b           unknown
-8b11:    14 01        bne L170
+8b11:    14 01        b_z L170
 8b13:    00           HALT
 
 L170:
@@ -795,14 +795,14 @@ L171:
 8b1f:    00           HALT
 
 L172:
-8b20:    14 01        bne L173
+8b20:    14 01        b_z L173
 8b22:    00           HALT
 
 L173:
 8b23:    90 55 55     liw A, 0x5555
-8b26:    d0 55 55     cmpw A, 0x5555
+8b26:    d0 55 55     liw B, 0x5555
 8b29:    51 02        sub? r?, r?
-8b2b:    14 01        bne L174
+8b2b:    14 01        b_z L174
 8b2d:    00           HALT
 
 L174:
@@ -814,8 +814,8 @@ L175:
 8b33:    00           HALT
 
 L176:
-8b34:    d0 aa aa     cmpw A, 0xaaaa
-8b37:    50 20        add r?, r?
+8b34:    d0 aa aa     liw B, 0xaaaa
+8b37:    50 20        unknown
 8b39:    11 01        b1 L177
 8b3b:    00           HALT
 
@@ -829,7 +829,7 @@ L178:
 
 L179:
 8b42:    3b           unknown
-8b43:    14 01        bne L180
+8b43:    14 01        b_z L180
 8b45:    00           HALT
 
 L180:
@@ -844,7 +844,7 @@ L181:
 
 L182:
 8b51:    3b           unknown
-8b52:    14 01        bne L183
+8b52:    14 01        b_z L183
 8b54:    00           HALT
 
 L183:
@@ -860,7 +860,7 @@ L184:
 8b61:    00           HALT
 
 L185:
-8b62:    14 01        bne L186
+8b62:    14 01        b_z L186
 8b64:    00           HALT
 
 L186:
@@ -872,23 +872,23 @@ L186:
 8b70:    55 8a        alu5 r?, r?
 8b72:    55 8c        alu5 r?, r?
 8b74:    55 80        alu5 r?, r?
-8b76:    50 20        add r?, r?
-8b78:    50 40        add r?, r?
-8b7a:    50 60        add r?, r?
+8b76:    50 20        unknown
+8b78:    50 40        unknown
+8b7a:    50 60        unknown
 8b7c:    51 08        sub? r?, r?
 8b7e:    51 8a        sub? r?, r?
 8b80:    51 ac        sub? r?, r?
 8b82:    51 c2        sub? r?, r?
-8b84:    14 01        bne L187
+8b84:    14 01        b_z L187
 8b86:    00           HALT
 
 L187:
-8b87:    d0 55 aa     cmpw A, 0x55aa
+8b87:    d0 55 aa     liw B, 0x55aa
 8b8a:    44 67        unknown
 8b8c:    44 76        unknown
 8b8e:    44 67        unknown
 8b90:    54 62        unknown
-8b92:    14 01        bne L188
+8b92:    14 01        b_z L188
 8b94:    00           HALT
 
 L188:
@@ -897,12 +897,12 @@ L188:
 8b99:    44 c8        unknown
 8b9b:    44 d9        unknown
 8b9d:    55 88        alu5 r?, r?
-8b9f:    14 01        bne L189
+8b9f:    14 01        b_z L189
 8ba1:    00           HALT
 
 L189:
 8ba2:    90 80 00     liw A, 0x8000
-8ba5:    d0 00 01     cmpw A, 0x0001
+8ba5:    d0 00 01     liw B, 0x0001
 8ba8:    59           unknown
 8ba9:    12 01        b2 L190
 8bab:    00           HALT
@@ -928,21 +928,21 @@ L193:
 
 L194:
 8bbb:    33 20        unknown
-8bbd:    14 01        bne L195
+8bbd:    14 01        b_z L195
 8bbf:    00           HALT
 
 L195:
 8bc0:    90 aa aa     liw A, 0xaaaa
-8bc3:    d0 55 55     cmpw A, 0x5555
+8bc3:    d0 55 55     liw B, 0x5555
 8bc6:    5e           unknown
 8bc7:    5b           unknown
 8bc8:    5a           unknown
-8bc9:    14 01        bne L196
+8bc9:    14 01        b_z L196
 8bcb:    00           HALT
 
 L196:
 8bcc:    5a           unknown
-8bcd:    14 01        bne L197
+8bcd:    14 01        b_z L197
 8bcf:    00           HALT
 
 L197:
@@ -950,14 +950,14 @@ L197:
 8bd2:    55 40        alu5 r?, r?
 8bd4:    5a           unknown
 8bd5:    51 40        sub? r?, r?
-8bd7:    14 01        bne L198
+8bd7:    14 01        b_z L198
 8bd9:    00           HALT
 
 L198:
 8bda:    91 bf fc     ldw A, 0xbffc
 8bdd:    5e           unknown
 8bde:    91 00 26     ldw A, 0x0026
-8be1:    14 01        bne L199
+8be1:    14 01        b_z L199
 8be3:    00           HALT
 
 L199:
@@ -972,7 +972,7 @@ L200:
 
 L201:
 8bf0:    b1 00 2c     stw A, 0x002c
-8bf3:    14 01        bne L202
+8bf3:    14 01        b_z L202
 8bf5:    00           HALT
 
 L202:
@@ -992,26 +992,26 @@ L204:
 8c0b:    54 42        unknown
 8c0d:    58           unknown
 8c0e:    33 20        unknown
-8c10:    14 01        bne L205
+8c10:    14 01        b_z L205
 8c12:    00           HALT
 
 L205:
 8c13:    91 bf fc     ldw A, 0xbffc
 8c16:    5e           unknown
 8c17:    91 00 10     ldw A, 0x0010
-8c1a:    50 80        add r?, r?
+8c1a:    50 80        add A, indexBase
 8c1c:    b1 00 10     stw A, 0x0010
 8c1f:    91 00 12     ldw A, 0x0012
-8c22:    50 80        add r?, r?
+8c22:    50 80        add A, indexBase
 8c24:    b1 00 12     stw A, 0x0012
 8c27:    91 00 14     ldw A, 0x0014
-8c2a:    50 80        add r?, r?
+8c2a:    50 80        add A, indexBase
 8c2c:    b1 00 14     stw A, 0x0014
 8c2f:    91 00 16     ldw A, 0x0016
-8c32:    50 80        add r?, r?
+8c32:    50 80        add A, indexBase
 8c34:    b1 00 16     stw A, 0x0016
 8c37:    91 00 18     ldw A, 0x0018
-8c3a:    50 80        add r?, r?
+8c3a:    50 80        add A, indexBase
 8c3c:    b1 00 18     stw A, 0x0018
 8c3f:    92 00 12     92 A, 0x0012
 8c42:    18 01        b8 L206
@@ -1025,7 +1025,7 @@ L206:
 L207:
 8c4b:    54 20        unknown
 8c4d:    3b           unknown
-8c4e:    14 01        bne L208
+8c4e:    14 01        b_z L208
 8c50:    00           HALT
 
 L208:
@@ -1041,7 +1041,7 @@ L209:
 L210:
 8c5b:    54 20        unknown
 8c5d:    3b           unknown
-8c5e:    14 01        bne L211
+8c5e:    14 01        b_z L211
 8c60:    00           HALT
 
 L211:
@@ -1052,7 +1052,7 @@ L211:
 8c65:    58           unknown
 8c66:    90 ff ba     liw A, 0xffba
 8c69:    58           unknown
-8c6a:    14 01        bne L212
+8c6a:    14 01        b_z L212
 8c6c:    00           HALT
 
 L212:
@@ -1065,148 +1065,137 @@ L212:
 L213:
 8c73:    60 00 20     60 A, 0x0020
 8c76:    9a           unknown
-8c77:    d0 ff ff     cmpw A, 0xffff
+8c77:    d0 ff ff     liw B, 0xffff
 8c7a:    59           unknown
-8c7b:    14 01        bne L214
+8c7b:    14 01        b_z L214
 8c7d:    00           HALT
 
 L214:
-8c7e:    95           unknown
-8c7f:    41 3b        unknown
-8c81:    14 01        bne L215
+8c7e:    95 41        unknown
+8c80:    3b           unknown
+8c81:    14 01        b_z L215
 8c83:    00           HALT
 
 L215:
-8c84:    95           unknown
-8c85:    41 d5        unknown
+8c84:    95 41        unknown
+8c86:    d5           unknown
 8c87:    41 54        unknown
 8c89:    20 3b        unknown
-8c8b:    14 01        bne L216
+8c8b:    14 01        b_z L216
 8c8d:    00           HALT
 
 L216:
 8c8e:    9a           unknown
-8c8f:    14 01        bne L217
+8c8f:    14 01        b_z L217
 8c91:    00           HALT
 
 L217:
-8c92:    95           unknown
-8c93:    42           unknown
+8c92:    95 42        unknown
 8c94:    d5           unknown
 8c95:    42           unknown
 8c96:    54 20        unknown
 8c98:    3b           unknown
-8c99:    14 01        bne L218
+8c99:    14 01        b_z L218
 8c9b:    00           HALT
 
 L218:
-8c9c:    d0 00 24     cmpw A, 0x0024
+8c9c:    d0 00 24     liw B, 0x0024
 8c9f:    9a           unknown
-8ca0:    65           unknown
-8ca1:    28           unknown
+8ca0:    65 28        unknown
 8ca2:    fe           unknown
 8ca3:    54 40        unknown
-8ca5:    14 01        bne L219
+8ca5:    14 01        b_z L219
 8ca7:    00           HALT
 
 L219:
-8ca8:    95           unknown
-8ca9:    28           unknown
+8ca8:    95 28        unknown
 8caa:    fc           unknown
-8cab:    65           unknown
-8cac:    29           unknown
+8cab:    65 29        unknown
 8cad:    02           flag2
-8cae:    50 40        add r?, r?
+8cae:    50 40        unknown
 8cb0:    3b           unknown
-8cb1:    14 01        bne L220
+8cb1:    14 01        b_z L220
 8cb3:    00           HALT
 
 L220:
 8cb4:    99           unknown
-8cb5:    65           unknown
-8cb6:    2a           unknown
+8cb5:    65 2a        unknown
 8cb7:    fc           unknown
 8cb8:    54 40        unknown
 8cba:    3b           unknown
-8cbb:    14 01        bne L221
+8cbb:    14 01        b_z L221
 8cbd:    00           HALT
 
 L221:
 8cbe:    60 00 10     60 A, 0x0010
-8cc1:    95           unknown
-8cc2:    44 d0        unknown
-8cc4:    ff           unknown
-8cc5:    ff           unknown
+8cc1:    95 44        unknown
+8cc3:    d0 ff ff     liw B, 0xffff
 8cc6:    59           unknown
-8cc7:    14 01        bne L222
+8cc7:    14 01        b_z L222
 8cc9:    00           HALT
 
 L222:
-8cca:    95           unknown
-8ccb:    45           unknown
+8cca:    95 45        unknown
 8ccc:    3b           unknown
-8ccd:    14 01        bne L223
+8ccd:    14 01        b_z L223
 8ccf:    00           HALT
 
 L223:
-8cd0:    95           unknown
-8cd1:    45           unknown
+8cd0:    95 45        unknown
 8cd2:    d5           unknown
 8cd3:    45           unknown
 8cd4:    54 20        unknown
 8cd6:    3b           unknown
-8cd7:    14 01        bne L224
+8cd7:    14 01        b_z L224
 8cd9:    00           HALT
 
 L224:
-8cda:    95           unknown
-8cdb:    46           unknown
+8cda:    95 46        unknown
 8cdc:    d5           unknown
 8cdd:    46           unknown
 8cde:    54 20        unknown
 8ce0:    3b           unknown
-8ce1:    14 01        bne L225
+8ce1:    14 01        b_z L225
 8ce3:    00           HALT
 
 L225:
 8ce4:    60 00 14     60 A, 0x0014
-8ce7:    95           unknown
-8ce8:    44 d5        unknown
+8ce7:    95 44        unknown
+8ce9:    d5           unknown
 8cea:    4c           unknown
 8ceb:    fe           unknown
 8cec:    54 20        unknown
 8cee:    3b           unknown
-8cef:    14 01        bne L226
+8cef:    14 01        b_z L226
 8cf1:    00           HALT
 
 L226:
-8cf2:    95           unknown
-8cf3:    4c           unknown
+8cf2:    95 4c        unknown
 8cf4:    fc           unknown
 8cf5:    d5           unknown
 8cf6:    4d           unknown
 8cf7:    02           flag2
-8cf8:    50 20        add r?, r?
+8cf8:    50 20        unknown
 8cfa:    3b           unknown
-8cfb:    14 01        bne L227
+8cfb:    14 01        b_z L227
 8cfd:    00           HALT
 
 L227:
-8cfe:    95           unknown
-8cff:    44 d5        unknown
+8cfe:    95 44        unknown
+8d00:    d5           unknown
 8d01:    4e           unknown
 8d02:    fc           unknown
 8d03:    54 20        unknown
 8d05:    3b           unknown
-8d06:    14 01        bne L228
+8d06:    14 01        b_z L228
 8d08:    00           HALT
 
 L228:
 8d09:    0d           unknown
 8d0a:    90 05 0a     liw A, 0x050a
-8d0d:    50 80        add r?, r?
+8d0d:    50 80        add A, indexBase
 8d0f:    51 04        sub? r?, r?
-8d11:    14 01        bne L229
+8d11:    14 01        b_z L229
 8d13:    00           HALT
 
 L229:
@@ -1221,19 +1210,17 @@ L229:
 8d22:    00
 
 L230:
-8d23:    95           unknown
-8d24:    41 d0        unknown
-8d26:    01           nop
-8d27:    01           nop
+8d23:    95 41        unknown
+8d25:    d0 01 01     liw B, 0x0101
 8d28:    54 20        unknown
-8d2a:    14 01        bne L231
+8d2a:    14 01        b_z L231
 8d2c:    00           HALT
 
 L231:
 8d2d:    9d           unknown
-8d2e:    d0 20 20     cmpw A, 0x2020
+8d2e:    d0 20 20     liw B, 0x2020
 8d31:    54 20        unknown
-8d33:    14 01        bne L232
+8d33:    14 01        b_z L232
 8d35:    00           HALT
 
 L232:
@@ -1247,66 +1234,64 @@ L233:
 8d40:    55 42        alu5 r?, r?
 8d42:    90 09 f1     liw A, 0x09f1
 8d45:    59           unknown
-8d46:    14 01        bne L234
+8d46:    14 01        b_z L234
 8d48:    00           HALT
 
 L234:
 8d49:    60 09 ef     60 A, 0x09ef
-8d4c:    95           unknown
-8d4d:    41 d0        unknown
-8d4f:    11 ff        b1 L235
+8d4c:    95 41        unknown
+8d4e:    d0 11 ff     liw B, 0x11ff
 8d51:    41 02        unknown
-8d53:    14 01        bne L236
+8d53:    14 01        b_z L235
 8d55:    00           HALT
 
-L236:
+L235:
 8d56:    49           unknown
-8d57:    14 01        bne L237
+8d57:    14 01        b_z L236
 8d59:    00           HALT
 
-L237:
+L236:
 8d5a:    90 60 66     liw A, 0x6066
 8d5d:    2f 00        unknown
 8d5f:    2f 21        unknown
 8d61:    59           unknown
-8d62:    14 01        bne L238
+8d62:    14 01        b_z L237
 8d64:    00           HALT
 
-L238:
+L237:
 8d65:    90 46 11     liw A, 0x4611
 8d68:    2f 02        unknown
 8d6a:    2f 23        unknown
 8d6c:    59           unknown
-8d6d:    14 01        bne L239
+8d6d:    14 01        b_z L238
 8d6f:    00           HALT
 
-L239:
+L238:
 8d70:    81 f2 00     ldb A, 0xf200
 8d73:    2c           unknown
-8d74:    11 18        b1 L240
+8d74:    11 18        b1 L239
 8d76:    81 f2 01     ldb A, 0xf201
-8d79:    c0 80        cmpb A, 0x80
+8d79:    c0 80        lib B, 0x80
 8d7b:    43 31        unknown
-8d7d:    c0 83        cmpb A, 0x83
+8d7d:    c0 83        lib B, 0x83
 8d7f:    49           unknown
-8d80:    15 0c        beq L240
+8d80:    15 0c        b_nz L239
 8d82:    61 bf fe     61 A, 0xbffe
 8d85:    91 bf fc     ldw A, 0xbffc
-8d88:    d0 07 74     cmpw A, 0x0774
+8d88:    d0 07 74     liw B, 0x0774
 8d8b:    58           unknown
-8d8c:    75           unknown
-8d8d:    20
+8d8c:    75 20        unknown jump L240
 
-L240:
+L239:
 8d8e:    a1 f1 0a     stb A, 0xf10a
 8d91:    90 bf fc     liw A, 0xbffc
 8d94:    5f           mov sp, A
-8d95:    95           unknown
-8d96:    a1 5e 65     stb A, 0x5e65
-8d99:    a1 90 00     stb A, 0x9000
-8d9c:    7d 50        call A + 0x50
-8d9e:    80 75        lib A, 0x75
-8da0:    00           HALT
+8d95:    95 a1        unknown
+8d97:    5e           unknown
+8d98:    65 a1        unknown
+8d9a:    90 00 7d     liw A, 0x007d
+8d9d:    50 80        add A, indexBase
+8d9f:    75 00        unknown jump Fn_5a1
 
 Fn_5a1:
 8da1:    05           flag5
@@ -1319,6 +1304,8 @@ Fn_5a1:
 8dab:    00           HALT
 8dac:    00           HALT
 8dad:    00           HALT
+
+L240:
 8dae:    00           HALT
 8daf:    00           HALT
 8db0:    00           HALT
@@ -1333,23 +1320,22 @@ Fn_5a1:
 
 Entry_CPU6_MAPPING_RAM_TEST:
 8dbb:    90 07 cc     liw A, 0x07cc
-8dbe:    50 80        add r?, r?
+8dbe:    50 80        add A, indexBase
 8dc0:    7d 00        call A + 0x00
 8dc2:    "\x1b\x1c\x0cCPU-6 MAPPING RAM TEST, CONTROL-C TO EXIT\r\n\0"
 8df1:    22 32        unknown
-8df3:    15 3a        beq L247
+8df3:    15 3a        b_nz L247
 8df5:    90 07 cc     liw A, 0x07cc
-8df8:    50 80        add r?, r?
+8df8:    50 80        add A, indexBase
 8dfa:    7d 00        call A + 0x00
 8dfc:    "\r\n*** THIS TEST WILL NOT RUN ON CPU-5 ***\r\n\0"
 8e28:    90 07 8a     liw A, 0x078a
-8e2b:    50 80        add r?, r?
-8e2d:    75           unknown
-8e2e:    00           HALT
+8e2b:    50 80        add A, indexBase
+8e2d:    75 00        unknown jump L247
 
 L247:
 8e2f:    90 06 d9     liw A, 0x06d9
-8e32:    50 80        add r?, r?
+8e32:    50 80        add A, indexBase
 8e34:    7d 00        call A + 0x00
 8e36:    47           unknown
 8e37:    40 ff        unknown
@@ -1380,18 +1366,17 @@ L247:
 8e5f:    2c           unknown
 8e60:    11 cd        b1 L247
 8e62:    81 f2 01     ldb A, 0xf201
-8e65:    c0 80        cmpb A, 0x80
+8e65:    c0 80        lib B, 0x80
 8e67:    43 31        unknown
-8e69:    c0 83        cmpb A, 0x83
+8e69:    c0 83        lib B, 0x83
 8e6b:    49           unknown
-8e6c:    15 c1        beq L247
+8e6c:    15 c1        b_nz L247
 8e6e:    90 07 74     liw A, 0x0774
-8e71:    50 80        add r?, r?
-8e73:    75           unknown
-8e74:    00           HALT
+8e71:    50 80        add A, indexBase
+8e73:    75 00        unknown jump L248
 
 L248:
-8e75:    3a           xor A, A
+8e75:    3a           clear A
 8e76:    85 41        ld r?, [r?++]
 8e78:    35 04        unknown
 8e7a:    20 00        unknown
@@ -1403,7 +1388,7 @@ L248:
 8e82:    60 00 20     60 A, 0x0020
 
 L253:
-8e85:    d0 01 00     cmpw A, 0x0100
+8e85:    d0 01 00     liw B, 0x0100
 
 L252:
 8e88:    8b 28        unknown
@@ -1417,15 +1402,15 @@ L252:
 8e94:    00           HALT
 8e95:    02           flag2
 8e96:    00           HALT
-8e97:    15 69        beq L250
+8e97:    15 69        b_nz L250
 8e99:    31 20        unknown
-8e9b:    15 eb        beq L252
+8e9b:    15 eb        b_nz L252
 8e9d:    30 60        unknown
 8e9f:    30 80        unknown
 8ea1:    3f           unknown
 
 L255:
-8ea2:    15 e1        beq L253
+8ea2:    15 e1        b_nz L253
 8ea4:    7f           unknown
 8ea5:    45           unknown
 8ea6:    09           ret 9
@@ -1449,7 +1434,7 @@ L1:
 8eb8:    6d a2        unknown
 8eba:    a5 a2        unknown
 8ebc:    60 06 c2     60 A, 0x06c2
-8ebf:    50 84        add r?, r?
+8ebf:    50 84        unknown
 8ec1:    0f           unknown
 8ec2:    7b 15        call Fn_6d9
 8ec4:    47           unknown
@@ -1507,7 +1492,7 @@ L4:
 L6:
 8ef8:    1c fe        b?? L6
 8efa:    01           nop
-8efb:    c0 2e        cmpb A, 0x2e
+8efb:    c0 2e        lib B, 0x2e
 8efd:    1c ff        b?? L7
 8eff:    01           nop
 8f00:    e0           unknown
@@ -1546,7 +1531,7 @@ L249:
 8f23:    0c           unknown
 8f24:    fe           unknown
 8f25:    01           nop
-8f26:    c0 2e        cmpb A, 0x2e
+8f26:    c0 2e        lib B, 0x2e
 8f28:    0c           unknown
 8f29:    ff           unknown
 8f2a:    01           nop
@@ -1556,33 +1541,31 @@ L249:
 L251:
 8f2d:    7f           unknown
 8f2e:    45           unknown
-8f2f:    65           unknown
-8f30:    a1 90 07     stb A, 0x9007
-8f33:    cc           unknown
-8f34:    50 80        add r?, r?
+8f2f:    65 a1        unknown
+8f31:    90 07 cc     liw A, 0x07cc
+8f34:    50 80        add A, indexBase
 8f36:    7d 00        call A + 0x00
 8f38:    "\r\n*** MAP RAM ERROR ***\r\n\0"
 8f52:    a1 f1 0b     stb A, 0xf10b
 8f55:    a1 f1 0c     stb A, 0xf10c
 8f58:    90 07 8a     liw A, 0x078a
-8f5b:    50 80        add r?, r?
-8f5d:    75           unknown
-8f5e:    00           HALT
+8f5b:    50 80        add A, indexBase
+8f5d:    75 00        unknown jump Entry_ROM_SELF_TEST
 
 Entry_ROM_SELF_TEST:
 8f5f:    55 86        alu5 r?, r?
-8f61:    3a           xor A, A
+8f61:    3a           clear A
 
-L258:
-8f62:    85 61        ld r?, [r?++]
+ChecksumLoop:
+8f62:    85 61        ld r?, [r?++] ; Load Byte via base+index, post-increment index
 8f64:    40 10        unknown
-8f66:    d0 07 dd     cmpw A, 0x07dd
-8f69:    50 82        add r?, r?
+8f66:    d0 07 dd     liw B, 0x07dd
+8f69:    50 82        unknown
 8f6b:    51 62        sub? r?, r?
-8f6d:    15 f3        beq L258
-8f6f:    8b 41        unknown
+8f6d:    15 f3        b_nz ChecksumLoop
+8f6f:    8b 41        unknown ; Load Byte via base+index
 8f71:    01           nop
-8f72:    15 32        beq L259
+8f72:    15 32        b_nz ChecksumFail
 8f74:    7b 56        call WriteString
 8f76:    "\r\n*** PASS ***\r\n\0"
 8f87:    a1 f1 0a     stb A, 0xf10a
@@ -1591,14 +1574,15 @@ L10:
 8f8a:    7b 40        call WriteString
 8f8c:    "PRESS SPACE\x07\r\n\0"
 
-L9:
+WaitForKey:
 8f9b:    81 f2 00     ldb A, 0xf200
 8f9e:    2c           unknown
-8f9f:    11 fa        b1 L9
+8f9f:    11 fa        b1 WaitForKey
 8fa1:    81 f2 01     ldb A, 0xf201
-8fa4:    75           unknown
-8fa5:    40 7b        unknown
-8fa7:    24
+8fa4:    75 40        unknown jump L9
+
+ChecksumFail:
+8fa6:    7b 24        call WriteString
 8fa8:    "\r\n*** CHECK SUM ERROR ***\r\n\0"
 8fc4:    a1 f1 0b     stb A, 0xf10b
 8fc7:    a1 f1 0c     stb A, 0xf10c
@@ -1610,7 +1594,7 @@ WriteString:
 8fd0:    2c           unknown
 8fd1:    11 f9        b1 WriteString
 8fd3:    85 41        ld r?, [r?++]
-8fd5:    15 01        beq L8
+8fd5:    15 01        b_nz L8
 8fd7:    09           ret 9
 
 L8:

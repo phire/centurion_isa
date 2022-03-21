@@ -541,3 +541,18 @@ the last byte in the ROM.
 The algorithm works with both 8bit overflow or 16 bit overflow and only comparing the low byte.
 Which means we don't get any insight into the width of the operations, but it's a start.
 
+------------------
+
+I'm having a hard time making this checksum function work with my current assumptions,
+even knowing more or less what algorithm it's implementing.
+
+So lets experiment with a fresh assumption:
+    What if this machine two Accumulators. An A Accumulator and a B Accumulator?
+    What if for most instructions that operate on A, there is a version that operates on B?
+
+There are two instructions, C0 NN and D0 NN NN instructions show up often, and I've flipped back and
+forwards between them being "Compare A with Byte/Word Immediate" or "Subtract Byte/Word Immediate from A"
+many times. One meaning would fit better in one place, and the other would fit better in the other.
+But neither really worked well, and wouldn't work at all in other places.
+
+But these are natural candidates for "Load Byte/Word Immediate into B"

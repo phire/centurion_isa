@@ -152,8 +152,8 @@ instructions = [
 
     I("10000000 NNNNNNNN", "lib A, {N:#04x}"),          # 80
     I("10010000 NNNNNNNN NNNNNNNN", "liw A, {N:#06x}"), # 90
-    I("11000000 NNNNNNNN", "cmpb A, {N:#04x}"),         # C0
-    I("11010000 NNNNNNNN NNNNNNNN", "cmpw A, {N:#06x}"),# D0
+    I("11000000 NNNNNNNN", "lib B, {N:#04x}"),          # C0
+    I("11010000 NNNNNNNN NNNNNNNN", "liw B, {N:#06x}"), # D0
 
     I("10000001 NNNNNNNN NNNNNNNN", "ldb A, {N:#06x}"), # 81
     I("10010001 NNNNNNNN NNNNNNNN", "ldw A, {N:#06x}"), # 91
@@ -183,8 +183,8 @@ instructions = [
     B("00010001 SSSSSSSS", "b1", relative_branch),
     B("00010010 SSSSSSSS", "b2", relative_branch),
     B("00010011 SSSSSSSS", "b3", relative_branch),
-    B("00010100 SSSSSSSS", "bne", relative_branch),
-    B("00010101 SSSSSSSS", "beq", relative_branch),
+    B("00010100 SSSSSSSS", "b_z", relative_branch),
+    B("00010101 SSSSSSSS", "b_nz", relative_branch),
     B("00010110 SSSSSSSS", "b6", relative_branch),
     B("00010111 SSSSSSSS", "b7", relative_branch),
     B("00011000 SSSSSSSS", "b8", relative_branch),
@@ -198,16 +198,18 @@ instructions = [
 
     B("01110011 SSSSSSSS", "jump", relative_branch_unconditional),
 
-    I("00111010", "xor A, A"),
+    I("00111010", "clear A"),
 
     I("01011111", "mov sp, A"),
 
     # I("00110101 xxxxxxxx"),
     # I("00110110 xxxxxxxx"),
 
-    I("01010000 xxxxxxxx", "add r?, r?"),
     I("01010001 xxxxxxxx", "sub? r?, r?"),
     I("01010101 xxxxxxxx", "alu5 r?, r?"),
+    I("01010000 10000000", "add A, indexBase"),
+
+    I("01010000 xxxxxxxx"),
 
 
 
@@ -221,6 +223,7 @@ instructions = [
     I("01111010 NNNNNNNN NNNNNNNN", "call [{N:#06x}]"),
     I("10100010 NNNNNNNN NNNNNNNN", "call_alt [{N:#06x}]"), # weird alternative call
     B("01110010 NNNNNNNN NNNNNNNN", "jump [{N:#06x}] ;", kill_branch),
+    B("01110101 SSSSSSSS", "unknown jump", relative_branch_unconditional),
 
     I("01010101"),
 
@@ -240,6 +243,8 @@ instructions = [
     I("00101111 xxxxxxxx"),
     I("10000011 xxxxxxxx"),
     I("11100101 xxxxxxxx"),
+    I("10010101 xxxxxxxx"),
+    I("01100101 xxxxxxxx"),
 
     # In the order tested by insturction test
     I("00100010 xxxxxxxx"),

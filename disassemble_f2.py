@@ -13,6 +13,12 @@ functions = [
     (0x7cc, "WriteString"),
 ]
 
+labels = [
+    (0x8f62, "ChecksumLoop"),
+    (0x8fa6, "ChecksumFail"),
+    (0x8f9b, "WaitForKey"),
+]
+
 strings = [
     0x8f76,
     0x8f8c,
@@ -40,7 +46,12 @@ comments = [
     (0x88f9, "This is potentially increment, "),
     (0x8951, "Using 60 in the operand means the following branch will be skipped\n"
              "if 22 doesn't consume it's operand"),
-    (0x89c1, "Is B0 a two byte instrution that we haven't encountered yet?")
+    (0x89c1, "Is B0 a two byte instrution that we haven't encountered yet?"),
+
+    (0x8f62, "Load Byte via base+index, post-increment index"),
+    (0x8f6f, "Load Byte via base+index"),
+
+
 ]
 
 if __name__ == "__main__":
@@ -54,6 +65,9 @@ if __name__ == "__main__":
     for (addr, name) in functions:
         memory_addr_info[base_address + addr].label = name
         entry_points.append(base_address + addr)
+
+    for (addr, name) in labels:
+        memory_addr_info[addr].label = name
 
     for addr in strings:
         add_string(memory, addr)

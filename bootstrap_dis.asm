@@ -22,37 +22,37 @@ fc16:    5f           mov sp, A ; Setup stack at 0x1000 (probally)
 fc17:    7b 79        call WriteString
 fc19:    "D=\0"
 fc1c:    7b 72        call ReadCharTramp
-fc1e:    c0 c6        cmpb A, 0xc6 ; A == 'F'
+fc1e:    c0 c6        lib B, 0xc6 ; A == 'F'
 fc20:    49           unknown
 fc21:    e5 a2        unknown
-fc23:    14 0a        bne L27
-fc25:    c0 c3        cmpb A, 0xc3 ; A == 'C'
+fc23:    14 0a        b_z L27
+fc25:    c0 c3        lib B, 0xc3 ; A == 'C'
 fc27:    49           unknown
-fc28:    14 05        bne L27
-fc2a:    c0 c8        cmpb A, 0xc8 ; A == 'H'
+fc28:    14 05        b_z L27
+fc2a:    c0 c8        lib B, 0xc8 ; A == 'H'
 fc2c:    49           unknown
-fc2d:    15 50        beq L5
+fc2d:    15 50        b_nz L5
 
 L27:
 fc2f:    7b 72        call ReadChar
-fc31:    c0 50        cmpb A, 0x50
+fc31:    c0 50        lib B, 0x50
 fc33:    40 31        unknown
 fc35:    16 48        b6 L5
 fc37:    c5           unknown
 fc38:    a1 16 7f     stb A, 0x167f
 fc3b:    18 7f        b8 L28
-fc3d:    c0 03        cmpb A, 0x03
+fc3d:    c0 03        lib B, 0x03
 fc3f:    49           unknown
 fc40:    18 3d        b8 L5
-fc42:    d0 0f 00     cmpw A, 0x0f00
+fc42:    d0 0f 00     liw B, 0x0f00
 fc45:    f5 a2        unknown
 fc47:    32 20        unknown
 fc49:    f5 a2        unknown
-fc4b:    c0 88        cmpb A, 0x88
+fc4b:    c0 88        lib B, 0x88
 fc4d:    e5 a2        unknown
-fc4f:    d0 83 00     cmpw A, 0x8300
+fc4f:    d0 83 00     liw B, 0x8300
 fc52:    f5 a2        unknown
-fc54:    d0 81 00     cmpw A, 0x8100
+fc54:    d0 81 00     liw B, 0x8100
 fc57:    06           flag6
 
 L31:
@@ -74,7 +74,7 @@ fc72:    90 f0 ff     liw A, 0xf0ff
 fc75:    2f 02        unknown
 fc77:    7b 15        call L32
 fc79:    45           unknown
-fc7a:    15 03        beq L5
+fc7a:    15 03        b_nz L5
 fc7c:    71 01 03     jump 0x0103 L14
 
 L5:
@@ -95,7 +95,7 @@ fc95:    2c           unknown
 fc96:    2c           unknown
 fc97:    11 f9        b1 WriteString
 fc99:    85 41        ld r?, [r?++]
-fc9b:    15 01        beq L3
+fc9b:    15 01        b_nz L3
 fc9d:    09           ret 9
 
 L3:
@@ -107,12 +107,12 @@ fca3:    84 ee        ldb A, [[pc-18]]
 fca5:    2c           unknown
 fca6:    11 fb        b1 ReadChar
 fca8:    84 f5        ldb A, [[pc-11]]
-fcaa:    c0 80        cmpb A, 0x80
+fcaa:    c0 80        lib B, 0x80
 fcac:    43 31        unknown
-fcae:    c0 e0        cmpb A, 0xe0
+fcae:    c0 e0        lib B, 0xe0
 fcb0:    49           unknown
 fcb1:    16 04        b6 L25
-fcb3:    c0 df        cmpb A, 0xdf
+fcb3:    c0 df        lib B, 0xdf
 fcb5:    42           unknown
 fcb6:    31
 
@@ -129,27 +129,27 @@ L4:
 fcbe:    73 bf        jump L5
 
 L29:
-fcc0:    c0 07        cmpb A, 0x07
+fcc0:    c0 07        lib B, 0x07
 fcc2:    49           unknown
 fcc3:    18 ba        b8 L5
 fcc5:    a1 f1 40     stb A, 0xf140
 fcc8:    94 2d        unknown
-fcca:    d0 00 10     cmpw A, 0x0010
+fcca:    d0 00 10     liw B, 0x0010
 fccd:    5a           unknown
-fcce:    14 af        bne L5
-fcd0:    3a           xor A, A
+fcce:    14 af        b_z L5
+fcd0:    3a           clear A
 fcd1:    b1 f1 41     stw A, 0xf141
 fcd4:    7b 3b        call DiskCommand
 fcd6:    03           flag3
 
 L30:
 fcd7:    94 1e        unknown
-fcd9:    d0 04 00     cmpw A, 0x0400
+fcd9:    d0 04 00     liw B, 0x0400
 fcdc:    5a           unknown
-fcdd:    15 a0        beq L5
-fcdf:    d0 00 20     cmpw A, 0x0020
+fcdd:    15 a0        b_nz L5
+fcdf:    d0 00 20     liw B, 0x0020
 fce2:    5a           unknown
-fce3:    14 f2        bne L30
+fce3:    14 f2        b_z L30
 fce5:    2f 04        unknown
 fce7:    2f 06        unknown
 fce9:    90 01 00     liw A, 0x0100
@@ -159,7 +159,7 @@ fcf1:    2f 02        unknown
 fcf3:    7b 1c        call DiskCommand
 fcf5:    00           HALT
 fcf6:    81 f1 44     ldb A, 0xf144
-fcf9:    15 84        beq L5
+fcf9:    15 84        b_nz L5
 fcfb:    71 01 03     jump 0x0103 L14
 fcfe:    7b 2f        call L22
 fd00:    71 fc 00     jump 0xfc00 L23
@@ -171,7 +171,7 @@ fd05:    a1 f8 00     stb A, 0xf800
 L34:
 fd08:    81 f8 01     ldb A, 0xf801
 fd0b:    29           unknown
-fd0c:    15 fa        beq L34
+fd0c:    15 fa        b_nz L34
 fd0e:    84 f6        ldb A, [[pc-10]]
 fd10:    09           ret 9
 
@@ -199,15 +199,15 @@ fd2b:    a5 81        unknown
 fd2d:    85 a1        ld r?, [r?++]
 
 L22:
-fd2f:    14 04        bne L6
-fd31:    c0 0f        cmpb A, 0x0f
+fd2f:    14 04        b_z L6
+fd31:    c0 0f        lib B, 0x0f
 fd33:    40 31        unknown
 
 L6:
 fd35:    a5 81        unknown
 fd37:    80 83        lib A, 0x83
 fd39:    a5 81        unknown
-fd3b:    3a           xor A, A
+fd3b:    3a           clear A
 fd3c:    b5 81        unknown
 fd3e:    80 85        lib A, 0x85
 fd40:    a5 81        unknown
@@ -215,12 +215,12 @@ fd42:    2a           unknown
 
 L7:
 fd43:    a5 81        unknown
-fd45:    d0 01 90     cmpw A, 0x0190
+fd45:    d0 01 90     liw B, 0x0190
 fd48:    f5 81        unknown
 fd4a:    28           unknown
-fd4b:    c0 0e        cmpb A, 0x0e
+fd4b:    c0 0e        lib B, 0x0e
 fd4d:    49           unknown
-fd4e:    15 f3        beq L7
+fd4e:    15 f3        b_nz L7
 fd50:    80 ff        lib A, 0xff
 fd52:    a5 81        unknown
 fd54:    80 08        lib A, 0x08
@@ -266,7 +266,7 @@ fd9b:    71 01 03     jump 0x0103 L14
 
 L9:
 fd9e:    81 f8 08     ldb A, 0xf808
-fda1:    15 01        beq L10
+fda1:    15 01        b_nz L10
 fda3:    09           ret 9
 
 L10:
@@ -275,7 +275,7 @@ fda4:    73 da        jump L11
 L8:
 fda6:    c1 f8 09     c1 A, 0xf809
 fda9:    4a           unknown
-fdaa:    15 fa        beq L8
+fdaa:    15 fa        b_nz L8
 fdac:    09           ret 9
 fdad:    8c           unknown
 fdae:    00           HALT
@@ -292,11 +292,11 @@ fdbc:    32 40        unknown
 L21:
 fdbe:    79 4c e7     call L16
 fdc1:    4d           unknown
-fdc2:    14 2a        bne L17
-fdc4:    c0 8d        cmpb A, 0x8d
+fdc2:    14 2a        b_z L17
+fdc4:    c0 8d        lib B, 0x8d
 fdc6:    49           unknown
-fdc7:    14 25        bne L17
-fdc9:    c0 b0        cmpb A, 0xb0
+fdc7:    14 25        b_z L17
+fdc9:    c0 b0        lib B, 0xb0
 fdcb:    49           unknown
 fdcc:    16 25        b6 L18
 fdce:    80 09        lib A, 0x09
@@ -305,10 +305,10 @@ fdd2:    19 0e        b9 L19
 fdd4:    80 11        lib A, 0x11
 fdd6:    41 31        unknown
 fdd8:    16 19        b6 L18
-fdda:    c0 05        cmpb A, 0x05
+fdda:    c0 05        lib B, 0x05
 fddc:    49           unknown
 fddd:    18 14        b8 L18
-fddf:    c0 0a        cmpb A, 0x0a
+fddf:    c0 0a        lib B, 0x0a
 fde1:    48           unknown
 
 L19:
@@ -330,5 +330,5 @@ fdf4:    a1 73 be     stb A, 0x73be
 fdf7:    d5           unknown
 fdf8:    41 7d        unknown
 fdfa:    80 0c        lib A, 0x0c
-fdfc:    d0 4b 65     cmpw A, 0x4b65
+fdfc:    d0 4b 65     liw B, 0x4b65
 fdff:    f5 00        unknown
