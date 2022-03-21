@@ -160,6 +160,9 @@ instructions = [
     I("10100001 NNNNNNNN NNNNNNNN", "stb A, {N:#06x}"), # A1
     I("10110001 NNNNNNNN NNNNNNNN", "stw A, {N:#06x}"), # B1
 
+    I("11100001 NNNNNNNN NNNNNNNN", "stb B, {N:#06x}"), # E1
+    I("11110001 NNNNNNNN NNNNNNNN", "stw B, {N:#06x}"), # F1
+
     I("11000001 NNNNNNNN NNNNNNNN", "c1 A, {N:#06x}"),  # C1 - Appears to be a second read byte?
 
     # unknown 3 byte instructions, in the order tested by instruction test rom
@@ -167,7 +170,6 @@ instructions = [
     I("10110000 NNNNNNNN NNNNNNNN", "b0 A, {N:#06x}"),  # b0 ??????? (might be a two byte instruction)
     I("11010001 NNNNNNNN NNNNNNNN", "d1 A, {N:#06x}"),  # D1 ???
     I("01100001 NNNNNNNN NNNNNNNN", "61 A, {N:#06x}"),  # 61
-    I("11110001 NNNNNNNN NNNNNNNN", "f1 A, {N:#06x}"),  # F1 ???
     I("01101001 NNNNNNNN NNNNNNNN", "69 A, {N:#06x}"),  # 69
     I("10010010 NNNNNNNN NNNNNNNN", "92 A, {N:#06x}"),  # 92
     I("11010010 NNNNNNNN NNNNNNNN", "d2 A, {N:#06x}"),  # D2
@@ -187,7 +189,7 @@ instructions = [
     B("00010111 SSSSSSSS", "b7", relative_branch),
     B("00011000 SSSSSSSS", "b_gt", relative_branch),
     B("00011001 SSSSSSSS", "b_le", relative_branch), # lessthan or equal
-    B("00011010 SSSSSSSS", "bEX", relative_branch),
+    B("00011010 SSSSSSSS", "b_sence1", relative_branch),
 
     B("00011100 SSSSSSSS", "b??", relative_branch), # Test rom doesn't test this directly. But it appares
                                                     # to use it as a sentinel when testing instruction lenghts
@@ -200,6 +202,7 @@ instructions = [
 
     I("00111010", "clear A"),
 
+    I("01001000", "add B, A"),
     I("01001001", "cmp A, B"),
 
     I("01011111", "mov sp, A"),
@@ -214,7 +217,7 @@ instructions = [
     I("01000000 00110001", "add A, B"),
     I("01000010 00110001", "and A, B"),
     I("01000011 00110001", "or A, B"),
-    I("01000101 00000001", "swap_bytes A"), # exchanges the high and low bytes of A
+
 
 
     I("01010000 xxxxxxxx"),
@@ -229,7 +232,6 @@ instructions = [
     I("01111101 NNNNNNNN", "call A + {N:#04x}"),
     B("01111001 NNNNNNNN NNNNNNNN", "call", abolsute_call),
     I("01111010 NNNNNNNN NNNNNNNN", "call [{N:#06x}]"),
-    I("10100010 NNNNNNNN NNNNNNNN", "call_alt [{N:#06x}]"), # weird alternative call
     B("01110010 NNNNNNNN NNNNNNNN", "jump [{N:#06x}] ;", kill_branch),
     B("01110101 SSSSSSSS", "unknown jump", relative_branch_unconditional),
 
@@ -239,6 +241,11 @@ instructions = [
 
     I("10100101 10100010", "push_byte A"),
     I("10000101 10100001", "pop_byte A"),
+    I("01000101 00000001", "swap_bytes A"),
+
+    I("10100010 NNNNNNNN NNNNNNNN", "push_word {N:#06x}"),
+
+
 
     # Unknown two byte instructions
 
@@ -259,7 +266,8 @@ instructions = [
     I("01000010 xxxxxxxx"),
 
     I("10000101 xxxxxxxx"),
-   # I("11000101 xxxxxxxx"),
+    I("11000101 xxxxxxxx"),
+    I("10100100 xxxxxxxx"),
 
     # In the order tested by insturction test
     I("00100010 xxxxxxxx"),

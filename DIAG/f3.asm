@@ -297,7 +297,7 @@ L12:
 92f6:    2f 34        unknown
 92f8:    2f 06        unknown
 92fa:    80 43        lib A, 0x43
-92fc:    a2 01 14     call_alt [0x0114]
+92fc:    a2 01 14     push_word 0x0114
 92ff:    7a 01 18     call [0x0118]
 9302:    60 00 e6     60 A, 0x00e6
 9305:    3a           clear A
@@ -314,7 +314,7 @@ L13:
 9318:    2f 34        unknown
 931a:    2f 06        unknown
 931c:    80 44        lib A, 0x44
-931e:    a2 01 14     call_alt [0x0114]
+931e:    a2 01 14     push_word 0x0114
 9321:    7a 01 18     call [0x0118]
 9324:    60 00 c8     60 A, 0x00c8
 9327:    d0 01 1c     liw B, 0x011c
@@ -371,19 +371,19 @@ L18:
 9395:    2f 34        unknown
 9397:    2f 06        unknown
 9399:    80 46        lib A, 0x46
-939b:    a2 01 14     call_alt [0x0114]
+939b:    a2 01 14     push_word 0x0114
 939e:    7a 01 0c     call [0x010c]
 93a1:    2a           unknown
-93a2:    a2 01 14     call_alt [0x0114]
+93a2:    a2 01 14     push_word 0x0114
 93a5:    7a 01 0c     call [0x010c]
 93a8:    2a           unknown
-93a9:    a2 01 14     call_alt [0x0114]
+93a9:    a2 01 14     push_word 0x0114
 93ac:    7a 01 0c     call [0x010c]
 93af:    80 3f        lib A, 0x3f
-93b1:    a2 01 14     call_alt [0x0114]
+93b1:    a2 01 14     push_word 0x0114
 93b4:    7a 01 0c     call [0x010c]
 93b7:    80 ff        lib A, 0xff
-93b9:    a2 01 14     call_alt [0x0114]
+93b9:    a2 01 14     push_word 0x0114
 93bc:    7a 01 18     call [0x0118]
 93bf:    60 3f ff     60 A, 0x3fff
 93c2:    3a           clear A
@@ -402,19 +402,19 @@ L17:
 93d5:    2f 34        unknown
 93d7:    2f 06        unknown
 93d9:    80 47        lib A, 0x47
-93db:    a2 01 14     call_alt [0x0114]
+93db:    a2 01 14     push_word 0x0114
 93de:    7a 01 0c     call [0x010c]
 93e1:    2a           unknown
-93e2:    a2 01 14     call_alt [0x0114]
+93e2:    a2 01 14     push_word 0x0114
 93e5:    7a 01 0c     call [0x010c]
 93e8:    2a           unknown
-93e9:    a2 01 14     call_alt [0x0114]
+93e9:    a2 01 14     push_word 0x0114
 93ec:    7a 01 0c     call [0x010c]
 93ef:    80 3f        lib A, 0x3f
-93f1:    a2 01 14     call_alt [0x0114]
+93f1:    a2 01 14     push_word 0x0114
 93f4:    7a 01 0c     call [0x010c]
 93f7:    80 ff        lib A, 0xff
-93f9:    a2 01 14     call_alt [0x0114]
+93f9:    a2 01 14     push_word 0x0114
 93fc:    7a 01 18     call [0x0118]
 93ff:    b5 a2        unknown
 9401:    60 3f ff     60 A, 0x3fff
@@ -476,7 +476,7 @@ Entry_CMD_SEEK_TEST:
 948f:    2f 34        unknown
 9491:    2f 06        unknown
 9493:    80 43        lib A, 0x43
-9495:    a2 01 14     call_alt [0x0114]
+9495:    a2 01 14     push_word 0x0114
 9498:    7a 01 18     call [0x0118]
 949b:    13 09        b3 L36
 
@@ -487,7 +487,7 @@ L37:
 
 L36:
 94a6:    80 45        lib A, 0x45
-94a8:    a2 01 14     call_alt [0x0114]
+94a8:    a2 01 14     push_word 0x0114
 94ab:    7a 01 18     call [0x0118]
 94ae:    12 ed        b2 L37
 94b0:    d0 41 4f     liw B, 0x414f
@@ -511,11 +511,11 @@ L40:
 94d0:    2f 34        unknown
 94d2:    2f 06        unknown
 94d4:    80 43        lib A, 0x43
-94d6:    a2 01 14     call_alt [0x0114]
+94d6:    a2 01 14     push_word 0x0114
 94d9:    7a 01 18     call [0x0118]
 94dc:    12 bf        b2 L37
 94de:    80 45        lib A, 0x45
-94e0:    a2 01 14     call_alt [0x0114]
+94e0:    a2 01 14     push_word 0x0114
 94e3:    7a 01 18     call [0x0118]
 94e6:    13 1c        b3 L38
 94e8:    7a 01 12     call [0x0112]
@@ -558,13 +558,13 @@ L39:
 9539:    08           flag8
 953a:    7a 01 06     call [0x0106]
 953d:    80 41        lib A, 0x41
-953f:    a2 01 14     call_alt [0x0114]
+953f:    a2 01 14     push_word 0x0114
 9542:    7a 01 0c     call [0x010c]
 9545:    2a           unknown
-9546:    a2 01 14     call_alt [0x0114]
+9546:    a2 01 14     push_word 0x0114
 9549:    7a 01 0c     call [0x010c]
 954c:    2a           unknown
-954d:    a2 01 14     call_alt [0x0114]
+954d:    a2 01 14     push_word 0x0114
 9550:    7a 01 18     call [0x0118]
 9553:    12 44        b2 L42
 9555:    90 41 4d     liw A, 0x414d
@@ -599,7 +599,7 @@ L47:
 958b:    2f 34        unknown
 958d:    2f 06        unknown
 958f:    80 43        lib A, 0x43
-9591:    a2 01 14     call_alt [0x0114]
+9591:    a2 01 14     push_word 0x0114
 9594:    7a 01 18     call [0x0118]
 9597:    13 09        b3 L44
 
@@ -616,7 +616,7 @@ L44:
 95ac:    2f 34        unknown
 95ae:    2f 06        unknown
 95b0:    80 45        lib A, 0x45
-95b2:    a2 01 14     call_alt [0x0114]
+95b2:    a2 01 14     push_word 0x0114
 95b5:    7a 01 18     call [0x0118]
 95b8:    13 16        b3 L45
 95ba:    7a 01 12     call [0x0112]
@@ -661,7 +661,7 @@ Entry_FLOPPY_SEEK_TEST:
 9609:    2f 34        unknown
 960b:    2f 06        unknown
 960d:    80 43        lib A, 0x43
-960f:    a2 01 14     call_alt [0x0114]
+960f:    a2 01 14     push_word 0x0114
 9612:    7a 01 18     call [0x0118]
 9615:    13 09        b3 L23
 
@@ -672,7 +672,7 @@ L24:
 
 L23:
 9620:    80 45        lib A, 0x45
-9622:    a2 01 14     call_alt [0x0114]
+9622:    a2 01 14     push_word 0x0114
 9625:    7a 01 18     call [0x0118]
 9628:    12 ed        b2 L24
 962a:    d0 41 4f     liw B, 0x414f
@@ -689,11 +689,11 @@ L27:
 9640:    2f 34        unknown
 9642:    2f 06        unknown
 9644:    80 43        lib A, 0x43
-9646:    a2 01 14     call_alt [0x0114]
+9646:    a2 01 14     push_word 0x0114
 9649:    7a 01 18     call [0x0118]
 964c:    12 c9        b2 L24
 964e:    80 45        lib A, 0x45
-9650:    a2 01 14     call_alt [0x0114]
+9650:    a2 01 14     push_word 0x0114
 9653:    7a 01 18     call [0x0118]
 9656:    13 1c        b3 L25
 9658:    7a 01 12     call [0x0112]
@@ -735,13 +735,13 @@ Entry_FLOPPY_READ_TEST:
 96a3:    00           HALT
 96a4:    7a 01 06     call [0x0106]
 96a7:    80 41        lib A, 0x41
-96a9:    a2 01 14     call_alt [0x0114]
+96a9:    a2 01 14     push_word 0x0114
 96ac:    7a 01 0c     call [0x010c]
 96af:    2a           unknown
-96b0:    a2 01 14     call_alt [0x0114]
+96b0:    a2 01 14     push_word 0x0114
 96b3:    7a 01 0c     call [0x010c]
 96b6:    2a           unknown
-96b7:    a2 01 14     call_alt [0x0114]
+96b7:    a2 01 14     push_word 0x0114
 96ba:    7a 01 18     call [0x0118]
 96bd:    12 3d        b2 L28
 96bf:    90 41 4d     liw A, 0x414d
@@ -772,7 +772,7 @@ L32:
 96ee:    2f 34        unknown
 96f0:    2f 06        unknown
 96f2:    80 43        lib A, 0x43
-96f4:    a2 01 14     call_alt [0x0114]
+96f4:    a2 01 14     push_word 0x0114
 96f7:    7a 01 18     call [0x0118]
 96fa:    13 09        b3 L30
 
@@ -789,7 +789,7 @@ L30:
 970f:    2f 34        unknown
 9711:    2f 06        unknown
 9713:    80 45        lib A, 0x45
-9715:    a2 01 14     call_alt [0x0114]
+9715:    a2 01 14     push_word 0x0114
 9718:    7a 01 18     call [0x0118]
 971b:    13 16        b3 L31
 971d:    7a 01 12     call [0x0112]

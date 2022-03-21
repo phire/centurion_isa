@@ -19,6 +19,8 @@ entry_points = [
 ]
 
 functions = [
+    (0xfc00, "EntryPoint"),
+    (0xfd00, "AlternativeEntryPoint"),
     (0x0103, "IPL_Entry_point"),
     (0xfc92, "WriteString"),
     (0xfc90, "ReadCharTramp"),
@@ -36,6 +38,7 @@ labels = [
 ]
 
 comments = [
+    (0xfc00, "Check the Sense switch to see if we should jump straight to DIAG"),
     (0xfc09, "Configure the first port on the mux board to 9600 baud, 8N1"),
     (0xfc0e, "Write control code FF aka Form Feed to serial\n"
              "Should cause a printer to move to the next page, and\n"
@@ -47,8 +50,7 @@ comments = [
     (0xfcac, "char | 0x80 - Force bit 7 to be set"),
     (0xfcb0, "Check if char is lowercase (greater than 0x60)"),
     (0xfcb5, "Clear bit 6, forcing it to be uppercase"),
-    (0xfc35, "seems to reject all Alpha-numeric characters?\n"
-             "only accepts ascii chars below 0x30"),
+    (0xfc35, "Reject anything below ASCI 0x30 aka '0'"),
 
     (0xfcc5, "HawkUnitSelect = A"),
     (0xfcd1, "HawkSectorAddressReg = (0, 0, 0)"),

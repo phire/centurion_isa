@@ -31,8 +31,8 @@ Entry_CPU_INSTRUCTION_TEST:
 888c:    90 00 10     liw A, 0x0010
 
 L11:
-888f:    c5           unknown
-8890:    61 e5 01     61 A, 0xe501
+888f:    c5 61        unknown
+8891:    e5 01        unknown
 8893:    3f           unknown
 8894:    15 f9        b_nz L11 ; clearing all regsiters?
 8896:    03           flag3
@@ -977,7 +977,7 @@ L201:
 
 L202:
 8bf6:    91 00 2c     ldw A, 0x002c
-8bf9:    f1 00 2c     f1 A, 0x002c
+8bf9:    f1 00 2c     stw B, 0x002c
 8bfc:    16 01        b_lt L203
 8bfe:    00           HALT
 

@@ -7,19 +7,26 @@ from diag_common import *
 
 base_address = 0x8000
 
-functions = [
-    (0x850e, "ReadByte"),
-    (0x8566, "ReadByteTramp"),
-    (0x8623, "WriteString"),
-    (0x8634, "ReadChar"),
-    (0x8728, "AuxiliaryTestMenu"),
-]
 
 strings = [
     0x85b3,
     0x8614,
     0x8734,
     0x8788,
+]
+
+functions = [
+    (0x850e, "WriteByte"),
+    (0x8519, "WriteHexWord"),
+    (0x8520, "WriteHexByte"),
+    (0x8566, "WriteByteTramp"),
+    (0x8623, "WriteString"),
+    (0x8634, "ReadChar"),
+    (0x8728, "AuxiliaryTestMenu"),
+]
+
+lables = [
+
 ]
 
 comments = [
@@ -49,12 +56,21 @@ if __name__ == "__main__":
     entry_points.append(0x8203)
     entry_points.append(0x826f)
     entry_points.append(0x8284)
-    entry_points.append(0x82a3)
     entry_points.append(0x82e3)
+    entry_points.append(0x8247)
+    entry_points.append(0x837f)
+    entry_points.append(0x8467)
+    entry_points.append(0x846f)
+    entry_points.append(0x859d)
+    entry_points.append(0x864d)
+    entry_points.append(0x86b2)
 
     for (addr, name) in functions:
         memory_addr_info[addr].label = name
         entry_points.append(addr)
+
+    for (addr, name) in lables:
+        memory_addr_info[addr].label = name
 
     for addr in strings:
         add_string(memory, addr)

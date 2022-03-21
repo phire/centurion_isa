@@ -1,6 +1,6 @@
 
-L22:
-fc00:    1a 02        bEX L0
+EntryPoint:
+fc00:    1a 02        b_sence1 L0 ; Check the Sense switch to see if we should jump straight to DIAG
 fc02:    73 03        jump L2
 
 L0:
@@ -37,10 +37,9 @@ GetNextChar:
 fc2f:    7b 72        call ReadChar
 fc31:    c0 50        lib B, 0x50
 fc33:    40 31        add A, B
-fc35:    16 48        b_lt PrintError ; seems to reject all Alpha-numeric characters?
-                                      ; only accepts ascii chars below 0x30
-fc37:    c5           unknown
-fc38:    a1 16 7f     stb A, 0x167f
+fc35:    16 48        b_lt PrintError ; Reject anything below ASCI 0x30 aka '0'
+fc37:    c5 a1        unknown
+fc39:    16 7f        b_lt L23
 fc3b:    18 7f        b_gt LoadFromHawkTramp
 fc3d:    c0 03        lib B, 0x03
 fc3f:    49           cmp A, B
@@ -56,24 +55,24 @@ fc52:    f5 a2        unknown
 fc54:    d0 81 00     liw B, 0x8100
 fc57:    06           flag6
 
-L25:
+L26:
 fc58:    27 30        unknown
 fc5a:    29           unknown
-fc5b:    17 fb        b7 L25
+fc5b:    17 fb        b7 L26
 fc5d:    f5 a2        unknown
 fc5f:    2f 14        unknown
 fc61:    2f 06        unknown
 fc63:    2f a0        unknown
 fc65:    90 ff f6     liw A, 0xfff6
 fc68:    2f 02        unknown
-fc6a:    7b 22        call L26
+fc6a:    7b 22        call L27
 fc6c:    43 90        unknown
 fc6e:    01           nop
 fc6f:    00           HALT
 fc70:    2f 00        unknown
 fc72:    90 f0 ff     liw A, 0xf0ff
 fc75:    2f 02        unknown
-fc77:    7b 15        call L26
+fc77:    7b 15        call L27
 fc79:    45           unknown
 fc7a:    15 03        b_nz PrintError
 fc7c:    71 01 03     jump 0x0103 IPL_Entry_point
@@ -84,8 +83,8 @@ fc81:    "\r\nERROR\r\n\0"
 fc8b:    07           clear_carry?
 fc8c:    73 85        jump Prompt
 
-L26:
-fc8e:    73 73        jump L27
+L27:
+fc8e:    73 73        jump L28
 
 ReadCharTramp:
 fc90:    73 11        jump ReadChar
@@ -112,16 +111,16 @@ fcaa:    c0 80        lib B, 0x80
 fcac:    43 31        or A, B ; char | 0x80 - Force bit 7 to be set
 fcae:    c0 e0        lib B, 0xe0
 fcb0:    49           cmp A, B ; Check if char is lowercase (greater than 0x60)
-fcb1:    16 04        b_lt L23
+fcb1:    16 04        b_lt L22
 fcb3:    c0 df        lib B, 0xdf
 fcb5:    42 31        and A, B ; Clear bit 6, forcing it to be uppercase
 
-L23:
-fcb7:    a4           unknown
-fcb8:    e6           unknown
+L22:
+fcb7:    a4 e6        unknown
 fcb9:    09           ret 9
-fcba:    73
-fcbb:    62
+
+L23:
+fcba:    73 62        jump L24
 
 LoadFromHawkTramp:
 fcbc:    73 02        jump LoadFromHawk
@@ -143,14 +142,14 @@ fcd1:    b1 f1 41     stw A, 0xf141 ; HawkSectorAddressReg = (0, 0, 0)
 fcd4:    7b 3b        call DiskCommand ; DiskCommand(3) - ReturnTrackZero
 fcd6:    03           flag3
 
-L24:
+L25:
 fcd7:    94 1e        unknown
 fcd9:    d0 04 00     liw B, 0x0400
 fcdc:    5a           unknown
 fcdd:    15 a0        b_nz PrintError
 fcdf:    d0 00 20     liw B, 0x0020
 fce2:    5a           unknown
-fce3:    14 f2        b_z L24
+fce3:    14 f2        b_z L25
 fce5:    2f 04        unknown
 fce7:    2f 06        unknown
 fce9:    90 01 00     liw A, 0x0100 ; DMA transfer destination address
@@ -163,16 +162,18 @@ fcf6:    81 f1 44     ldb A, 0xf144 ; Check Command Status (0 == success?)
 fcf9:    15 84        b_nz PrintError
 fcfb:    71 01 03     jump 0x0103 IPL_Entry_point ; Transfer control to the IPL that was loaded off disk
 fcfe:    7b 2f        call L21
-fd00:    71 fc 00     jump 0xfc00 L22
 
-L27:
+AlternativeEntryPoint:
+fd00:    71 fc 00     jump 0xfc00 EntryPoint
+
+L28:
 fd03:    85 41        unknown
 fd05:    a1 f8 00     stb A, 0xf800
 
-L28:
+L29:
 fd08:    81 f8 01     ldb A, 0xf801
 fd0b:    29           unknown
-fd0c:    15 fa        b_nz L28
+fd0c:    15 fa        b_nz L29
 fd0e:    84 f6        ldb A, [[pc-10]]
 fd10:    09           ret 9
 
@@ -188,6 +189,8 @@ fd1b:    09           ret 9
 
 L11:
 fd1c:    73 a0        jump L4
+
+L24:
 fd1e:    a5 a2        push_byte A
 fd20:    90 1f 40     liw A, 0x1f40
 fd23:    5e           unknown
@@ -310,7 +313,7 @@ fdda:    c0 05        lib B, 0x05
 fddc:    49           cmp A, B
 fddd:    18 14        b_gt L16
 fddf:    c0 0a        lib B, 0x0a
-fde1:    48           unknown
+fde1:    48           add B, A
 
 L18:
 fde2:    80 04        lib A, 0x04
