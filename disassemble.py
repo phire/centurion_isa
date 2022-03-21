@@ -175,6 +175,7 @@ instructions = [
     # not in test rom
 
     I("11100001 NNNNNNNN NNNNNNNN", "e1 A, {N:#06x}"),  # E1
+    I("10000010 NNNNNNNN NNNNNNNN", "82 A, {N:#06x}"),  # 82
 
     B("00010000 SSSSSSSS", "b0", relative_branch),
     B("00010001 SSSSSSSS", "b1", relative_branch),
@@ -182,9 +183,9 @@ instructions = [
     B("00010011 SSSSSSSS", "b3", relative_branch),
     B("00010100 SSSSSSSS", "b_z", relative_branch),
     B("00010101 SSSSSSSS", "b_nz", relative_branch),
-    B("00010110 SSSSSSSS", "b6", relative_branch),
+    B("00010110 SSSSSSSS", "b_lt", relative_branch),
     B("00010111 SSSSSSSS", "b7", relative_branch),
-    B("00011000 SSSSSSSS", "b8", relative_branch),
+    B("00011000 SSSSSSSS", "b_gt", relative_branch),
     B("00011001 SSSSSSSS", "b_le", relative_branch), # lessthan or equal
     B("00011010 SSSSSSSS", "bEX", relative_branch),
 
@@ -212,6 +213,7 @@ instructions = [
 
     I("01000000 00110001", "add A, B"),
     I("01000010 00110001", "and A, B"),
+    I("01000011 00110001", "or A, B"),
     I("01000101 00000001", "swap_bytes A"), # exchanges the high and low bytes of A
 
 
@@ -257,6 +259,7 @@ instructions = [
     I("01000010 xxxxxxxx"),
 
     I("10000101 xxxxxxxx"),
+   # I("11000101 xxxxxxxx"),
 
     # In the order tested by insturction test
     I("00100010 xxxxxxxx"),

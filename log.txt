@@ -634,3 +634,40 @@ It also confirms the there are two Accumulators theory.
 
 One remaining mystery is the 07 26 10 sequence that WriteHex uses to
 start the shift sequence. 07 might be clear carry, and then 26 10 is arithmetic shift right
+
+....
+
+Fleshed out the comments/labels in Bootstrap some more. Found "or A, B" and narrowed down
+some more branch instructions.
+
+### DMA
+
+I also think I understand DMA now. It's super cool and innovative.
+
+It's not an MMIO device. you don't configure it with MMIO register writes.
+It's not really a device at all.
+The CPU is the DMA. The code simply puts the arguments for source address and destinatio
+(and size?, and mode?) into the CPU's index registers. Then the code tells the device to start
+a transfer and then loops checking the device's status register.
+When it's ready, the device (ie Hawk Disk drive) sends a signal to the CPU board, the CPU halts
+execution of the code, and switches to a microcoded copy loop that's significantly faster for copying
+code. When the transfer finishes, regular code execution resumes. It sees the device status register
+has changed and it knows the DMA has finished.
+
+If I was to speculate how this functionality might interact with the multiple interrupt level register
+sets, it's possible that the DMA control cable from the device includes 4 bits to control what
+interrupt level the DMA transfer belongs to.
+If so, you would be able issue a long-running IO operation request from one "process", switch to a
+completely different process and the incoming DMA trigger from the device would trigger the CPU
+ to switch to the right register set during the transfer.
+The DMA transfer could be be slow, only stealing a few cycles from the foreground process until
+ it completes.
+There could be multiple outstanding DMA transfers in parallel. Very useful for a multi-user system.
+
+Though, I'm just speculating here.
+
+
+
+
+
+

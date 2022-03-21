@@ -36,7 +36,7 @@ L0:
 
 L1:
 8045:    c1 f1 10     c1 A, 0xf110
-8048:    16 b7        b6 L2
+8048:    16 b7        b_lt L2
 804a:    3d           unknown
 804b:    d0 80 55     liw B, 0x8055
 804e:    58           unknown
@@ -48,12 +48,9 @@ L1:
 8059:    81 1b 81     ldb A, 0x1b81
 805c:    83 81        unknown
 805e:    dc           unknown
-805f:    82           unknown
-8060:    03           flag3
-8061:    82           unknown
+805f:    82 03 82     82 A, 0x0382
 8062:    47           unknown
-8063:    82           unknown
-8064:    84 82        ldb A, [[pc-126]]
+8063:    82 84 82     82 A, 0x8482
 8066:    e3           unknown
 8067:    83 7f        unknown
 8069:    84 6f        ldb A, [[pc+111]]
@@ -151,7 +148,7 @@ L6:
 80e9:    a1 f1 0c     stb A, 0xf10c
 80ec:    81 f1 10     ldb A, 0xf110
 80ef:    2d           unknown
-80f0:    16 20        b6 L7
+80f0:    16 20        b_lt L7
 80f2:    a1 f1 07     stb A, 0xf107
 80f5:    90 00 64     liw A, 0x0064
 
@@ -192,7 +189,7 @@ L22:
 
 L26:
 8130:    5d           unknown
-8131:    16 06        b6 L19
+8131:    16 06        b_lt L19
 8133:    f5 01        unknown
 8135:    73 f9        jump L26
 
@@ -1024,7 +1021,7 @@ L77:
 852a:    26 00        unknown
 852c:    c0 0a        lib B, 0x0a
 852e:    49           cmp A, B
-852f:    16 05        b6 L78
+852f:    16 05        b_lt L78
 8531:    c0 37        lib B, 0x37
 
 L79:
@@ -1086,7 +1083,7 @@ L83:
 8568:    45           unknown
 8569:    31 c0        unknown
 856b:    30 49        unknown
-856d:    16 13        b6 L84
+856d:    16 13        b_lt L84
 856f:    c0 47        lib B, 0x47
 8571:    49           cmp A, B
 8572:    17 1e        b7 L86
@@ -1162,12 +1159,12 @@ L66:
 85c4:    7b 6e        call ReadChar
 85c6:    c0 50        lib B, 0x50
 85c8:    40 31        add A, B
-85ca:    16 46        b6 L67
+85ca:    16 46        b_lt L67
 85cc:    c5           unknown
 85cd:    a1 14 7d     stb A, 0x147d
 85d0:    c0 03        lib B, 0x03
 85d2:    49           cmp A, B
-85d3:    18 3d        b8 L67
+85d3:    18 3d        b_gt L67
 85d5:    d0 0f 00     liw B, 0x0f00
 85d8:    f5 a2        unknown
 85da:    32 20        unknown
@@ -1230,10 +1227,10 @@ ReadChar:
 8639:    11 f9        b1 ReadChar
 863b:    84 f3        ldb A, [[pc-13]]
 863d:    c0 80        lib B, 0x80
-863f:    43 31        unknown
+863f:    43 31        or A, B
 8641:    c0 e0        lib B, 0xe0
 8643:    49           cmp A, B
-8644:    16 04        b6 L65
+8644:    16 04        b_lt L65
 8646:    c0 df        lib B, 0xdf
 8648:    42 31        and A, B
 
@@ -1471,7 +1468,7 @@ L75:
 8751:    19 21        b_le L74
 8753:    d0 07 ff     liw B, 0x07ff
 8756:    59           unknown
-8757:    18 1b        b8 L74
+8757:    18 1b        b_gt L74
 8759:    30 60        unknown
 875b:    d0 f8 00     liw B, 0xf800 ; will wrap around to 0x800, the length of each ROM
 875e:    52           unknown
@@ -1479,7 +1476,7 @@ L75:
 8761:    20 b5        unknown
 8763:    a2 55 60     call_alt [0x5560]
 8766:    79 85 19     call L76
-8769:    c0 bd        lib B, 0xbd
+8769:    c0 bd        lib B, 0xbd ; '='
 876b:    79 85 0e     call ReadByte
 876e:    c5           unknown
 876f:    41 15        unknown
@@ -1523,7 +1520,7 @@ L80:
 L82:
 87bf:    e1 f2 01     e1 A, 0xf201
 87c2:    79 85 68     call L83
-87c5:    16 0c        b6 L88
+87c5:    16 0c        b_lt L88
 87c7:    35 40        unknown
 87c9:    35 40        unknown
 87cb:    35 40        unknown
@@ -1533,14 +1530,14 @@ L82:
 
 L88:
 87d3:    55 40        alu5 r?, r?
-87d5:    18 03        b8 L89
+87d5:    18 03        b_gt L89
 
 L90:
 87d7:    71 87 28     jump 0x8728 AuxiliaryTestMenu
 
 L89:
 87da:    51 60        sub? r?, r?
-87dc:    16 f9        b6 L90
+87dc:    16 f9        b_lt L90
 87de:    55 40        alu5 r?, r?
 87e0:    3d           unknown
 87e1:    3b           unknown

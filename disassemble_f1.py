@@ -26,6 +26,9 @@ comments = [
     (0x8002, "Probally setting the 7 segment LEDs to 0 0"),
     (0x875b, "will wrap around to 0x800, the length of each ROM"),
     (0x8774, "will wrap around to 0x800, the length of each ROM"),
+    (0x8769, "'='"),
+    (0x8770, "While byte from serial != '='"),
+
 
 ]
 
