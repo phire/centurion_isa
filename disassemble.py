@@ -144,7 +144,7 @@ class B(I):
 
 
 instructions = [
-    #B("00000000", "HALT", kill_branch),
+    B("00000000", "HALT", kill_branch),
 
     I("10000000 NNNNNNNN", "lib A, {N:#04x}"),          # 80
     I("10010000 NNNNNNNN NNNNNNNN", "liw A, {N:#06x}"), # 90
