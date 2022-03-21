@@ -36,7 +36,7 @@ L11:
 8893:    3f           unknown
 8894:    15 f9        b_nz L11 ; clearing all regsiters?
 8896:    03           flag3
-8897:    07           flag7
+8897:    07           clear_carry?
 8898:    c0 01        lib B, 0x01 ; if A is empty. This would set the overflow flag
 889a:    11 01        b1 L12 ; Some tests for all the branch instructions
 889c:    00           HALT
@@ -87,7 +87,7 @@ L20:
 88bc:    00           HALT
 
 L243:
-88bd:    19 02        b9 L21
+88bd:    19 02        b_le L21
 88bf:    18 0a        b8 L242
 
 L21:
@@ -115,7 +115,7 @@ L24:
 88d1:    00           HALT
 
 L25:
-88d2:    07           flag7
+88d2:    07           clear_carry?
 88d3:    11 01        b1 L26
 88d5:    00           HALT
 
@@ -181,7 +181,7 @@ L38:
 8905:    00           HALT
 
 L39:
-8906:    19 01        b9 L40
+8906:    19 01        b_le L40
 8908:    00           HALT
 
 L40:
@@ -198,7 +198,7 @@ L42:
 8912:    00           HALT
 
 L43:
-8913:    19 01        b9 L44
+8913:    19 01        b_le L44
 8915:    00           HALT
 
 L44:
@@ -754,7 +754,7 @@ L163:
 
 L164:
 8af8:    c0 55        lib B, 0x55
-8afa:    40 31        unknown
+8afa:    40 31        add A, B
 8afc:    11 01        b1 L165
 8afe:    00           HALT
 
@@ -1092,9 +1092,8 @@ L216:
 L217:
 8c92:    95 42        unknown
 8c94:    d5           unknown
-8c95:    42           unknown
-8c96:    54 20        unknown
-8c98:    3b           unknown
+8c95:    42 54        unknown
+8c97:    20 3b        unknown
 8c99:    14 01        b_z L218
 8c9b:    00           HALT
 
@@ -1246,7 +1245,7 @@ L234:
 8d55:    00           HALT
 
 L235:
-8d56:    49           unknown
+8d56:    49           cmp A, B
 8d57:    14 01        b_z L236
 8d59:    00           HALT
 
@@ -1268,13 +1267,13 @@ L237:
 
 L238:
 8d70:    81 f2 00     ldb A, 0xf200
-8d73:    2c           unknown
+8d73:    2c           rotate_right A
 8d74:    11 18        b1 L239
 8d76:    81 f2 01     ldb A, 0xf201
 8d79:    c0 80        lib B, 0x80
 8d7b:    43 31        unknown
 8d7d:    c0 83        lib B, 0x83
-8d7f:    49           unknown
+8d7f:    49           cmp A, B
 8d80:    15 0c        b_nz L239
 8d82:    61 bf fe     61 A, 0xbffe
 8d85:    91 bf fc     ldw A, 0xbffc
@@ -1356,20 +1355,20 @@ L247:
 8e4c:    7b 27        call L248
 8e4e:    06           flag6
 8e4f:    7b 24        call L248
-8e51:    07           flag7
+8e51:    07           clear_carry?
 8e52:    7b 53        call L254
 8e54:    7b 1f        call L248
 8e56:    00           HALT
 8e57:    7b 73        call L256
 8e59:    a1 f1 0a     stb A, 0xf10a
 8e5c:    81 f2 00     ldb A, 0xf200
-8e5f:    2c           unknown
+8e5f:    2c           rotate_right A
 8e60:    11 cd        b1 L247
 8e62:    81 f2 01     ldb A, 0xf201
 8e65:    c0 80        lib B, 0x80
 8e67:    43 31        unknown
 8e69:    c0 83        lib B, 0x83
-8e6b:    49           unknown
+8e6b:    49           cmp A, B
 8e6c:    15 c1        b_nz L247
 8e6e:    90 07 74     liw A, 0x0774
 8e71:    50 80        add A, indexBase
@@ -1377,7 +1376,7 @@ L247:
 
 L248:
 8e75:    3a           clear A
-8e76:    85 41        ld r?, [r?++]
+8e76:    85 41        unknown
 8e78:    35 04        unknown
 8e7a:    20 00        unknown
 8e7c:    7e           unknown
@@ -1428,11 +1427,11 @@ L254:
 8eb1:    80 01        lib A, 0x01
 
 L1:
-8eb3:    a5 a2        unknown
+8eb3:    a5 a2        push_byte A
 8eb5:    2a           unknown
-8eb6:    a5 a2        unknown
+8eb6:    a5 a2        push_byte A
 8eb8:    6d a2        unknown
-8eba:    a5 a2        unknown
+8eba:    a5 a2        push_byte A
 8ebc:    60 06 c2     60 A, 0x06c2
 8ebf:    50 84        unknown
 8ec1:    0f           unknown
@@ -1557,7 +1556,7 @@ Entry_ROM_SELF_TEST:
 8f61:    3a           clear A
 
 ChecksumLoop:
-8f62:    85 61        ld r?, [r?++] ; Load Byte via base+index, post-increment index
+8f62:    85 61        unknown ; Load Byte via base+index, post-increment index
 8f64:    40 10        unknown
 8f66:    d0 07 dd     liw B, 0x07dd
 8f69:    50 82        unknown
@@ -1576,7 +1575,7 @@ L10:
 
 WaitForKey:
 8f9b:    81 f2 00     ldb A, 0xf200
-8f9e:    2c           unknown
+8f9e:    2c           rotate_right A
 8f9f:    11 fa        b1 WaitForKey
 8fa1:    81 f2 01     ldb A, 0xf201
 8fa4:    75 40        unknown jump L9
@@ -1590,10 +1589,10 @@ ChecksumFail:
 
 WriteString:
 8fcc:    81 f2 00     ldb A, 0xf200
-8fcf:    2c           unknown
-8fd0:    2c           unknown
+8fcf:    2c           rotate_right A
+8fd0:    2c           rotate_right A
 8fd1:    11 f9        b1 WriteString
-8fd3:    85 41        ld r?, [r?++]
+8fd3:    85 41        unknown
 8fd5:    15 01        b_nz L8
 8fd7:    09           ret 9
 

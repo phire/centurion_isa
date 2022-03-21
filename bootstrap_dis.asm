@@ -1,5 +1,5 @@
 
-L23:
+L24:
 fc00:    1a 02        bEX L0
 fc02:    73 03        jump L2
 
@@ -16,33 +16,33 @@ fc0e:    a1 f2 01     stb A, 0xf201 ; Write control code FF aka Form Feed to ser
 fc11:    0e           delay 4.5ms
 fc12:    0e           delay 4.5ms
 
-L35:
+L36:
 fc13:    90 10 00     liw A, 0x1000
 fc16:    5f           mov sp, A ; Setup stack at 0x1000 (probally)
 fc17:    7b 79        call WriteString
 fc19:    "D=\0"
 fc1c:    7b 72        call ReadCharTramp
 fc1e:    c0 c6        lib B, 0xc6 ; A == 'F'
-fc20:    49           unknown
+fc20:    49           cmp A, B
 fc21:    e5 a2        unknown
-fc23:    14 0a        b_z L27
+fc23:    14 0a        b_z L28
 fc25:    c0 c3        lib B, 0xc3 ; A == 'C'
-fc27:    49           unknown
-fc28:    14 05        b_z L27
+fc27:    49           cmp A, B
+fc28:    14 05        b_z L28
 fc2a:    c0 c8        lib B, 0xc8 ; A == 'H'
-fc2c:    49           unknown
+fc2c:    49           cmp A, B
 fc2d:    15 50        b_nz L5
 
-L27:
+L28:
 fc2f:    7b 72        call ReadChar
 fc31:    c0 50        lib B, 0x50
-fc33:    40 31        unknown
+fc33:    40 31        add A, B
 fc35:    16 48        b6 L5
 fc37:    c5           unknown
 fc38:    a1 16 7f     stb A, 0x167f
-fc3b:    18 7f        b8 L28
+fc3b:    18 7f        b8 L29
 fc3d:    c0 03        lib B, 0x03
-fc3f:    49           unknown
+fc3f:    49           cmp A, B
 fc40:    18 3d        b8 L5
 fc42:    d0 0f 00     liw B, 0x0f00
 fc45:    f5 a2        unknown
@@ -55,24 +55,24 @@ fc52:    f5 a2        unknown
 fc54:    d0 81 00     liw B, 0x8100
 fc57:    06           flag6
 
-L31:
+L32:
 fc58:    27 30        unknown
 fc5a:    29           unknown
-fc5b:    17 fb        b7 L31
+fc5b:    17 fb        b7 L32
 fc5d:    f5 a2        unknown
 fc5f:    2f 14        unknown
 fc61:    2f 06        unknown
 fc63:    2f a0        unknown
 fc65:    90 ff f6     liw A, 0xfff6
 fc68:    2f 02        unknown
-fc6a:    7b 22        call L32
+fc6a:    7b 22        call L33
 fc6c:    43 90        unknown
 fc6e:    01           nop
 fc6f:    00           HALT
 fc70:    2f 00        unknown
 fc72:    90 f0 ff     liw A, 0xf0ff
 fc75:    2f 02        unknown
-fc77:    7b 15        call L32
+fc77:    7b 15        call L33
 fc79:    45           unknown
 fc7a:    15 03        b_nz L5
 fc7c:    71 01 03     jump 0x0103 L14
@@ -80,21 +80,21 @@ fc7c:    71 01 03     jump 0x0103 L14
 L5:
 fc7f:    7b 11        call WriteString
 fc81:    "\r\nERROR\r\n\0"
-fc8b:    07           flag7
-fc8c:    73 85        jump L35
+fc8b:    07           clear_carry?
+fc8c:    73 85        jump L36
 
-L32:
-fc8e:    73 73        jump L33
+L33:
+fc8e:    73 73        jump L34
 
 ReadCharTramp:
 fc90:    73 11        jump ReadChar
 
 WriteString:
 fc92:    81 f2 00     ldb A, 0xf200
-fc95:    2c           unknown
-fc96:    2c           unknown
+fc95:    2c           rotate_right A
+fc96:    2c           rotate_right A
 fc97:    11 f9        b1 WriteString
-fc99:    85 41        ld r?, [r?++]
+fc99:    85 41        unknown
 fc9b:    15 01        b_nz L3
 fc9d:    09           ret 9
 
@@ -104,33 +104,32 @@ fca1:    73 ef        jump WriteString
 
 ReadChar:
 fca3:    84 ee        ldb A, [[pc-18]]
-fca5:    2c           unknown
+fca5:    2c           rotate_right A
 fca6:    11 fb        b1 ReadChar
 fca8:    84 f5        ldb A, [[pc-11]]
 fcaa:    c0 80        lib B, 0x80
 fcac:    43 31        unknown
 fcae:    c0 e0        lib B, 0xe0
-fcb0:    49           unknown
-fcb1:    16 04        b6 L25
+fcb0:    49           cmp A, B
+fcb1:    16 04        b6 L26
 fcb3:    c0 df        lib B, 0xdf
-fcb5:    42           unknown
-fcb6:    31
+fcb5:    42 31        and A, B
 
-L25:
+L26:
 fcb7:    a4           unknown
 fcb8:    e6           unknown
 fcb9:    09           ret 9
-fcba:    73 62        jump L24
+fcba:    73 62        jump L25
 
-L28:
-fcbc:    73 02        jump L29
+L29:
+fcbc:    73 02        jump L30
 
 L4:
 fcbe:    73 bf        jump L5
 
-L29:
+L30:
 fcc0:    c0 07        lib B, 0x07
-fcc2:    49           unknown
+fcc2:    49           cmp A, B
 fcc3:    18 ba        b8 L5
 fcc5:    a1 f1 40     stb A, 0xf140
 fcc8:    94 2d        unknown
@@ -142,14 +141,14 @@ fcd1:    b1 f1 41     stw A, 0xf141
 fcd4:    7b 3b        call DiskCommand
 fcd6:    03           flag3
 
-L30:
+L31:
 fcd7:    94 1e        unknown
 fcd9:    d0 04 00     liw B, 0x0400
 fcdc:    5a           unknown
 fcdd:    15 a0        b_nz L5
 fcdf:    d0 00 20     liw B, 0x0020
 fce2:    5a           unknown
-fce3:    14 f2        b_z L30
+fce3:    14 f2        b_z L31
 fce5:    2f 04        unknown
 fce7:    2f 06        unknown
 fce9:    90 01 00     liw A, 0x0100
@@ -161,47 +160,47 @@ fcf5:    00           HALT
 fcf6:    81 f1 44     ldb A, 0xf144
 fcf9:    15 84        b_nz L5
 fcfb:    71 01 03     jump 0x0103 L14
-fcfe:    7b 2f        call L22
-fd00:    71 fc 00     jump 0xfc00 L23
-
-L33:
-fd03:    85 41        ld r?, [r?++]
-fd05:    a1 f8 00     stb A, 0xf800
+fcfe:    7b 2f        call L23
+fd00:    71 fc 00     jump 0xfc00 L24
 
 L34:
+fd03:    85 41        unknown
+fd05:    a1 f8 00     stb A, 0xf800
+
+L35:
 fd08:    81 f8 01     ldb A, 0xf801
 fd0b:    29           unknown
-fd0c:    15 fa        b_nz L34
+fd0c:    15 fa        b_nz L35
 fd0e:    84 f6        ldb A, [[pc-10]]
 fd10:    09           ret 9
 
 DiskCommand:
-fd11:    85 41        ld r?, [r?++]
+fd11:    85 41        unknown
 fd13:    a1 f1 48     stb A, 0xf148
 
-L26:
+L27:
 fd16:    84 df        ldb A, [[pc-33]]
-fd18:    2c           unknown
-fd19:    10 fb        b0 L26
+fd18:    2c           rotate_right A
+fd19:    10 fb        b0 L27
 fd1b:    09           ret 9
 
 L12:
 fd1c:    73 a0        jump L4
 
-L24:
-fd1e:    a5 a2        unknown
+L25:
+fd1e:    a5 a2        push_byte A
 fd20:    90 1f 40     liw A, 0x1f40
 fd23:    5e           unknown
 fd24:    90 81 00     liw A, 0x8100
 fd27:    b5 81        unknown
 fd29:    80 84        lib A, 0x84
 fd2b:    a5 81        unknown
-fd2d:    85 a1        ld r?, [r?++]
+fd2d:    85 a1        pop_byte A
 
-L22:
+L23:
 fd2f:    14 04        b_z L6
 fd31:    c0 0f        lib B, 0x0f
-fd33:    40 31        unknown
+fd33:    40 31        add A, B
 
 L6:
 fd35:    a5 81        unknown
@@ -219,7 +218,7 @@ fd45:    d0 01 90     liw B, 0x0190
 fd48:    f5 81        unknown
 fd4a:    28           unknown
 fd4b:    c0 0e        lib B, 0x0e
-fd4d:    49           unknown
+fd4d:    49           cmp A, B
 fd4e:    15 f3        b_nz L7
 fd50:    80 ff        lib A, 0xff
 fd52:    a5 81        unknown
@@ -280,55 +279,64 @@ fdac:    09           ret 9
 fdad:    8c           unknown
 fdae:    00           HALT
 fdaf:    8b 00        unknown
-fdb1:    95           unknown
-fdb2:    41 b3        unknown
+fdb1:    95 41        unknown
+fdb3:    b3           unknown
 fdb4:    03           flag3
+
+L19:
 fdb5:    79 4c 93     call L15
 fdb8:    47           unknown
 fdb9:    be           unknown
 fdba:    6d a2        unknown
 fdbc:    32 40        unknown
 
-L21:
+L22:
 fdbe:    79 4c e7     call L16
 fdc1:    4d           unknown
 fdc2:    14 2a        b_z L17
 fdc4:    c0 8d        lib B, 0x8d
-fdc6:    49           unknown
+fdc6:    49           cmp A, B
 fdc7:    14 25        b_z L17
 fdc9:    c0 b0        lib B, 0xb0
-fdcb:    49           unknown
+fdcb:    49           cmp A, B
 fdcc:    16 25        b6 L18
 fdce:    80 09        lib A, 0x09
 fdd0:    41 31        unknown
-fdd2:    19 0e        b9 L19
+fdd2:    19 0e        b_le L20
 fdd4:    80 11        lib A, 0x11
 fdd6:    41 31        unknown
 fdd8:    16 19        b6 L18
 fdda:    c0 05        lib B, 0x05
-fddc:    49           unknown
+fddc:    49           cmp A, B
 fddd:    18 14        b8 L18
 fddf:    c0 0a        lib B, 0x0a
 fde1:    48           unknown
 
-L19:
+L20:
 fde2:    80 04        lib A, 0x04
 
-L20:
-fde4:    07           flag7
+L21:
+fde4:    07           clear_carry?
 fde5:    37 40        unknown
 fde7:    29           unknown
-fde8:    18 fa        b8 L20
+fde8:    18 fa        b8 L21
 fdea:    40 35        unknown
-fdec:    73 d0        jump L21
+fdec:    73 d0        jump L22
 
 L17:
 fdee:    55 40        alu5 r?, r?
-fdf0:    65           unknown
-fdf1:    a1 09 65     stb A, 0x0965
-fdf4:    a1 73 be     stb A, 0x73be
-fdf7:    d5           unknown
-fdf8:    41 7d        unknown
-fdfa:    80 0c        lib A, 0x0c
-fdfc:    d0 4b 65     liw B, 0x4b65
-fdff:    f5 00        unknown
+fdf0:    65 a1        unknown
+fdf2:    09           ret 9
+
+L18:
+fdf3:    65 a1        unknown
+fdf5:    73 be        jump L19
+fdf7:    d5
+fdf8:    41
+fdf9:    7d
+fdfa:    80
+fdfb:    0c
+fdfc:    d0
+fdfd:    4b
+fdfe:    65
+fdff:    f5

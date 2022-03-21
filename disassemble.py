@@ -176,9 +176,6 @@ instructions = [
 
     I("11100001 NNNNNNNN NNNNNNNN", "e1 A, {N:#06x}"),  # E1
 
-
-    I("10000101 xxxxxxxx", "ld r?, [r?++]"),
-
     B("00010000 SSSSSSSS", "b0", relative_branch),
     B("00010001 SSSSSSSS", "b1", relative_branch),
     B("00010010 SSSSSSSS", "b2", relative_branch),
@@ -188,7 +185,7 @@ instructions = [
     B("00010110 SSSSSSSS", "b6", relative_branch),
     B("00010111 SSSSSSSS", "b7", relative_branch),
     B("00011000 SSSSSSSS", "b8", relative_branch),
-    B("00011001 SSSSSSSS", "b9", relative_branch),
+    B("00011001 SSSSSSSS", "b_le", relative_branch), # lessthan or equal
     B("00011010 SSSSSSSS", "bEX", relative_branch),
 
     B("00011100 SSSSSSSS", "b??", relative_branch), # Test rom doesn't test this directly. But it appares
@@ -198,7 +195,11 @@ instructions = [
 
     B("01110011 SSSSSSSS", "jump", relative_branch_unconditional),
 
+    I("00101100", "rotate_right A"),
+
     I("00111010", "clear A"),
+
+    I("01001001", "cmp A, B"),
 
     I("01011111", "mov sp, A"),
 
@@ -208,6 +209,11 @@ instructions = [
     I("01010001 xxxxxxxx", "sub? r?, r?"),
     I("01010101 xxxxxxxx", "alu5 r?, r?"),
     I("01010000 10000000", "add A, indexBase"),
+
+    I("01000000 00110001", "add A, B"),
+    I("01000010 00110001", "and A, B"),
+    I("01000101 00000001", "swap_bytes A"), # exchanges the high and low bytes of A
+
 
     I("01010000 xxxxxxxx"),
 
@@ -229,6 +235,9 @@ instructions = [
 
     I("10000100 SSSSSSSS", "ldb A, [[pc{S:+n}]]"),
 
+    I("10100101 10100010", "push_byte A"),
+    I("10000101 10100001", "pop_byte A"),
+
     # Unknown two byte instructions
 
     # these 3 are probally the same
@@ -245,6 +254,9 @@ instructions = [
     I("11100101 xxxxxxxx"),
     I("10010101 xxxxxxxx"),
     I("01100101 xxxxxxxx"),
+    I("01000010 xxxxxxxx"),
+
+    I("10000101 xxxxxxxx"),
 
     # In the order tested by insturction test
     I("00100010 xxxxxxxx"),
@@ -278,7 +290,7 @@ instructions = [
     I("00000100", "flag4"),
     I("00000101", "flag5"),
     I("00000110", "flag6"),
-    I("00000111", "flag7"),
+    I("00000111", "clear_carry?"),
     I("00001000", "flag8"),
 
 

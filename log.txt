@@ -556,3 +556,81 @@ many times. One meaning would fit better in one place, and the other would fit b
 But neither really worked well, and wouldn't work at all in other places.
 
 But these are natural candidates for "Load Byte/Word Immediate into B"
+
+....
+
+While looking around after applying these changes, I happen to spot this function in F3/F4:
+
+Fn_0C5:
+90c5:    a5 a2        unknown
+90c7:    c0 f0        lib B, 0xf0
+90c9:    42 31        unknown
+90cb:    07           flag7
+90cc:    26 10        unknown
+90ce:    2c           unknown
+90cf:    2c           unknown
+90d0:    2c           unknown
+90d1:    c0 b0        lib B, 0xb0
+90d3:    40 31        unknown
+90d5:    c0 b9        lib B, 0xb9
+90d7:    49           unknown
+90d8:    19 04        b9 L1
+90da:    c0 07        lib B, 0x07
+90dc:    40 31        unknown
+
+L1:
+90de:    7b c3        call WriteByte
+90e0:    85 a1        ld r?, [r?++]
+90e2:    c0 0f        lib B, 0x0f
+90e4:    42 31        unknown
+90e6:    c0 b0        lib B, 0xb0
+90e8:    40 31        unknown
+90ea:    c0 b9        lib B, 0xb9
+90ec:    49           unknown
+90ed:    19 04        b9 L2
+90ef:    c0 07        lib B, 0x07
+90f1:    40 31        unknown
+
+L2:
+90f3:    7b ae        call WriteByte
+90f5:    09           ret 9
+
+Which does some math on it's input, and calls WriteByte one or two times.
+WriteByte takes Ascii, so the 0xb0 and 0xb9 constants stick out as the
+characters '0' and '9'
+
+(This would be a lot easier to spot, if this machine used ASCII with bit 7 cleared)
+
+And when we check where this function is called we see it's used something like:
+
+    WriteString("*** ERROR, ADDR=");
+    95 a1 ; unknown instruction
+    39 ; unknown instruction
+    Fn_0C5();
+    WriteString(" ***\0");
+
+(code simplified)
+
+I went though a few options (WriteInteger, WriteBCD) before deciding that this
+is WriteHexByte
+
+This allows us to make some more progress.
+
+    a5 a2      pushes a byte to the stack
+    42 31      is A = A & B
+    2c         is probably rotate right
+               (if it was shift right, this function would just four of them)
+    49         is compare A with B (subtract B from A and discard result)
+    19 04      is branch less than
+
+    85 a1      pops a byte off the stack
+
+And the corresponding WriteHexWord function gives us:
+
+    45 01      swap upper and lower bytes of A
+               OR move upper byte of A to lower byte of A
+
+It also confirms the there are two Accumulators theory.
+
+One remaining mystery is the 07 26 10 sequence that WriteHex uses to
+start the shift sequence. 07 might be clear carry, and then 26 10 is arithmetic shift right

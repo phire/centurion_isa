@@ -9,16 +9,17 @@ base_address = 0x9000
 
 
 functions = [
-    (0x09a, 0x112, "WriteString"),
+    (0x09a, 0x112, "WriteString"), # Writes null-terminated string to serial
     (0x0b0, 0x102, "ReadChar"),
-    (0x0ba, 0x110, "Fn_0ba"),
-    (0x0c5, 0x10a, "Fn_0c5"), # often called just before WriteString
+    (0x0ba, 0x110, "WriteHexWord"), # Prints out a 4 digit BCD number as ASCII to serial
+    (0x0c5, 0x10a, "WriteHexByte"), # Prints out a 2 digit BCD number as ASCII to serial
     (0x0f6, 0x104, "FinishTest"), # Prints Pass or Fail. checks 0x108 to see if test passed or failed
     (0x128, 0x10e, "PressSpaceThenExit"),
     (0x164, 0x106, "PrintCtrlCToExit"), # prints out "(CONTROL-C TO EXIT)"
     (0x180,     0, "Init"),
     (0x1e3, 0x118, "Fn_1e3"),
     (0x286, 0x10c, "Fn_286"),
+    (0x0a3, 0,     "WriteByte"),
 ]
 
 if __name__ == "__main__":
@@ -31,7 +32,8 @@ if __name__ == "__main__":
 
     for (addr, indirect_addr, name) in functions:
         memory_addr_info[base_address + addr].label = name
-        memory_addr_info[indirect_addr].label = name
+        if indirect_addr != 0:
+            memory_addr_info[indirect_addr].label = name
         entry_points.append(base_address + addr)
 
     # print(entry_points)
