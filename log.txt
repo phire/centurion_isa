@@ -532,3 +532,12 @@ if I can implement in python, maybe I can line it up. I'm expected either an XOR
 style algorithm
 
 (got distracted commenting bootcode, discovered the "mov SP, A" instruction)
+
+....
+
+Worked out the checksum. Sum all bytes except the last non-zero byte. The result should match
+the last byte in the ROM.
+
+The algorithm works with both 8bit overflow or 16 bit overflow and only comparing the low byte.
+Which means we don't get any insight into the width of the operations, but it's a start.
+
