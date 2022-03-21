@@ -25,6 +25,11 @@ functions = [
 ]
 
 comments = [
+    (0xfc09, "Configure the first port on the mux board to 9600 baud, 8N1"),
+    (0xfc0e, "Write control code FF aka Form Feed to serial\n"
+             "Should cause a printer to move to the next page, and\n"
+             "cause a CRT terminal to clear the screen"),
+    (0xfc16, "Setup stack at 0x1000 (probally)"),
     (0xfc1e, "A == 'F'"),
     (0xfc25, "A == 'C'"),
     (0xfc2a, "A == 'H'"),

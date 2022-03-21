@@ -437,7 +437,7 @@ disassembler to add to the output during each run.
 
 **F3 and F4 share a lot of common code.**
 
-## CPU instruction tests.
+#### CPU instruction tests.
 
 Perhaps I spent too long ignoring the F2 rom. This was mostly because it was different from F3/F4.
 But the strings indicate it has a CPU instruction test, so I really should take a look at it.
@@ -507,5 +507,28 @@ pc+offset, then loads an 8bit value from that address.
 And the programmer of the bootstrap ROM is using it to save one byte each time a MMIO register is
 referenced twice within a short range. They pointed right at the operand of the first MMIO access
 instrction.
+A total of 4 bytes saved.
 
 classic 70s CISC machines
+
+## Day 3
+
+Ken showed up and named a few instructions I didn't already know about. NOP and Delay, which delays
+execution for 4.5ms
+
+Spent some time disassembling F1, It's where I expect to find the TOS operating system, along with
+the code to launch the tests.
+
+Found a new absolute call instruction.
+
+Also improved bootstrap slightly.
+
+-----------------
+
+Next, we really need a Rosetta stone to decode the ALU instructions.
+
+First, I'm going to take a look at the rom checksums and see if I can work out the algorithm.
+if I can implement in python, maybe I can line it up. I'm expected either an XOR or ADD all bytes
+style algorithm
+
+(got distracted commenting bootcode, discovered the "mov SP, A" instruction)

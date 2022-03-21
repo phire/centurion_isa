@@ -9,7 +9,7 @@ L2:
 800a:    a1 f2 0d     stb A, 0xf20d
 800d:    a1 f2 0f     stb A, 0xf20f
 8010:    90 c0 00     liw A, 0xc000
-8013:    5f           unknown
+8013:    5f           mov sp, A
 8014:    22 32        unknown
 8016:    14 0b        bne L0
 8018:    90 80 77     liw A, 0x8077
@@ -433,7 +433,7 @@ L43:
 8274:    91 f2 00     ldw A, 0xf200
 8277:    a1 f2 01     stb A, 0xf201
 827a:    91 00 0a     ldw A, 0x000a
-827d:    5f           unknown
+827d:    5f           mov sp, A
 827e:    7b a9        call L34
 8280:    06           flag6
 

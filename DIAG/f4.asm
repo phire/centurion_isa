@@ -128,7 +128,7 @@ L5:
 
 L4:
 9961:    90 c0 00     liw A, 0xc000
-9964:    5f           unknown
+9964:    5f           mov sp, A
 9965:    91 01 1a     ldw A, 0x011a
 9968:    5e           unknown
 9969:    95           unknown

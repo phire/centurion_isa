@@ -1211,7 +1211,7 @@ L228:
 
 L229:
 8d14:    90 00 3a     liw A, 0x003a
-8d17:    5f           unknown
+8d17:    5f           mov sp, A
 8d18:    60 20 20     60 A, 0x2020
 8d1b:    7b 06        call L230
 8d1d:    01           nop
@@ -1300,7 +1300,7 @@ L239:
 L240:
 8d8e:    a1 f1 0a     stb A, 0xf10a
 8d91:    90 bf fc     liw A, 0xbffc
-8d94:    5f           unknown
+8d94:    5f           mov sp, A
 8d95:    95           unknown
 8d96:    a1 5e 65     stb A, 0x5e65
 8d99:    a1 90 00     stb A, 0x9000

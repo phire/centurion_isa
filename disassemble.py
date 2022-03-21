@@ -200,6 +200,8 @@ instructions = [
 
     I("00111010", "xor A, A"),
 
+    I("01011111", "mov sp, A"),
+
     # I("00110101 xxxxxxxx"),
     # I("00110110 xxxxxxxx"),
 

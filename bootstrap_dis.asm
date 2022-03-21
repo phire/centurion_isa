@@ -8,15 +8,17 @@ fc04:    71 80 01     jump 0x8001 L1
 
 L2:
 fc07:    80 c5        lib A, 0xc5
-fc09:    a1 f2 00     stb A, 0xf200
+fc09:    a1 f2 00     stb A, 0xf200 ; Configure the first port on the mux board to 9600 baud, 8N1
 fc0c:    80 8c        lib A, 0x8c
-fc0e:    a1 f2 01     stb A, 0xf201
+fc0e:    a1 f2 01     stb A, 0xf201 ; Write control code FF aka Form Feed to serial
+                                    ; Should cause a printer to move to the next page, and
+                                    ; cause a CRT terminal to clear the screen
 fc11:    0e           delay 4.5ms
 fc12:    0e           delay 4.5ms
 
 L35:
 fc13:    90 10 00     liw A, 0x1000
-fc16:    5f           unknown
+fc16:    5f           mov sp, A ; Setup stack at 0x1000 (probally)
 fc17:    7b 79        call WriteString
 fc19:    "D=\0"
 fc1c:    7b 72        call ReadCharTramp
