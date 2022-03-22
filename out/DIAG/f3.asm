@@ -103,7 +103,7 @@ FinishTest:
 90fd:    11 57        b1 L_9156
 90ff:    81 f2 01     ldb A, 0xf201
 9102:    c0 80        lib B, 0x80
-9104:    43 31        unknown
+9104:    43 31        or? A, B
 9106:    c0 83        lib B, 0x83
 9108:    49           cmp B, A
 9109:    15 4b        b_nz L_9156
@@ -169,13 +169,13 @@ Init:
 91c4:    90 01 28     liw A, 0x0128
 91c7:    50 80        add A, indexBase
 91c9:    b1 01 0e     stw A, 0x010e
-91cc:    55 80        alu5 r?, r?
+91cc:    55 80        unknown
 91ce:    b1 01 1a     stw A, 0x011a
 91d1:    95 41        unknown
 91d3:    b1 01 14     stw A, 0x0114
 91d6:    38           unknown
 91d7:    b1 01 16     stw A, 0x0116
-91da:    55 40        alu5 r?, r?
+91da:    55 40        unknown
 91dc:    65 a1        unknown
 91de:    69 01 00     69 A, 0x0100
 91e1:    75 00        jump A + 0x00
@@ -280,7 +280,7 @@ Entry_FLOPPY_COMMAND_BUFFER_TEST:
 92d7:    7a 01 06     call [0x0106]
 92da:    32 60        unknown
 92dc:    60 00 c8     60 A, 0x00c8
-92df:    55 60        alu5 r?, r?
+92df:    55 60        unknown
 92e1:    d0 01 1c     liw B, 0x011c
 
 L_92e4:
@@ -326,7 +326,7 @@ L_9309:
 9325:    00           HALT
 9326:    c8           unknown
 9327:    d0 01 1c     liw B, 0x011c
-932a:    55 60        alu5 r?, r?
+932a:    55 60        unknown
 932c:    45           unknown
 932d:    10 85        b0 L_92b4
 932f:    21 41        unknown
@@ -361,7 +361,7 @@ Entry_CMD_AUX_MEMORY_TEST:
 L_937a:
 937a:    60 60 3f     60 A, 0x603f
 937d:    ff           unknown
-937e:    55 60        alu5 r?, r?
+937e:    55 60        unknown
 9380:    d0 01 1c     liw B, 0x011c
 
 L_9383:
@@ -463,7 +463,7 @@ L_93c6:
 9400:    a2           unknown
 9401:    60 3f ff     60 A, 0x3fff
 9404:    d0 01 1c     liw B, 0x011c
-9407:    55 60        alu5 r?, r?
+9407:    55 60        unknown
 9409:    45           unknown
 940a:    10
 
@@ -1009,7 +1009,7 @@ Entry_ROM_SELF_TEST:
 974c:    7d 00        call A + 0x00
 974e:    00           HALT
 974f:    00           HALT
-9750:    55 86        alu5 r?, r?
+9750:    55 86        unknown
 9752:    3a           clear A
 
 L_9753:
@@ -1017,7 +1017,7 @@ L_9753:
 9755:    40 10        unknown
 9757:    d0 07 96     liw B, 0x0796
 975a:    50 82        unknown
-975c:    51 62        sub? r?, r?
+975c:    51 62        unknown
 975e:    15 f3        b_nz L_9753
 9760:    8b 41        unknown
 9762:    01           nop

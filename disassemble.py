@@ -106,6 +106,25 @@ class I:
     def to_string(self, dict):
         return self.format.format(**dict)
 
+class Memory():
+    # Implements all opcodes 0x80 and above
+    # Memory and load immediate
+    newpc = None
+
+    def match(self, pc, bitstring):
+        if bitstring[0] != "1":
+            return None
+
+        accumulator = "A" if bitstring[1] == "0" else "B"
+        write = bitstring[2] = "1"
+        word = bitstring[3] = "1"
+        unknown = bitstring[4] = "1"
+        address_mode = int(bitstring[5:8], 2)
+
+
+        match = InstructionMatch(pc, self, bitstring, {})
+        return match
+
 def relative_branch(next_pc, S, **kwargs):
     return [next_pc, next_pc + S]
 
@@ -146,10 +165,110 @@ class B(I):
         return f"{self.name.format(**dict)} {label}"
 
 
-
 instructions = [
     #B("00000000", "HALT", kill_branch),
     I("00000000", "HALT"),
+
+    # Flag instructions:
+    I("00000001", "nop"),
+    I("00000010", "flag2"),
+    I("00000011", "flag3"),
+    I("00000100", "flag4"),
+    I("00000101", "flag5"),
+    I("00000110", "flag6"),
+    I("00000111", "clear_carry?"),
+    I("00001000", "flag8"),
+
+    B("00001001", "ret", kill_branch),
+
+    I("00001110", "delay 4.5ms"),
+
+# 10
+
+    B("00010000 SSSSSSSS", "b0", relative_branch),
+    B("00010001 SSSSSSSS", "b1", relative_branch),
+    B("00010010 SSSSSSSS", "b2", relative_branch),
+    B("00010011 SSSSSSSS", "b3", relative_branch),
+    B("00010100 SSSSSSSS", "b_z", relative_branch),
+    B("00010101 SSSSSSSS", "b_nz", relative_branch),
+    B("00010110 SSSSSSSS", "b_lt", relative_branch),
+    B("00010111 SSSSSSSS", "b7", relative_branch),
+    B("00011000 SSSSSSSS", "b_gt", relative_branch),
+    B("00011001 SSSSSSSS", "b_le", relative_branch), # lessthan or equal
+    B("00011010 SSSSSSSS", "b_sense0", relative_branch),
+    B("00011011 SSSSSSSS", "b_sense1", relative_branch),
+    B("00011100 SSSSSSSS", "b_sense2", relative_branch),
+    B("00011101 SSSSSSSS", "b_sense3", relative_branch),
+
+# 20
+
+    I("00100yyy xxxxxxxx"), # 20-27 multi-byte
+
+# 28
+
+    I("00101100", "rotate_right A"), # 2c
+    I("00101101", "rotate_left A"),  # 2d
+
+    I("00101111 xxxxxxxx"), # Suspicious, I'm expecting a 1 byte instruction here.
+
+# 30
+    I("00110yyy xxxxxxxx"),
+
+# 38
+
+    I("00111010", "clear A"),
+
+# 40
+
+    I("01000000 00110001", "add A, B"),  # 40 31
+    I("01000001 00110001", "cmp? A, B"), # 41 31
+    I("01000010 00110001", "and A, B"),  # 42 31
+    I("01000011 00110001", "or? A, B"),  # 43 31
+    I("010000yy xxxxxxxx"),
+
+    I("01000100 xxxxxxxx"),
+    I("01000101 00000001", "swap_bytes A"), # 45 01
+
+# 48
+
+    I("01001000", "add B, A"), # 48
+    I("01001001", "cmp B, A"), # 49
+    I("01001010", "and B, A"), # 4a
+    I("01001011", "or B, A"),  # 4b
+
+# 50
+
+    I("01010000 10000000", "add A, indexBase"),
+    I("01010000 xxxxxxxx"),
+    I("01010001 xxxxxxxx"),
+    I("01010010 xxxxxxxx"),
+    I("01010011 xxxxxxxx"),
+    I("01010100 xxxxxxxx"),
+    I("01010101 xxxxxxxx"),
+
+# 58
+
+    I("01011111", "mov sp, A"),
+
+# 60
+    I("01100101 xxxxxxxx"),
+    I("01101101 xxxxxxxx"),
+
+# 70
+
+    B("01110001 NNNNNNNN NNNNNNNN", "jump {N:#06x}", abolsute_branch_uncondtionional),
+    B("01110010 NNNNNNNN NNNNNNNN", "jump [{N:#06x}] ;", kill_branch),
+    B("01110011 SSSSSSSS", "jump", relative_branch_unconditional),
+    B("01110101 NNNNNNNN", "jump A + {N:#04x}", kill_branch),
+
+# 78
+
+    B("01111001 NNNNNNNN NNNNNNNN", "call", absolute_call),
+    I("01111010 NNNNNNNN NNNNNNNN", "call [{N:#06x}]"),
+    B("01111011 SSSSSSSS", "call", relative_call),
+    I("01111101 NNNNNNNN", "call A + {N:#04x}"),
+
+# 80
 
     I("10000000 NNNNNNNN", "lib A, {N:#04x}"),          # 80
     I("10010000 NNNNNNNN NNNNNNNN", "liw A, {N:#06x}"), # 90
@@ -180,138 +299,33 @@ instructions = [
     I("11100001 NNNNNNNN NNNNNNNN", "e1 A, {N:#06x}"),  # E1
     I("10000010 NNNNNNNN NNNNNNNN", "82 A, {N:#06x}"),  # 82
 
-    B("00010000 SSSSSSSS", "b0", relative_branch),
-    B("00010001 SSSSSSSS", "b1", relative_branch),
-    B("00010010 SSSSSSSS", "b2", relative_branch),
-    B("00010011 SSSSSSSS", "b3", relative_branch),
-    B("00010100 SSSSSSSS", "b_z", relative_branch),
-    B("00010101 SSSSSSSS", "b_nz", relative_branch),
-    B("00010110 SSSSSSSS", "b_lt", relative_branch),
-    B("00010111 SSSSSSSS", "b7", relative_branch),
-    B("00011000 SSSSSSSS", "b_gt", relative_branch),
-    B("00011001 SSSSSSSS", "b_le", relative_branch), # lessthan or equal
-    B("00011010 SSSSSSSS", "b_sense0", relative_branch),
-    B("00011011 SSSSSSSS", "b_sense1", relative_branch),
-    B("00011100 SSSSSSSS", "b_sense2", relative_branch),
-    B("00011101 SSSSSSSS", "b_sense3", relative_branch),
-
-
-    B("01110011 SSSSSSSS", "jump", relative_branch_unconditional),
-
-    I("00101100", "rotate_right A"),
-    I("00101101", "rotate_left A"),
-
-    I("00111010", "clear A"),
-
-
-
-    I("01001000", "add B, A"),
-    I("01001001", "cmp B, A"),
-    I("01001010", "and B, A"),
-
-    I("01011111", "mov sp, A"),
-
-
-    I("01010001 xxxxxxxx", "sub? r?, r?"),
-    I("01010101 xxxxxxxx", "alu5 r?, r?"),
-    I("01010000 10000000", "add A, indexBase"),
-
-    I("01000000 00110001", "add A, B"),
-    I("01000010 00110001", "and A, B"),
-
-
-
-    I("01010000 xxxxxxxx"),
-
-
-
-    B("01111011 SSSSSSSS", "call", relative_call),
-    B("00001001", "ret", kill_branch),
-
-    B("01110001 NNNNNNNN NNNNNNNN", "jump {N:#06x}", abolsute_branch_uncondtionional),
-    B("01110010 NNNNNNNN NNNNNNNN", "jump [{N:#06x}] ;", kill_branch),
-    B("01110101 NNNNNNNN", "jump A + {N:#04x}", kill_branch),
-    B("01111001 NNNNNNNN NNNNNNNN", "call", absolute_call),
-    I("01111101 NNNNNNNN", "call A + {N:#04x}"),
-    I("01111010 NNNNNNNN NNNNNNNN", "call [{N:#06x}]"),
-
-
-
-
-    I("01010101"),
 
     I("10000100 SSSSSSSS", "ldb A, [[pc{S:+n}]]"),
 
     I("10100101 10100010", "push_byte A"),
     I("10000101 10100001", "pop_byte A"),
-    I("01000101 00000001", "swap_bytes A"),
     I("10000101 01000001", "ldb A, [sp]++"), # Indirect load from SP with indirect post increment
 
-   # I("10100010 NNNNNNNN NNNNNNNN", "push_word {N:#06x}"),
+    # I("10100010 NNNNNNNN NNNNNNNN", "push_word {N:#06x}"),
 
+    I("11010101 xxxxxxxx xxxxxxxx"),
+    I("11010001 xxxxxxxx"),
+    I("10010100 xxxxxxxx"),
+    I("11010100 xxxxxxxx"),
+    I("10000101 xxxxxxxx"),
+    I("11000101 xxxxxxxx"),
+    I("10100100 xxxxxxxx"),
+    I("11100101 xxxxxxxx"),
 
-
-    # Unknown two byte instructions
-
-    # these 3 are probally the same
     I("10100101 xxxxxxxx"),
     I("11110101 xxxxxxxx"),
     I("10110101 xxxxxxxx"),
 
-    I("01101101 xxxxxxxx"),
-
     I("10001011 xxxxxxxx"),
-    I("00100110 xxxxxxxx"),
-    I("00101111 xxxxxxxx"),
+
     I("10000011 xxxxxxxx"),
-    I("11100101 xxxxxxxx"),
     I("10010101 xxxxxxxx"),
-    I("01100101 xxxxxxxx"),
-    I("01000010 xxxxxxxx"),
 
-    I("10000101 xxxxxxxx"),
-    I("11000101 xxxxxxxx"),
-    I("10100100 xxxxxxxx"),
-    I("01010010 xxxxxxxx"),
-
-    # In the order tested by instruction test
-    I("00100010 xxxxxxxx"),
-    I("00100000 xxxxxxxx"),
-    I("00100001 xxxxxxxx"),
-    I("00110010 xxxxxxxx"),
-    I("00110000 xxxxxxxx"),
-    I("00110001 xxxxxxxx"),
-    I("00100011 xxxxxxxx"),
-    I("00100100 xxxxxxxx"),
-    I("00100111 xxxxxxxx"),
-    I("00110011 xxxxxxxx"),
-    I("00110110 xxxxxxxx"),
-    I("00110101 xxxxxxxx"),
-    I("00110100 xxxxxxxx"),
-    I("00110111 xxxxxxxx"),
-    I("00100101 xxxxxxxx"),
-    I("01000001 xxxxxxxx"),
-    I("01000000 xxxxxxxx"),
-    I("01000011 xxxxxxxx"),
-    I("01000100 xxxxxxxx"),
-    I("01010011 xxxxxxxx"),
-    I("01010100 xxxxxxxx"),
-    I("11010001 xxxxxxxx"),
-    I("10010100 xxxxxxxx"),
-    I("11010100 xxxxxxxx"),
-
-    # Flag instructions:
-    I("00000010", "flag2"),
-    I("00000011", "flag3"),
-    I("00000100", "flag4"),
-    I("00000101", "flag5"),
-    I("00000110", "flag6"),
-    I("00000111", "clear_carry?"),
-    I("00001000", "flag8"),
-
-
-    I("00000001", "nop"),
-    I("00001110", "delay 4.5ms"),
 
 
     I("xxxxxxxx"),

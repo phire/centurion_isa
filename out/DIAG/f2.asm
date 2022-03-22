@@ -20,7 +20,7 @@ Entry_CPU_INSTRUCTION_TEST:
 884e:    7d 00        call A + 0x00
 8850:    "\x1b\x1c\x0cCPU INSTRUCTION TEST, CONTROL-C TO EXIT\r\n\0"
 887d:    6d a2        unknown
-887f:    55 80        alu5 r?, r?
+887f:    55 80        unknown
 8881:    b5 a2        unknown
 8883:    60 00 20     60 A, 0x0020 ; This is a testing that the 60 3 byte instruction is working.
                                    ; Which it will use later to test other multi-byte insturctions
@@ -769,7 +769,7 @@ L_8b02:
 
 L_8b06:
 8b06:    80 aa        lib A, 0xaa
-8b08:    43 31        unknown
+8b08:    43 31        or? A, B
 8b0a:    11 01        b1 L_8b0d
 8b0c:    00           HALT
 
@@ -801,7 +801,7 @@ L_8b20:
 L_8b23:
 8b23:    90 55 55     liw A, 0x5555
 8b26:    d0 55 55     liw B, 0x5555
-8b29:    51 02        sub? r?, r?
+8b29:    51 02        unknown
 8b2b:    14 01        b_z L_8b2e
 8b2d:    00           HALT
 
@@ -865,20 +865,20 @@ L_8b62:
 
 L_8b65:
 8b65:    90 aa 55     liw A, 0xaa55
-8b68:    55 02        alu5 r?, r?
-8b6a:    55 04        alu5 r?, r?
-8b6c:    55 06        alu5 r?, r?
-8b6e:    55 08        alu5 r?, r?
-8b70:    55 8a        alu5 r?, r?
-8b72:    55 8c        alu5 r?, r?
-8b74:    55 80        alu5 r?, r?
+8b68:    55 02        unknown
+8b6a:    55 04        unknown
+8b6c:    55 06        unknown
+8b6e:    55 08        unknown
+8b70:    55 8a        unknown
+8b72:    55 8c        unknown
+8b74:    55 80        unknown
 8b76:    50 20        unknown
 8b78:    50 40        unknown
 8b7a:    50 60        unknown
-8b7c:    51 08        sub? r?, r?
-8b7e:    51 8a        sub? r?, r?
-8b80:    51 ac        sub? r?, r?
-8b82:    51 c2        sub? r?, r?
+8b7c:    51 08        unknown
+8b7e:    51 8a        unknown
+8b80:    51 ac        unknown
+8b82:    51 c2        unknown
 8b84:    14 01        b_z L_8b87
 8b86:    00           HALT
 
@@ -896,7 +896,7 @@ L_8b95:
 8b96:    69 45 78     69 A, 0x4578
 8b99:    44 c8        unknown
 8b9b:    44 d9        unknown
-8b9d:    55 88        alu5 r?, r?
+8b9d:    55 88        unknown
 8b9f:    14 01        b_z L_8ba2
 8ba1:    00           HALT
 
@@ -946,10 +946,10 @@ L_8bcc:
 8bcf:    00           HALT
 
 L_8bd0:
-8bd0:    55 82        alu5 r?, r?
-8bd2:    55 40        alu5 r?, r?
+8bd0:    55 82        unknown
+8bd2:    55 40        unknown
 8bd4:    5a           unknown
-8bd5:    51 40        sub? r?, r?
+8bd5:    51 40        unknown
 8bd7:    14 01        b_z L_8bda
 8bd9:    00           HALT
 
@@ -1078,8 +1078,7 @@ L_8c7e:
 
 L_8c84:
 8c84:    95 41        unknown
-8c86:    d5           unknown
-8c87:    41 54        unknown
+8c86:    d5 41 54     unknown
 8c89:    20 3b        unknown
 8c8b:    14 01        b_z L_8c8e
 8c8d:    00           HALT
@@ -1091,8 +1090,7 @@ L_8c8e:
 
 L_8c92:
 8c92:    95 42        unknown
-8c94:    d5           unknown
-8c95:    42 54        unknown
+8c94:    d5 42 54     unknown
 8c97:    20 3b        unknown
 8c99:    14 01        b_z L_8c9c
 8c9b:    00           HALT
@@ -1141,28 +1139,22 @@ L_8cca:
 
 L_8cd0:
 8cd0:    95 45        unknown
-8cd2:    d5           unknown
-8cd3:    45           unknown
-8cd4:    54 20        unknown
-8cd6:    3b           unknown
+8cd2:    d5 45 54     unknown
+8cd5:    20 3b        unknown
 8cd7:    14 01        b_z L_8cda
 8cd9:    00           HALT
 
 L_8cda:
 8cda:    95 46        unknown
-8cdc:    d5           unknown
-8cdd:    46           unknown
-8cde:    54 20        unknown
-8ce0:    3b           unknown
+8cdc:    d5 46 54     unknown
+8cdf:    20 3b        unknown
 8ce1:    14 01        b_z L_8ce4
 8ce3:    00           HALT
 
 L_8ce4:
 8ce4:    60 00 14     60 A, 0x0014
 8ce7:    95 44        unknown
-8ce9:    d5           unknown
-8cea:    4c           unknown
-8ceb:    fe           unknown
+8ce9:    d5 4c fe     unknown
 8cec:    54 20        unknown
 8cee:    3b           unknown
 8cef:    14 01        b_z L_8cf2
@@ -1171,9 +1163,7 @@ L_8ce4:
 L_8cf2:
 8cf2:    95 4c        unknown
 8cf4:    fc           unknown
-8cf5:    d5           unknown
-8cf6:    4d           unknown
-8cf7:    02           flag2
+8cf5:    d5 4d 02     unknown
 8cf8:    50 20        unknown
 8cfa:    3b           unknown
 8cfb:    14 01        b_z L_8cfe
@@ -1181,9 +1171,7 @@ L_8cf2:
 
 L_8cfe:
 8cfe:    95 44        unknown
-8d00:    d5           unknown
-8d01:    4e           unknown
-8d02:    fc           unknown
+8d00:    d5 4e fc     unknown
 8d03:    54 20        unknown
 8d05:    3b           unknown
 8d06:    14 01        b_z L_8d09
@@ -1193,7 +1181,7 @@ L_8d09:
 8d09:    0d           unknown
 8d0a:    90 05 0a     liw A, 0x050a
 8d0d:    50 80        add A, indexBase
-8d0f:    51 04        sub? r?, r?
+8d0f:    51 04        unknown
 8d11:    14 01        b_z L_8d14
 8d13:    00           HALT
 
@@ -1230,7 +1218,7 @@ L_8d38:
 8d38:    60 09 ef     60 A, 0x09ef
 8d3b:    90 11 ff     liw A, 0x11ff
 8d3e:    b5 41        unknown
-8d40:    55 42        alu5 r?, r?
+8d40:    55 42        unknown
 8d42:    90 09 f1     liw A, 0x09f1
 8d45:    59           unknown
 8d46:    14 01        b_z L_8d49
@@ -1271,7 +1259,7 @@ L_8d70:
 8d74:    11 18        b1 L_8d8e
 8d76:    81 f2 01     ldb A, 0xf201
 8d79:    c0 80        lib B, 0x80
-8d7b:    43 31        unknown
+8d7b:    43 31        or? A, B
 8d7d:    c0 83        lib B, 0x83
 8d7f:    49           cmp B, A
 8d80:    15 0c        b_nz L_8d8e
@@ -1308,7 +1296,7 @@ Fn_5a1:
 8db0:    00           HALT
 8db1:    ff           unknown
 8db2:    ff           unknown
-8db3:    55 55        alu5 r?, r?
+8db3:    55 55        unknown
 8db5:    aa           unknown
 8db6:    aa           unknown
 8db7:    00           HALT
@@ -1364,7 +1352,7 @@ L_8e2f:
 8e60:    11 cd        b1 L_8e2f
 8e62:    81 f2 01     ldb A, 0xf201
 8e65:    c0 80        lib B, 0x80
-8e67:    43 31        unknown
+8e67:    43 31        or? A, B
 8e69:    c0 83        lib B, 0x83
 8e6b:    49           cmp B, A
 8e6c:    15 c1        b_nz L_8e2f
@@ -1550,7 +1538,7 @@ L_8f2d:
 8f5d:    75 00        jump A + 0x00
 
 Entry_ROM_SELF_TEST:
-8f5f:    55 86        alu5 r?, r?
+8f5f:    55 86        unknown
 8f61:    3a           clear A
 
 ChecksumLoop:
@@ -1558,7 +1546,7 @@ ChecksumLoop:
 8f64:    40 10        unknown
 8f66:    d0 07 dd     liw B, 0x07dd
 8f69:    50 82        unknown
-8f6b:    51 62        sub? r?, r?
+8f6b:    51 62        unknown
 8f6d:    15 f3        b_nz ChecksumLoop
 8f6f:    8b 41        unknown ; Load Byte via base+index
 8f71:    01           nop

@@ -107,7 +107,7 @@ fca5:    2c           rotate_right A
 fca6:    11 fb        b1 ReadChar
 fca8:    84 f5        ldb A, [[pc-11]]
 fcaa:    c0 80        lib B, 0x80
-fcac:    43 31        unknown ; char | 0x80 - Force bit 7 to be set
+fcac:    43 31        or? A, B ; char | 0x80 - Force bit 7 to be set
 fcae:    c0 e0        lib B, 0xe0
 fcb0:    49           cmp B, A ; Check if char is lowercase (greater than 0x60)
 fcb1:    16 04        b_lt L_fcb7
@@ -236,7 +236,7 @@ fd63:    a1 f8 08     stb A, 0xf808
 fd66:    0e           delay 4.5ms
 fd67:    90 1f 40     liw A, 0x1f40
 fd6a:    2f 00        unknown
-fd6c:    51 80        sub? r?, r?
+fd6c:    51 80        unknown
 fd6e:    3b           unknown
 fd6f:    2f 02        unknown
 fd71:    2f 34        unknown
@@ -303,10 +303,10 @@ fdc9:    c0 b0        lib B, 0xb0
 fdcb:    49           cmp B, A
 fdcc:    16 25        b_lt L_fdf3
 fdce:    80 09        lib A, 0x09
-fdd0:    41 31        unknown
+fdd0:    41 31        cmp? A, B
 fdd2:    19 0e        b_le L_fde2
 fdd4:    80 11        lib A, 0x11
-fdd6:    41 31        unknown
+fdd6:    41 31        cmp? A, B
 fdd8:    16 19        b_lt L_fdf3
 fdda:    c0 05        lib B, 0x05
 fddc:    49           cmp B, A
@@ -326,15 +326,14 @@ fdea:    40 35        unknown
 fdec:    73 d0        jump L_fdbe
 
 L_fdee:
-fdee:    55 40        alu5 r?, r?
+fdee:    55 40        unknown
 fdf0:    65 a1        unknown
 fdf2:    09           ret
 
 L_fdf3:
 fdf3:    65 a1        unknown
 fdf5:    73 be        jump L_fdb5
-fdf7:    d5           unknown
-fdf8:    41 7d        unknown
+fdf7:    d5 41 7d     unknown
 fdfa:    80 0c        lib A, 0x0c
 fdfc:    d0 4b 65     liw B, 0x4b65
 fdff:    f5 00        unknown

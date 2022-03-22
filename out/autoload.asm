@@ -44,7 +44,7 @@ efc3:    1d 03        b_sense3 L_efc8
 efc5:    90 f0 a0     liw A, 0xf0a0
 
 L_efc8:
-efc8:    55 0c        alu5 r?, r?
+efc8:    55 0c        unknown
 efca:    90 00 f0     liw A, 0x00f0
 efcd:    5f           mov sp, A
 

@@ -90,12 +90,12 @@ L_8090:
 8090:    c0 11        lib B, 0x11
 8092:    2f 42        unknown
 8094:    2f 03        unknown
-8096:    51 40        sub? r?, r?
+8096:    51 40        unknown
 8098:    15 43        b_nz L_80dd
 809a:    c0 21        lib B, 0x21
 809c:    2f 40        unknown
 809e:    2f 01        unknown
-80a0:    51 40        sub? r?, r?
+80a0:    51 40        unknown
 80a2:    15 39        b_nz L_80dd
 80a4:    20 50        unknown
 80a6:    20 40        unknown
@@ -104,7 +104,7 @@ L_8090:
 80ad:    5c           unknown
 
 L_80ae:
-80ae:    55 60        alu5 r?, r?
+80ae:    55 60        unknown
 80b0:    bb           unknown
 80b1:    20 70        unknown
 80b3:    20 70        unknown
@@ -117,7 +117,7 @@ L_80bb:
 80bd:    41 71        unknown
 80bf:    14 05        b_z L_80c6
 80c1:    9b           unknown
-80c2:    51 60        sub? r?, r?
+80c2:    51 60        unknown
 80c4:    15 15        b_nz L_80db
 
 L_80c6:
@@ -212,10 +212,10 @@ L_813c:
 8147:    5c           unknown
 
 L_8148:
-8148:    55 60        alu5 r?, r?
+8148:    55 60        unknown
 814a:    3b           unknown
 814b:    b5 61        unknown
-814d:    55 66        alu5 r?, r?
+814d:    55 66        unknown
 814f:    17 f7        b7 L_8148
 8151:    90 01 00     liw A, 0x0100
 8154:    5c           unknown
@@ -224,7 +224,7 @@ L_8155:
 8155:    9b           unknown
 8156:    5d           unknown
 8157:    33 20        unknown
-8159:    51 62        sub? r?, r?
+8159:    51 62        unknown
 815b:    15 09        b_nz L_8166
 815d:    95 61        unknown
 815f:    17 f4        b7 L_8155
@@ -273,7 +273,7 @@ L_8186:
 8197:    40 15        unknown
 8199:    15 eb        b_nz L_8186
 819b:    90 10 00     liw A, 0x1000
-819e:    55 0c        alu5 r?, r?
+819e:    55 0c        unknown
 81a0:    0a           unknown
 81a1:    73 03        jump L_81a6
 81a3:    55
@@ -287,7 +287,7 @@ L_81a6:
 81ac:    80 f0        lib A, 0xf0
 81ae:    42 10        unknown
 81b0:    45           unknown
-81b1:    51 c0        sub? r?, r?
+81b1:    51 c0        unknown
 81b3:    10 40        b0 L_81f5
 81b5:    31 41        unknown
 81b7:    10 15        b0 L_81ce
@@ -436,9 +436,9 @@ Test_07:
 8284:    32 40        unknown
 
 L_8286:
-8286:    55 46        alu5 r?, r?
+8286:    55 46        unknown
 8288:    45           unknown
-8289:    51 a1        sub? r?, r?
+8289:    51 a1        unknown
 828b:    f1 40 28     stw B, 0x4028
 828e:    a1 f1 41     stb A, 0xf141
 8291:    28           unknown
@@ -495,7 +495,7 @@ Test_08:
 82ed:    15 44        b_nz L_8333
 
 L_82ef:
-82ef:    55 40        alu5 r?, r?
+82ef:    55 40        unknown
 82f1:    3d           unknown
 82f2:    3d           unknown
 82f3:    3d           unknown
@@ -514,13 +514,13 @@ L_8307:
 8307:    3e           unknown
 8308:    3e           unknown
 8309:    90 03 2c     liw A, 0x032c
-830c:    51 40        sub? r?, r?
+830c:    51 40        unknown
 830e:    15 df        b_nz L_82ef
 8310:    3f           unknown
 8311:    3f           unknown
 
 L_8312:
-8312:    55 40        alu5 r?, r?
+8312:    55 40        unknown
 8314:    3d           unknown
 8315:    3d           unknown
 8316:    3d           unknown
@@ -664,7 +664,7 @@ L_83d6:
 L_83e4:
 83e4:    2a           unknown
 83e5:    a1 00 20     stb A, 0x0020
-83e8:    55 40        alu5 r?, r?
+83e8:    55 40        unknown
 83ea:    79 83 3f     call L_833f
 83ed:    15 c4        b_nz L_83b3
 83ef:    81 00 20     ldb A, 0x0020
@@ -724,7 +724,7 @@ L_8441:
 8442:    29           unknown
 8443:    15 fc        b_nz L_8441
 8445:    90 40 00     liw A, 0x4000
-8448:    51 40        sub? r?, r?
+8448:    51 40        unknown
 844a:    15 8a        b_nz L_83d6
 844c:    a1 f1 0a     stb A, 0xf10a
 844f:    71 83 7f     jump 0x837f Test_09
@@ -762,17 +762,17 @@ TOS_Entry:
 8477:    90 00 12     liw A, 0x0012
 847a:    f5 01        unknown
 847c:    6d 01        unknown
-847e:    55 62        alu5 r?, r?
+847e:    55 62        unknown
 8480:    f5 01        unknown
-8482:    55 82        alu5 r?, r?
+8482:    55 82        unknown
 8484:    f5 01        unknown
-8486:    55 a2        alu5 r?, r?
+8486:    55 a2        unknown
 8488:    30 20        unknown
 848a:    30 20        unknown
 848c:    f5 01        unknown
-848e:    55 c2        alu5 r?, r?
+848e:    55 c2        unknown
 8490:    f5 01        unknown
-8492:    55 e2        alu5 r?, r?
+8492:    55 e2        unknown
 8494:    f5 01        unknown
 8496:    80 c5        lib A, 0xc5
 8498:    a1 f2 00     stb A, 0xf200 ; Configure UART
@@ -801,15 +801,15 @@ TOS_PromptLoop:
 
 G_Command:
 84bf:    7b 79        call ReadHexWord
-84c1:    55 80        alu5 r?, r?
+84c1:    55 80        unknown
 
 Q_Command:
 84c3:    b1 00 20     stw A, 0x0020
 84c6:    d0 00 1e     liw B, 0x001e
 84c9:    99           unknown
-84ca:    55 0e        alu5 r?, r?
+84ca:    55 0e        unknown
 84cc:    95 22        unknown
-84ce:    55 0c        alu5 r?, r?
+84ce:    55 0c        unknown
 84d0:    95 22        unknown
 84d2:    5f           mov sp, A
 84d3:    95 22        unknown
@@ -817,8 +817,7 @@ Q_Command:
 84d6:    95 22        unknown
 84d8:    5c           unknown
 84d9:    65 22        unknown
-84db:    d5           unknown
-84dc:    22 91        unknown
+84db:    d5 22 91     unknown
 84de:    00           HALT
 84df:    10 72        b0 L_8553
 84e1:    00           HALT
@@ -826,7 +825,7 @@ Q_Command:
 
 L_84e3:
 84e3:    7b 55        call ReadHexWord
-84e5:    55 86        alu5 r?, r?
+84e5:    55 86        unknown
 
 L_84e7:
 84e7:    8b 7b        unknown
@@ -1065,7 +1064,7 @@ ReadChar:
 8639:    11 f9        b1 ReadChar
 863b:    84 f3        ldb A, [[pc-13]]
 863d:    c0 80        lib B, 0x80
-863f:    43 31        unknown
+863f:    43 31        or? A, B
 8641:    c0 e0        lib B, 0xe0
 8643:    49           cmp B, A
 8644:    16 04        b_lt L_864a
@@ -1159,7 +1158,7 @@ L_86c4:
 86c4:    85 41        ldb A, [sp]++
 86c6:    40 10        unknown
 86c8:    d0 87 f9     liw B, 0x87f9
-86cb:    51 42        sub? r?, r?
+86cb:    51 42        unknown
 86cd:    15 f5        b_nz L_86c4
 86cf:    8a           unknown
 86d0:    41 01        unknown
@@ -1184,16 +1183,16 @@ L_86e5:
 86eb:    31 20        unknown
 86ed:    15 f6        b_nz L_86e5
 86ef:    d0 04 00     liw B, 0x0400
-86f2:    55 64        alu5 r?, r?
+86f2:    55 64        unknown
 
 L_86f4:
 86f4:    45           unknown
-86f5:    51 2b        sub? r?, r?
+86f5:    51 2b        unknown
 86f7:    a5 41        unknown
 86f9:    31 20        unknown
 86fb:    15 f7        b_nz L_86f4
 86fd:    d0 04 00     liw B, 0x0400
-8700:    55 64        alu5 r?, r?
+8700:    55 64        unknown
 
 L_8702:
 8702:    8a           unknown
@@ -1243,7 +1242,7 @@ Aux_ReadTestEntry:
 875e:    52 42        unknown
 8760:    50 20        unknown
 8762:    b5 a2        unknown
-8764:    55 60        alu5 r?, r?
+8764:    55 60        unknown
 8766:    79 85 19     call WriteHexByte ; Print the Test Number
 8769:    c0 bd        lib B, 0xbd ; '='
 
@@ -1259,7 +1258,7 @@ NextRom:
 8779:    90 08 00     liw A, 0x0800
 877c:    50 04        unknown
 877e:    90 f0 00     liw A, 0xf000
-8781:    51 40        sub? r?, r?
+8781:    51 40        unknown
 8783:    15 ca        b_nz Aux_ReadTestEntry
 8785:    79 86 23     call WriteString
 8788:    "\r\nENTER TEST NUMBER:\0"
@@ -1282,7 +1281,7 @@ Aux_CheckSerial:
 87b1:    11 ec        b1 Aux_CheckDIPs
 87b3:    c1 f2 01     ldb B, 0xf201
 87b6:    80 5f        lib A, 0x5f
-87b8:    41 31        unknown
+87b8:    41 31        cmp? A, B
 87ba:    19 03        b_le Aux_GotByte
 87bc:    80 df        lib A, 0xdf
 87be:    4a           and B, A
@@ -1299,27 +1298,27 @@ Aux_GotByte:
 87d1:    73 cc        jump Aux_CheckDIPs
 
 L_87d3:
-87d3:    55 40        alu5 r?, r?
+87d3:    55 40        unknown
 87d5:    18 03        b_gt L_87da
 
 L_87d7:
 87d7:    71 87 28     jump 0x8728 AuxiliaryTestMenu
 
 L_87da:
-87da:    51 60        sub? r?, r?
+87da:    51 60        unknown
 87dc:    16 f9        b_lt L_87d7
-87de:    55 40        alu5 r?, r?
+87de:    55 40        unknown
 87e0:    3d           unknown
 87e1:    3b           unknown
 87e2:    38           unknown
 87e3:    d0 c0 00     liw B, 0xc000
 87e6:    50 20        unknown
 87e8:    98           unknown
-87e9:    55 2a        alu5 r?, r?
+87e9:    55 2a        unknown
 87eb:    60 80 01     60 A, 0x8001
 87ee:    d0 f8 00     liw B, 0xf800
 87f1:    5a           unknown
-87f2:    55 28        alu5 r?, r?
+87f2:    55 28        unknown
 87f4:    a1 f1 0e     stb A, 0xf10e
 87f7:    75 00        jump A + 0x00
 87f9:    3e

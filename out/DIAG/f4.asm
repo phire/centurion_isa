@@ -103,7 +103,7 @@ FinishTest:
 9908:    11 57        b1 L_9961
 990a:    81 f2 01     ldb A, 0xf201
 990d:    c0 80        lib B, 0x80
-990f:    43 31        unknown
+990f:    43 31        or? A, B
 9911:    c0 83        lib B, 0x83
 9913:    49           cmp B, A
 9914:    15 4b        b_nz L_9961
@@ -169,13 +169,13 @@ Init:
 99cf:    90 01 33     liw A, 0x0133
 99d2:    50 80        add A, indexBase
 99d4:    b1 01 0e     stw A, 0x010e
-99d7:    55 80        alu5 r?, r?
+99d7:    55 80        unknown
 99d9:    b1 01 1a     stw A, 0x011a
 99dc:    95 41        unknown
 99de:    b1 01 14     stw A, 0x0114
 99e1:    38           unknown
 99e2:    b1 01 16     stw A, 0x0116
-99e5:    55 40        alu5 r?, r?
+99e5:    55 40        unknown
 99e7:    65 a1        unknown
 99e9:    69 01 00     69 A, 0x0100
 99ec:    75 00        jump A + 0x00
@@ -279,7 +279,7 @@ L_9ae2:
 9ae2:    7a 01 06     call [0x0106]
 9ae5:    32 60        unknown
 9ae7:    60 0f 00     60 A, 0x0f00
-9aea:    55 60        alu5 r?, r?
+9aea:    55 60        unknown
 9aec:    d0 01 1c     liw B, 0x011c
 
 L_9aef:
@@ -375,7 +375,7 @@ L_9b32:
 9b6c:    a2           unknown
 9b6d:    60 0f 00     60 A, 0x0f00
 9b70:    d0 01 1c     liw B, 0x011c
-9b73:    55 60        alu5 r?, r?
+9b73:    55 60        unknown
 9b75:    45           unknown
 9b76:    10
 
@@ -890,7 +890,7 @@ Entry_ROM_SELF_TEST:
 9ea3:    7d 00        call A + 0x00
 9ea5:    00           HALT
 9ea6:    00           HALT
-9ea7:    55 86        alu5 r?, r?
+9ea7:    55 86        unknown
 9ea9:    3a           clear A
 
 L_9eaa:
@@ -898,7 +898,7 @@ L_9eaa:
 9eac:    40 10        unknown
 9eae:    d0 06 ed     liw B, 0x06ed
 9eb1:    50 82        unknown
-9eb3:    51 62        sub? r?, r?
+9eb3:    51 62        unknown
 9eb5:    15 f3        b_nz L_9eaa
 9eb7:    8b 41        unknown
 9eb9:    01           nop
