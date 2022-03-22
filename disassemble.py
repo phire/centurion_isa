@@ -251,8 +251,15 @@ instructions = [
     I("01011111", "mov sp, A"),
 
 # 60
-    I("01100101 xxxxxxxx"),
-    I("01101101 xxxxxxxx"),
+    I("01100000 NNNNNNNN NNNNNNNN", "60 {N:#06x}"),  # 60 ??? Might be load immediate into index reg?
+    I("01100001 NNNNNNNN NNNNNNNN", "61 {N:#06x}"),  # 61
+
+    I("01100101 xxxxxxxx"), # suspect
+
+    I("01101001 NNNNNNNN NNNNNNNN", "69 A, {N:#06x}"),  # 69
+
+    I("01101101 xxxxxxxx"), # suspect
+
 
 # 70
 
@@ -268,7 +275,7 @@ instructions = [
     B("01111011 SSSSSSSS", "call", relative_call),
     I("01111101 NNNNNNNN", "call A + {N:#04x}"),
 
-# 80
+# 80-FF
 
     I("10000000 NNNNNNNN", "lib A, {N:#04x}"),          # 80
     I("10010000 NNNNNNNN NNNNNNNN", "liw A, {N:#06x}"), # 90
@@ -287,10 +294,6 @@ instructions = [
     I("11010001 NNNNNNNN NNNNNNNN", "ldw A, {N:#06x}"), # D1
 
     # unknown 3 byte instructions, in the order tested by instruction test rom
-    I("01100000 NNNNNNNN NNNNNNNN", "60 A, {N:#06x}"),  # 60 ???
-
-    I("01100001 NNNNNNNN NNNNNNNN", "61 A, {N:#06x}"),  # 61
-    I("01101001 NNNNNNNN NNNNNNNN", "69 A, {N:#06x}"),  # 69
     I("10010010 NNNNNNNN NNNNNNNN", "92 A, {N:#06x}"),  # 92
     I("11010010 NNNNNNNN NNNNNNNN", "d2 A, {N:#06x}"),  # D2
 
