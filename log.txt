@@ -666,8 +666,35 @@ There could be multiple outstanding DMA transfers in parallel. Very useful for a
 
 Though, I'm just speculating here.
 
+## Day 4
 
+Spent a lot of time on Improving the Bootcode and F1 disasembly.
 
+Major breakthrough of the day was working out where the DIAG MMIO was mapped.
+Previously I thought it was at address 0xb800-0xbfff, But turns out that's DIAG's onboard DRAM.
 
+DIAG MMIO is mapped to 0xf100-0xf11f
 
+f100-f10f toggle several lines on and off. A0 controls on or off, A1, A2, A3 select which line to toggle.
+The first 3 lines are connected to empty sockets, so don't do anything on our DIAG board
 
+Which results in this memory map:
+
+f106 - Unblank Hex Displays
+f107 - Blank Hex Displays
+f108 - Decimal Point 1 Set
+f109 - Decimal Point 1 Clear
+f10a - Decimal Point 2 Set
+f10b - Decimal Point 2 Clear
+f10c - Decimal Point 3 Set
+f10d - Decimal Point 3 Clear
+f10e - Decimal Point 4 Set
+f10f - Decimal Point 4 Clear
+
+And then both the DIP switches and Hex Displays are mapped to 0xf110 (maybe mirrored upto 0xf11f ?)
+
+Read from 0xf110 to get the DIP switch value, Write to 0xf110 to set the hex Displays.
+
+This makes the DiagROMs make a lot more sense.
+
+## Day 5
