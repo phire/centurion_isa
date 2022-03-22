@@ -189,7 +189,10 @@ instructions = [
     B("00010111 SSSSSSSS", "b7", relative_branch),
     B("00011000 SSSSSSSS", "b_gt", relative_branch),
     B("00011001 SSSSSSSS", "b_le", relative_branch), # lessthan or equal
-    B("00011010 SSSSSSSS", "b_sence1", relative_branch),
+    B("00011010 SSSSSSSS", "b_sence0", relative_branch),
+    B("00011100 SSSSSSSS", "b_sence2", relative_branch),
+    B("00011101 SSSSSSSS", "b_sence3", relative_branch),
+
 
     B("00011100 SSSSSSSS", "b??", relative_branch), # Test rom doesn't test this directly. But it appares
                                                     # to use it as a sentinel when testing instruction lenghts
@@ -225,8 +228,7 @@ instructions = [
 
 
     B("01111011 SSSSSSSS", "call", relative_call),
-    B("00001001", "ret 9", kill_branch),
- #   B("00001000", "ret 8", kill_branch),
+    B("00001001", "ret", kill_branch),
 
     B("01110001 NNNNNNNN NNNNNNNN", "jump {N:#06x}", abolsute_branch_uncondtionional),
     I("01111101 NNNNNNNN", "call A + {N:#04x}"),
@@ -349,20 +351,16 @@ def recursive_disassemble(memory, entry):
         if len(info.next_pc) == 0:
             return
 
-        global label_id
-
         for next_pc in info.next_pc[1:]:
             if memory_addr_info[next_pc].label == None:
-                memory_addr_info[next_pc].label = f"L{label_id}"
-                label_id += 1
+                memory_addr_info[next_pc].label = f"L_{next_pc:04x}"
             recursive_disassemble(memory, next_pc)
 
         next_pc = info.next_pc[0]
 
         if next_pc != pc + len(info.bytes):
             if memory_addr_info[next_pc].label == None:
-                memory_addr_info[next_pc].label = f"L{label_id}"
-                label_id += 1
+                memory_addr_info[next_pc].label = f"L_{next_pc:04x}"
 
         pc = next_pc
 
