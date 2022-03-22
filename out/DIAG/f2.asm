@@ -769,465 +769,568 @@ L_8b02:
 
 L_8b06:
 8b06:    80 aa        lib A, 0xaa
-8b08:    43 31        or A, B
-8b0a:    11 01        b1 L_8b0d
+8b08:    43           or A, B
+8b09:    31 11        unknown
+8b0b:    01           nop
 8b0c:    00           HALT
-
-L_8b0d:
-8b0d:    13 01        b3 L_8b10
-8b0f:    00           HALT
-
-L_8b10:
-8b10:    2b           unknown
-8b11:    14 01        b_z L_8b14
-8b13:    00           HALT
-
-L_8b14:
-8b14:    80 55        lib A, 0x55
-8b16:    02           flag2
-8b17:    06           flag6
-8b18:    44 31        unknown
-8b1a:    10 01        b0 L_8b1d
-8b1c:    00           HALT
-
-L_8b1d:
-8b1d:    12 01        b2 L_8b20
-8b1f:    00           HALT
-
-L_8b20:
-8b20:    14 01        b_z L_8b23
-8b22:    00           HALT
-
-L_8b23:
-8b23:    90 55 55     liw A, 0x5555
-8b26:    d0 55 55     liw B, 0x5555
-8b29:    51 02        sub? r?, r?
-8b2b:    14 01        b_z L_8b2e
-8b2d:    00           HALT
-
-L_8b2e:
-8b2e:    10 01        b0 L_8b31
-8b30:    00           HALT
-
-L_8b31:
-8b31:    13 01        b3 L_8b34
-8b33:    00           HALT
-
-L_8b34:
-8b34:    d0 aa aa     liw B, 0xaaaa
-8b37:    50 20        unknown
-8b39:    11 01        b1 L_8b3c
-8b3b:    00           HALT
-
-L_8b3c:
-8b3c:    13 01        b3 L_8b3f
-8b3e:    00           HALT
-
-L_8b3f:
-8b3f:    16 01        b_lt L_8b42
-8b41:    00           HALT
-
-L_8b42:
-8b42:    3b           unknown
-8b43:    14 01        b_z L_8b46
-8b45:    00           HALT
-
-L_8b46:
-8b46:    90 55 55     liw A, 0x5555
-8b49:    53 20        unknown
-8b4b:    11 01        b1 L_8b4e
-8b4d:    00           HALT
-
-L_8b4e:
-8b4e:    13 01        b3 L_8b51
-8b50:    00           HALT
-
-L_8b51:
-8b51:    3b           unknown
-8b52:    14 01        b_z L_8b55
-8b54:    00           HALT
-
-L_8b55:
-8b55:    90 aa aa     liw A, 0xaaaa
-8b58:    06           flag6
-8b59:    02           flag2
-8b5a:    54 20        unknown
-8b5c:    10 01        b0 L_8b5f
-8b5e:    00           HALT
-
-L_8b5f:
-8b5f:    12 01        b2 L_8b62
-8b61:    00           HALT
-
-L_8b62:
-8b62:    14 01        b_z L_8b65
-8b64:    00           HALT
-
-L_8b65:
-8b65:    90 aa 55     liw A, 0xaa55
-8b68:    55 02        alu5 r?, r?
-8b6a:    55 04        alu5 r?, r?
-8b6c:    55 06        alu5 r?, r?
-8b6e:    55 08        alu5 r?, r?
-8b70:    55 8a        alu5 r?, r?
-8b72:    55 8c        alu5 r?, r?
-8b74:    55 80        alu5 r?, r?
-8b76:    50 20        unknown
-8b78:    50 40        unknown
-8b7a:    50 60        unknown
-8b7c:    51 08        sub? r?, r?
-8b7e:    51 8a        sub? r?, r?
-8b80:    51 ac        sub? r?, r?
-8b82:    51 c2        sub? r?, r?
-8b84:    14 01        b_z L_8b87
-8b86:    00           HALT
-
-L_8b87:
-8b87:    d0 55 aa     liw B, 0x55aa
-8b8a:    44 67        unknown
-8b8c:    44 76        unknown
-8b8e:    44 67        unknown
-8b90:    54 62        unknown
-8b92:    14 01        b_z L_8b95
-8b94:    00           HALT
-
-L_8b95:
-8b95:    45           unknown
-8b96:    69 45 78     69 A, 0x4578
-8b99:    44 c8        unknown
-8b9b:    44 d9        unknown
-8b9d:    55 88        alu5 r?, r?
-8b9f:    14 01        b_z L_8ba2
-8ba1:    00           HALT
-
-L_8ba2:
-8ba2:    90 80 00     liw A, 0x8000
-8ba5:    d0 00 01     liw B, 0x0001
-8ba8:    59           unknown
-8ba9:    12 01        b2 L_8bac
-8bab:    00           HALT
-
-L_8bac:
-8bac:    10 01        b0 L_8baf
-8bae:    00           HALT
-
-L_8baf:
-8baf:    18 01        b_gt L_8bb2
-8bb1:    00           HALT
-
-L_8bb2:
-8bb2:    03           flag3
-8bb3:    06           flag6
-8bb4:    58           unknown
-8bb5:    13 01        b3 L_8bb8
-8bb7:    00           HALT
-
-L_8bb8:
-8bb8:    11 01        b1 L_8bbb
-8bba:    00           HALT
-
-L_8bbb:
-8bbb:    33 20        unknown
-8bbd:    14 01        b_z L_8bc0
-8bbf:    00           HALT
-
-L_8bc0:
-8bc0:    90 aa aa     liw A, 0xaaaa
-8bc3:    d0 55 55     liw B, 0x5555
-8bc6:    5e           unknown
-8bc7:    5b           unknown
-8bc8:    5a           unknown
-8bc9:    14 01        b_z L_8bcc
-8bcb:    00           HALT
-
-L_8bcc:
-8bcc:    5a           unknown
-8bcd:    14 01        b_z L_8bd0
-8bcf:    00           HALT
-
-L_8bd0:
-8bd0:    55 82        alu5 r?, r?
-8bd2:    55 40        alu5 r?, r?
-8bd4:    5a           unknown
-8bd5:    51 40        sub? r?, r?
-8bd7:    14 01        b_z L_8bda
-8bd9:    00           HALT
-
-L_8bda:
-8bda:    91 bf fc     ldw A, 0xbffc
-8bdd:    5e           unknown
-8bde:    91 00 26     ldw A, 0x0026
-8be1:    14 01        b_z L_8be4
-8be3:    00           HALT
-
-L_8be4:
-8be4:    d1 00 24     d1 A, 0x0024
-8be7:    16 01        b_lt L_8bea
-8be9:    00           HALT
-
-L_8bea:
-8bea:    61 00 22     61 A, 0x0022
-8bed:    18 01        b_gt L_8bf0
-8bef:    00           HALT
-
-L_8bf0:
-8bf0:    b1 00 2c     stw A, 0x002c
-8bf3:    14 01        b_z L_8bf6
-8bf5:    00           HALT
-
-L_8bf6:
-8bf6:    91 00 2c     ldw A, 0x002c
-8bf9:    f1 00 2c     stw B, 0x002c
-8bfc:    16 01        b_lt L_8bff
-8bfe:    00           HALT
-
-L_8bff:
-8bff:    d1 00 2c     d1 A, 0x002c
-8c02:    69 00 2c     69 A, 0x002c
-8c05:    18 01        b_gt L_8c08
-8c07:    00           HALT
-
-L_8c08:
-8c08:    61 00 2c     61 A, 0x002c
-8c0b:    54 42        unknown
-8c0d:    58           unknown
-8c0e:    33 20        unknown
-8c10:    14 01        b_z L_8c13
-8c12:    00           HALT
-
-L_8c13:
-8c13:    91 bf fc     ldw A, 0xbffc
-8c16:    5e           unknown
-8c17:    91 00 10     ldw A, 0x0010
-8c1a:    50 80        add A, indexBase
-8c1c:    b1 00 10     stw A, 0x0010
-8c1f:    91 00 12     ldw A, 0x0012
-8c22:    50 80        add A, indexBase
-8c24:    b1 00 12     stw A, 0x0012
-8c27:    91 00 14     ldw A, 0x0014
-8c2a:    50 80        add A, indexBase
-8c2c:    b1 00 14     stw A, 0x0014
-8c2f:    91 00 16     ldw A, 0x0016
-8c32:    50 80        add A, indexBase
-8c34:    b1 00 16     stw A, 0x0016
-8c37:    91 00 18     ldw A, 0x0018
-8c3a:    50 80        add A, indexBase
-8c3c:    b1 00 18     stw A, 0x0018
-8c3f:    92 00 12     92 A, 0x0012
-8c42:    18 01        b_gt L_8c45
-8c44:    00           HALT
-
-L_8c45:
-8c45:    d2 00 14     d2 A, 0x0014
-8c48:    16 01        b_lt L_8c4b
-8c4a:    00           HALT
-
-L_8c4b:
-8c4b:    54 20        unknown
-8c4d:    3b           unknown
-8c4e:    14 01        b_z L_8c51
-8c50:    00           HALT
-
-L_8c51:
-8c51:    94 1c        unknown
-8c53:    18 01        b_gt L_8c56
-8c55:    00           HALT
-
-L_8c56:
-8c56:    d4 19        unknown
-8c58:    16 01        b_lt L_8c5b
-8c5a:    00           HALT
-
-L_8c5b:
-8c5b:    54 20        unknown
-8c5d:    3b           unknown
-8c5e:    14 01        b_z L_8c61
-8c60:    00           HALT
-
-L_8c61:
-8c61:    93           unknown
-8c62:    0c           unknown
-8c63:    d3           unknown
-8c64:    0c           unknown
-8c65:    58           unknown
-8c66:    90 ff ba     liw A, 0xffba
-8c69:    58           unknown
-8c6a:    14 01        b_z L_8c6d
-8c6c:    00           HALT
-
-L_8c6d:
-8c6d:    73 04        jump L_8c73
+8b0d:    13
+8b0e:    01
+8b0f:    00
+8b10:    2b
+8b11:    14
+8b12:    01
+8b13:    00
+8b14:    80
+8b15:    55
+8b16:    02
+8b17:    06
+8b18:    44
+8b19:    31
+8b1a:    10
+8b1b:    01
+8b1c:    00
+8b1d:    12
+8b1e:    01
+8b1f:    00
+8b20:    14
+8b21:    01
+8b22:    00
+8b23:    90
+8b24:    55
+8b25:    55
+8b26:    d0
+8b27:    55
+8b28:    55
+8b29:    51
+8b2a:    02
+8b2b:    14
+8b2c:    01
+8b2d:    00
+8b2e:    10
+8b2f:    01
+8b30:    00
+8b31:    13
+8b32:    01
+8b33:    00
+8b34:    d0
+8b35:    aa
+8b36:    aa
+8b37:    50
+8b38:    20
+8b39:    11
+8b3a:    01
+8b3b:    00
+8b3c:    13
+8b3d:    01
+8b3e:    00
+8b3f:    16
+8b40:    01
+8b41:    00
+8b42:    3b
+8b43:    14
+8b44:    01
+8b45:    00
+8b46:    90
+8b47:    55
+8b48:    55
+8b49:    53
+8b4a:    20
+8b4b:    11
+8b4c:    01
+8b4d:    00
+8b4e:    13
+8b4f:    01
+8b50:    00
+8b51:    3b
+8b52:    14
+8b53:    01
+8b54:    00
+8b55:    90
+8b56:    aa
+8b57:    aa
+8b58:    06
+8b59:    02
+8b5a:    54
+8b5b:    20
+8b5c:    10
+8b5d:    01
+8b5e:    00
+8b5f:    12
+8b60:    01
+8b61:    00
+8b62:    14
+8b63:    01
+8b64:    00
+8b65:    90
+8b66:    aa
+8b67:    55
+8b68:    55
+8b69:    02
+8b6a:    55
+8b6b:    04
+8b6c:    55
+8b6d:    06
+8b6e:    55
+8b6f:    08
+8b70:    55
+8b71:    8a
+8b72:    55
+8b73:    8c
+8b74:    55
+8b75:    80
+8b76:    50
+8b77:    20
+8b78:    50
+8b79:    40
+8b7a:    50
+8b7b:    60
+8b7c:    51
+8b7d:    08
+8b7e:    51
+8b7f:    8a
+8b80:    51
+8b81:    ac
+8b82:    51
+8b83:    c2
+8b84:    14
+8b85:    01
+8b86:    00
+8b87:    d0
+8b88:    55
+8b89:    aa
+8b8a:    44
+8b8b:    67
+8b8c:    44
+8b8d:    76
+8b8e:    44
+8b8f:    67
+8b90:    54
+8b91:    62
+8b92:    14
+8b93:    01
+8b94:    00
+8b95:    45
+8b96:    69
+8b97:    45
+8b98:    78
+8b99:    44
+8b9a:    c8
+8b9b:    44
+8b9c:    d9
+8b9d:    55
+8b9e:    88
+8b9f:    14
+8ba0:    01
+8ba1:    00
+8ba2:    90
+8ba3:    80
+8ba4:    00
+8ba5:    d0
+8ba6:    00
+8ba7:    01
+8ba8:    59
+8ba9:    12
+8baa:    01
+8bab:    00
+8bac:    10
+8bad:    01
+8bae:    00
+8baf:    18
+8bb0:    01
+8bb1:    00
+8bb2:    03
+8bb3:    06
+8bb4:    58
+8bb5:    13
+8bb6:    01
+8bb7:    00
+8bb8:    11
+8bb9:    01
+8bba:    00
+8bbb:    33
+8bbc:    20
+8bbd:    14
+8bbe:    01
+8bbf:    00
+8bc0:    90
+8bc1:    aa
+8bc2:    aa
+8bc3:    d0
+8bc4:    55
+8bc5:    55
+8bc6:    5e
+8bc7:    5b
+8bc8:    5a
+8bc9:    14
+8bca:    01
+8bcb:    00
+8bcc:    5a
+8bcd:    14
+8bce:    01
+8bcf:    00
+8bd0:    55
+8bd1:    82
+8bd2:    55
+8bd3:    40
+8bd4:    5a
+8bd5:    51
+8bd6:    40
+8bd7:    14
+8bd8:    01
+8bd9:    00
+8bda:    91
+8bdb:    bf
+8bdc:    fc
+8bdd:    5e
+8bde:    91
+8bdf:    00
+8be0:    26
+8be1:    14
+8be2:    01
+8be3:    00
+8be4:    d1
+8be5:    00
+8be6:    24
+8be7:    16
+8be8:    01
+8be9:    00
+8bea:    61
+8beb:    00
+8bec:    22
+8bed:    18
+8bee:    01
+8bef:    00
+8bf0:    b1
+8bf1:    00
+8bf2:    2c
+8bf3:    14
+8bf4:    01
+8bf5:    00
+8bf6:    91
+8bf7:    00
+8bf8:    2c
+8bf9:    f1
+8bfa:    00
+8bfb:    2c
+8bfc:    16
+8bfd:    01
+8bfe:    00
+8bff:    d1
+8c00:    00
+8c01:    2c
+8c02:    69
+8c03:    00
+8c04:    2c
+8c05:    18
+8c06:    01
+8c07:    00
+8c08:    61
+8c09:    00
+8c0a:    2c
+8c0b:    54
+8c0c:    42
+8c0d:    58
+8c0e:    33
+8c0f:    20
+8c10:    14
+8c11:    01
+8c12:    00
+8c13:    91
+8c14:    bf
+8c15:    fc
+8c16:    5e
+8c17:    91
+8c18:    00
+8c19:    10
+8c1a:    50
+8c1b:    80
+8c1c:    b1
+8c1d:    00
+8c1e:    10
+8c1f:    91
+8c20:    00
+8c21:    12
+8c22:    50
+8c23:    80
+8c24:    b1
+8c25:    00
+8c26:    12
+8c27:    91
+8c28:    00
+8c29:    14
+8c2a:    50
+8c2b:    80
+8c2c:    b1
+8c2d:    00
+8c2e:    14
+8c2f:    91
+8c30:    00
+8c31:    16
+8c32:    50
+8c33:    80
+8c34:    b1
+8c35:    00
+8c36:    16
+8c37:    91
+8c38:    00
+8c39:    18
+8c3a:    50
+8c3b:    80
+8c3c:    b1
+8c3d:    00
+8c3e:    18
+8c3f:    92
+8c40:    00
+8c41:    12
+8c42:    18
+8c43:    01
+8c44:    00
+8c45:    d2
+8c46:    00
+8c47:    14
+8c48:    16
+8c49:    01
+8c4a:    00
+8c4b:    54
+8c4c:    20
+8c4d:    3b
+8c4e:    14
+8c4f:    01
+8c50:    00
+8c51:    94
+8c52:    1c
+8c53:    18
+8c54:    01
+8c55:    00
+8c56:    d4
+8c57:    19
+8c58:    16
+8c59:    01
+8c5a:    00
+8c5b:    54
+8c5c:    20
+8c5d:    3b
+8c5e:    14
+8c5f:    01
+8c60:    00
+8c61:    93
+8c62:    0c
+8c63:    d3
+8c64:    0c
+8c65:    58
+8c66:    90
+8c67:    ff
+8c68:    ba
+8c69:    58
+8c6a:    14
+8c6b:    01
+8c6c:    00
+8c6d:    73
+8c6e:    04
 8c6f:    00
 8c70:    22
 8c71:    00
 8c72:    24
-
-L_8c73:
-8c73:    60 00 20     60 A, 0x0020
-8c76:    9a           unknown
-8c77:    d0 ff ff     liw B, 0xffff
-8c7a:    59           unknown
-8c7b:    14 01        b_z L_8c7e
-8c7d:    00           HALT
-
-L_8c7e:
-8c7e:    95 41        unknown
-8c80:    3b           unknown
-8c81:    14 01        b_z L_8c84
-8c83:    00           HALT
-
-L_8c84:
-8c84:    95 41        unknown
-8c86:    d5           unknown
-8c87:    41 54        unknown
-8c89:    20 3b        unknown
-8c8b:    14 01        b_z L_8c8e
-8c8d:    00           HALT
-
-L_8c8e:
-8c8e:    9a           unknown
-8c8f:    14 01        b_z L_8c92
-8c91:    00           HALT
-
-L_8c92:
-8c92:    95 42        unknown
-8c94:    d5           unknown
-8c95:    42 54        unknown
-8c97:    20 3b        unknown
-8c99:    14 01        b_z L_8c9c
-8c9b:    00           HALT
-
-L_8c9c:
-8c9c:    d0 00 24     liw B, 0x0024
-8c9f:    9a           unknown
-8ca0:    65 28        unknown
-8ca2:    fe           unknown
-8ca3:    54 40        unknown
-8ca5:    14 01        b_z L_8ca8
-8ca7:    00           HALT
-
-L_8ca8:
-8ca8:    95 28        unknown
-8caa:    fc           unknown
-8cab:    65 29        unknown
-8cad:    02           flag2
-8cae:    50 40        unknown
-8cb0:    3b           unknown
-8cb1:    14 01        b_z L_8cb4
-8cb3:    00           HALT
-
-L_8cb4:
-8cb4:    99           unknown
-8cb5:    65 2a        unknown
-8cb7:    fc           unknown
-8cb8:    54 40        unknown
-8cba:    3b           unknown
-8cbb:    14 01        b_z L_8cbe
-8cbd:    00           HALT
-
-L_8cbe:
-8cbe:    60 00 10     60 A, 0x0010
-8cc1:    95 44        unknown
-8cc3:    d0 ff ff     liw B, 0xffff
-8cc6:    59           unknown
-8cc7:    14 01        b_z L_8cca
-8cc9:    00           HALT
-
-L_8cca:
-8cca:    95 45        unknown
-8ccc:    3b           unknown
-8ccd:    14 01        b_z L_8cd0
-8ccf:    00           HALT
-
-L_8cd0:
-8cd0:    95 45        unknown
-8cd2:    d5           unknown
-8cd3:    45           unknown
-8cd4:    54 20        unknown
-8cd6:    3b           unknown
-8cd7:    14 01        b_z L_8cda
-8cd9:    00           HALT
-
-L_8cda:
-8cda:    95 46        unknown
-8cdc:    d5           unknown
-8cdd:    46           unknown
-8cde:    54 20        unknown
-8ce0:    3b           unknown
-8ce1:    14 01        b_z L_8ce4
-8ce3:    00           HALT
-
-L_8ce4:
-8ce4:    60 00 14     60 A, 0x0014
-8ce7:    95 44        unknown
-8ce9:    d5           unknown
-8cea:    4c           unknown
-8ceb:    fe           unknown
-8cec:    54 20        unknown
-8cee:    3b           unknown
-8cef:    14 01        b_z L_8cf2
-8cf1:    00           HALT
-
-L_8cf2:
-8cf2:    95 4c        unknown
-8cf4:    fc           unknown
-8cf5:    d5           unknown
-8cf6:    4d           unknown
-8cf7:    02           flag2
-8cf8:    50 20        unknown
-8cfa:    3b           unknown
-8cfb:    14 01        b_z L_8cfe
-8cfd:    00           HALT
-
-L_8cfe:
-8cfe:    95 44        unknown
-8d00:    d5           unknown
-8d01:    4e           unknown
-8d02:    fc           unknown
-8d03:    54 20        unknown
-8d05:    3b           unknown
-8d06:    14 01        b_z L_8d09
-8d08:    00           HALT
-
-L_8d09:
-8d09:    0d           unknown
-8d0a:    90 05 0a     liw A, 0x050a
-8d0d:    50 80        add A, indexBase
-8d0f:    51 04        sub? r?, r?
-8d11:    14 01        b_z L_8d14
-8d13:    00           HALT
-
-L_8d14:
-8d14:    90 00 3a     liw A, 0x003a
-8d17:    5f           mov sp, A
-8d18:    60 20 20     60 A, 0x2020
-8d1b:    7b 06        call L_8d23
-8d1d:    01           nop
-8d1e:    01           nop
-8d1f:    00           HALT
-8d20:    73 16        jump L_8d38
+8c73:    60
+8c74:    00
+8c75:    20
+8c76:    9a
+8c77:    d0
+8c78:    ff
+8c79:    ff
+8c7a:    59
+8c7b:    14
+8c7c:    01
+8c7d:    00
+8c7e:    95
+8c7f:    41
+8c80:    3b
+8c81:    14
+8c82:    01
+8c83:    00
+8c84:    95
+8c85:    41
+8c86:    d5
+8c87:    41
+8c88:    54
+8c89:    20
+8c8a:    3b
+8c8b:    14
+8c8c:    01
+8c8d:    00
+8c8e:    9a
+8c8f:    14
+8c90:    01
+8c91:    00
+8c92:    95
+8c93:    42
+8c94:    d5
+8c95:    42
+8c96:    54
+8c97:    20
+8c98:    3b
+8c99:    14
+8c9a:    01
+8c9b:    00
+8c9c:    d0
+8c9d:    00
+8c9e:    24
+8c9f:    9a
+8ca0:    65
+8ca1:    28
+8ca2:    fe
+8ca3:    54
+8ca4:    40
+8ca5:    14
+8ca6:    01
+8ca7:    00
+8ca8:    95
+8ca9:    28
+8caa:    fc
+8cab:    65
+8cac:    29
+8cad:    02
+8cae:    50
+8caf:    40
+8cb0:    3b
+8cb1:    14
+8cb2:    01
+8cb3:    00
+8cb4:    99
+8cb5:    65
+8cb6:    2a
+8cb7:    fc
+8cb8:    54
+8cb9:    40
+8cba:    3b
+8cbb:    14
+8cbc:    01
+8cbd:    00
+8cbe:    60
+8cbf:    00
+8cc0:    10
+8cc1:    95
+8cc2:    44
+8cc3:    d0
+8cc4:    ff
+8cc5:    ff
+8cc6:    59
+8cc7:    14
+8cc8:    01
+8cc9:    00
+8cca:    95
+8ccb:    45
+8ccc:    3b
+8ccd:    14
+8cce:    01
+8ccf:    00
+8cd0:    95
+8cd1:    45
+8cd2:    d5
+8cd3:    45
+8cd4:    54
+8cd5:    20
+8cd6:    3b
+8cd7:    14
+8cd8:    01
+8cd9:    00
+8cda:    95
+8cdb:    46
+8cdc:    d5
+8cdd:    46
+8cde:    54
+8cdf:    20
+8ce0:    3b
+8ce1:    14
+8ce2:    01
+8ce3:    00
+8ce4:    60
+8ce5:    00
+8ce6:    14
+8ce7:    95
+8ce8:    44
+8ce9:    d5
+8cea:    4c
+8ceb:    fe
+8cec:    54
+8ced:    20
+8cee:    3b
+8cef:    14
+8cf0:    01
+8cf1:    00
+8cf2:    95
+8cf3:    4c
+8cf4:    fc
+8cf5:    d5
+8cf6:    4d
+8cf7:    02
+8cf8:    50
+8cf9:    20
+8cfa:    3b
+8cfb:    14
+8cfc:    01
+8cfd:    00
+8cfe:    95
+8cff:    44
+8d00:    d5
+8d01:    4e
+8d02:    fc
+8d03:    54
+8d04:    20
+8d05:    3b
+8d06:    14
+8d07:    01
+8d08:    00
+8d09:    0d
+8d0a:    90
+8d0b:    05
+8d0c:    0a
+8d0d:    50
+8d0e:    80
+8d0f:    51
+8d10:    04
+8d11:    14
+8d12:    01
+8d13:    00
+8d14:    90
+8d15:    00
+8d16:    3a
+8d17:    5f
+8d18:    60
+8d19:    20
+8d1a:    20
+8d1b:    7b
+8d1c:    06
+8d1d:    01
+8d1e:    01
+8d1f:    00
+8d20:    73
+8d21:    16
 8d22:    00
-
-L_8d23:
-8d23:    95 41        unknown
-8d25:    d0 01 01     liw B, 0x0101
-8d28:    54 20        unknown
-8d2a:    14 01        b_z L_8d2d
-8d2c:    00           HALT
-
-L_8d2d:
-8d2d:    9d           unknown
-8d2e:    d0 20 20     liw B, 0x2020
-8d31:    54 20        unknown
-8d33:    14 01        b_z L_8d36
-8d35:    00           HALT
-
-L_8d36:
-8d36:    3e           unknown
-8d37:    09           ret
-
-L_8d38:
-8d38:    60 09 ef     60 A, 0x09ef
+8d23:    95
+8d24:    41
+8d25:    d0
+8d26:    01
+8d27:    01
+8d28:    54
+8d29:    20
+8d2a:    14
+8d2b:    01
+8d2c:    00
+8d2d:    9d
+8d2e:    d0
+8d2f:    20
+8d30:    20
+8d31:    54
+8d32:    20
+8d33:    14
+8d34:    01
+8d35:    00
+8d36:    3e
+8d37:    09
+8d38:    60
+8d39:    09
+8d3a:    ef           unknown
 8d3b:    90 11 ff     liw A, 0x11ff
 8d3e:    b5 41        unknown
 8d40:    55 42        alu5 r?, r?
@@ -1245,7 +1348,7 @@ L_8d49:
 8d55:    00           HALT
 
 L_8d56:
-8d56:    49           cmp A, B
+8d56:    49           cmp B, A
 8d57:    14 01        b_z L_8d5a
 8d59:    00           HALT
 
@@ -1271,15 +1374,15 @@ L_8d70:
 8d74:    11 18        b1 L_8d8e
 8d76:    81 f2 01     ldb A, 0xf201
 8d79:    c0 80        lib B, 0x80
-8d7b:    43 31        or A, B
-8d7d:    c0 83        lib B, 0x83
-8d7f:    49           cmp A, B
+8d7b:    43           or A, B
+8d7c:    31 c0        unknown
+8d7e:    83 49        unknown
 8d80:    15 0c        b_nz L_8d8e
 8d82:    61 bf fe     61 A, 0xbffe
 8d85:    91 bf fc     ldw A, 0xbffc
 8d88:    d0 07 74     liw B, 0x0774
 8d8b:    58           unknown
-8d8c:    75 20        unknown jump L_8dae
+8d8c:    75 20        jump A + 0x20
 
 L_8d8e:
 8d8e:    a1 f1 0a     stb A, 0xf10a
@@ -1290,7 +1393,7 @@ L_8d8e:
 8d98:    65 a1        unknown
 8d9a:    90 00 7d     liw A, 0x007d
 8d9d:    50 80        add A, indexBase
-8d9f:    75 00        unknown jump Fn_5a1
+8d9f:    75 00        jump A + 0x00
 
 Fn_5a1:
 8da1:    05           flag5
@@ -1301,21 +1404,21 @@ Fn_5a1:
 8da9:    05           flag5
 8daa:    b9           unknown
 8dab:    00           HALT
-8dac:    00           HALT
-8dad:    00           HALT
-
-L_8dae:
-8dae:    00           HALT
-8daf:    00           HALT
-8db0:    00           HALT
-8db1:    ff           unknown
-8db2:    ff           unknown
-8db3:    55 55        alu5 r?, r?
-8db5:    aa           unknown
-8db6:    aa           unknown
-8db7:    00           HALT
-8db8:    00           HALT
-8db9:    80 01        lib A, 0x01
+8dac:    00
+8dad:    00
+8dae:    00
+8daf:    00
+8db0:    00
+8db1:    ff
+8db2:    ff
+8db3:    55
+8db4:    55
+8db5:    aa
+8db6:    aa
+8db7:    00
+8db8:    00
+8db9:    80
+8dba:    01
 
 Entry_CPU6_MAPPING_RAM_TEST:
 8dbb:    90 07 cc     liw A, 0x07cc
@@ -1330,7 +1433,7 @@ Entry_CPU6_MAPPING_RAM_TEST:
 8dfc:    "\r\n*** THIS TEST WILL NOT RUN ON CPU-5 ***\r\n\0"
 8e28:    90 07 8a     liw A, 0x078a
 8e2b:    50 80        add A, indexBase
-8e2d:    75 00        unknown jump L_8e2f
+8e2d:    75 00        jump A + 0x00
 
 L_8e2f:
 8e2f:    90 06 d9     liw A, 0x06d9
@@ -1340,216 +1443,268 @@ L_8e2f:
 8e37:    40 ff        unknown
 8e39:    01           nop
 8e3a:    00           HALT
-8e3b:    02           flag2
-8e3c:    00           HALT
-8e3d:    7b 36        call L_8e75
-8e3f:    01           nop
-8e40:    7b 33        call L_8e75
-8e42:    02           flag2
-8e43:    7b 30        call L_8e75
-8e45:    03           flag3
-8e46:    7b 2d        call L_8e75
-8e48:    04           flag4
-8e49:    7b 2a        call L_8e75
-8e4b:    05           flag5
-8e4c:    7b 27        call L_8e75
-8e4e:    06           flag6
-8e4f:    7b 24        call L_8e75
-8e51:    07           clear_carry?
-8e52:    7b 53        call L_8ea7
-8e54:    7b 1f        call L_8e75
-8e56:    00           HALT
-8e57:    7b 73        call L_8ecc
-8e59:    a1 f1 0a     stb A, 0xf10a
-8e5c:    81 f2 00     ldb A, 0xf200
-8e5f:    2c           rotate_right A
-8e60:    11 cd        b1 L_8e2f
-8e62:    81 f2 01     ldb A, 0xf201
-8e65:    c0 80        lib B, 0x80
-8e67:    43 31        or A, B
-8e69:    c0 83        lib B, 0x83
-8e6b:    49           cmp A, B
-8e6c:    15 c1        b_nz L_8e2f
-8e6e:    90 07 74     liw A, 0x0774
-8e71:    50 80        add A, indexBase
-8e73:    75 00        unknown jump L_8e75
-
-L_8e75:
-8e75:    3a           clear A
-8e76:    85 41        unknown
-8e78:    35 04        unknown
-8e7a:    20 00        unknown
-8e7c:    7e           unknown
-8e7d:    45           unknown
-8e7e:    5c           unknown
-8e7f:    5e           unknown
-8e80:    20 80        unknown
-8e82:    60 00 20     60 A, 0x0020
-
-L_8e85:
-8e85:    d0 01 00     liw B, 0x0100
-
-L_8e88:
-8e88:    8b 28        unknown
-8e8a:    ab           unknown
-8e8b:    ac           unknown
-8e8c:    7b 76        call L_8f04
-8e8e:    7b 49        call Fn_6d9
-8e90:    47           unknown
-8e91:    80 ff        lib A, 0xff
-8e93:    01           nop
-8e94:    00           HALT
-8e95:    02           flag2
-8e96:    00           HALT
-8e97:    15 69        b_nz L_8f02
-8e99:    31 20        unknown
-8e9b:    15 eb        b_nz L_8e88
-8e9d:    30 60        unknown
-8e9f:    30 80        unknown
-8ea1:    3f           unknown
-
-L_8ea2:
-8ea2:    15 e1        b_nz L_8e85
-8ea4:    7f           unknown
-8ea5:    45           unknown
-8ea6:    09           ret
-
-L_8ea7:
-8ea7:    2e           unknown
-8ea8:    1c f8        b_sence2 L_8ea2
-8eaa:    03           flag3
-8eab:    00           HALT
-8eac:    2e           unknown
-8ead:    0c           unknown
-8eae:    f9           unknown
-8eaf:    03           flag3
-8eb0:    00           HALT
-8eb1:    80 01        lib A, 0x01
-
-L_8eb3:
-8eb3:    a5 a2        push_byte A
-8eb5:    2a           unknown
-8eb6:    a5 a2        push_byte A
-8eb8:    6d a2        unknown
-8eba:    a5 a2        push_byte A
-8ebc:    60 06 c2     60 A, 0x06c2
-8ebf:    50 84        unknown
-8ec1:    0f           unknown
-8ec2:    7b 15        call Fn_6d9
-8ec4:    47           unknown
-8ec5:    40 ff        unknown
-8ec7:    01           nop
-
-L_8ec8:
-8ec8:    00           HALT
-8ec9:    02           flag2
-8eca:    00           HALT
-8ecb:    09           ret
-
-L_8ecc:
-8ecc:    2e           unknown
-8ecd:    1c f9        b_sence2 L_8ec8
-8ecf:    03           flag3
-8ed0:    00           HALT
-8ed1:    2e           unknown
-8ed2:    0c           unknown
-8ed3:    f8           unknown
+8e3b:    02
+8e3c:    00
+8e3d:    7b
+8e3e:    36
+8e3f:    01
+8e40:    7b
+8e41:    33
+8e42:    02
+8e43:    7b
+8e44:    30
+8e45:    03
+8e46:    7b
+8e47:    2d
+8e48:    04
+8e49:    7b
+8e4a:    2a
+8e4b:    05
+8e4c:    7b
+8e4d:    27
+8e4e:    06
+8e4f:    7b
+8e50:    24
+8e51:    07
+8e52:    7b
+8e53:    53
+8e54:    7b
+8e55:    1f
+8e56:    00
+8e57:    7b
+8e58:    73
+8e59:    a1
+8e5a:    f1
+8e5b:    0a
+8e5c:    81
+8e5d:    f2
+8e5e:    00
+8e5f:    2c
+8e60:    11
+8e61:    cd
+8e62:    81
+8e63:    f2
+8e64:    01
+8e65:    c0
+8e66:    80
+8e67:    43
+8e68:    31
+8e69:    c0
+8e6a:    83
+8e6b:    49
+8e6c:    15
+8e6d:    c1
+8e6e:    90
+8e6f:    07
+8e70:    74
+8e71:    50
+8e72:    80
+8e73:    75
+8e74:    00
+8e75:    3a
+8e76:    85
+8e77:    41
+8e78:    35
+8e79:    04
+8e7a:    20
+8e7b:    00
+8e7c:    7e
+8e7d:    45
+8e7e:    5c
+8e7f:    5e
+8e80:    20
+8e81:    80
+8e82:    60
+8e83:    00
+8e84:    20
+8e85:    d0
+8e86:    01
+8e87:    00
+8e88:    8b
+8e89:    28
+8e8a:    ab
+8e8b:    ac
+8e8c:    7b
+8e8d:    76
+8e8e:    7b
+8e8f:    49
+8e90:    47
+8e91:    80
+8e92:    ff
+8e93:    01
+8e94:    00
+8e95:    02
+8e96:    00
+8e97:    15
+8e98:    69
+8e99:    31
+8e9a:    20
+8e9b:    15
+8e9c:    eb
+8e9d:    30
+8e9e:    60
+8e9f:    30
+8ea0:    80
+8ea1:    3f
+8ea2:    15
+8ea3:    e1
+8ea4:    7f
+8ea5:    45
+8ea6:    09
+8ea7:    2e
+8ea8:    1c
+8ea9:    f8
+8eaa:    03
+8eab:    00
+8eac:    2e
+8ead:    0c
+8eae:    f9
+8eaf:    03
+8eb0:    00
+8eb1:    80
+8eb2:    01
+8eb3:    a5
+8eb4:    a2
+8eb5:    2a
+8eb6:    a5
+8eb7:    a2
+8eb8:    6d
+8eb9:    a2
+8eba:    a5
+8ebb:    a2
+8ebc:    60
+8ebd:    06
+8ebe:    c2
+8ebf:    50
+8ec0:    84
+8ec1:    0f
+8ec2:    7b
+8ec3:    15
+8ec4:    47
+8ec5:    40
+8ec6:    ff
+8ec7:    01
+8ec8:    00
+8ec9:    02
+8eca:    00
+8ecb:    09
+8ecc:    2e
+8ecd:    1c
+8ece:    f9
+8ecf:    03
+8ed0:    00
+8ed1:    2e
+8ed2:    0c
+8ed3:    f8
 
 L_8ed4:
 8ed4:    03           flag3
 8ed5:    00           HALT
-8ed6:    2a           unknown
-8ed7:    73 da        jump L_8eb3
+8ed6:    2a
+8ed7:    73
+8ed8:    da
 
 Fn_6d9:
 8ed9:    2e           unknown
-
-L_8eda:
 8eda:    1c f8        b_sence2 L_8ed4
 8edc:    01           nop
 8edd:    00           HALT
-8ede:    2e           unknown
-8edf:    1c f9        b_sence2 L_8eda
-8ee1:    01           nop
-8ee2:    20 2e        unknown
-8ee4:    1c fa        b_sence2 L_8ee0
-
-L_8ee6:
-8ee6:    01           nop
-8ee7:    40 2e        unknown
-8ee9:    1c fb        b_sence2 L_8ee6
-8eeb:    01           nop
-8eec:    60 2e 1c     60 A, 0x2e1c
-8eef:    fc           unknown
-8ef0:    01           nop
-8ef1:    80 2e        lib A, 0x2e
-8ef3:    1c fd        b_sence2 L_8ef2
-8ef5:    01           nop
-8ef6:    a0           unknown
-8ef7:    2e           unknown
-
-L_8ef8:
-8ef8:    1c fe        b_sence2 L_8ef8
-8efa:    01           nop
-8efb:    c0 2e        lib B, 0x2e
-8efd:    1c ff        b_sence2 L_8efe
-8eff:    01           nop
-8f00:    e0           unknown
-8f01:    09           ret
-
-L_8f02:
-8f02:    73 29        jump L_8f2d
-
-L_8f04:
-8f04:    2e           unknown
-8f05:    0c           unknown
-8f06:    f8           unknown
-8f07:    01           nop
-8f08:    00           HALT
-8f09:    2e           unknown
-8f0a:    0c           unknown
-8f0b:    f9           unknown
-8f0c:    01           nop
-8f0d:    20 2e        unknown
-8f0f:    0c           unknown
-8f10:    fa           unknown
-8f11:    01           nop
-8f12:    40 2e        unknown
-8f14:    0c           unknown
-8f15:    fb           unknown
-8f16:    01           nop
-8f17:    60 2e 0c     60 A, 0x2e0c
-8f1a:    fc           unknown
-8f1b:    01           nop
-8f1c:    80 2e        lib A, 0x2e
-8f1e:    0c           unknown
-8f1f:    fd           unknown
-8f20:    01           nop
-8f21:    a0           unknown
-8f22:    2e           unknown
-8f23:    0c           unknown
-8f24:    fe           unknown
-8f25:    01           nop
-8f26:    c0 2e        lib B, 0x2e
-8f28:    0c           unknown
-8f29:    ff           unknown
-8f2a:    01           nop
-8f2b:    e0           unknown
-8f2c:    09           ret
-
-L_8f2d:
-8f2d:    7f           unknown
-8f2e:    45           unknown
-8f2f:    65 a1        unknown
-8f31:    90 07 cc     liw A, 0x07cc
-8f34:    50 80        add A, indexBase
-8f36:    7d 00        call A + 0x00
+8ede:    2e
+8edf:    1c
+8ee0:    f9
+8ee1:    01
+8ee2:    20
+8ee3:    2e
+8ee4:    1c
+8ee5:    fa
+8ee6:    01
+8ee7:    40
+8ee8:    2e
+8ee9:    1c
+8eea:    fb
+8eeb:    01
+8eec:    60
+8eed:    2e
+8eee:    1c
+8eef:    fc
+8ef0:    01
+8ef1:    80
+8ef2:    2e
+8ef3:    1c
+8ef4:    fd
+8ef5:    01
+8ef6:    a0
+8ef7:    2e
+8ef8:    1c
+8ef9:    fe
+8efa:    01
+8efb:    c0
+8efc:    2e
+8efd:    1c
+8efe:    ff
+8eff:    01
+8f00:    e0
+8f01:    09
+8f02:    73
+8f03:    29
+8f04:    2e
+8f05:    0c
+8f06:    f8
+8f07:    01
+8f08:    00
+8f09:    2e
+8f0a:    0c
+8f0b:    f9
+8f0c:    01
+8f0d:    20
+8f0e:    2e
+8f0f:    0c
+8f10:    fa
+8f11:    01
+8f12:    40
+8f13:    2e
+8f14:    0c
+8f15:    fb
+8f16:    01
+8f17:    60
+8f18:    2e
+8f19:    0c
+8f1a:    fc
+8f1b:    01
+8f1c:    80
+8f1d:    2e
+8f1e:    0c
+8f1f:    fd
+8f20:    01
+8f21:    a0
+8f22:    2e
+8f23:    0c
+8f24:    fe
+8f25:    01
+8f26:    c0
+8f27:    2e
+8f28:    0c
+8f29:    ff
+8f2a:    01
+8f2b:    e0
+8f2c:    09
+8f2d:    7f
+8f2e:    45
+8f2f:    65
+8f30:    a1
+8f31:    90
+8f32:    07
+8f33:    cc
+8f34:    50
+8f35:    80
+8f36:    7d
+8f37:    00
 8f38:    "\r\n*** MAP RAM ERROR ***\r\n\0"
 8f52:    a1 f1 0b     stb A, 0xf10b
 8f55:    a1 f1 0c     stb A, 0xf10c
 8f58:    90 07 8a     liw A, 0x078a
 8f5b:    50 80        add A, indexBase
-8f5d:    75 00        unknown jump Entry_ROM_SELF_TEST
+8f5d:    75 00        jump A + 0x00
 
 Entry_ROM_SELF_TEST:
 8f5f:    55 86        alu5 r?, r?
@@ -1578,7 +1733,7 @@ WaitForKey:
 8f9e:    2c           rotate_right A
 8f9f:    11 fa        b1 WaitForKey
 8fa1:    81 f2 01     ldb A, 0xf201
-8fa4:    75 40        unknown jump L_8fe6
+8fa4:    75 40        jump A + 0x40
 
 ChecksumFail:
 8fa6:    7b 24        call WriteString
@@ -1592,7 +1747,7 @@ WriteString:
 8fcf:    2c           rotate_right A
 8fd0:    2c           rotate_right A
 8fd1:    11 f9        b1 WriteString
-8fd3:    85 41        unknown
+8fd3:    85 41        ldb A, [sp]++
 8fd5:    15 01        b_nz L_8fd8
 8fd7:    09           ret
 

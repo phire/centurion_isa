@@ -21,7 +21,7 @@ ef20:    80 03        lib A, 0x03
 ef22:    7b 06        call L_ef2a
 ef24:    80 00        lib A, 0x00
 ef26:    7b 02        call L_ef2a
-ef28:    75 a0        unknown jump L_eeca
+ef28:    75 a0        jump A + 0xa0
 
 L_ef2a:
 ef2a:    a1 f1 48     stb A, 0xf148
@@ -34,7 +34,7 @@ ef33:    10 f8        b0 L_ef2d
 ef35:    81 f1 45     ldb A, 0xf145
 ef38:    c0 30        lib B, 0x30
 ef3a:    42 31        and A, B
-ef3c:    49           cmp A, B
+ef3c:    49           cmp B, A
 ef3d:    15 ee        b_nz L_ef2d
 ef3f:    09           ret
 
@@ -72,7 +72,7 @@ efe7:    15 e2        b_nz L_efcb
 efe9:    45           unknown
 efea:    99           unknown
 efeb:    15 e1        b_nz L_efce
-efed:    75 60        unknown jump L_f04f
+efed:    75 60        jump A + 0x60
 
 L_efef:
 efef:    85 c8        unknown

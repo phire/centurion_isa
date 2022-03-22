@@ -1,48 +1,49 @@
 8000:    00           HALT
 
-L_8001:
+DiagEntryPoint:
 8001:    3a           clear A
-8002:    b1 b8 00     stw A, 0xb800 ; Probally setting the 7 segment LEDs to 0 0
+8002:    b1 b8 00     stw A, 0xb800 ; This is the first word in Diag's 1KB of RAM
 8005:    05           flag5
 8006:    0e           delay 4.5ms
 8007:    a1 f1 4f     stb A, 0xf14f
 800a:    a1 f2 0d     stb A, 0xf20d
 800d:    a1 f2 0f     stb A, 0xf20f
 8010:    90 c0 00     liw A, 0xc000
-8013:    5f           mov sp, A
+8013:    5f           mov sp, A ; Set stack pointer just beyond top of Diag's 1KB of RAM
 8014:    22 32        unknown
 8016:    14 0b        b_z L_8023
 8018:    90 80 77     liw A, 0x8077
-801b:    b1 00 fe     stw A, 0x00fe
+801b:    b1 00 fe     stw A, 0x00fe ; This is writing a pointer directly into registers.
 801e:    3a           clear A
-801f:    b1 00 fc     stw A, 0x00fc
-8022:    76           unknown
+801f:    b1 00 fc     stw A, 0x00fc ; Something really funky is going on here.
+8022:    76           unknown ; I assume this is calling or jumpting to that function
 
 L_8023:
 8023:    3a           clear A
-8024:    a1 f1 09     stb A, 0xf109
-8027:    a1 f1 0b     stb A, 0xf10b
-802a:    a1 f1 0d     stb A, 0xf10d
-802d:    a1 f1 0f     stb A, 0xf10f
-8030:    81 f1 10     ldb A, 0xf110
+8024:    a1 f1 09     stb A, 0xf109 ; Turn Decimal Point 1 off
+8027:    a1 f1 0b     stb A, 0xf10b ; Turn Decimal Point 2 off
+802a:    a1 f1 0d     stb A, 0xf10d ; Turn Decimal Point 3 off
+802d:    a1 f1 0f     stb A, 0xf10f ; Turn Decimal Point 4 off
+8030:    81 f1 10     ldb A, 0xf110 ; A = Dip swiches value
 8033:    c0 0f        lib B, 0x0f
-8035:    42 31        and A, B
-8037:    a1 f1 10     stb A, 0xf110
-803a:    a1 f1 06     stb A, 0xf106
+8035:    42 31        and A, B ; A = A & 0x0f
+8037:    a1 f1 10     stb A, 0xf110 ; Write A to hex displays
+803a:    a1 f1 06     stb A, 0xf106 ; Unblank the hex displys
 803d:    c0 0d        lib B, 0x0d
-803f:    49           cmp A, B
+803f:    49           cmp B, A ; Compare with 0b1011
 8040:    15 03        b_nz L_8045
-8042:    71 87 28     jump 0x8728 AuxiliaryTestMenu
+8042:    71 87 28     jump 0x8728 AuxiliaryTestMenu ; If dipswitches == 0xb111: 
+                                                    ;     Display Auxiliary Test Menu
 
 L_8045:
-8045:    c1 f1 10     c1 A, 0xf110
-8048:    16 b7        b_lt L_8001
+8045:    c1 f1 10     ldb B, 0xf110
+8048:    16 b7        b_lt DiagEntryPoint
 804a:    3d           unknown
 804b:    d0 80 55     liw B, 0x8055
 804e:    58           unknown
 804f:    99           unknown
 8050:    a1 f1 08     stb A, 0xf108
-8053:    75 00        unknown jump 0x8055
+8053:    75 00        jump A + 0x00
 8055:    80 01        lib A, 0x01
 8057:    80 8e        lib A, 0x8e
 8059:    81 1b 81     ldb A, 0x1b81
@@ -63,7 +64,7 @@ L_8045:
 8073:    80 01        lib A, 0x01
 
 L_8075:
-8075:    73 8a        jump L_8001
+8075:    73 8a        jump DiagEntryPoint
 
 L_8077:
 8077:    2d           unknown
@@ -172,7 +173,7 @@ L_8102:
 L_8112:
 8112:    81 f1 10     ldb A, 0xf110
 8115:    c0 0f        lib B, 0x0f
-8117:    4a           unknown
+8117:    4a           and B, A
 8118:    14 c7        b_z L_80e1
 811a:    09           ret
 
@@ -238,7 +239,7 @@ L_8166:
 816d:    7b c8        call L_8137
 816f:    73 aa        jump L_811b
 8171:    c0 04        lib B, 0x04
-8173:    49           cmp A, B
+8173:    49           cmp B, A
 8174:    14 03        b_z L_8179
 8176:    71 80 77     jump 0x8077 L_8077
 
@@ -295,7 +296,7 @@ L_81a6:
 81cc:    14 b5        b_z L_8183
 
 L_81ce:
-81ce:    71 80 01     jump 0x8001 L_8001
+81ce:    71 80 01     jump 0x8001 DiagEntryPoint
 81d1:    45           unknown
 81d2:    51 28        sub? r?, r?
 81d4:    28           unknown
@@ -318,7 +319,7 @@ L_81e1:
 81eb:    29           unknown
 81ec:    29           unknown
 81ed:    14 03        b_z L_81f2
-81ef:    71 80 01     jump 0x8001 L_8001
+81ef:    71 80 01     jump 0x8001 DiagEntryPoint
 
 L_81f2:
 81f2:    81 f2 00     ldb A, 0xf200
@@ -342,9 +343,9 @@ L_8208:
 820b:    81 f1 10     ldb A, 0xf110
 820e:    42 01        unknown
 8210:    c0 05        lib B, 0x05
-8212:    49           cmp A, B
+8212:    49           cmp B, A
 8213:    14 03        b_z L_8218
-8215:    71 80 01     jump 0x8001 L_8001
+8215:    71 80 01     jump 0x8001 DiagEntryPoint
 
 L_8218:
 8218:    81 f2 00     ldb A, 0xf200
@@ -359,7 +360,7 @@ L_8218:
 L_8229:
 8229:    81 f2 00     ldb A, 0xf200
 822c:    c0 1c        lib B, 0x1c
-822e:    4a           unknown
+822e:    4a           and B, A
 822f:    15 05        b_nz L_8236
 8231:    a1 f1 0a     stb A, 0xf10a
 8234:    3e           unknown
@@ -391,9 +392,9 @@ L_825f:
 8262:    81 f1 10     ldb A, 0xf110
 8265:    42 01        unknown
 8267:    c0 06        lib B, 0x06
-8269:    49           cmp A, B
+8269:    49           cmp B, A
 826a:    14 f3        b_z L_825f
-826c:    71 80 01     jump 0x8001 L_8001
+826c:    71 80 01     jump 0x8001 DiagEntryPoint
 
 L_826f:
 826f:    81 f2 0f     ldb A, 0xf20f
@@ -420,11 +421,11 @@ L_8286:
 8292:    a1 f1 42     stb A, 0xf142
 8295:    28           unknown
 8296:    a1 f1 43     stb A, 0xf143
-8299:    c1 f1 40     c1 A, 0xf140
+8299:    c1 f1 40     ldb B, 0xf140
 829c:    80 07        lib A, 0x07
-829e:    4a           unknown
+829e:    4a           and B, A
 829f:    42 71        unknown
-82a1:    49           cmp A, B
+82a1:    49           cmp B, A
 82a2:    15 38        b_nz L_82dc
 82a4:    20 70        unknown
 82a6:    c0 27        lib B, 0x27
@@ -442,12 +443,12 @@ L_8286:
 82c1:    41 71        unknown
 82c3:    15 19        b_nz L_82de
 82c5:    80 0f        lib A, 0x0f
-82c7:    c1 f1 10     c1 A, 0xf110
-82ca:    4a           unknown
+82c7:    c1 f1 10     ldb B, 0xf110
+82ca:    4a           and B, A
 82cb:    80 07        lib A, 0x07
-82cd:    49           cmp A, B
+82cd:    49           cmp B, A
 82ce:    14 03        b_z L_82d3
-82d0:    71 80 01     jump 0x8001 L_8001
+82d0:    71 80 01     jump 0x8001 DiagEntryPoint
 
 L_82d3:
 82d3:    20 50        unknown
@@ -479,11 +480,11 @@ L_82ef:
 82f7:    15 3a        b_nz L_8333
 82f9:    81 f1 10     ldb A, 0xf110
 82fc:    c0 0f        lib B, 0x0f
-82fe:    4a           unknown
+82fe:    4a           and B, A
 82ff:    80 08        lib A, 0x08
-8301:    49           cmp A, B
+8301:    49           cmp B, A
 8302:    14 03        b_z L_8307
-8304:    71 80 01     jump 0x8001 L_8001
+8304:    71 80 01     jump 0x8001 DiagEntryPoint
 
 L_8307:
 8307:    3e           unknown
@@ -504,11 +505,11 @@ L_8312:
 831a:    15 17        b_nz L_8333
 831c:    81 f1 10     ldb A, 0xf110
 831f:    c0 0f        lib B, 0x0f
-8321:    4a           unknown
+8321:    4a           and B, A
 8322:    80 08        lib A, 0x08
-8324:    49           cmp A, B
+8324:    49           cmp B, A
 8325:    14 03        b_z L_832a
-8327:    71 80 01     jump 0x8001 L_8001
+8327:    71 80 01     jump 0x8001 DiagEntryPoint
 
 L_832a:
 832a:    3f           unknown
@@ -548,7 +549,7 @@ L_8356:
 
 L_835c:
 835c:    d0 20 00     liw B, 0x2000
-835f:    c1 f1 45     c1 A, 0xf145
+835f:    c1 f1 45     ldb B, 0xf145
 8362:    42 23        unknown
 8364:    15 08        b_nz L_836e
 8366:    0e           delay 4.5ms
@@ -595,7 +596,7 @@ L_837f:
 839e:    a1 f1 48     stb A, 0xf148
 83a1:    79 84 52     call L_8452
 83a4:    c0 20        lib B, 0x20
-83a6:    4a           unknown
+83a6:    4a           and B, A
 83a7:    15 19        b_nz L_83c2
 83a9:    4d           unknown
 83aa:    15 04        b_nz L_83b0
@@ -632,9 +633,9 @@ L_83d6:
 83d6:    d0 0f 09     liw B, 0x0f09
 83d9:    81 f1 10     ldb A, 0xf110
 83dc:    42 21        unknown
-83de:    49           cmp A, B
+83de:    49           cmp B, A
 83df:    14 03        b_z L_83e4
-83e1:    71 80 01     jump 0x8001 L_8001
+83e1:    71 80 01     jump 0x8001 DiagEntryPoint
 
 L_83e4:
 83e4:    2a           unknown
@@ -684,7 +685,7 @@ L_8422:
 L_842e:
 842e:    90 00 0f     liw A, 0x000f
 8431:    50 40        unknown
-8433:    d1 f1 41     d1 A, 0xf141
+8433:    d1 f1 41     ldw A, 0xf141
 8436:    59           unknown
 8437:    14 04        b_z L_843d
 8439:    c0 f9        lib B, 0xf9
@@ -708,7 +709,7 @@ L_8452:
 8452:    90 01 90     liw A, 0x0190
 
 L_8455:
-8455:    c1 f1 44     c1 A, 0xf144
+8455:    c1 f1 44     ldb B, 0xf144
 8458:    24 30        unknown
 845a:    11 07        b1 L_8463
 845c:    0e           delay 4.5ms
@@ -734,6 +735,8 @@ L_8467:
 847c:    6d 01        unknown
 847e:    55 62        alu5 r?, r?
 8480:    f5 01        unknown
+
+TOS_Entry:
 8482:    55 82        alu5 r?, r?
 8484:    f5 01        unknown
 8486:    55 a2        alu5 r?, r?
@@ -745,35 +748,35 @@ L_8467:
 8492:    55 e2        alu5 r?, r?
 8494:    f5 01        unknown
 8496:    80 c5        lib A, 0xc5
-8498:    a1 f2 00     stb A, 0xf200
+8498:    a1 f2 00     stb A, 0xf200 ; Configure UART
 849b:    85 a1        pop_byte A
-849d:    7b 7a        call WriteHexWord
+849d:    7b 7a        call WriteHexByte
 849f:    85 a1        pop_byte A
-84a1:    7b 76        call WriteHexWord
+84a1:    7b 76        call WriteHexByte
 
-L_84a3:
-84a3:    c0 5c        lib B, 0x5c
+TOS_PromptLoop:
+84a3:    c0 5c        lib B, 0x5c ; ''
 84a5:    7b 67        call WriteByte
-84a7:    7b 57        call L_8500
+84a7:    7b 57        call ReadByteWithEcho
 84a9:    45           unknown
 84aa:    31 c0        unknown
 84ac:    4d           unknown
-84ad:    49           cmp A, B
+84ad:    49           cmp B, A
 84ae:    14 33        b_z L_84e3
-84b0:    c0 47        lib B, 0x47
-84b2:    49           cmp A, B
-84b3:    14 0a        b_z L_84bf
-84b5:    c0 51        lib B, 0x51
-84b7:    49           cmp A, B
-84b8:    15 e9        b_nz L_84a3
-84ba:    90 80 01     liw A, 0x8001
-84bd:    73 04        jump L_84c3
+84b0:    c0 47        lib B, 0x47 ; 'G'
+84b2:    49           cmp B, A
+84b3:    14 0a        b_z G_Command
+84b5:    c0 51        lib B, 0x51 ; 'Q'
+84b7:    49           cmp B, A
+84b8:    15 e9        b_nz TOS_PromptLoop
+84ba:    90 80 01     liw A, 0x8001 ; Start of ROM
+84bd:    73 04        jump Q_Command
 
-L_84bf:
-84bf:    7b 79        call L_853a
+G_Command:
+84bf:    7b 79        call ReadHexWord
 84c1:    55 80        alu5 r?, r?
 
-L_84c3:
+Q_Command:
 84c3:    b1 00 20     stw A, 0x0020
 84c6:    d0 00 1e     liw B, 0x001e
 84c9:    99           unknown
@@ -795,7 +798,7 @@ L_84c3:
 84e2:    20
 
 L_84e3:
-84e3:    7b 55        call L_853a
+84e3:    7b 55        call ReadHexWord
 84e5:    55 86        alu5 r?, r?
 
 L_84e7:
@@ -811,18 +814,18 @@ L_84e7:
 84f8:    73 f0        jump L_84ea
 
 L_84fa:
-84fa:    11 a7        b1 L_84a3
+84fa:    11 a7        b1 TOS_PromptLoop
 84fc:    30 60        unknown
 84fe:    73 e7        jump L_84e7
 
-L_8500:
-8500:    7b 55        call L_8557
+ReadByteWithEcho:
+8500:    7b 55        call CheckForReset ; Jumps back to the start of F1 if some condition is met
 8502:    81 f2 00     ldb A, 0xf200
 8505:    2c           rotate_right A
-8506:    11 f8        b1 L_8500
+8506:    11 f8        b1 ReadByteWithEcho
 8508:    81 f2 01     ldb A, 0xf201
 850b:    c0 7f        lib B, 0x7f
-850d:    4a           unknown
+850d:    4a           and B, A
 
 WriteByte:
 850e:    81 f2 00     ldb A, 0xf200
@@ -832,13 +835,13 @@ WriteByte:
 8515:    e1 f2 01     stb B, 0xf201
 8518:    09           ret
 
-WriteHexWord:
-8519:    7b 05        call WriteHexByte
+WriteHexByte:
+8519:    7b 05        call WriteHexNibble
 851b:    45 01        swap_bytes A
-851d:    7b 01        call WriteHexByte
+851d:    7b 01        call WriteHexNibble
 851f:    09           ret
 
-WriteHexByte:
+WriteHexNibble:
 8520:    22 00        unknown
 8522:    36 00        unknown
 8524:    36 00        unknown
@@ -846,7 +849,7 @@ WriteHexByte:
 8528:    36 00        unknown
 852a:    26 00        unknown
 852c:    c0 0a        lib B, 0x0a
-852e:    49           cmp A, B
+852e:    49           cmp B, A
 852f:    16 05        b_lt L_8536
 8531:    c0 37        lib B, 0x37
 
@@ -858,14 +861,14 @@ L_8536:
 8536:    c0 30        lib B, 0x30
 8538:    73 f9        jump L_8533
 
-L_853a:
+ReadHexWord:
 853a:    3a           clear A
 853b:    5e           unknown
-853c:    a1 bf 92     stb A, 0xbf92
+853c:    a1 bf 92     stb A, 0xbf92 ; This is a DIAG IO port
 
 L_853f:
-853f:    7b bf        call L_8500
-8541:    7b 25        call L_8568
+853f:    7b bf        call ReadByteWithEcho
+8541:    7b 25        call AsciiToHexNibble
 8543:    17 01        b7 L_8546
 8545:    09           ret
 
@@ -874,36 +877,37 @@ L_8546:
 8548:    35 80        unknown
 854a:    35 80        unknown
 854c:    35 80        unknown
-854e:    43 19        unknown
-8550:    80 01        lib A, 0x01
+854e:    43           or A, B
+854f:    19 80        b_le L_85d1
+8551:    01           nop
 8552:    a1 bf 92     stb A, 0xbf92
 8555:    73 e8        jump L_853f
 
-L_8557:
+CheckForReset:
 8557:    80 0f        lib A, 0x0f
-8559:    c1 f1 10     c1 A, 0xf110
-855c:    4a           unknown
+8559:    c1 f1 10     ldb B, 0xf110
+855c:    4a           and B, A
 855d:    80 0a        lib A, 0x0a
-855f:    49           cmp A, B
+855f:    49           cmp B, A
 8560:    15 01        b_nz L_8563
 8562:    09           ret
 
 L_8563:
-8563:    71 80 01     jump 0x8001 L_8001
+8563:    71 80 01     jump 0x8001 DiagEntryPoint
 
 WriteByteTramp:
 8566:    73 a6        jump WriteByte
 
-L_8568:
+AsciiToHexNibble:
 8568:    45           unknown
 8569:    31 c0        unknown
 856b:    30 49        unknown
 856d:    16 13        b_lt L_8582
 856f:    c0 47        lib B, 0x47
-8571:    49           cmp A, B
+8571:    49           cmp B, A
 8572:    17 1e        b7 L_8592
 8574:    c0 40        lib B, 0x40
-8576:    4a           unknown
+8576:    4a           and B, A
 8577:    14 04        b_z L_857d
 8579:    c0 09        lib B, 0x09
 857b:    40 31        add A, B
@@ -915,14 +919,14 @@ L_857d:
 
 L_8582:
 8582:    c0 20        lib B, 0x20
-8584:    49           cmp A, B
+8584:    49           cmp B, A
 8585:    15 02        b_nz L_8589
 8587:    2b           unknown
 8588:    09           ret
 
 L_8589:
 8589:    c0 2c        lib B, 0x2c
-858b:    49           cmp A, B
+858b:    49           cmp B, A
 858c:    15 04        b_nz L_8592
 858e:    02           flag2
 858f:    07           clear_carry?
@@ -946,28 +950,39 @@ L_8592:
 85ac:    a1 f2 01     stb A, 0xf201
 85af:    0e           delay 4.5ms
 85b0:    0e           delay 4.5ms
-
-L_85b1:
 85b1:    7b 70        call WriteString
 85b3:    "D=\0"
-85b6:    7b 7c        call ReadChar
-85b8:    c0 c8        lib B, 0xc8
-85ba:    49           cmp A, B
-85bb:    e5 a2        unknown
-85bd:    14 05        b_z L_85c4
-85bf:    c0 c6        lib B, 0xc6
-85c1:    49           cmp A, B
-85c2:    15 4e        b_nz L_8612
+85b6:    7b
+85b7:    7c
+85b8:    c0
+85b9:    c8
+85ba:    49
+85bb:    e5
+85bc:    a2
+85bd:    14
+85be:    05
+85bf:    c0
+85c0:    c6
+85c1:    49
+85c2:    15
+85c3:    4e
+85c4:    7b
+85c5:    6e
+85c6:    c0
+85c7:    50
+85c8:    40
+85c9:    31
+85ca:    16
+85cb:    46
+85cc:    c5
+85cd:    a1
+85ce:    14
+85cf:    7d
+85d0:    c0
 
-L_85c4:
-85c4:    7b 6e        call ReadChar
-85c6:    c0 50        lib B, 0x50
-85c8:    40 31        add A, B
-85ca:    16 46        b_lt L_8612
-85cc:    c5 a1        unknown
-85ce:    14 7d        b_z L_864d
-85d0:    c0 03        lib B, 0x03
-85d2:    49           cmp A, B
+L_85d1:
+85d1:    03           flag3
+85d2:    49           cmp B, A
 85d3:    18 3d        b_gt L_8612
 85d5:    d0 0f 00     liw B, 0x0f00
 85d8:    f5 a2        unknown
@@ -991,9 +1006,8 @@ L_85eb:
 85f8:    90 ff f6     liw A, 0xfff6
 85fb:    2f 02        unknown
 85fd:    7b 22        call L_8621
-85ff:    43 90        unknown
-8601:    01           nop
-8602:    00           HALT
+85ff:    43           or A, B
+8600:    90 01 00     liw A, 0x0100
 8603:    2f 00        unknown
 8605:    90 f0 ff     liw A, 0xf0ff
 8608:    2f 02        unknown
@@ -1007,8 +1021,9 @@ L_860f:
 L_8612:
 8612:    7b 0f        call WriteString
 8614:    "\r\nERROR\r\n\0"
-861e:    07           clear_carry?
-861f:    73 90        jump L_85b1
+861e:    07
+861f:    73
+8620:    90
 
 L_8621:
 8621:    73 67        jump L_868a
@@ -1018,7 +1033,7 @@ WriteString:
 8626:    2c           rotate_right A
 8627:    2c           rotate_right A
 8628:    11 f9        b1 WriteString
-862a:    85 41        unknown
+862a:    85 41        ldb A, [sp]++
 862c:    15 01        b_nz L_862f
 862e:    09           ret
 
@@ -1033,9 +1048,10 @@ ReadChar:
 8639:    11 f9        b1 ReadChar
 863b:    84 f3        ldb A, [[pc-13]]
 863d:    c0 80        lib B, 0x80
-863f:    43 31        or A, B
-8641:    c0 e0        lib B, 0xe0
-8643:    49           cmp A, B
+863f:    43           or A, B
+8640:    31 c0        unknown
+8642:    e0           unknown
+8643:    49           cmp B, A
 8644:    16 04        b_lt L_864a
 8646:    c0 df        lib B, 0xdf
 8648:    42 31        and A, B
@@ -1043,10 +1059,8 @@ ReadChar:
 L_864a:
 864a:    a4 e4        unknown
 864c:    09           ret
-
-L_864d:
 864d:    c0 07        lib B, 0x07
-864f:    49           cmp A, B
+864f:    49           cmp B, A
 8650:    18 c0        b_gt L_8612
 8652:    a1 f1 40     stb A, 0xf140
 8655:    94 2d        unknown
@@ -1079,7 +1093,7 @@ L_8664:
 8688:    73 85        jump L_860f
 
 L_868a:
-868a:    85 41        unknown
+868a:    85 41        ldb A, [sp]++
 868c:    a1 f8 00     stb A, 0xf800
 
 L_868f:
@@ -1090,7 +1104,7 @@ L_868f:
 8697:    09           ret
 
 L_8698:
-8698:    85 41        unknown
+8698:    85 41        ldb A, [sp]++
 869a:    a1 f1 48     stb A, 0xf148
 
 L_869d:
@@ -1101,30 +1115,30 @@ L_869d:
 
 L_86a3:
 86a3:    80 0f        lib A, 0x0f
-86a5:    c1 f1 10     c1 A, 0xf110
-86a8:    4a           unknown
+86a5:    c1 f1 10     ldb B, 0xf110
+86a8:    4a           and B, A
 86a9:    80 0b        lib A, 0x0b
-86ab:    49           cmp A, B
+86ab:    49           cmp B, A
 86ac:    15 01        b_nz L_86af
 86ae:    09           ret
 
 L_86af:
-86af:    71 80 01     jump 0x8001 L_8001
+86af:    71 80 01     jump 0x8001 DiagEntryPoint
 
 L_86b2:
 86b2:    d0 0f 0c     liw B, 0x0f0c
 86b5:    81 f1 10     ldb A, 0xf110
 86b8:    42 21        unknown
-86ba:    49           cmp A, B
+86ba:    49           cmp B, A
 86bb:    14 03        b_z L_86c0
-86bd:    71 80 01     jump 0x8001 L_8001
+86bd:    71 80 01     jump 0x8001 DiagEntryPoint
 
 L_86c0:
 86c0:    60 80 00     60 A, 0x8000
 86c3:    3a           clear A
 
 L_86c4:
-86c4:    85 41        unknown
+86c4:    85 41        ldb A, [sp]++
 86c6:    40 10        unknown
 86c8:    d0 87 f9     liw B, 0x87f9
 86cb:    51 42        sub? r?, r?
@@ -1196,104 +1210,167 @@ AuxiliaryTestMenu:
 8730:    0e           delay 4.5ms
 8731:    79 86 23     call WriteString
 8734:    "\x0c\x1b\x1cAUXILIARY TESTS\r\n\n\0"
-874a:    60 88 00     60 A, 0x8800
-874d:    3a           clear A
-874e:    5c           unknown
+874a:    60
+874b:    88
+874c:    00
+874d:    3a
+874e:    5c
+874f:    95
+8750:    41
+8751:    19
+8752:    21
+8753:    d0
+8754:    07
+8755:    ff
+8756:    59
+8757:    18
+8758:    1b
+8759:    30
+875a:    60
+875b:    d0
+875c:    f8
+875d:    00
+875e:    52
+875f:    42
+8760:    50
+8761:    20
+8762:    b5
+8763:    a2
+8764:    55
+8765:    60
+8766:    79
+8767:    85
+8768:    19
+8769:    c0
+876a:    bd
+876b:    79
+876c:    85
+876d:    0e
+876e:    c5
+876f:    41
+8770:    15
+8771:    f9
+8772:    73
+8773:    db
 
-L_874f:
-874f:    95 41        unknown
-8751:    19 21        b_le L_8774
-8753:    d0 07 ff     liw B, 0x07ff
-8756:    59           unknown
-8757:    18 1b        b_gt L_8774
-8759:    30 60        unknown
-875b:    d0 f8 00     liw B, 0xf800 ; will wrap around to 0x800, the length of each ROM
-875e:    52           unknown
-875f:    42 50        unknown
-8761:    20 b5        unknown
-8763:    a2 55 60     push_word 0x5560
-8766:    79 85 19     call WriteHexWord
-8769:    c0 bd        lib B, 0xbd ; '='
-
-L_876b:
-876b:    79 85 0e     call WriteByte
-876e:    c5 41        unknown
-8770:    15 f9        b_nz L_876b ; While byte from serial != '='
-8772:    73 db        jump L_874f
-
-L_8774:
-8774:    d0 f8 00     liw B, 0xf800 ; will wrap around to 0x800, the length of each ROM
-8777:    52           unknown
-8778:    24 90        unknown
-877a:    08           flag8
-877b:    00           HALT
-877c:    50 04        unknown
-877e:    90 f0 00     liw A, 0xf000
-8781:    51 40        sub? r?, r?
-8783:    15 ca        b_nz L_874f
-8785:    79 86 23     call WriteString
+NextRom:
+8774:    d0
+8775:    f8
+8776:    00
+8777:    52
+8778:    24
+8779:    90
+877a:    08
+877b:    00
+877c:    50
+877d:    04
+877e:    90
+877f:    f0
+8780:    00
+8781:    51
+8782:    40
+8783:    15
+8784:    ca
+8785:    79
+8786:    86
+8787:    23
 8788:    "\r\nENTER TEST NUMBER:\0"
-879d:    32 40        unknown
-
-L_879f:
-879f:    80 0f        lib A, 0x0f
-87a1:    c1 f1 10     c1 A, 0xf110
-87a4:    4a           unknown
-87a5:    80 0d        lib A, 0x0d
-87a7:    49           cmp A, B
-87a8:    14 03        b_z L_87ad
-87aa:    71 80 01     jump 0x8001 L_8001
-
-L_87ad:
-87ad:    81 f2 00     ldb A, 0xf200
-87b0:    2c           rotate_right A
-87b1:    11 ec        b1 L_879f
-87b3:    c1 f2 01     c1 A, 0xf201
-87b6:    80 5f        lib A, 0x5f
-87b8:    41 31        unknown
-87ba:    19 03        b_le L_87bf
-87bc:    80 df        lib A, 0xdf
-87be:    4a           unknown
-
-L_87bf:
-87bf:    e1 f2 01     stb B, 0xf201
-87c2:    79 85 68     call L_8568
-87c5:    16 0c        b_lt L_87d3
-87c7:    35 40        unknown
-87c9:    35 40        unknown
-87cb:    35 40        unknown
-87cd:    35 40        unknown
-87cf:    43 15        unknown
-87d1:    73 cc        jump L_879f
-
-L_87d3:
-87d3:    55 40        alu5 r?, r?
-87d5:    18 03        b_gt L_87da
-
-L_87d7:
-87d7:    71 87 28     jump 0x8728 AuxiliaryTestMenu
-
-L_87da:
-87da:    51 60        sub? r?, r?
-87dc:    16 f9        b_lt L_87d7
-87de:    55 40        alu5 r?, r?
-87e0:    3d           unknown
-87e1:    3b           unknown
-87e2:    38           unknown
-87e3:    d0 c0 00     liw B, 0xc000
-87e6:    50 20        unknown
-87e8:    98           unknown
-87e9:    55 2a        alu5 r?, r?
-87eb:    60 80 01     60 A, 0x8001
-87ee:    d0 f8 00     liw B, 0xf800
-87f1:    5a           unknown
-87f2:    55 28        alu5 r?, r?
-87f4:    a1 f1 0e     stb A, 0xf10e
-87f7:    75 00        unknown jump 0x87f9
-87f9:    3e           unknown
-87fa:    00           HALT
-87fb:    00           HALT
-87fc:    00           HALT
-87fd:    00           HALT
-87fe:    00           HALT
-87ff:    00           HALT
+879d:    32
+879e:    40
+879f:    80
+87a0:    0f
+87a1:    c1
+87a2:    f1
+87a3:    10
+87a4:    4a
+87a5:    80
+87a6:    0d
+87a7:    49
+87a8:    14
+87a9:    03
+87aa:    71
+87ab:    80
+87ac:    01
+87ad:    81
+87ae:    f2
+87af:    00
+87b0:    2c
+87b1:    11
+87b2:    ec
+87b3:    c1
+87b4:    f2
+87b5:    01
+87b6:    80
+87b7:    5f
+87b8:    41
+87b9:    31
+87ba:    19
+87bb:    03
+87bc:    80
+87bd:    df
+87be:    4a
+87bf:    e1
+87c0:    f2
+87c1:    01
+87c2:    79
+87c3:    85
+87c4:    68
+87c5:    16
+87c6:    0c
+87c7:    35
+87c8:    40
+87c9:    35
+87ca:    40
+87cb:    35
+87cc:    40
+87cd:    35
+87ce:    40
+87cf:    43
+87d0:    15
+87d1:    73
+87d2:    cc
+87d3:    55
+87d4:    40
+87d5:    18
+87d6:    03
+87d7:    71
+87d8:    87
+87d9:    28
+87da:    51
+87db:    60
+87dc:    16
+87dd:    f9
+87de:    55
+87df:    40
+87e0:    3d
+87e1:    3b
+87e2:    38
+87e3:    d0
+87e4:    c0
+87e5:    00
+87e6:    50
+87e7:    20
+87e8:    98
+87e9:    55
+87ea:    2a
+87eb:    60
+87ec:    80
+87ed:    01
+87ee:    d0
+87ef:    f8
+87f0:    00
+87f1:    5a
+87f2:    55
+87f3:    28
+87f4:    a1
+87f5:    f1
+87f6:    0e
+87f7:    75
+87f8:    00
+87f9:    3e
+87fa:    00
+87fb:    00
+87fc:    00
+87fd:    00
+87fe:    00
+87ff:    00

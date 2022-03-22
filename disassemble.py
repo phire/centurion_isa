@@ -163,12 +163,13 @@ instructions = [
     I("11100001 NNNNNNNN NNNNNNNN", "stb B, {N:#06x}"), # E1
     I("11110001 NNNNNNNN NNNNNNNN", "stw B, {N:#06x}"), # F1
 
-    I("11000001 NNNNNNNN NNNNNNNN", "c1 A, {N:#06x}"),  # C1 - Appears to be a second read byte?
+    I("11000001 NNNNNNNN NNNNNNNN", "ldb B, {N:#06x}"), # C1
+    I("11010001 NNNNNNNN NNNNNNNN", "ldw A, {N:#06x}"), # D1
 
     # unknown 3 byte instructions, in the order tested by instruction test rom
     I("01100000 NNNNNNNN NNNNNNNN", "60 A, {N:#06x}"),  # 60 ???
     I("10110000 NNNNNNNN NNNNNNNN", "b0 A, {N:#06x}"),  # b0 ??????? (might be a two byte instruction)
-    I("11010001 NNNNNNNN NNNNNNNN", "d1 A, {N:#06x}"),  # D1 ???
+
     I("01100001 NNNNNNNN NNNNNNNN", "61 A, {N:#06x}"),  # 61
     I("01101001 NNNNNNNN NNNNNNNN", "69 A, {N:#06x}"),  # 69
     I("10010010 NNNNNNNN NNNNNNNN", "92 A, {N:#06x}"),  # 92
@@ -190,14 +191,10 @@ instructions = [
     B("00011000 SSSSSSSS", "b_gt", relative_branch),
     B("00011001 SSSSSSSS", "b_le", relative_branch), # lessthan or equal
     B("00011010 SSSSSSSS", "b_sence0", relative_branch),
+    B("00011011 SSSSSSSS", "b_sence1", relative_branch),
     B("00011100 SSSSSSSS", "b_sence2", relative_branch),
     B("00011101 SSSSSSSS", "b_sence3", relative_branch),
 
-
-    B("00011100 SSSSSSSS", "b??", relative_branch), # Test rom doesn't test this directly. But it appares
-                                                    # to use it as a sentinel when testing instruction lenghts
-                                                    # It might be a sence switch branch, and will mess things
-                                                    # up either way
 
     B("01110011 SSSSSSSS", "jump", relative_branch_unconditional),
 
@@ -205,13 +202,14 @@ instructions = [
 
     I("00111010", "clear A"),
 
+    I("01000011", "or A, B"),
+
     I("01001000", "add B, A"),
-    I("01001001", "cmp A, B"),
+    I("01001001", "cmp B, A"),
+    I("01001010", "and B, A"),
 
     I("01011111", "mov sp, A"),
 
-    # I("00110101 xxxxxxxx"),
-    # I("00110110 xxxxxxxx"),
 
     I("01010001 xxxxxxxx", "sub? r?, r?"),
     I("01010101 xxxxxxxx", "alu5 r?, r?"),
@@ -219,7 +217,6 @@ instructions = [
 
     I("01000000 00110001", "add A, B"),
     I("01000010 00110001", "and A, B"),
-    I("01000011 00110001", "or A, B"),
 
 
 
@@ -231,11 +228,12 @@ instructions = [
     B("00001001", "ret", kill_branch),
 
     B("01110001 NNNNNNNN NNNNNNNN", "jump {N:#06x}", abolsute_branch_uncondtionional),
+    I("01110101 NNNNNNNN", "jump A + {N:#04x}"),
     I("01111101 NNNNNNNN", "call A + {N:#04x}"),
     B("01111001 NNNNNNNN NNNNNNNN", "call", abolsute_call),
     I("01111010 NNNNNNNN NNNNNNNN", "call [{N:#06x}]"),
     B("01110010 NNNNNNNN NNNNNNNN", "jump [{N:#06x}] ;", kill_branch),
-    B("01110101 SSSSSSSS", "unknown jump", relative_branch_unconditional),
+
 
     I("01010101"),
 
@@ -244,6 +242,7 @@ instructions = [
     I("10100101 10100010", "push_byte A"),
     I("10000101 10100001", "pop_byte A"),
     I("01000101 00000001", "swap_bytes A"),
+    I("10000101 01000001", "ldb A, [sp]++"), # Indirect load from SP with indirect post increment
 
     I("10100010 NNNNNNNN NNNNNNNN", "push_word {N:#06x}"),
 
@@ -289,7 +288,7 @@ instructions = [
     I("00100101 xxxxxxxx"),
     I("01000001 xxxxxxxx"),
     I("01000000 xxxxxxxx"),
-    I("01000011 xxxxxxxx"),
+    #I("01000011 xxxxxxxx"),
     I("01000100 xxxxxxxx"),
     I("01010011 xxxxxxxx"),
     I("01010100 xxxxxxxx"),

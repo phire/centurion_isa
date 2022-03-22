@@ -31,7 +31,7 @@ TEST_7:
 98a3:    00 00              0x0
 
 WriteString:
-98a5:    85 41        unknown
+98a5:    85 41        ldb A, [sp]++
 98a7:    15 01        b_nz L_98aa
 98a9:    09           ret
 
@@ -40,7 +40,7 @@ L_98aa:
 98ac:    73 f7        jump WriteString
 
 L_98ae:
-98ae:    c1 f2 00     c1 A, 0xf200
+98ae:    c1 f2 00     ldb B, 0xf200
 98b1:    24 30        unknown
 98b3:    24 30        unknown
 98b5:    11 f7        b1 L_98ae
@@ -74,7 +74,7 @@ Fn_0d0:
 98dc:    c0 b0        lib B, 0xb0
 98de:    40 31        add A, B
 98e0:    c0 b9        lib B, 0xb9
-98e2:    49           cmp A, B
+98e2:    49           cmp B, A
 98e3:    19 04        b_le L_98e9
 98e5:    c0 07        lib B, 0x07
 98e7:    40 31        add A, B
@@ -87,7 +87,7 @@ L_98e9:
 98f1:    c0 b0        lib B, 0xb0
 98f3:    40 31        add A, B
 98f5:    c0 b9        lib B, 0xb9
-98f7:    49           cmp A, B
+98f7:    49           cmp B, A
 98f8:    19 04        b_le L_98fe
 98fa:    c0 07        lib B, 0x07
 98fc:    40 31        add A, B
@@ -103,9 +103,9 @@ FinishTest:
 9908:    11 57        b1 L_9961
 990a:    81 f2 01     ldb A, 0xf201
 990d:    c0 80        lib B, 0x80
-990f:    43 31        or A, B
-9911:    c0 83        lib B, 0x83
-9913:    49           cmp A, B
+990f:    43           or A, B
+9910:    31 c0        unknown
+9912:    83 49        unknown
 9914:    15 4b        b_nz L_9961
 9916:    81 01 08     ldb A, 0x0108
 9919:    14 32        b_z L_994d
@@ -132,7 +132,7 @@ L_9961:
 9968:    5e           unknown
 9969:    95 41        unknown
 996b:    50 80        add A, indexBase
-996d:    75 00        unknown jump PrintCtrlCToExit
+996d:    75 00        jump A + 0x00
 
 PrintCtrlCToExit:
 996f:    7a 01 12     call [0x0112]
@@ -178,7 +178,7 @@ Init:
 99e5:    55 40        alu5 r?, r?
 99e7:    65 a1        unknown
 99e9:    69 01 00     69 A, 0x0100
-99ec:    75 00        unknown jump Fn_1ee
+99ec:    75 00        jump A + 0x00
 
 Fn_1ee:
 99ee:    7a 01 0c     call [0x010c]
@@ -188,7 +188,7 @@ Fn_1ee:
 L_99f6:
 99f6:    82 01 16     82 A, 0x0116
 99f9:    c0 08        lib B, 0x08
-99fb:    4a           unknown
+99fb:    4a           and B, A
 99fc:    14 2b        b_z L_9a29
 99fe:    0e           delay 4.5ms
 99ff:    3f           unknown
@@ -455,7 +455,7 @@ L_9c32:
 L_9c70:
 9c70:    91 41 b1     ldw A, 0x41b1
 9c73:    16 1a        b_lt L_9c8f
-9c75:    d1 41 52     d1 A, 0x4152
+9c75:    d1 41 52     ldw A, 0x4152
 9c78:    50 20        unknown
 9c7a:    b1 41 52     stw A, 0x4152
 9c7d:    d0 03 36     liw B, 0x0336
@@ -480,32 +480,55 @@ L_9c8f:
 9c9f:    8b 50        unknown
 9ca1:    80 7d        lib A, 0x7d
 9ca3:    00           HALT
-9ca4:    f8           unknown
-9ca5:    08           flag8
-9ca6:    7a 01 06     call [0x0106]
-9ca9:    90 41 4d     liw A, 0x414d
-9cac:    5c           unknown
-9cad:    90 81 00     liw A, 0x8100
-9cb0:    b5 61        unknown
-9cb2:    90 84 00     liw A, 0x8400
-9cb5:    b5 61        unknown
-9cb7:    80 83        lib A, 0x83
-9cb9:    a5 61        unknown
-9cbb:    3a           clear A
-9cbc:    b5 61        unknown
-9cbe:    80 85        lib A, 0x85
-9cc0:    a5 61        unknown
-9cc2:    d0 10 00     liw B, 0x1000
-
-L_9cc5:
-9cc5:    e5 61        unknown
-9cc7:    90 01 90     liw A, 0x0190
-9cca:    b5 61        unknown
-9ccc:    20 30        unknown
-9cce:    21 20        unknown
-9cd0:    15 f3        b_nz L_9cc5
-9cd2:    80 ff        lib A, 0xff
-9cd4:    ab           unknown
+9ca4:    f8
+9ca5:    08
+9ca6:    7a
+9ca7:    01
+9ca8:    06
+9ca9:    90
+9caa:    41
+9cab:    4d
+9cac:    5c
+9cad:    90
+9cae:    81
+9caf:    00
+9cb0:    b5
+9cb1:    61
+9cb2:    90
+9cb3:    84
+9cb4:    00
+9cb5:    b5
+9cb6:    61
+9cb7:    80
+9cb8:    83
+9cb9:    a5
+9cba:    61
+9cbb:    3a
+9cbc:    b5
+9cbd:    61
+9cbe:    80
+9cbf:    85
+9cc0:    a5
+9cc1:    61
+9cc2:    d0
+9cc3:    10
+9cc4:    00
+9cc5:    e5
+9cc6:    61
+9cc7:    90
+9cc8:    01
+9cc9:    90
+9cca:    b5
+9ccb:    61
+9ccc:    20
+9ccd:    30
+9cce:    21
+9ccf:    20
+9cd0:    15
+9cd1:    f3
+9cd2:    80
+9cd3:    ff
+9cd4:    ab
 
 L_9cd5:
 9cd5:    90 ff c3     liw A, 0xffc3
@@ -736,7 +759,7 @@ Entry_ROM_SELF_TEST:
 9ea1:    50 80        add A, indexBase
 9ea3:    7d 00        call A + 0x00
 9ea5:    00           HALT
-9ea6:    00           HALT
+9ea6:    00
 9ea7:    55 86        alu5 r?, r?
 9ea9:    3a           clear A
 

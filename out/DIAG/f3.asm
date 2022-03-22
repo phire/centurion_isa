@@ -31,7 +31,7 @@ TEST_7:
 9098:    00 00              0x0
 
 WriteString:
-909a:    85 41        unknown
+909a:    85 41        ldb A, [sp]++
 909c:    15 01        b_nz L_909f
 909e:    09           ret
 
@@ -40,7 +40,7 @@ L_909f:
 90a1:    73 f7        jump WriteString
 
 WriteByte:
-90a3:    c1 f2 00     c1 A, 0xf200
+90a3:    c1 f2 00     ldb B, 0xf200
 90a6:    24 30        unknown
 90a8:    24 30        unknown
 90aa:    11 f7        b1 WriteByte
@@ -74,7 +74,7 @@ WriteHexByte:
 90d1:    c0 b0        lib B, 0xb0
 90d3:    40 31        add A, B
 90d5:    c0 b9        lib B, 0xb9
-90d7:    49           cmp A, B
+90d7:    49           cmp B, A
 90d8:    19 04        b_le L_90de
 90da:    c0 07        lib B, 0x07
 90dc:    40 31        add A, B
@@ -87,7 +87,7 @@ L_90de:
 90e6:    c0 b0        lib B, 0xb0
 90e8:    40 31        add A, B
 90ea:    c0 b9        lib B, 0xb9
-90ec:    49           cmp A, B
+90ec:    49           cmp B, A
 90ed:    19 04        b_le L_90f3
 90ef:    c0 07        lib B, 0x07
 90f1:    40 31        add A, B
@@ -103,9 +103,9 @@ FinishTest:
 90fd:    11 57        b1 L_9156
 90ff:    81 f2 01     ldb A, 0xf201
 9102:    c0 80        lib B, 0x80
-9104:    43 31        or A, B
-9106:    c0 83        lib B, 0x83
-9108:    49           cmp A, B
+9104:    43           or A, B
+9105:    31 c0        unknown
+9107:    83 49        unknown
 9109:    15 4b        b_nz L_9156
 910b:    81 01 08     ldb A, 0x0108
 910e:    14 32        b_z L_9142
@@ -132,7 +132,7 @@ L_9156:
 915d:    5e           unknown
 915e:    95 41        unknown
 9160:    50 80        add A, indexBase
-9162:    75 00        unknown jump PrintCtrlCToExit
+9162:    75 00        jump A + 0x00
 
 PrintCtrlCToExit:
 9164:    7a 01 12     call [0x0112]
@@ -178,7 +178,7 @@ Init:
 91da:    55 40        alu5 r?, r?
 91dc:    65 a1        unknown
 91de:    69 01 00     69 A, 0x0100
-91e1:    75 00        unknown jump Fn_1e3
+91e1:    75 00        jump A + 0x00
 
 Fn_1e3:
 91e3:    7a 01 0c     call [0x010c]
@@ -188,7 +188,7 @@ Fn_1e3:
 L_91eb:
 91eb:    82 01 16     82 A, 0x0116
 91ee:    c0 08        lib B, 0x08
-91f0:    4a           unknown
+91f0:    4a           and B, A
 91f1:    14 2b        b_z L_921e
 91f3:    0e           delay 4.5ms
 91f4:    3f           unknown
@@ -530,7 +530,7 @@ L_94c6:
 L_9504:
 9504:    91 41 b1     ldw A, 0x41b1
 9507:    16 1a        b_lt L_9523
-9509:    d1 41 52     d1 A, 0x4152
+9509:    d1 41 52     ldw A, 0x4152
 950c:    50 20        unknown
 950e:    b1 41 52     stw A, 0x4152
 9511:    d0 03 36     liw B, 0x0336
@@ -554,42 +554,79 @@ L_9523:
 9533:    80 50        lib A, 0x50
 9535:    80 7d        lib A, 0x7d
 9537:    00           HALT
-9538:    f8           unknown
-9539:    08           flag8
-953a:    7a 01 06     call [0x0106]
-953d:    80 41        lib A, 0x41
-953f:    a2 01 14     push_word 0x0114
-9542:    7a 01 0c     call [0x010c]
-9545:    2a           unknown
-9546:    a2 01 14     push_word 0x0114
-9549:    7a 01 0c     call [0x010c]
-954c:    2a           unknown
-954d:    a2 01 14     push_word 0x0114
-9550:    7a 01 18     call [0x0118]
-9553:    12 44        b2 L_9599
-9555:    90 41 4d     liw A, 0x414d
-9558:    5c           unknown
-9559:    90 81 00     liw A, 0x8100
-955c:    b5 61        unknown
-955e:    90 84 00     liw A, 0x8400
-9561:    b5 61        unknown
-9563:    80 83        lib A, 0x83
-9565:    a5 61        unknown
-9567:    3a           clear A
-9568:    b5 61        unknown
-956a:    80 85        lib A, 0x85
-956c:    a5 61        unknown
-956e:    d0 10 00     liw B, 0x1000
-
-L_9571:
-9571:    e5 61        unknown
-9573:    90 01 90     liw A, 0x0190
-9576:    b5 61        unknown
-9578:    20 30        unknown
-957a:    21 20        unknown
-957c:    15 f3        b_nz L_9571
-957e:    80 ff        lib A, 0xff
-9580:    ab           unknown
+9538:    f8
+9539:    08
+953a:    7a
+953b:    01
+953c:    06
+953d:    80
+953e:    41
+953f:    a2
+9540:    01
+9541:    14
+9542:    7a
+9543:    01
+9544:    0c
+9545:    2a
+9546:    a2
+9547:    01
+9548:    14
+9549:    7a
+954a:    01
+954b:    0c
+954c:    2a
+954d:    a2
+954e:    01
+954f:    14
+9550:    7a
+9551:    01
+9552:    18
+9553:    12
+9554:    44
+9555:    90
+9556:    41
+9557:    4d
+9558:    5c
+9559:    90
+955a:    81
+955b:    00
+955c:    b5
+955d:    61
+955e:    90
+955f:    84
+9560:    00
+9561:    b5
+9562:    61
+9563:    80
+9564:    83
+9565:    a5
+9566:    61
+9567:    3a
+9568:    b5
+9569:    61
+956a:    80
+956b:    85
+956c:    a5
+956d:    61
+956e:    d0
+956f:    10
+9570:    00
+9571:    e5
+9572:    61
+9573:    90
+9574:    01
+9575:    90
+9576:    b5
+9577:    61
+9578:    20
+9579:    30
+957a:    21
+957b:    20
+957c:    15
+957d:    f3
+957e:    80
+957f:    ff
+9580:    ab
 
 L_9581:
 9581:    90 ff c3     liw A, 0xffc3
@@ -602,8 +639,6 @@ L_9581:
 9591:    a2 01 14     push_word 0x0114
 9594:    7a 01 18     call [0x0118]
 9597:    13 09        b3 L_95a2
-
-L_9599:
 9599:    a1 f1 0b     stb A, 0xf10b
 959c:    a1 f1 0c     stb A, 0xf10c
 959f:    72 01 0e     jump [{N:#06x}] ;
@@ -708,11 +743,11 @@ L_9636:
 L_9674:
 9674:    81 41 b1     ldb A, 0x41b1
 9677:    16 14        b_lt L_968d
-9679:    c1 41 50     c1 A, 0x4150
+9679:    c1 41 50     ldb B, 0x4150
 967c:    40 31        add A, B
 967e:    a1 41 50     stb A, 0x4150
 9681:    c0 4b        lib B, 0x4b
-9683:    49           cmp A, B
+9683:    49           cmp B, A
 9684:    15 b0        b_nz L_9636
 9686:    80 ff        lib A, 0xff
 9688:    a1 41 b1     stb A, 0x41b1
@@ -804,7 +839,7 @@ L_9733:
 9736:    2d           unknown
 9737:    a1 41 50     stb A, 0x4150
 973a:    c0 4b        lib B, 0x4b
-973c:    49           cmp A, B
+973c:    49           cmp B, A
 973d:    19 a5        b_le L_96e4
 973f:    a1 f1 0a     stb A, 0xf10a
 9742:    7a 01 04     call [0x0104]
@@ -816,7 +851,7 @@ Entry_ROM_SELF_TEST:
 974a:    50 80        add A, indexBase
 974c:    7d 00        call A + 0x00
 974e:    00           HALT
-974f:    00           HALT
+974f:    00
 9750:    55 86        alu5 r?, r?
 9752:    3a           clear A
 

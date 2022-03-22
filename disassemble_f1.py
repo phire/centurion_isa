@@ -7,6 +7,11 @@ from diag_common import *
 
 base_address = 0x8000
 
+entry_points = [
+    0x8077,
+    0x8055,
+    0x8482,
+]
 
 strings = [
     0x85b3,
@@ -17,24 +22,69 @@ strings = [
 
 functions = [
     (0x850e, "WriteByte"),
-    (0x8519, "WriteHexWord"),
-    (0x8520, "WriteHexByte"),
+    (0x8519, "WriteHexByte"),
+    (0x8520, "WriteHexNibble"),
     (0x8566, "WriteByteTramp"),
     (0x8623, "WriteString"),
     (0x8634, "ReadChar"),
     (0x8728, "AuxiliaryTestMenu"),
+    (0x8557, "CheckForReset"),
+    (0x8482, "TOS_Entry"),
+    (0x8500, "ReadByteWithEcho"),
+    (0x8568, "AsciiToHexNibble"), # sets flags if conversion fails
+    (0x853a, "ReadHexWord"),
 ]
 
 lables = [
+    (0x8774, "NextRom"),
+    (0x84a3, "TOS_PromptLoop"),
+    (0x84bf, "G_Command"),
+    (0x84c3, "Q_Command"),
+    (0x8001, "DiagEntryPoint"),
 
 ]
 
 comments = [
-    (0x8002, "Probally setting the 7 segment LEDs to 0 0"),
+    (0x8002, "This is the first word in Diag's 1KB of RAM"),
+    (0x8013, "Set stack pointer just beyond top of Diag's 1KB of RAM"),
+
+    (0x801b, "This is writing a pointer directly into registers."),
+    (0x801f, "Something really funky is going on here."),
+    (0x8022, "I assume this is calling or jumpting to that function"),
+
+    (0x8024, "Turn Decimal Point 1 off"),
+    (0x8027, "Turn Decimal Point 2 off"),
+    (0x802a, "Turn Decimal Point 3 off"),
+    (0x802d, "Turn Decimal Point 4 off"),
+    (0x8030, "A = Dip swiches value"),
+    (0x8035, "A = A & 0x0f"),
+    (0x8037, "Write A to hex displays"),
+    (0x803a, "Unblank the hex displys"),
+    (0x803f, "Compare with 0b1011"),
+
+    (0x8042, "If dipswitches == 0xb111: \n"
+             "    Display Auxiliary Test Menu"),
+
+
+
+
+    (0x8498, "Configure UART"),
+    (0x84a3, "'\'"),
+    (0x84b0, "'G'"),
+    (0x84b5, "'Q'"),
+
+    (0x84ba, "Start of ROM"),
+
+
+
+    (0x8500, "Jumps back to the start of F1 if some condition is met"),
+
+    (0x853c, "This is a DIAG IO port"),
+
     (0x875b, "will wrap around to 0x800, the length of each ROM"),
     (0x8774, "will wrap around to 0x800, the length of each ROM"),
     (0x8769, "'='"),
-    (0x8770, "While byte from serial != '='"),
+    (0x8770, "Write string"),
 
 
 ]
