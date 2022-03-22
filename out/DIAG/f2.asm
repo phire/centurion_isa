@@ -22,9 +22,9 @@ Entry_CPU_INSTRUCTION_TEST:
 887d:    6d a2        unknown
 887f:    55 80        unknown
 8881:    b5 a2        unknown
-8883:    60 00 20     60 A, 0x0020 ; This is a testing that the 60 3 byte instruction is working.
-                                   ; Which it will use later to test other multi-byte insturctions
-                                   ; If the operand isn't consuemed, then a HALT instruction will be executed
+8883:    60 00 20     60 0x0020 ; This is a testing that the 60 3 byte instruction is working.
+                                ; Which it will use later to test other multi-byte insturctions
+                                ; If the operand isn't consuemed, then a HALT instruction will be executed
 8886:    90 05 a1     liw A, 0x05a1
 8889:    50 80        add A, indexBase
 888b:    5c           unknown ; This might be installing an exception handler?
@@ -720,7 +720,7 @@ L_8ad2:
 8ad7:    00           HALT
 
 L_8ad8:
-8ad8:    60 80 00     60 A, 0x8000
+8ad8:    60 80 00     60 0x8000
 8adb:    10 01        b0 L_8ade
 8add:    00           HALT
 
@@ -966,7 +966,7 @@ L_8be4:
 8be9:    00           HALT
 
 L_8bea:
-8bea:    61 00 22     61 A, 0x0022
+8bea:    61 00 22     61 0x0022
 8bed:    18 01        b_gt L_8bf0
 8bef:    00           HALT
 
@@ -988,7 +988,7 @@ L_8bff:
 8c07:    00           HALT
 
 L_8c08:
-8c08:    61 00 2c     61 A, 0x002c
+8c08:    61 00 2c     61 0x002c
 8c0b:    54 42        unknown
 8c0d:    58           unknown
 8c0e:    33 20        unknown
@@ -1063,7 +1063,7 @@ L_8c6d:
 8c72:    24
 
 L_8c73:
-8c73:    60 00 20     60 A, 0x0020
+8c73:    60 00 20     60 0x0020
 8c76:    9a           unknown
 8c77:    d0 ff ff     liw B, 0xffff
 8c7a:    59           unknown
@@ -1124,7 +1124,7 @@ L_8cb4:
 8cbd:    00           HALT
 
 L_8cbe:
-8cbe:    60 00 10     60 A, 0x0010
+8cbe:    60 00 10     60 0x0010
 8cc1:    95 44        unknown
 8cc3:    d0 ff ff     liw B, 0xffff
 8cc6:    59           unknown
@@ -1152,7 +1152,7 @@ L_8cda:
 8ce3:    00           HALT
 
 L_8ce4:
-8ce4:    60 00 14     60 A, 0x0014
+8ce4:    60 00 14     60 0x0014
 8ce7:    95 44        unknown
 8ce9:    d5 4c fe     unknown
 8cec:    54 20        unknown
@@ -1188,7 +1188,7 @@ L_8d09:
 L_8d14:
 8d14:    90 00 3a     liw A, 0x003a
 8d17:    5f           mov sp, A
-8d18:    60 20 20     60 A, 0x2020
+8d18:    60 20 20     60 0x2020
 8d1b:    7b 06        call L_8d23
 8d1d:    01           nop
 8d1e:    01           nop
@@ -1215,7 +1215,7 @@ L_8d36:
 8d37:    09           ret
 
 L_8d38:
-8d38:    60 09 ef     60 A, 0x09ef
+8d38:    60 09 ef     60 0x09ef
 8d3b:    90 11 ff     liw A, 0x11ff
 8d3e:    b5 41        unknown
 8d40:    55 42        unknown
@@ -1225,7 +1225,7 @@ L_8d38:
 8d48:    00           HALT
 
 L_8d49:
-8d49:    60 09 ef     60 A, 0x09ef
+8d49:    60 09 ef     60 0x09ef
 8d4c:    95 41        unknown
 8d4e:    d0 11 ff     liw B, 0x11ff
 8d51:    41 02        unknown
@@ -1233,7 +1233,7 @@ L_8d49:
 8d55:    00           HALT
 
 L_8d56:
-8d56:    49           cmp B, A
+8d56:    49           sub B, A
 8d57:    14 01        b_z L_8d5a
 8d59:    00           HALT
 
@@ -1261,9 +1261,9 @@ L_8d70:
 8d79:    c0 80        lib B, 0x80
 8d7b:    43 31        or? A, B
 8d7d:    c0 83        lib B, 0x83
-8d7f:    49           cmp B, A
+8d7f:    49           sub B, A
 8d80:    15 0c        b_nz L_8d8e
-8d82:    61 bf fe     61 A, 0xbffe
+8d82:    61 bf fe     61 0xbffe
 8d85:    91 bf fc     ldw A, 0xbffc
 8d88:    d0 07 74     liw B, 0x0774
 8d8b:    58           unknown
@@ -1354,7 +1354,7 @@ L_8e2f:
 8e65:    c0 80        lib B, 0x80
 8e67:    43 31        or? A, B
 8e69:    c0 83        lib B, 0x83
-8e6b:    49           cmp B, A
+8e6b:    49           sub B, A
 8e6c:    15 c1        b_nz L_8e2f
 8e6e:    90 07 74     liw A, 0x0774
 8e71:    50 80        add A, indexBase
@@ -1370,7 +1370,7 @@ L_8e75:
 8e7e:    5c           unknown
 8e7f:    5e           unknown
 8e80:    20 80        unknown
-8e82:    60 00 20     60 A, 0x0020
+8e82:    60 00 20     60 0x0020
 
 L_8e85:
 8e85:    d0 01 00     liw B, 0x0100
@@ -1418,7 +1418,7 @@ L_8eb3:
 8eb6:    a5 a2        push_byte A
 8eb8:    6d a2        unknown
 8eba:    a5 a2        push_byte A
-8ebc:    60 06 c2     60 A, 0x06c2
+8ebc:    60 06 c2     60 0x06c2
 8ebf:    50 84        unknown
 8ec1:    0f           unknown
 8ec2:    7b 15        call Fn_6d9
@@ -1465,7 +1465,7 @@ L_8ee6:
 8ee7:    40 2e        unknown
 8ee9:    1c fb        b_sense2 L_8ee6
 8eeb:    01           nop
-8eec:    60 2e 1c     60 A, 0x2e1c
+8eec:    60 2e 1c     60 0x2e1c
 8eef:    fc           unknown
 8ef0:    01           nop
 8ef1:    80 2e        lib A, 0x2e
@@ -1504,7 +1504,7 @@ L_8f04:
 8f14:    0c           unknown
 8f15:    fb           unknown
 8f16:    01           nop
-8f17:    60 2e 0c     60 A, 0x2e0c
+8f17:    60 2e 0c     60 0x2e0c
 8f1a:    fc           unknown
 8f1b:    01           nop
 8f1c:    80 2e        lib A, 0x2e

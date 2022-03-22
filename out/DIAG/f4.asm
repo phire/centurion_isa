@@ -74,7 +74,7 @@ Fn_0d0:
 98dc:    c0 b0        lib B, 0xb0
 98de:    40 31        add A, B
 98e0:    c0 b9        lib B, 0xb9
-98e2:    49           cmp B, A
+98e2:    49           sub B, A
 98e3:    19 04        b_le L_98e9
 98e5:    c0 07        lib B, 0x07
 98e7:    40 31        add A, B
@@ -87,7 +87,7 @@ L_98e9:
 98f1:    c0 b0        lib B, 0xb0
 98f3:    40 31        add A, B
 98f5:    c0 b9        lib B, 0xb9
-98f7:    49           cmp B, A
+98f7:    49           sub B, A
 98f8:    19 04        b_le L_98fe
 98fa:    c0 07        lib B, 0x07
 98fc:    40 31        add A, B
@@ -105,7 +105,7 @@ FinishTest:
 990d:    c0 80        lib B, 0x80
 990f:    43 31        or? A, B
 9911:    c0 83        lib B, 0x83
-9913:    49           cmp B, A
+9913:    49           sub B, A
 9914:    15 4b        b_nz L_9961
 9916:    81 01 08     ldb A, 0x0108
 9919:    14 32        b_z L_994d
@@ -183,7 +183,7 @@ Init:
 Fn_1ee:
 99ee:    7a 01 0c     call [0x010c]
 99f1:    6d a2        unknown
-99f3:    60 03 e8     60 A, 0x03e8
+99f3:    60 03 e8     60 0x03e8
 
 L_99f6:
 99f6:    82 01 16     82 A, 0x0116
@@ -200,7 +200,7 @@ L_99f6:
 9a26:    72 01 0e     jump [0x010e] ;
 
 L_9a29:
-9a29:    60 03 e8     60 A, 0x03e8
+9a29:    60 03 e8     60 0x03e8
 
 L_9a2c:
 9a2c:    2c           rotate_right A
@@ -240,7 +240,7 @@ L_9a63:
 Fn_291:
 9a91:    6d a2        unknown
 9a93:    0e           delay 4.5ms
-9a94:    60 03 e8     60 A, 0x03e8
+9a94:    60 03 e8     60 0x03e8
 
 L_9a97:
 9a97:    82 01 16     82 A, 0x0116
@@ -278,7 +278,7 @@ Entry_FINCH_AUX_MEMORY_TEST:
 L_9ae2:
 9ae2:    7a 01 06     call [0x0106]
 9ae5:    32 60        unknown
-9ae7:    60 0f 00     60 A, 0x0f00
+9ae7:    60 0f 00     60 0x0f00
 9aea:    55 60        unknown
 9aec:    d0 01 1c     liw B, 0x011c
 
@@ -373,7 +373,7 @@ L_9b32:
 9b69:    01           nop
 9b6a:    18 b5        b_gt L_9b21
 9b6c:    a2           unknown
-9b6d:    60 0f 00     60 A, 0x0f00
+9b6d:    60 0f 00     60 0x0f00
 9b70:    d0 01 1c     liw B, 0x011c
 9b73:    55 60        unknown
 9b75:    45           unknown
@@ -802,7 +802,7 @@ L_9e27:
 9e27:    e5
 
 L_9e28:
-9e28:    61 90 01     61 A, 0x9001
+9e28:    61 90 01     61 0x9001
 9e2b:    90 b5 61     liw A, 0xb561
 9e2e:    20 30        unknown
 9e30:    21 20        unknown

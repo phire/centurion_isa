@@ -34,7 +34,7 @@ ef33:    10 f8        b0 L_ef2d
 ef35:    81 f1 45     ldb A, 0xf145
 ef38:    c0 30        lib B, 0x30
 ef3a:    42 31        and A, B
-ef3c:    49           cmp B, A
+ef3c:    49           sub B, A
 ef3d:    15 ee        b_nz L_ef2d
 ef3f:    09           ret
 

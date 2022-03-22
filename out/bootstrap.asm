@@ -23,14 +23,14 @@ fc17:    7b 79        call WriteString
 fc19:    "D=\0"
 fc1c:    7b 72        call ReadCharTramp
 fc1e:    c0 c6        lib B, 0xc6 ; B == 'F'
-fc20:    49           cmp B, A
+fc20:    49           sub B, A
 fc21:    e5 a2        unknown
 fc23:    14 0a        b_z GetNextChar
 fc25:    c0 c3        lib B, 0xc3 ; B == 'C'
-fc27:    49           cmp B, A
+fc27:    49           sub B, A
 fc28:    14 05        b_z GetNextChar
 fc2a:    c0 c8        lib B, 0xc8 ; B == 'H'
-fc2c:    49           cmp B, A
+fc2c:    49           sub B, A
 fc2d:    15 50        b_nz PrintError
 
 GetNextChar:
@@ -42,7 +42,7 @@ fc37:    c5 a1        unknown
 fc39:    16 7f        b_lt L_fcba
 fc3b:    18 7f        b_gt LoadFromHawkTramp
 fc3d:    c0 03        lib B, 0x03
-fc3f:    49           cmp B, A
+fc3f:    49           sub B, A
 fc40:    18 3d        b_gt PrintError
 fc42:    d0 0f 00     liw B, 0x0f00
 fc45:    f5 a2        unknown
@@ -109,7 +109,7 @@ fca8:    84 f5        ldb A, [[pc-11]]
 fcaa:    c0 80        lib B, 0x80
 fcac:    43 31        or? A, B ; char | 0x80 - Force bit 7 to be set
 fcae:    c0 e0        lib B, 0xe0
-fcb0:    49           cmp B, A ; Check if char is lowercase (greater than 0x60)
+fcb0:    49           sub B, A ; Check if char is lowercase (greater than 0x60)
 fcb1:    16 04        b_lt L_fcb7
 fcb3:    c0 df        lib B, 0xdf
 fcb5:    42 31        and A, B ; Clear bit 6, forcing it to be uppercase
@@ -129,7 +129,7 @@ fcbe:    73 bf        jump PrintError
 
 LoadFromHawk:
 fcc0:    c0 07        lib B, 0x07
-fcc2:    49           cmp B, A
+fcc2:    49           sub B, A
 fcc3:    18 ba        b_gt PrintError
 fcc5:    a1 f1 40     stb A, 0xf140 ; HawkUnitSelect = A
 fcc8:    94 2d        unknown
@@ -220,7 +220,7 @@ fd45:    d0 01 90     liw B, 0x0190
 fd48:    f5 81        unknown
 fd4a:    28           unknown
 fd4b:    c0 0e        lib B, 0x0e
-fd4d:    49           cmp B, A
+fd4d:    49           sub B, A
 fd4e:    15 f3        b_nz L_fd43
 fd50:    80 ff        lib A, 0xff
 fd52:    a5 81        unknown
@@ -297,19 +297,19 @@ fdbe:    79 4c e7     call L_4ce7
 fdc1:    4d           unknown
 fdc2:    14 2a        b_z L_fdee
 fdc4:    c0 8d        lib B, 0x8d
-fdc6:    49           cmp B, A
+fdc6:    49           sub B, A
 fdc7:    14 25        b_z L_fdee
 fdc9:    c0 b0        lib B, 0xb0
-fdcb:    49           cmp B, A
+fdcb:    49           sub B, A
 fdcc:    16 25        b_lt L_fdf3
 fdce:    80 09        lib A, 0x09
-fdd0:    41 31        cmp? A, B
+fdd0:    41 31        sub A, B
 fdd2:    19 0e        b_le L_fde2
 fdd4:    80 11        lib A, 0x11
-fdd6:    41 31        cmp? A, B
+fdd6:    41 31        sub A, B
 fdd8:    16 19        b_lt L_fdf3
 fdda:    c0 05        lib B, 0x05
-fddc:    49           cmp B, A
+fddc:    49           sub B, A
 fddd:    18 14        b_gt L_fdf3
 fddf:    c0 0a        lib B, 0x0a
 fde1:    48           add B, A

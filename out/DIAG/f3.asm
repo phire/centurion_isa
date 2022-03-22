@@ -74,7 +74,7 @@ WriteHexByte:
 90d1:    c0 b0        lib B, 0xb0
 90d3:    40 31        add A, B
 90d5:    c0 b9        lib B, 0xb9
-90d7:    49           cmp B, A
+90d7:    49           sub B, A
 90d8:    19 04        b_le L_90de
 90da:    c0 07        lib B, 0x07
 90dc:    40 31        add A, B
@@ -87,7 +87,7 @@ L_90de:
 90e6:    c0 b0        lib B, 0xb0
 90e8:    40 31        add A, B
 90ea:    c0 b9        lib B, 0xb9
-90ec:    49           cmp B, A
+90ec:    49           sub B, A
 90ed:    19 04        b_le L_90f3
 90ef:    c0 07        lib B, 0x07
 90f1:    40 31        add A, B
@@ -105,7 +105,7 @@ FinishTest:
 9102:    c0 80        lib B, 0x80
 9104:    43 31        or? A, B
 9106:    c0 83        lib B, 0x83
-9108:    49           cmp B, A
+9108:    49           sub B, A
 9109:    15 4b        b_nz L_9156
 910b:    81 01 08     ldb A, 0x0108
 910e:    14 32        b_z L_9142
@@ -183,7 +183,7 @@ Init:
 Fn_1e3:
 91e3:    7a 01 0c     call [0x010c]
 91e6:    6d a2        unknown
-91e8:    60 03 e8     60 A, 0x03e8
+91e8:    60 03 e8     60 0x03e8
 
 L_91eb:
 91eb:    82 01 16     82 A, 0x0116
@@ -200,7 +200,7 @@ L_91eb:
 921b:    72 01 0e     jump [0x010e] ;
 
 L_921e:
-921e:    60 03 e8     60 A, 0x03e8
+921e:    60 03 e8     60 0x03e8
 
 L_9221:
 9221:    2c           rotate_right A
@@ -240,7 +240,7 @@ L_9258:
 Fn_286:
 9286:    6d a2        unknown
 9288:    0e           delay 4.5ms
-9289:    60 03 e8     60 A, 0x03e8
+9289:    60 03 e8     60 0x03e8
 
 L_928c:
 928c:    82 01 16     82 A, 0x0116
@@ -279,7 +279,7 @@ Entry_FLOPPY_COMMAND_BUFFER_TEST:
 92d6:    00           HALT
 92d7:    7a 01 06     call [0x0106]
 92da:    32 60        unknown
-92dc:    60 00 c8     60 A, 0x00c8
+92dc:    60 00 c8     60 0x00c8
 92df:    55 60        unknown
 92e1:    d0 01 1c     liw B, 0x011c
 
@@ -359,7 +359,7 @@ Entry_CMD_AUX_MEMORY_TEST:
 9379:    32
 
 L_937a:
-937a:    60 60 3f     60 A, 0x603f
+937a:    60 60 3f     60 0x603f
 937d:    ff           unknown
 937e:    55 60        unknown
 9380:    d0 01 1c     liw B, 0x011c
@@ -461,7 +461,7 @@ L_93c6:
 93fd:    01           nop
 93fe:    18 b5        b_gt L_93b5
 9400:    a2           unknown
-9401:    60 3f ff     60 A, 0x3fff
+9401:    60 3f ff     60 0x3fff
 9404:    d0 01 1c     liw B, 0x011c
 9407:    55 60        unknown
 9409:    45           unknown
@@ -862,7 +862,7 @@ L_9636:
 967c:    40 31        add A, B
 967e:    a1 41 50     stb A, 0x4150
 9681:    c0 4b        lib B, 0x4b
-9683:    49           cmp B, A
+9683:    49           sub B, A
 9684:    15 b0        b_nz L_9636
 9686:    80 ff        lib A, 0xff
 9688:    a1 41 b1     stb A, 0x41b1
@@ -911,7 +911,7 @@ L_96be:
 
 L_96c4:
 96c4:    81 01 b5     ldb A, 0x01b5
-96c7:    61 90 83     61 A, 0x9083
+96c7:    61 90 83     61 0x9083
 96ca:    01           nop
 96cb:    b5 61        unknown
 96cd:    d0 10 00     liw B, 0x1000
@@ -996,7 +996,7 @@ L_9735:
 9735:    50 2d        unknown
 9737:    a1 41 50     stb A, 0x4150
 973a:    c0 4b        lib B, 0x4b
-973c:    49           cmp B, A
+973c:    49           sub B, A
 973d:    19 a5        b_le L_96e4
 973f:    a1 f1 0a     stb A, 0xf10a
 9742:    7a 01 04     call [0x0104]

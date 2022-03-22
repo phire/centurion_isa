@@ -30,7 +30,7 @@ L_8023:
 8037:    a1 f1 10     stb A, 0xf110 ; Write A to hex displays
 803a:    a1 f1 06     stb A, 0xf106 ; Unblank the hex displys
 803d:    c0 0d        lib B, 0x0d
-803f:    49           cmp B, A ; Compare with 0b1011
+803f:    49           sub B, A ; Compare with 0b1011
 8040:    15 03        b_nz L_8045
 8042:    71 87 28     jump 0x8728 AuxiliaryTestMenu ; If dipswitches == 0xb111: 
                                                     ;     Display Auxiliary Test Menu
@@ -259,7 +259,7 @@ L_8166:
 8182:    7e
 
 Test_03:
-8183:    60 00 10     60 A, 0x0010
+8183:    60 00 10     60 0x0010
 
 L_8186:
 8186:    90 10 00     liw A, 0x1000
@@ -281,7 +281,7 @@ L_8186:
 81a5:    0a
 
 L_81a6:
-81a6:    60 00 10     60 A, 0x0010
+81a6:    60 00 10     60 0x0010
 81a9:    95 48        unknown
 81ab:    04           flag4
 81ac:    80 f0        lib A, 0xf0
@@ -356,7 +356,7 @@ L_8208:
 820b:    81 f1 10     ldb A, 0xf110
 820e:    42 01        unknown
 8210:    c0 05        lib B, 0x05
-8212:    49           cmp B, A
+8212:    49           sub B, A
 8213:    14 03        b_z L_8218
 8215:    71 80 01     jump 0x8001 DiagEntryPoint
 
@@ -407,7 +407,7 @@ L_825f:
 8262:    81 f1 10     ldb A, 0xf110
 8265:    42 01        unknown
 8267:    c0 06        lib B, 0x06
-8269:    49           cmp B, A
+8269:    49           sub B, A
 826a:    14 f3        b_z L_825f
 826c:    71 80 01     jump 0x8001 DiagEntryPoint
 826f:    81
@@ -449,7 +449,7 @@ L_8286:
 829c:    80 07        lib A, 0x07
 829e:    4a           and B, A
 829f:    42 71        unknown
-82a1:    49           cmp B, A
+82a1:    49           sub B, A
 82a2:    15 38        b_nz L_82dc
 82a4:    20 70        unknown
 82a6:    c0 27        lib B, 0x27
@@ -470,7 +470,7 @@ L_8286:
 82c7:    c1 f1 10     ldb B, 0xf110
 82ca:    4a           and B, A
 82cb:    80 07        lib A, 0x07
-82cd:    49           cmp B, A
+82cd:    49           sub B, A
 82ce:    14 03        b_z L_82d3
 82d0:    71 80 01     jump 0x8001 DiagEntryPoint
 
@@ -506,7 +506,7 @@ L_82ef:
 82fc:    c0 0f        lib B, 0x0f
 82fe:    4a           and B, A
 82ff:    80 08        lib A, 0x08
-8301:    49           cmp B, A
+8301:    49           sub B, A
 8302:    14 03        b_z L_8307
 8304:    71 80 01     jump 0x8001 DiagEntryPoint
 
@@ -531,7 +531,7 @@ L_8312:
 831f:    c0 0f        lib B, 0x0f
 8321:    4a           and B, A
 8322:    80 08        lib A, 0x08
-8324:    49           cmp B, A
+8324:    49           sub B, A
 8325:    14 03        b_z L_832a
 8327:    71 80 01     jump 0x8001 DiagEntryPoint
 
@@ -651,13 +651,13 @@ L_83c2:
 83cc:    a1 f1 4f     stb A, 0xf14f
 83cf:    a1 f1 4e     stb A, 0xf14e
 83d2:    04           flag4
-83d3:    60 00 01     60 A, 0x0001
+83d3:    60 00 01     60 0x0001
 
 L_83d6:
 83d6:    d0 0f 09     liw B, 0x0f09
 83d9:    81 f1 10     ldb A, 0xf110
 83dc:    42 21        unknown
-83de:    49           cmp B, A
+83de:    49           sub B, A
 83df:    14 03        b_z L_83e4
 83e1:    71 80 01     jump 0x8001 DiagEntryPoint
 
@@ -788,13 +788,13 @@ TOS_PromptLoop:
 84a9:    45           unknown
 84aa:    31 c0        unknown
 84ac:    4d           unknown
-84ad:    49           cmp B, A
+84ad:    49           sub B, A
 84ae:    14 33        b_z L_84e3
 84b0:    c0 47        lib B, 0x47 ; 'G'
-84b2:    49           cmp B, A
+84b2:    49           sub B, A
 84b3:    14 0a        b_z G_Command
 84b5:    c0 51        lib B, 0x51 ; 'Q'
-84b7:    49           cmp B, A
+84b7:    49           sub B, A
 84b8:    15 e9        b_nz TOS_PromptLoop
 84ba:    90 80 01     liw A, 0x8001 ; Start of ROM
 84bd:    73 04        jump Q_Command
@@ -875,7 +875,7 @@ WriteHexNibble:
 8528:    36 00        unknown
 852a:    26 00        unknown
 852c:    c0 0a        lib B, 0x0a
-852e:    49           cmp B, A
+852e:    49           sub B, A
 852f:    16 05        b_lt L_8536
 8531:    c0 37        lib B, 0x37
 
@@ -913,7 +913,7 @@ CheckForReset:
 8559:    c1 f1 10     ldb B, 0xf110
 855c:    4a           and B, A
 855d:    80 0a        lib A, 0x0a
-855f:    49           cmp B, A
+855f:    49           sub B, A
 8560:    15 01        b_nz L_8563
 8562:    09           ret
 
@@ -929,7 +929,7 @@ AsciiToHexNibble:
 856b:    30 49        unknown
 856d:    16 13        b_lt L_8582
 856f:    c0 47        lib B, 0x47
-8571:    49           cmp B, A
+8571:    49           sub B, A
 8572:    17 1e        b7 L_8592
 8574:    c0 40        lib B, 0x40
 8576:    4a           and B, A
@@ -944,14 +944,14 @@ L_857d:
 
 L_8582:
 8582:    c0 20        lib B, 0x20
-8584:    49           cmp B, A
+8584:    49           sub B, A
 8585:    15 02        b_nz L_8589
 8587:    2b           unknown
 8588:    09           ret
 
 L_8589:
 8589:    c0 2c        lib B, 0x2c
-858b:    49           cmp B, A
+858b:    49           sub B, A
 858c:    15 04        b_nz L_8592
 858e:    02           flag2
 858f:    07           clear_carry?
@@ -983,11 +983,11 @@ L_85b1:
 85b3:    "D=\0"
 85b6:    7b 7c        call ReadChar
 85b8:    c0 c8        lib B, 0xc8
-85ba:    49           cmp B, A
+85ba:    49           sub B, A
 85bb:    e5 a2        unknown
 85bd:    14 05        b_z L_85c4
 85bf:    c0 c6        lib B, 0xc6
-85c1:    49           cmp B, A
+85c1:    49           sub B, A
 85c2:    15 4e        b_nz L_8612
 
 L_85c4:
@@ -998,7 +998,7 @@ L_85c4:
 85cc:    c5 a1        unknown
 85ce:    14 7d        b_z L_864d
 85d0:    c0 03        lib B, 0x03
-85d2:    49           cmp B, A
+85d2:    49           sub B, A
 85d3:    18 3d        b_gt L_8612
 85d5:    d0 0f 00     liw B, 0x0f00
 85d8:    f5 a2        unknown
@@ -1066,7 +1066,7 @@ ReadChar:
 863d:    c0 80        lib B, 0x80
 863f:    43 31        or? A, B
 8641:    c0 e0        lib B, 0xe0
-8643:    49           cmp B, A
+8643:    49           sub B, A
 8644:    16 04        b_lt L_864a
 8646:    c0 df        lib B, 0xdf
 8648:    42 31        and A, B
@@ -1077,7 +1077,7 @@ L_864a:
 
 L_864d:
 864d:    c0 07        lib B, 0x07
-864f:    49           cmp B, A
+864f:    49           sub B, A
 8650:    18 c0        b_gt L_8612
 8652:    a1 f1 40     stb A, 0xf140
 8655:    94 2d        unknown
@@ -1135,7 +1135,7 @@ L_86a3:
 86a5:    c1 f1 10     ldb B, 0xf110
 86a8:    4a           and B, A
 86a9:    80 0b        lib A, 0x0b
-86ab:    49           cmp B, A
+86ab:    49           sub B, A
 86ac:    15 01        b_nz L_86af
 86ae:    09           ret
 
@@ -1146,12 +1146,12 @@ Test_0c:
 86b2:    d0 0f 0c     liw B, 0x0f0c
 86b5:    81 f1 10     ldb A, 0xf110
 86b8:    42 21        unknown
-86ba:    49           cmp B, A
+86ba:    49           sub B, A
 86bb:    14 03        b_z L_86c0
 86bd:    71 80 01     jump 0x8001 DiagEntryPoint
 
 L_86c0:
-86c0:    60 80 00     60 A, 0x8000
+86c0:    60 80 00     60 0x8000
 86c3:    3a           clear A
 
 L_86c4:
@@ -1227,7 +1227,7 @@ AuxiliaryTestMenu:
 8730:    0e           delay 4.5ms
 8731:    79 86 23     call WriteString
 8734:    "\x0c\x1b\x1cAUXILIARY TESTS\r\n\n\0"
-874a:    60 88 00     60 A, 0x8800
+874a:    60 88 00     60 0x8800
 874d:    3a           clear A
 874e:    5c           unknown
 
@@ -1271,7 +1271,7 @@ Aux_CheckDIPs:
 87a1:    c1 f1 10     ldb B, 0xf110 ; Read DIP switches
 87a4:    4a           and B, A
 87a5:    80 0d        lib A, 0x0d
-87a7:    49           cmp B, A
+87a7:    49           sub B, A
 87a8:    14 03        b_z Aux_CheckSerial
 87aa:    71 80 01     jump 0x8001 DiagEntryPoint
 
@@ -1281,7 +1281,7 @@ Aux_CheckSerial:
 87b1:    11 ec        b1 Aux_CheckDIPs
 87b3:    c1 f2 01     ldb B, 0xf201
 87b6:    80 5f        lib A, 0x5f
-87b8:    41 31        cmp? A, B
+87b8:    41 31        sub A, B
 87ba:    19 03        b_le Aux_GotByte
 87bc:    80 df        lib A, 0xdf
 87be:    4a           and B, A
@@ -1315,7 +1315,7 @@ L_87da:
 87e6:    50 20        unknown
 87e8:    98           unknown
 87e9:    55 2a        unknown
-87eb:    60 80 01     60 A, 0x8001
+87eb:    60 80 01     60 0x8001
 87ee:    d0 f8 00     liw B, 0xf800
 87f1:    5a           unknown
 87f2:    55 28        unknown
