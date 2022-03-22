@@ -78,6 +78,14 @@ def add_string(mem, address):
     address += 1
     entry_points.append(address)
 
+def add_byte(mem, address):
+    memory_addr_info[address].visited = True
+    memory_addr_info[address].type = ">B"
+
+     # resume execution after byte
+    address += 1
+    entry_points.append(address)
+
 if __name__ == "__main__":
     with open(filename, "rb") as f:
         bytes = f.read()
@@ -93,6 +101,8 @@ if __name__ == "__main__":
 
     add_string(memory, 0xfc19) # "D=?\0"
     add_string(memory, 0xfc81) # "\r\nERROR\r\n\0"
+
+    add_byte(memory, 0xfc6c)
 
     apply_comments(comments)
 

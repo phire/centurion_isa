@@ -169,7 +169,6 @@ instructions = [
 
     # unknown 3 byte instructions, in the order tested by instruction test rom
     I("01100000 NNNNNNNN NNNNNNNN", "60 A, {N:#06x}"),  # 60 ???
-    I("10110000 NNNNNNNN NNNNNNNN", "b0 A, {N:#06x}"),  # b0 ??????? (might be a two byte instruction)
 
     I("01100001 NNNNNNNN NNNNNNNN", "61 A, {N:#06x}"),  # 61
     I("01101001 NNNNNNNN NNNNNNNN", "69 A, {N:#06x}"),  # 69
@@ -191,19 +190,20 @@ instructions = [
     B("00010111 SSSSSSSS", "b7", relative_branch),
     B("00011000 SSSSSSSS", "b_gt", relative_branch),
     B("00011001 SSSSSSSS", "b_le", relative_branch), # lessthan or equal
-    B("00011010 SSSSSSSS", "b_sence0", relative_branch),
-    B("00011011 SSSSSSSS", "b_sence1", relative_branch),
-    B("00011100 SSSSSSSS", "b_sence2", relative_branch),
-    B("00011101 SSSSSSSS", "b_sence3", relative_branch),
+    B("00011010 SSSSSSSS", "b_sense0", relative_branch),
+    B("00011011 SSSSSSSS", "b_sense1", relative_branch),
+    B("00011100 SSSSSSSS", "b_sense2", relative_branch),
+    B("00011101 SSSSSSSS", "b_sense3", relative_branch),
 
 
     B("01110011 SSSSSSSS", "jump", relative_branch_unconditional),
 
     I("00101100", "rotate_right A"),
+    I("00101101", "rotate_left A"),
 
     I("00111010", "clear A"),
 
-    I("01000011", "or A, B"),
+
 
     I("01001000", "add B, A"),
     I("01001001", "cmp B, A"),
@@ -270,8 +270,9 @@ instructions = [
     I("10000101 xxxxxxxx"),
     I("11000101 xxxxxxxx"),
     I("10100100 xxxxxxxx"),
+    I("01010010 xxxxxxxx"),
 
-    # In the order tested by insturction test
+    # In the order tested by instruction test
     I("00100010 xxxxxxxx"),
     I("00100000 xxxxxxxx"),
     I("00100001 xxxxxxxx"),
@@ -289,7 +290,7 @@ instructions = [
     I("00100101 xxxxxxxx"),
     I("01000001 xxxxxxxx"),
     I("01000000 xxxxxxxx"),
-    #I("01000011 xxxxxxxx"),
+    I("01000011 xxxxxxxx"),
     I("01000100 xxxxxxxx"),
     I("01010011 xxxxxxxx"),
     I("01010100 xxxxxxxx"),
