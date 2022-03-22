@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-filename = "Diag_F1_Rev_1.0.BIN"
+filename = "roms/Diag_F1_Rev_1.0.BIN"
 
 from diag_common import *
 

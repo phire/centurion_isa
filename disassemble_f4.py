@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-filename = "Diag_F4_1133CMD.BIN"
+filename = "roms/Diag_F4_1133CMD.BIN"
 base_address = 0x9800
 
 from diag_common import *

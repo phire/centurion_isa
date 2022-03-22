@@ -2,7 +2,7 @@
 
 from disassemble import *
 
-filename = "bootstrap_unscrambled.bin"
+filename = "roms/bootstrap_unscrambled.bin"
 base_address = 0xfc00
 
 entry_points = [
