@@ -17,3 +17,6 @@ out/DIAG/f4.asm: disassemble.py diag_common.py
 
 out/bootstrap.asm: disassemble.py
 	python3 disassemble_bootstrap.py > out/bootstrap.asm
+
+out/autoload.asm: disassemble.py
+	python3 disassemble_autoload.py > out/autoload.asm
