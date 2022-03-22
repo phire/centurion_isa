@@ -1,34 +1,34 @@
 
 TEST_0:
-9800:    02 ce              0x2ce
+9800:    02 ce        (0x2ce)
 9802:    "01133 CMD AUX MEMORY TEST\r\n\0"
 
 TEST_1:
-981e:    03 d9              0x3d9
+981e:    03 d9        (0x3d9)
 9820:    "01133 CMD SEEK TEST\r\n\0"
 
 TEST_2:
-9836:    04 9d              0x49d
+9836:    04 9d        (0x49d)
 9838:    "01133 CMD READ TEST\r\n\0"
 
 TEST_3:
-984e:    02 d9              0x2d9
+984e:    02 d9        (0x2d9)
 9850:    "FINCH AUX MEMORY TEST\r\n\0"
 
 TEST_4:
-9868:    05 3c              0x53c
+9868:    05 3c        (0x53c)
 986a:    "FINCH SEEK TEST\r\n\0"
 
 TEST_5:
-987c:    05 ff              0x5ff
+987c:    05 ff        (0x5ff)
 987e:    "FINCH READ TEST\r\n\0"
 
 TEST_6:
-9890:    06 9e              0x69e
+9890:    06 9e        (0x69e)
 9892:    "ROM SELF TEST\r\n\n\0"
 
 TEST_7:
-98a3:    00 00              0x0
+98a3:    00 00        (0x0)
 
 WriteString:
 98a5:    85 41        ldb A, [sp]++
@@ -103,9 +103,9 @@ FinishTest:
 9908:    11 57        b1 L_9961
 990a:    81 f2 01     ldb A, 0xf201
 990d:    c0 80        lib B, 0x80
-990f:    43           or A, B
-9910:    31 c0        unknown
-9912:    83 49        unknown
+990f:    43 31        unknown
+9911:    c0 83        lib B, 0x83
+9913:    49           cmp B, A
 9914:    15 4b        b_nz L_9961
 9916:    81 01 08     ldb A, 0x0108
 9919:    14 32        b_z L_994d
@@ -118,7 +118,7 @@ PressSpaceThenExit:
 9933:    7a 01 12     call [0x0112]
 9936:    "\r\nPRESS SPACE\x07\r\n\0"
 9947:    7a 01 02     call [0x0102]
-994a:    72 01 00     jump [{N:#06x}] ;
+994a:    72 01 00     jump [0x0100] ;
 
 L_994d:
 994d:    7a 01 12     call [0x0112]
@@ -197,7 +197,7 @@ L_99f6:
 9a05:    "*** BUSY DID NOT CLEAR ***\0"
 9a20:    a1 f1 0b     stb A, 0xf10b
 9a23:    a1 f1 0c     stb A, 0xf10c
-9a26:    72 01 0e     jump [{N:#06x}] ;
+9a26:    72 01 0e     jump [0x010e] ;
 
 L_9a29:
 9a29:    60 03 e8     60 A, 0x03e8
@@ -212,7 +212,7 @@ L_9a2c:
 9a36:    "*** FOUT NEVER CAME ON ***\0"
 9a51:    a1 f1 0b     stb A, 0xf10b
 9a54:    a1 f1 0c     stb A, 0xf10c
-9a57:    72 01 0e     jump [{N:#06x}] ;
+9a57:    72 01 0e     jump [0x010e] ;
 
 L_9a5a:
 9a5a:    03           flag3
@@ -254,7 +254,7 @@ L_9a97:
 9aa5:    "*** FIN DID NOT GO OFF ***\r\n\0"
 9ac2:    a1 f1 0b     stb A, 0xf10b
 9ac5:    a1 f1 0c     stb A, 0xf10c
-9ac8:    72 01 0e     jump [{N:#06x}] ;
+9ac8:    72 01 0e     jump [0x010e] ;
 
 L_9acb:
 9acb:    65 a1        unknown
@@ -296,21 +296,37 @@ L_9aef:
 9b01:    2f 34        unknown
 9b03:    2f 06        unknown
 9b05:    80 46        lib A, 0x46
-9b07:    a2 01 14     push_word 0x0114
-9b0a:    7a 01 0c     call [0x010c]
+9b07:    a2           unknown
+9b08:    01           nop
+9b09:    14 7a        b_z L_9b85
+9b0b:    01           nop
+9b0c:    0c           unknown
 9b0d:    80 01        lib A, 0x01
-9b0f:    a2 01 14     push_word 0x0114
-9b12:    7a 01 0c     call [0x010c]
+9b0f:    a2           unknown
+9b10:    01           nop
+9b11:    14 7a        b_z L_9b8d
+9b13:    01           nop
+9b14:    0c           unknown
 9b15:    2a           unknown
-9b16:    a2 01 14     push_word 0x0114
-9b19:    7a 01 0c     call [0x010c]
+9b16:    a2           unknown
+9b17:    01           nop
+9b18:    14 7a        b_z L_9b94
+9b1a:    01           nop
+9b1b:    0c           unknown
 9b1c:    80 0f        lib A, 0x0f
-9b1e:    a2 01 14     push_word 0x0114
-9b21:    7a 01 0c     call [0x010c]
+9b1e:    a2           unknown
+9b1f:    01           nop
+9b20:    14 7a        b_z L_9b9c
+9b22:    01           nop
+9b23:    0c           unknown
 9b24:    2a           unknown
-9b25:    a2 01 14     push_word 0x0114
-9b28:    7a 01 18     call [0x0118]
-9b2b:    60 0f 00     60 A, 0x0f00
+9b25:    a2           unknown
+9b26:    01           nop
+9b27:    14 7a        b_z L_9ba3
+9b29:    01           nop
+9b2a:    18 60        b_gt L_9b8c
+9b2c:    0f           unknown
+9b2d:    00           HALT
 9b2e:    3a           clear A
 
 L_9b2f:
@@ -327,33 +343,53 @@ L_9b32:
 9b41:    2f 34        unknown
 9b43:    2f 06        unknown
 9b45:    80 47        lib A, 0x47
-9b47:    a2 01 14     push_word 0x0114
-9b4a:    7a 01 0c     call [0x010c]
+9b47:    a2           unknown
+9b48:    01           nop
+9b49:    14 7a        b_z L_9bc5
+9b4b:    01           nop
+9b4c:    0c           unknown
 9b4d:    80 01        lib A, 0x01
-9b4f:    a2 01 14     push_word 0x0114
-9b52:    7a 01 0c     call [0x010c]
+9b4f:    a2           unknown
+9b50:    01           nop
+9b51:    14 7a        b_z L_9bcd
+9b53:    01           nop
+9b54:    0c           unknown
 9b55:    2a           unknown
-9b56:    a2 01 14     push_word 0x0114
-9b59:    7a 01 0c     call [0x010c]
+9b56:    a2           unknown
+9b57:    01           nop
+9b58:    14 7a        b_z L_9bd4
+9b5a:    01           nop
+9b5b:    0c           unknown
 9b5c:    80 0f        lib A, 0x0f
-9b5e:    a2 01 14     push_word 0x0114
-9b61:    7a 01 0c     call [0x010c]
+9b5e:    a2           unknown
+9b5f:    01           nop
+9b60:    14 7a        b_z L_9bdc
+9b62:    01           nop
+9b63:    0c           unknown
 9b64:    2a           unknown
-9b65:    a2 01 14     push_word 0x0114
-9b68:    7a 01 18     call [0x0118]
-9b6b:    b5 a2        unknown
+9b65:    a2           unknown
+9b66:    01           nop
+9b67:    14 7a        b_z L_9be3
+9b69:    01           nop
+9b6a:    18 b5        b_gt L_9b21
+9b6c:    a2           unknown
 9b6d:    60 0f 00     60 A, 0x0f00
 9b70:    d0 01 1c     liw B, 0x011c
 9b73:    55 60        alu5 r?, r?
 9b75:    45           unknown
-9b76:    10 85        b0 L_9afd
-9b78:    21 bd        unknown
+9b76:    10
+
+L_9b77:
+9b77:    85 21        unknown
+9b79:    bd           unknown
 9b7a:    41 01        unknown
 9b7c:    15 12        b_nz L_9b90
 9b7e:    20 00        unknown
 9b80:    20 00        unknown
 9b82:    20 00        unknown
 9b84:    3f           unknown
+
+L_9b85:
 9b85:    15 f0        b_nz L_9b77
 9b87:    95 a1        unknown
 9b89:    20 70        unknown
@@ -380,10 +416,12 @@ L_9b90:
 9bcb:    7a 01 0a     call [0x010a]
 9bce:    7a 01 12     call [0x0112]
 9bd1:    " ***\0"
-9bd6:    72 01 0e     jump [{N:#06x}] ;
+9bd6:    72 01 0e     jump [0x010e] ;
 
 Entry_01133_CMD_SEEK_TEST:
 9bd9:    90 01 8b     liw A, 0x018b
+
+L_9bdc:
 9bdc:    50 80        add A, indexBase
 9bde:    7d 00        call A + 0x00
 9be0:    f8           unknown
@@ -401,20 +439,33 @@ Entry_01133_CMD_SEEK_TEST:
 9bfb:    2f 34        unknown
 9bfd:    2f 06        unknown
 9bff:    80 43        lib A, 0x43
-9c01:    a2 01 14     push_word 0x0114
-9c04:    7a 01 18     call [0x0118]
-9c07:    13 09        b3 L_9c12
+9c01:    a2           unknown
+9c02:    01           nop
+9c03:    14 7a        b_z L_9c7f
+9c05:    01           nop
+9c06:    18 13        b_gt L_9c1b
+9c08:    09           ret
+9c09:    a1
+9c0a:    f1
+9c0b:    0b
+9c0c:    a1
+9c0d:    f1
+9c0e:    0c
+9c0f:    72
+9c10:    01
+9c11:    0e
+9c12:    80
+9c13:    45
+9c14:    a2
+9c15:    01
+9c16:    14
+9c17:    7a
+9c18:    01
+9c19:    18
+9c1a:    12
 
-L_9c09:
-9c09:    a1 f1 0b     stb A, 0xf10b
-9c0c:    a1 f1 0c     stb A, 0xf10c
-9c0f:    72 01 0e     jump [{N:#06x}] ;
-
-L_9c12:
-9c12:    80 45        lib A, 0x45
-9c14:    a2 01 14     push_word 0x0114
-9c17:    7a 01 18     call [0x0118]
-9c1a:    12 ed        b2 L_9c09
+L_9c1b:
+9c1b:    ed           unknown
 9c1c:    d0 41 4f     liw B, 0x414f
 9c1f:    90 84 00     liw A, 0x8400
 9c22:    b5 21        unknown
@@ -423,6 +474,8 @@ L_9c12:
 9c28:    3a           clear A
 9c29:    b5 21        unknown
 9c2b:    39           unknown
+
+L_9c2c:
 9c2c:    a9           unknown
 9c2d:    38           unknown
 9c2e:    38           unknown
@@ -436,14 +489,21 @@ L_9c32:
 9c3c:    2f 34        unknown
 9c3e:    2f 06        unknown
 9c40:    80 43        lib A, 0x43
-9c42:    a2 01 14     push_word 0x0114
-9c45:    7a 01 18     call [0x0118]
-9c48:    12 bf        b2 L_9c09
+9c42:    a2           unknown
+9c43:    01           nop
+9c44:    14 7a        b_z L_9cc0
+9c46:    01           nop
+9c47:    18 12        b_gt L_9c5b
+9c49:    bf           unknown
 9c4a:    80 45        lib A, 0x45
-9c4c:    a2 01 14     push_word 0x0114
-9c4f:    7a 01 18     call [0x0118]
-9c52:    13 1c        b3 L_9c70
-9c54:    7a 01 12     call [0x0112]
+9c4c:    a2           unknown
+9c4d:    01           nop
+9c4e:    14 7a        b_z L_9cca
+9c50:    01           nop
+9c51:    18 13        b_gt L_9c66
+9c53:    1c 7a        b_sense2 L_9ccf
+9c55:    01           nop
+9c56:    12
 9c57:    "TRACK=\0"
 9c5e:    91 41 52     ldw A, 0x4152
 9c61:    7a 01 10     call [0x0110]
@@ -451,15 +511,16 @@ L_9c32:
 9c67:    "\r\n\0"
 9c6a:    a1 f1 0b     stb A, 0xf10b
 9c6d:    a1 f1 0c     stb A, 0xf10c
-
-L_9c70:
 9c70:    91 41 b1     ldw A, 0x41b1
 9c73:    16 1a        b_lt L_9c8f
 9c75:    d1 41 52     ldw A, 0x4152
 9c78:    50 20        unknown
 9c7a:    b1 41 52     stw A, 0x4152
-9c7d:    d0 03 36     liw B, 0x0336
-9c80:    59           unknown
+9c7d:    d0
+9c7e:    03
+
+L_9c7f:
+9c7f:    36 59        unknown
 9c81:    15 af        b_nz L_9c32
 9c83:    3a           clear A
 9c84:    39           unknown
@@ -475,60 +536,46 @@ L_9c8f:
 9c96:    17 9a        b7 L_9c32
 9c98:    7a 01 04     call [0x0104]
 9c9b:    03           flag3
-9c9c:    e5 90        unknown
-9c9e:    01           nop
-9c9f:    8b 50        unknown
-9ca1:    80 7d        lib A, 0x7d
-9ca3:    00           HALT
-9ca4:    f8
-9ca5:    08
-9ca6:    7a
-9ca7:    01
-9ca8:    06
-9ca9:    90
-9caa:    41
-9cab:    4d
-9cac:    5c
+9c9c:    e5
+
+Entry_01133_CMD_READ_TEST:
+9c9d:    90 01 8b     liw A, 0x018b
+9ca0:    50 80        add A, indexBase
+9ca2:    7d 00        call A + 0x00
+9ca4:    f8           unknown
+9ca5:    08           flag8
+9ca6:    7a 01 06     call [0x0106]
+9ca9:    90 41 4d     liw A, 0x414d
+9cac:    5c           unknown
 9cad:    90
 9cae:    81
-9caf:    00
-9cb0:    b5
-9cb1:    61
-9cb2:    90
-9cb3:    84
-9cb4:    00
-9cb5:    b5
-9cb6:    61
-9cb7:    80
-9cb8:    83
-9cb9:    a5
-9cba:    61
-9cbb:    3a
-9cbc:    b5
-9cbd:    61
-9cbe:    80
-9cbf:    85
-9cc0:    a5
-9cc1:    61
-9cc2:    d0
-9cc3:    10
-9cc4:    00
-9cc5:    e5
-9cc6:    61
-9cc7:    90
-9cc8:    01
-9cc9:    90
-9cca:    b5
-9ccb:    61
-9ccc:    20
-9ccd:    30
-9cce:    21
-9ccf:    20
-9cd0:    15
-9cd1:    f3
-9cd2:    80
-9cd3:    ff
-9cd4:    ab
+
+L_9caf:
+9caf:    00           HALT
+9cb0:    b5 61        unknown
+9cb2:    90 84 00     liw A, 0x8400
+9cb5:    b5 61        unknown
+9cb7:    80 83        lib A, 0x83
+9cb9:    a5 61        unknown
+9cbb:    3a           clear A
+9cbc:    b5 61        unknown
+9cbe:    80 85        lib A, 0x85
+
+L_9cc0:
+9cc0:    a5 61        unknown
+9cc2:    d0 10 00     liw B, 0x1000
+
+L_9cc5:
+9cc5:    e5 61        unknown
+9cc7:    90 01 90     liw A, 0x0190
+
+L_9cca:
+9cca:    b5 61        unknown
+9ccc:    20 30        unknown
+9cce:    21 20        unknown
+9cd0:    15 f3        b_nz L_9cc5
+9cd2:    80 ff        lib A, 0xff
+9cd4:    ab           unknown
 
 L_9cd5:
 9cd5:    90 ff c3     liw A, 0xffc3
@@ -538,32 +585,55 @@ L_9cd5:
 9cdf:    2f 34        unknown
 9ce1:    2f 06        unknown
 9ce3:    80 43        lib A, 0x43
-9ce5:    a2 01 14     push_word 0x0114
-9ce8:    7a 01 18     call [0x0118]
-9ceb:    13 09        b3 L_9cf6
-9ced:    a1 f1 0b     stb A, 0xf10b
-9cf0:    a1 f1 0c     stb A, 0xf10c
-9cf3:    72 01 0e     jump [{N:#06x}] ;
+9ce5:    a2           unknown
 
-L_9cf6:
-9cf6:    90 e6 ff     liw A, 0xe6ff
-9cf9:    2f 02        unknown
-9cfb:    90 01 1c     liw A, 0x011c
-9cfe:    2f 00        unknown
+L_9ce6:
+9ce6:    01           nop
+9ce7:    14 7a        b_z L_9d63
+9ce9:    01           nop
+9cea:    18 13        b_gt L_9cff
+9cec:    09           ret
+9ced:    a1
+9cee:    f1
+9cef:    0b
+9cf0:    a1
+9cf1:    f1
+9cf2:    0c
+9cf3:    72
+9cf4:    01
+9cf5:    0e
+9cf6:    90
+9cf7:    e6
+9cf8:    ff
+9cf9:    2f
+9cfa:    02
+9cfb:    90
+9cfc:    01
+9cfd:    1c
+9cfe:    2f
+
+L_9cff:
+9cff:    00           HALT
 9d00:    2f 34        unknown
 9d02:    2f 06        unknown
 9d04:    80 45        lib A, 0x45
-9d06:    a2 01 14     push_word 0x0114
-9d09:    7a 01 18     call [0x0118]
-9d0c:    13 16        b3 L_9d24
-9d0e:    7a 01 12     call [0x0112]
+9d06:    a2           unknown
+9d07:    01           nop
+9d08:    14 7a        b_z L_9d84
+9d0a:    01           nop
+9d0b:    18 13        b_gt L_9d20
+9d0d:    16 7a        b_lt L_9d89
+9d0f:    01           nop
+9d10:    12
 9d11:    "TRACK=\0"
 9d18:    91 41 52     ldw A, 0x4152
 9d1b:    7a 01 10     call [0x0110]
-9d1e:    7a 01 12     call [0x0112]
-9d21:    "\r\n\0"
+9d1e:    7a
+9d1f:    01
 
-L_9d24:
+L_9d20:
+9d20:    12
+9d21:    "\r\n\0"
 9d24:    91 41 52     ldw A, 0x4152
 9d27:    15 01        b_nz L_9d2a
 9d29:    38           unknown
@@ -594,26 +664,46 @@ Entry_FINCH_SEEK_TEST:
 9d55:    90 82 ff     liw A, 0x82ff
 9d58:    b9           unknown
 9d59:    90 ff f9     liw A, 0xfff9
-9d5c:    2f 02        unknown
+9d5c:    2f
+
+L_9d5d:
+9d5d:    02           flag2
 9d5e:    90 41 4d     liw A, 0x414d
 9d61:    2f 00        unknown
+
+L_9d63:
 9d63:    2f 34        unknown
 9d65:    2f 06        unknown
 9d67:    80 43        lib A, 0x43
-9d69:    a2 01 14     push_word 0x0114
-9d6c:    7a 01 18     call [0x0118]
-9d6f:    13 09        b3 L_9d7a
+9d69:    a2           unknown
+9d6a:    01           nop
+9d6b:    14 7a        b_z L_9de7
+9d6d:    01           nop
+9d6e:    18 13        b_gt L_9d83
+9d70:    09           ret
+9d71:    a1
+9d72:    f1
+9d73:    0b
+9d74:    a1
+9d75:    f1
+9d76:    0c
+9d77:    72
+9d78:    01
+9d79:    0e
+9d7a:    80
+9d7b:    45
+9d7c:    a2
+9d7d:    01
+9d7e:    14
+9d7f:    7a
+9d80:    01
+9d81:    18
+9d82:    12
 
-L_9d71:
-9d71:    a1 f1 0b     stb A, 0xf10b
-9d74:    a1 f1 0c     stb A, 0xf10c
-9d77:    72 01 0e     jump [{N:#06x}] ;
+L_9d83:
+9d83:    ed           unknown
 
-L_9d7a:
-9d7a:    80 45        lib A, 0x45
-9d7c:    a2 01 14     push_word 0x0114
-9d7f:    7a 01 18     call [0x0118]
-9d82:    12 ed        b2 L_9d71
+L_9d84:
 9d84:    d0 41 4f     liw B, 0x414f
 9d87:    90 84 00     liw A, 0x8400
 9d8a:    b5 21        unknown
@@ -622,6 +712,8 @@ L_9d7a:
 9d90:    3a           clear A
 9d91:    b5 21        unknown
 9d93:    39           unknown
+
+L_9d94:
 9d94:    a9           unknown
 9d95:    38           unknown
 9d96:    38           unknown
@@ -635,14 +727,21 @@ L_9d9a:
 9da4:    2f 34        unknown
 9da6:    2f 06        unknown
 9da8:    80 43        lib A, 0x43
-9daa:    a2 01 14     push_word 0x0114
-9dad:    7a 01 18     call [0x0118]
-9db0:    12 bf        b2 L_9d71
+9daa:    a2           unknown
+9dab:    01           nop
+9dac:    14 7a        b_z L_9e28
+9dae:    01           nop
+9daf:    18 12        b_gt L_9dc3
+9db1:    bf           unknown
 9db2:    80 45        lib A, 0x45
-9db4:    a2 01 14     push_word 0x0114
-9db7:    7a 01 18     call [0x0118]
-9dba:    13 1c        b3 L_9dd8
-9dbc:    7a 01 12     call [0x0112]
+9db4:    a2           unknown
+9db5:    01           nop
+9db6:    14 7a        b_z L_9e32
+9db8:    01           nop
+9db9:    18 13        b_gt L_9dce
+9dbb:    1c 7a        b_sense2 L_9e37
+9dbd:    01           nop
+9dbe:    12
 9dbf:    "TRACK=\0"
 9dc6:    91 41 52     ldw A, 0x4152
 9dc9:    7a 01 10     call [0x0110]
@@ -650,14 +749,14 @@ L_9d9a:
 9dcf:    "\r\n\0"
 9dd2:    a1 f1 0b     stb A, 0xf10b
 9dd5:    a1 f1 0c     stb A, 0xf10c
-
-L_9dd8:
 9dd8:    91 41 b1     ldw A, 0x41b1
 9ddb:    16 14        b_lt L_9df1
 9ddd:    91 41 52     ldw A, 0x4152
 9de0:    38           unknown
 9de1:    b1 41 52     stw A, 0x4152
 9de4:    d0 02 5c     liw B, 0x025c
+
+L_9de7:
 9de7:    59           unknown
 9de8:    15 b0        b_nz L_9d9a
 9dea:    3a           clear A
@@ -683,7 +782,11 @@ Entry_FINCH_READ_TEST:
 9e08:    7a 01 06     call [0x0106]
 9e0b:    90 41 4d     liw A, 0x414d
 9e0e:    5c           unknown
-9e0f:    90 81 02     liw A, 0x8102
+9e0f:    90
+9e10:    81
+
+L_9e11:
+9e11:    02           flag2
 9e12:    b5 61        unknown
 9e14:    90 84 00     liw A, 0x8400
 9e17:    b5 61        unknown
@@ -696,11 +799,15 @@ Entry_FINCH_READ_TEST:
 9e24:    d0 10 00     liw B, 0x1000
 
 L_9e27:
-9e27:    e5 61        unknown
-9e29:    90 01 90     liw A, 0x0190
-9e2c:    b5 61        unknown
+9e27:    e5
+
+L_9e28:
+9e28:    61 90 01     61 A, 0x9001
+9e2b:    90 b5 61     liw A, 0xb561
 9e2e:    20 30        unknown
 9e30:    21 20        unknown
+
+L_9e32:
 9e32:    15 f3        b_nz L_9e27
 9e34:    80 ff        lib A, 0xff
 9e36:    ab           unknown
@@ -713,32 +820,55 @@ L_9e37:
 9e41:    2f 34        unknown
 9e43:    2f 06        unknown
 9e45:    80 43        lib A, 0x43
-9e47:    a2 01 14     push_word 0x0114
-9e4a:    7a 01 18     call [0x0118]
-9e4d:    13 09        b3 L_9e58
-9e4f:    a1 f1 0b     stb A, 0xf10b
-9e52:    a1 f1 0c     stb A, 0xf10c
-9e55:    72 01 0e     jump [{N:#06x}] ;
+9e47:    a2           unknown
 
-L_9e58:
-9e58:    90 e6 ff     liw A, 0xe6ff
-9e5b:    2f 02        unknown
-9e5d:    90 01 1c     liw A, 0x011c
-9e60:    2f 00        unknown
+L_9e48:
+9e48:    01           nop
+9e49:    14 7a        b_z L_9ec5
+9e4b:    01           nop
+9e4c:    18 13        b_gt L_9e61
+9e4e:    09           ret
+9e4f:    a1
+9e50:    f1
+9e51:    0b
+9e52:    a1
+9e53:    f1
+9e54:    0c
+9e55:    72
+9e56:    01
+9e57:    0e
+9e58:    90
+9e59:    e6
+9e5a:    ff
+9e5b:    2f
+9e5c:    02
+9e5d:    90
+9e5e:    01
+9e5f:    1c
+9e60:    2f
+
+L_9e61:
+9e61:    00           HALT
 9e62:    2f 34        unknown
 9e64:    2f 06        unknown
 9e66:    80 45        lib A, 0x45
-9e68:    a2 01 14     push_word 0x0114
-9e6b:    7a 01 18     call [0x0118]
-9e6e:    13 16        b3 L_9e86
-9e70:    7a 01 12     call [0x0112]
+9e68:    a2           unknown
+9e69:    01           nop
+9e6a:    14 7a        b_z L_9ee6
+9e6c:    01           nop
+9e6d:    18 13        b_gt L_9e82
+9e6f:    16 7a        b_lt L_9eeb
+9e71:    01           nop
+9e72:    12
 9e73:    "TRACK=\0"
 9e7a:    91 41 52     ldw A, 0x4152
 9e7d:    7a 01 10     call [0x0110]
-9e80:    7a 01 12     call [0x0112]
-9e83:    "\r\n\0"
+9e80:    7a
+9e81:    01
 
-L_9e86:
+L_9e82:
+9e82:    12
+9e83:    "\r\n\0"
 9e86:    91 41 52     ldw A, 0x4152
 9e89:    15 01        b_nz L_9e8c
 9e8b:    38           unknown
@@ -759,7 +889,7 @@ Entry_ROM_SELF_TEST:
 9ea1:    50 80        add A, indexBase
 9ea3:    7d 00        call A + 0x00
 9ea5:    00           HALT
-9ea6:    00
+9ea6:    00           HALT
 9ea7:    55 86        alu5 r?, r?
 9ea9:    3a           clear A
 
@@ -776,14 +906,17 @@ L_9eaa:
 9ebc:    7a 01 12     call [0x0112]
 9ebf:    "\n\r*** PASS ***\0"
 9ece:    a1 f1 0a     stb A, 0xf10a
-9ed1:    72 01 0e     jump [{N:#06x}] ;
+9ed1:    72 01 0e     jump [0x010e] ;
 
 L_9ed4:
 9ed4:    7a 01 12     call [0x0112]
 9ed7:    "*** FAIL ***\0"
-9ee4:    a1 f1 0b     stb A, 0xf10b
+9ee4:    a1
+9ee5:    f1
+
+L_9ee6:
+9ee6:    0b           unknown
 9ee7:    a1 f1 0c     stb A, 0xf10c
-9eea:    72 01 0e     jump [{N:#06x}] ;
-9eed:    c5
-9eee:    00
-9eef:    00
+9eea:    72 01 0e     jump [0x010e] ;
+9eed:    c5 00        unknown
+9eef:    00           HALT

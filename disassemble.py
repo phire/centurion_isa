@@ -118,7 +118,7 @@ def relative_call(next_pc, S, **kwargs):
 def abolsute_branch_uncondtionional(N, **kwargs):
     return [N]
 
-def abolsute_call(next_pc, N, **kwargs):
+def absolute_call(next_pc, N, **kwargs):
     return [next_pc, N]
 
 def kill_branch(**kwargs):
@@ -229,11 +229,13 @@ instructions = [
     B("00001001", "ret", kill_branch),
 
     B("01110001 NNNNNNNN NNNNNNNN", "jump {N:#06x}", abolsute_branch_uncondtionional),
-    I("01110101 NNNNNNNN", "jump A + {N:#04x}"),
-    I("01111101 NNNNNNNN", "call A + {N:#04x}"),
-    B("01111001 NNNNNNNN NNNNNNNN", "call", abolsute_call),
-    I("01111010 NNNNNNNN NNNNNNNN", "call [{N:#06x}]"),
     B("01110010 NNNNNNNN NNNNNNNN", "jump [{N:#06x}] ;", kill_branch),
+    B("01110101 NNNNNNNN", "jump A + {N:#04x}", kill_branch),
+    B("01111001 NNNNNNNN NNNNNNNN", "call", absolute_call),
+    I("01111101 NNNNNNNN", "call A + {N:#04x}"),
+    I("01111010 NNNNNNNN NNNNNNNN", "call [{N:#06x}]"),
+
+
 
 
     I("01010101"),
@@ -245,7 +247,7 @@ instructions = [
     I("01000101 00000001", "swap_bytes A"),
     I("10000101 01000001", "ldb A, [sp]++"), # Indirect load from SP with indirect post increment
 
-    I("10100010 NNNNNNNN NNNNNNNN", "push_word {N:#06x}"),
+   # I("10100010 NNNNNNNN NNNNNNNN", "push_word {N:#06x}"),
 
 
 
@@ -436,14 +438,14 @@ def disassemble(memory, entry_points):
             str += (f"{i:04x}:    {memory[i]:02x}")
             i += 1
 
-            if info.comment:
-                indent = len(str)
-                lines = info.comment.split("\n")
-                str += f" ; {lines[0]}"
-                for line in lines[1:]:
-                    str += "\n" + " " * indent + f" ; {line}"
+        if info.comment:
+            indent = len(str)
+            lines = info.comment.split("\n")
+            str += f" ; {lines[0]}"
+            for line in lines[1:]:
+                str += "\n" + " " * indent + f" ; {line}"
 
-            print(str)
+        print(str)
 
 def apply_comments(comments):
     for addr, comment in comments:

@@ -1,6 +1,6 @@
 
 EntryPoint:
-fc00:    1a 02        b_sence0 L_fc04 ; Check the Sense switch to see if we should jump straight to DIAG
+fc00:    1a 02        b_sense0 L_fc04 ; Check the Sense switch to see if we should jump straight to DIAG
 fc02:    73 03        jump L_fc07
 
 L_fc04:
@@ -66,7 +66,7 @@ fc63:    2f a0        unknown
 fc65:    90 ff f6     liw A, 0xfff6
 fc68:    2f 02        unknown
 fc6a:    7b 22        call L_fc8e
-fc6c:    43           or A, B
+fc6c:    43           (0x43)
 fc6d:    90 01 00     liw A, 0x0100
 fc70:    2f 00        unknown
 fc72:    90 f0 ff     liw A, 0xf0ff
@@ -107,9 +107,8 @@ fca5:    2c           rotate_right A
 fca6:    11 fb        b1 ReadChar
 fca8:    84 f5        ldb A, [[pc-11]]
 fcaa:    c0 80        lib B, 0x80
-fcac:    43           or A, B ; char | 0x80 - Force bit 7 to be set
-fcad:    31 c0        unknown
-fcaf:    e0           unknown
+fcac:    43 31        unknown ; char | 0x80 - Force bit 7 to be set
+fcae:    c0 e0        lib B, 0xe0
 fcb0:    49           cmp B, A ; Check if char is lowercase (greater than 0x60)
 fcb1:    16 04        b_lt L_fcb7
 fcb3:    c0 df        lib B, 0xdf
@@ -158,14 +157,9 @@ fcee:    90 ea 1f     liw A, 0xea1f ; DMA source address? It's 0xf1ae backwards.
 fcf1:    2f 02        unknown
 fcf3:    7b 1c        call DiskCommand ; DiskCommand(0) - Read
 fcf5:    00           HALT
-fcf6:    81
-fcf7:    f1
-fcf8:    44
-fcf9:    15
-fcfa:    84
-fcfb:    71
-fcfc:    01
-fcfd:    03
+fcf6:    81 f1 44     ldb A, 0xf144 ; Check Command Status (0 == success?)
+fcf9:    15 84        b_nz PrintError
+fcfb:    71 01 03     jump 0x0103 IPL_Entry_point ; Transfer control to the IPL that was loaded off disk
 fcfe:    7b 2f        call L_fd2f
 
 AlternativeEntryPoint:
@@ -286,78 +280,59 @@ fdaa:    15 fa        b_nz L_fda6
 fdac:    09           ret
 fdad:    8c           unknown
 fdae:    00           HALT
-fdaf:    8b
-fdb0:    00
-fdb1:    95
-fdb2:    41
-fdb3:    b3
-fdb4:    03
-fdb5:    79
-fdb6:    4c
-fdb7:    93
-fdb8:    47
-fdb9:    be
-fdba:    6d
-fdbb:    a2
-fdbc:    32
-fdbd:    40
-fdbe:    79
-fdbf:    4c
-fdc0:    e7
-fdc1:    4d
-fdc2:    14
-fdc3:    2a
-fdc4:    c0
-fdc5:    8d
-fdc6:    49
-fdc7:    14
-fdc8:    25
-fdc9:    c0
-fdca:    b0
-fdcb:    49
-fdcc:    16
-fdcd:    25
-fdce:    80
-fdcf:    09
-fdd0:    41
-fdd1:    31
-fdd2:    19
-fdd3:    0e
-fdd4:    80
-fdd5:    11
-fdd6:    41
-fdd7:    31
-fdd8:    16
-fdd9:    19
-fdda:    c0
-fddb:    05
-fddc:    49
-fddd:    18
-fdde:    14
-fddf:    c0
-fde0:    0a
-fde1:    48
-fde2:    80
-fde3:    04
-fde4:    07
-fde5:    37
-fde6:    40
-fde7:    29
-fde8:    18
-fde9:    fa
-fdea:    40
-fdeb:    35
-fdec:    73
-fded:    d0
-fdee:    55
-fdef:    40
-fdf0:    65
-fdf1:    a1
-fdf2:    09
-fdf3:    65
-fdf4:    a1
-fdf5:    73
-fdf6:    be
+fdaf:    8b 00        unknown
+fdb1:    95 41        unknown
+fdb3:    b3           unknown
+fdb4:    03           flag3
+
+L_fdb5:
+fdb5:    79 4c 93     call L_4c93
+fdb8:    47           unknown
+fdb9:    be           unknown
+fdba:    6d a2        unknown
+fdbc:    32 40        unknown
+
+L_fdbe:
+fdbe:    79 4c e7     call L_4ce7
+fdc1:    4d           unknown
+fdc2:    14 2a        b_z L_fdee
+fdc4:    c0 8d        lib B, 0x8d
+fdc6:    49           cmp B, A
+fdc7:    14 25        b_z L_fdee
+fdc9:    c0 b0        lib B, 0xb0
+fdcb:    49           cmp B, A
+fdcc:    16 25        b_lt L_fdf3
+fdce:    80 09        lib A, 0x09
+fdd0:    41 31        unknown
+fdd2:    19 0e        b_le L_fde2
+fdd4:    80 11        lib A, 0x11
+fdd6:    41 31        unknown
+fdd8:    16 19        b_lt L_fdf3
+fdda:    c0 05        lib B, 0x05
+fddc:    49           cmp B, A
+fddd:    18 14        b_gt L_fdf3
+fddf:    c0 0a        lib B, 0x0a
+fde1:    48           add B, A
+
+L_fde2:
+fde2:    80 04        lib A, 0x04
+
+L_fde4:
+fde4:    07           clear_carry?
+fde5:    37 40        unknown
+fde7:    29           unknown
+fde8:    18 fa        b_gt L_fde4
+fdea:    40 35        unknown
+fdec:    73 d0        jump L_fdbe
+
+L_fdee:
+fdee:    55 40        alu5 r?, r?
+fdf0:    65 a1        unknown
+fdf2:    09           ret
+
+L_fdf3:
+fdf3:    65 a1        unknown
+fdf5:    73 be        jump L_fdb5
 fdf7:    d5           unknown
 fdf8:    41 7d        unknown
 fdfa:    80 0c        lib A, 0x0c

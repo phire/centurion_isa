@@ -1,11 +1,11 @@
 
 L_ef00:
-ef00:    1c 03        b_sence2 L_ef05
+ef00:    1c 03        b_sense2 L_ef05
 ef02:    71 ef c0     jump 0xefc0 L_efc0
 
 L_ef05:
 ef05:    80 01        lib A, 0x01
-ef07:    1d 01        b_sence3 L_ef0a
+ef07:    1d 01        b_sense3 L_ef0a
 ef09:    2a           unknown
 
 L_ef0a:
@@ -40,7 +40,7 @@ ef3f:    09           ret
 
 L_efc0:
 efc0:    90 f0 b0     liw A, 0xf0b0
-efc3:    1d 03        b_sence3 L_efc8
+efc3:    1d 03        b_sense3 L_efc8
 efc5:    90 f0 a0     liw A, 0xf0a0
 
 L_efc8:
