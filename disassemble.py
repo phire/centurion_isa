@@ -14,6 +14,7 @@ class MemInfo:
         self.visited = False
         self.type = None
         self.comment = None
+        self.pre_comment = None
 
 memory_addr_info = defaultdict(MemInfo)
 
@@ -131,7 +132,7 @@ class B(I):
 
     def to_string(self, dict):
         if self.newpc == kill_branch:
-            return self.name
+            return self.name.format(**dict)
         if self.newpc == relative_branch or self.newpc == relative_branch_unconditional:
             dest = dict["next_pc"] + dict["S"]
         elif self.newpc == relative_call:
@@ -381,11 +382,17 @@ def disassemble(memory, entry_points):
         if info.label:
             print(f"\n{info.label}:")
 
-        if info.type == "cstring":
-            str = f"{i:04x}:    \""
-            c = memory[i] & 0x7f
+        if info.pre_comment:
+            lines = info.pre_comment.split("\n")
+            for line in lines:
+                print(f"    ; {line}")
 
-            while c != 0:
+        str = ""
+
+        if info.type == "cstring":
+            str += f"{i:04x}:    \""
+
+            while c := memory[i] & 0x7f:
                 # if char is printable, print it
                 if c >= 32 and c <= 126:
                     str += chr(c)
@@ -396,11 +403,10 @@ def disassemble(memory, entry_points):
                 else:
                     str += f"\\x{c:02x}"
                 i += 1
-                c = memory[i] & 0x7f
-            print (f"{str}\\0\"")
+            str += "\\0\""
 
             i += 1
-            continue
+
         elif info.type != None:
             value = struct.unpack_from(info.type, memory[i:i+4])[0]
             bytes = struct.pack(info.type, value)
@@ -409,13 +415,11 @@ def disassemble(memory, entry_points):
             for b in bytes:
                 str += f"{b:02x} "
             i += len(bytes)
-            while len(str) < 28:
+            while len(str) < 22:
                 str += " "
-            print(str + f"{value:#x}")
-            continue
+            str += f"({value:#x})"
 
-
-        if info.instruction:
+        elif info.instruction:
             inst = info.instruction
             str = f"{i:04x}:    "
             for b in inst.bytes:
@@ -425,6 +429,12 @@ def disassemble(memory, entry_points):
 
             str += inst.__repr__()
 
+            i += len(inst.bytes)
+
+        else:
+            str += (f"{i:04x}:    {memory[i]:02x}")
+            i += 1
+
             if info.comment:
                 indent = len(str)
                 lines = info.comment.split("\n")
@@ -433,11 +443,6 @@ def disassemble(memory, entry_points):
                     str += "\n" + " " * indent + f" ; {line}"
 
             print(str)
-            i += len(inst.bytes)
-
-        else:
-            print(f"{i:04x}:    {memory[i]:02x}")
-            i += 1
 
 def apply_comments(comments):
     for addr, comment in comments:
