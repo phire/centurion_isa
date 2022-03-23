@@ -47,14 +47,13 @@ class InvalidInstruction():
         return dict["bytes"] + " <Invalid>"
 
 class InstructionMatch:
-    def __init__(self, pc, instruction, bitstring, wildcard_bitstrings):
+    def __init__(self, pc, instruction, bytes, wildcard_bitstrings):
         self.disassembled = True
         self.valid = not isinstance(instruction, InvalidInstruction)
         self.instruction = instruction
         #self.bitstring = bitstring
 
-        bytes = [bitstring[i:i+8] for i in range(0, len(bitstring), 8)]
-        self.bytes = [int(byte, 2) for byte in bytes]
+        self.bytes = bytes
         self.next_pc = [pc + len(self.bytes)]
 
 
@@ -85,7 +84,7 @@ class I:
         self.format = format
         self.newpc = None
 
-    def match(self, pc, bitstring):
+    def match(self, pc, bitstring, bytes):
         bitstring = bitstring[0:len(self.pattern)]
 
         wildcard_bitstrings = defaultdict(str)
@@ -100,18 +99,32 @@ class I:
             # otherwise, the pattern is a wildcard which we extract
             wildcard_bitstrings[p] += b
 
-        match = InstructionMatch(pc, self, bitstring, wildcard_bitstrings)
+        bytes = bytes[0:len(self.pattern) // 8]
+
+        match = InstructionMatch(pc, self, bytes, wildcard_bitstrings)
         return match
 
     def to_string(self, dict):
         return self.format.format(**dict)
+
+RegNames8 = [
+    "AH", "AL", "BH", "BL", "CH", "CL", "DH", "DL",
+    "EH", "EL", "FH", "FL", "GH", "GL", "HH", "HL",
+]
+
+RegNames16 = [
+    # Because this 16 bit registers are byte indexed, it's possible to straddle two registers
+    "A", "{AL, BH}", "B", "{BL, CH}", "C", "{CL, DH}",
+    "D", "{DL, EH}", "E", "{EL, FH}", "F", "{FL, GH}",
+    "G", "{GL, HH}", "H", "{HL, LH}", "L", "{LL, AH}",
+]
 
 class Memory():
     # Implements all opcodes 0x80 and above
     # Memory and load immediate
     newpc = None
 
-    def match(self, pc, bitstring):
+    def match(self, pc, bitstring, bytes):
         if bitstring[0] != "1":
             return None
 
@@ -122,8 +135,63 @@ class Memory():
         address_mode = int(bitstring[5:8], 2)
 
 
-        match = InstructionMatch(pc, self, bitstring, {})
+
+
+        match = InstructionMatch(pc, self, bytes, {})
         return match
+
+
+OPs = [
+    "add", "sub", "xor", "or", "shift_right", "mov", "rotate_right", "rotate_left"
+]
+
+class Alu():
+    # Implements all opcodes between 0x20 and 0x5f
+
+    class AluInstance():
+        def __init__(self, op, word, src, dest):
+            self.newpc = None
+            self.op = op
+            self.word = word
+            self.src = src
+            self.dest = dest
+
+        def to_string(self, dict):
+            if self.word:
+                operands = f"{RegNames16[self.dest]}, {RegNames16[self.src]}"
+            else:
+                operands = f"{RegNames8[self.dest]}, {RegNames8[self.src]}"
+
+            return f"{OPs[self.op]} {operands}"
+
+    def match(self, pc, bitstring, bytes):
+
+        inst = bytes[0]
+        if inst < 0x20 or inst >= 0x60:
+            return None
+
+        word = inst & 0x10
+        fast = inst & 0x08
+        same = inst & 0x40 == 0
+        op = inst & 0x07
+
+        if fast:
+            dest = 0 if word else 1
+            if same:
+                src = dest
+            else:
+                src = 2 if word else 3
+            bytes = [inst]
+        else:
+            bytetwo = bytes[1]
+            dest = bytetwo & 0xf
+            src = (bytetwo >> 4) & 0xf
+            bytes = [inst, bytetwo]
+
+        return InstructionMatch(pc, self.AluInstance(op, word, src, dest), bytes, {})
+
+
+
 
 def relative_branch(next_pc, S, **kwargs):
     return [next_pc, next_pc + S]
@@ -166,6 +234,8 @@ class B(I):
 
 
 instructions = [
+    Alu(),
+
     #B("00000000", "HALT", kill_branch),
     I("00000000", "HALT"),
 
@@ -223,11 +293,12 @@ instructions = [
     I("01000000 00110001", "add A, B"),  # 40 31
     I("01000001 00110001", "sub A, B"),  # 41 31
     I("01000010 00110001", "and A, B"),  # 42 31
-    I("01000011 00110001", "or? A, B"),  # 43 31
+    I("01000011 00110001", "or A, B"),   # 43 31
     I("010000yy xxxxxxxx"),
 
     I("01000100 xxxxxxxx"),
-    I("01000101 00000001", "swap_bytes A"), # 45 01
+    #I("01000101", "swap_bytes A"), # 45 - pretty sure this is single byte
+    I("01000101 xxxxxxxx"),
 
 # 48
 
@@ -336,12 +407,13 @@ instructions = [
 
 
 def disassemble_instruction(memory, pc):
+    bytes = memory[pc:pc+3]
     bitstring = ""
-    for i in range(pc, pc+3):
-        bitstring += format(memory[i], '08b')
+    for byte in bytes:
+        bitstring += format(byte, '08b')
 
     for instruction in instructions:
-        match = instruction.match(pc, bitstring)
+        match = instruction.match(pc, bitstring, bytes)
         if match:
             return match
 
