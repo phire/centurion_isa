@@ -46,31 +46,32 @@ class InvalidInstruction():
     def to_string(self, dict):
         return dict["bytes"] + " <Invalid>"
 
+class QuickInstuction:
+    newpc = None
+    def __init__(self, format):
+        self.format = format
+
+    def to_string(self, dict):
+        return self.format.format(**dict)
+
+
 class InstructionMatch:
-    def __init__(self, pc, instruction, bytes, wildcard_bitstrings):
+    def __init__(self, pc, instruction, bytes, dict={}):
         self.disassembled = True
         self.valid = not isinstance(instruction, InvalidInstruction)
         self.instruction = instruction
-        #self.bitstring = bitstring
 
         self.bytes = bytes
         self.next_pc = [pc + len(self.bytes)]
 
-
-        self.dict = {
+        self.dict = dict | {
             "bytes": " ".join([f"{b:02x}" for b in self.bytes]),
             "pc": pc,
             "next_pc": self.next_pc[0],
         }
 
-        for key, bistring in wildcard_bitstrings.items():
-            signed = key in signed_wildcards
-            self.dict[key] = bitstring_to_int(bistring, signed)
-
-
         if self.instruction.newpc is not None:
             self.next_pc = instruction.newpc(**self.dict)
-
 
     def __repr__(self):
         return self.instruction.to_string(self.dict)
@@ -101,48 +102,105 @@ class I:
 
         bytes = bytes[0:len(self.pattern) // 8]
 
-        match = InstructionMatch(pc, self, bytes, wildcard_bitstrings)
-        return match
+        dict = {}
+        for key, bistring in wildcard_bitstrings.items():
+            signed = key in signed_wildcards
+            dict[key] = bitstring_to_int(bistring, signed)
+
+        return InstructionMatch(pc, self, bytes, dict)
 
     def to_string(self, dict):
         return self.format.format(**dict)
 
-RegNames8 = [
-    "AH", "AL", "BH", "BL", "CH", "CL", "DH", "DL",
-    "EH", "EL", "FH", "FL", "GH", "GL", "HH", "HL",
-]
+
 
 RegNames16 = [
-    # Because this 16 bit registers are byte indexed, it's possible to straddle two registers
-    "A", "{AL, BH}", "B", "{BL, CH}", "C", "{CL, DH}",
-    "D", "{DL, EH}", "E", "{EL, FH}", "F", "{FL, GH}",
-    "G", "{GL, HH}", "H", "{HL, LH}", "L", "{LL, AH}",
+    "AX", "BX", "r2", "r3", "r4", "SP", "r6", "r7",
+]
+
+RegNames8 = [
+    "AH", "AL", "BH", "BL", "r2_high", "r2_low", "r3_high", "r3_low",
+    "SP_high", "SP_low", "r5_high", "r5_low", "r6_high", "r6_low", "r7_high", "r7_low",
 ]
 
 class Memory():
     # Implements all opcodes 0x80 and above
     # Memory and load immediate
-    newpc = None
+
 
     def match(self, pc, bitstring, bytes):
-        if bitstring[0] != "1":
+        inst = bytes[0]
+
+
+        # bit 7: 1 for all load/store operations
+        if inst < 0x80:
             return None
 
-        accumulator = "A" if bitstring[1] == "0" else "B"
-        write = bitstring[2] = "1"
-        word = bitstring[3] = "1"
-        unknown = bitstring[4] = "1"
-        address_mode = int(bitstring[5:8], 2)
+        # bit 6: Accumulator select - 0 for "A", 1 for "B"
+        reg = 0 if inst & 0x40 == 0 else 2
+        # bit 5: Direction - 0 for read, 1 for write
+        load = inst & 0x20 == 0
+        # bit 4: Length - 0 for byte, 1 for word
+        word = inst & 0x10 != 0
+        if not word:
+            reg += 1
+
+        index_name = None
+        address_mode = inst & 0xf
+
+        if address_mode == 0b101:
+            reg = bytes[1] & 0xf
+            index = bytes[1] >> 4
+            index_name = RegNames16[index >> 1]
+        elif address_mode & 0x1000:
+            index = address_mode & 0x7 << 1
+            index_name = RegNames16[index >> 1]
+
+        if word:
+            reg_name = RegNames16[reg >> 1]
+        else:
+            reg_name = RegNames8[reg]
 
 
+        address_modes = [
+            (2 + word, "mov {reg}, {addr}", "unknown"),               # 000 = immediate
+            (3, "mov {reg}, [{addr}]", "mov [{addr}], {reg}"),        # 001 = direct
+            (2, "unknown", "unknown"),
+            (2, "unknown", "unknown"),
+            (2, "mov {reg}, [pc{offset}]","mov [PC{offset}], {reg}"), # 100 = PC relative
+            (2, "mov {reg}, [{index}++]", "mov [--{index}], {reg}"), # 101 = indexed with increment
+            (2, "unknown", "unknown"),
+            (2, "unknown", "unknown"),
+            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),     # indexed
+            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
+            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
+            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
+            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
+            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
+            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
+            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
+        ]
 
+        offset = f"0x{struct.unpack_from('xb', bytes)[0]:-02x}"
+        addr = f"0x{struct.unpack_from('>xH', bytes)[0]:04x}"
 
-        match = InstructionMatch(pc, self, bytes, {})
-        return match
+        if address_mode == 0 and not word:
+            addr = addr[:4]
+
+        size, load_format, store_format = address_modes[address_mode]
+        format = load_format if load else store_format
+
+        return InstructionMatch(pc, QuickInstuction(format), bytes[:size], {
+            "reg": reg_name,
+            "index": index_name,
+            "addr": addr,
+            "offset": offset,
+        })
 
 
 OPs = [
-    "add", "sub", "xor", "or", "shift_right", "mov", "rotate_right", "rotate_left"
+    "inc?", "dec?", "clear", "neg?", "shift_right", "shift_left", "rotate_right", "rotate_left",
+    "add", "sub", "and", "or", "xor", "mov", "?alu15", "?alu16",
 ]
 
 class Alu():
@@ -158,7 +216,7 @@ class Alu():
 
         def to_string(self, dict):
             if self.word:
-                operands = f"{RegNames16[self.dest]}, {RegNames16[self.src]}"
+                operands = f"{RegNames16[self.dest >> 1]}, {RegNames16[self.src >> 1]}"
             else:
                 operands = f"{RegNames8[self.dest]}, {RegNames8[self.src]}"
 
@@ -172,15 +230,22 @@ class Alu():
 
         word = inst & 0x10
         fast = inst & 0x08
-        same = inst & 0x40 == 0
         op = inst & 0x07
 
+        if inst >= 0x40:
+            op += 8
+
         if fast:
-            dest = 0 if word else 1
-            if same:
-                src = dest
+            if inst & 0xd0 == 0x40:
+                src = 0
+                dest = 2
             else:
-                src = 2 if word else 3
+                src = 0
+                dest = 0
+            if not word:
+                src += 1
+                dest += 1
+
             bytes = [inst]
         else:
             bytetwo = bytes[1]
@@ -234,7 +299,16 @@ class B(I):
 
 
 instructions = [
+    Memory(),
+
+    I("00101110 ssssdddd", "?? r{d}, r{s}"),
+
+    I("01011111", "mov SP, a"),
+    I("01011xxx", "mov r{x}, a"),
+
+    I("00101111 xxxxNNNN", "DMA load {N}"),
     Alu(),
+
 
     #B("00000000", "HALT", kill_branch),
     I("00000000", "HALT"),
@@ -279,7 +353,7 @@ instructions = [
     I("00101100", "rotate_right A"), # 2c
     I("00101101", "rotate_left A"),  # 2d
 
-    I("00101111 xxxxxxxx"), # Suspicious, I'm expecting a 1 byte instruction here.
+
 
 # 30
     I("00110yyy xxxxxxxx"),

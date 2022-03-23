@@ -80,6 +80,7 @@ comments = [
 
     (0x8498, "Configure UART"),
     (0x84a3, "'\'"),
+    (0x84ab, "'M'"),
     (0x84b0, "'G'"),
     (0x84b5, "'Q'"),
 
