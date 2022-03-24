@@ -66,7 +66,7 @@ WriteHexByte:
 90c5:    a5 a2        mov [--SP], BH
 90c7:    c0 f0        mov BL, 0xf0
 90c9:    42 31        and AL, BL
-90cb:    07           clear_carry?
+90cb:    07           clear_carry
 90cc:    26 10        rotate_right AH, AL
 90ce:    2c           shift_right AL, AL
 90cf:    2c           shift_right AL, AL
@@ -127,9 +127,9 @@ L_9142:
 
 L_9156:
 9156:    90 c0 00     mov AX, 0xc000
-9159:    5f           mov SP, a
+9159:    5f           mov SP, AX
 915a:    91 01 1a     mov AX, [0x011a]
-915d:    5e           mov r6, a
+915d:    5e           mov r4, AX
 915e:    95 41        mov AX, [r2++]
 9160:    50 80        add AX, r4
 9162:    75 00        jump A + 0x00
@@ -304,11 +304,11 @@ L_92e4:
 92e9:    3f           rotate_left AX, AX
 92ea:    15 f8        b_nz L_92e4
 92ec:    90 ff 37     mov AX, 0xff37
-92ef:    2f 02        DMA load 2
+92ef:    2f 02        DMA load 0, 2
 92f1:    90 01 1c     mov AX, 0x011c
-92f4:    2f 00        DMA load 0
-92f6:    2f 34        DMA load 4
-92f8:    2f 06        DMA load 6
+92f4:    2f 00        DMA load 0, 0
+92f6:    2f 34        DMA load 3, 4
+92f8:    2f 06        DMA load 0, 6
 92fa:    80 43        mov AL, 0x43
 92fc:    a2 01        unknown
 92fe:    14 7a        b_z L_937a
@@ -323,11 +323,11 @@ L_9309:
 930b:    3f           rotate_left AX, AX
 930c:    15 fb        b_nz L_9309
 930e:    90 ff 37     mov AX, 0xff37
-9311:    2f 02        DMA load 2
+9311:    2f 02        DMA load 0, 2
 9313:    90 01 1c     mov AX, 0x011c
-9316:    2f 00        DMA load 0
-9318:    2f 34        DMA load 4
-931a:    2f 06        DMA load 6
+9316:    2f 00        DMA load 0, 0
+9318:    2f 34        DMA load 3, 4
+931a:    2f 06        DMA load 0, 6
 931c:    80 44        mov AL, 0x44
 931e:    a2 01        unknown
 9320:    14 7a        b_z L_939c
@@ -385,11 +385,11 @@ L_9385:
 9388:    3f           rotate_left AX, AX
 9389:    15 f8        b_nz L_9383
 938b:    90 c0 00     mov AX, 0xc000
-938e:    2f 02        DMA load 2
+938e:    2f 02        DMA load 0, 2
 9390:    90 01 1c     mov AX, 0x011c
-9393:    2f 00        DMA load 0
-9395:    2f 34        DMA load 4
-9397:    2f 06        DMA load 6
+9393:    2f 00        DMA load 0, 0
+9395:    2f 34        DMA load 3, 4
+9397:    2f 06        DMA load 0, 6
 9399:    80 46        mov AL, 0x46
 939b:    a2 01        unknown
 939d:    14 7a        b_z L_9419
@@ -427,11 +427,11 @@ L_93c6:
 93c8:    3f           rotate_left AX, AX
 93c9:    15 fb        b_nz L_93c6
 93cb:    90 c0 00     mov AX, 0xc000
-93ce:    2f 02        DMA load 2
+93ce:    2f 02        DMA load 0, 2
 93d0:    90 01 1c     mov AX, 0x011c
-93d3:    2f 00        DMA load 0
-93d5:    2f 34        DMA load 4
-93d7:    2f 06        DMA load 6
+93d3:    2f 00        DMA load 0, 0
+93d5:    2f 34        DMA load 3, 4
+93d7:    2f 06        DMA load 0, 6
 93d9:    80 47        mov AL, 0x47
 93db:    a2 01        unknown
 93dd:    14 7a        b_z L_9459
@@ -524,11 +524,11 @@ L_946f:
 9481:    90 82 ff     mov AX, 0x82ff
 9484:    b9           mov [None], AX
 9485:    90 ff fb     mov AX, 0xfffb
-9488:    2f 02        DMA load 2
+9488:    2f 02        DMA load 0, 2
 948a:    90 41 4d     mov AX, 0x414d
-948d:    2f 00        DMA load 0
-948f:    2f 34        DMA load 4
-9491:    2f 06        DMA load 6
+948d:    2f 00        DMA load 0, 0
+948f:    2f 34        DMA load 3, 4
+9491:    2f 06        DMA load 0, 6
 9493:    80 43        mov AL, 0x43
 9495:    a2 01        unknown
 9497:    14 7a        b_z L_9513
@@ -573,11 +573,11 @@ L_94c0:
 
 L_94c6:
 94c6:    90 41 4d     mov AX, 0x414d
-94c9:    2f 00        DMA load 0
+94c9:    2f 00        DMA load 0, 0
 94cb:    90 ff f7     mov AX, 0xfff7
-94ce:    2f 02        DMA load 2
-94d0:    2f 34        DMA load 4
-94d2:    2f 06        DMA load 6
+94ce:    2f 02        DMA load 0, 2
+94d0:    2f 34        DMA load 3, 4
+94d2:    2f 06        DMA load 0, 6
 94d4:    80 43        mov AL, 0x43
 94d6:    a2 01        unknown
 94d8:    14 7a        b_z L_9554
@@ -652,7 +652,7 @@ Entry_CMD_READ_TEST:
 L_9554:
 9554:    44 90        xor AH, SP_low
 9556:    41 4d        sub r6_low, r2_high
-9558:    5c           mov r4, a
+9558:    5c           xor BX, AX
 9559:    90 81 00     mov AX, 0x8100
 955c:    b5 61        mov [--r3], AX
 
@@ -681,11 +681,11 @@ L_9571:
 
 L_9581:
 9581:    90 ff c3     mov AX, 0xffc3
-9584:    2f 02        DMA load 2
+9584:    2f 02        DMA load 0, 2
 9586:    90 41 4d     mov AX, 0x414d
-9589:    2f 00        DMA load 0
-958b:    2f 34        DMA load 4
-958d:    2f 06        DMA load 6
+9589:    2f 00        DMA load 0, 0
+958b:    2f 34        DMA load 3, 4
+958d:    2f 06        DMA load 0, 6
 958f:    80 43        mov AL, 0x43
 9591:    a2 01        unknown
 9593:    14 7a        b_z L_960f
@@ -713,8 +713,8 @@ L_9581:
 
 L_95ab:
 95ab:    00           HALT
-95ac:    2f 34        DMA load 4
-95ae:    2f 06        DMA load 6
+95ac:    2f 34        DMA load 3, 4
+95ae:    2f 06        DMA load 0, 6
 95b0:    80 45        mov AL, 0x45
 95b2:    a2 01        unknown
 95b4:    14 7a        b_z L_9630
@@ -746,7 +746,7 @@ L_95d6:
 95d6:    3d           shift_left AX, AX
 95d7:    b1 41 52     mov [0x4152], AX
 95da:    d0 03 36     mov BX, 0x0336
-95dd:    59           mov r1, a
+95dd:    59           sub BX, AX
 95de:    19 a1        b_le L_9581
 95e0:    a1 f1 0a     mov [0xf10a], AL
 95e3:    7a 01 04     call [0x0104]
@@ -770,11 +770,11 @@ L_95f9:
 95fc:    80 82        mov AL, 0x82
 95fe:    a9           mov [None], AL
 95ff:    90 ff fc     mov AX, 0xfffc
-9602:    2f 02        DMA load 2
+9602:    2f 02        DMA load 0, 2
 9604:    90 41 4d     mov AX, 0x414d
-9607:    2f 00        DMA load 0
-9609:    2f 34        DMA load 4
-960b:    2f 06        DMA load 6
+9607:    2f 00        DMA load 0, 0
+9609:    2f 34        DMA load 3, 4
+960b:    2f 06        DMA load 0, 6
 960d:    80 43        mov AL, 0x43
 
 L_960f:
@@ -814,11 +814,11 @@ L_9630:
 
 L_9636:
 9636:    90 41 4d     mov AX, 0x414d
-9639:    2f 00        DMA load 0
+9639:    2f 00        DMA load 0, 0
 963b:    90 ff fb     mov AX, 0xfffb
-963e:    2f 02        DMA load 2
-9640:    2f 34        DMA load 4
-9642:    2f 06        DMA load 6
+963e:    2f 02        DMA load 0, 2
+9640:    2f 34        DMA load 3, 4
+9642:    2f 06        DMA load 0, 6
 9644:    80 43        mov AL, 0x43
 9646:    a2 01        unknown
 9648:    14 7a        b_z L_96c4
@@ -859,7 +859,7 @@ L_968d:
 9694:    17 a0        b7 L_9636
 9696:    7a 01 04     call [0x0104]
 9699:    05           flag5
-969a:    f4 90        mov [PC0x-70], BX
+969a:    f4 90        mov [PC-0x70], BX
 969c:    01           nop
 969d:    80 50        mov AL, 0x50
 969f:    80 7d        mov AL, 0x7d
@@ -886,7 +886,7 @@ L_968d:
 L_96be:
 96be:    3d           shift_left AX, AX
 96bf:    90 41 4d     mov AX, 0x414d
-96c2:    5c           mov r4, a
+96c2:    5c           xor BX, AX
 96c3:    90
 
 L_96c4:
@@ -910,11 +910,11 @@ L_96d0:
 
 L_96e4:
 96e4:    90 ff ab     mov AX, 0xffab
-96e7:    2f 02        DMA load 2
+96e7:    2f 02        DMA load 0, 2
 96e9:    90 41 4d     mov AX, 0x414d
-96ec:    2f 00        DMA load 0
-96ee:    2f 34        DMA load 4
-96f0:    2f 06        DMA load 6
+96ec:    2f 00        DMA load 0, 0
+96ee:    2f 34        DMA load 3, 4
+96f0:    2f 06        DMA load 0, 6
 96f2:    80 43        mov AL, 0x43
 96f4:    a2 01        unknown
 96f6:    14 7a        b_z L_9772
@@ -942,8 +942,8 @@ L_96e4:
 
 L_970e:
 970e:    00           HALT
-970f:    2f 34        DMA load 4
-9711:    2f 06        DMA load 6
+970f:    2f 34        DMA load 3, 4
+9711:    2f 06        DMA load 0, 6
 9713:    80 45        mov AL, 0x45
 9715:    a2 01        unknown
 9717:    14 7a        b_z L_9793
@@ -976,7 +976,7 @@ L_9735:
 973d:    19 a5        b_le L_96e4
 973f:    a1 f1 0a     mov [0xf10a], AL
 9742:    7a 01 04     call [0x0104]
-9745:    06           flag6
+9745:    06           set_carry
 9746:    a7 90        unknown
 9748:    01           nop
 9749:    80 50        mov AL, 0x50

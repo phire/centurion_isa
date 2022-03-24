@@ -66,7 +66,7 @@ Fn_0d0:
 98d0:    a5 a2        mov [--SP], BH
 98d2:    c0 f0        mov BL, 0xf0
 98d4:    42 31        and AL, BL
-98d6:    07           clear_carry?
+98d6:    07           clear_carry
 98d7:    26 10        rotate_right AH, AL
 98d9:    2c           shift_right AL, AL
 98da:    2c           shift_right AL, AL
@@ -127,9 +127,9 @@ L_994d:
 
 L_9961:
 9961:    90 c0 00     mov AX, 0xc000
-9964:    5f           mov SP, a
+9964:    5f           mov SP, AX
 9965:    91 01 1a     mov AX, [0x011a]
-9968:    5e           mov r6, a
+9968:    5e           mov r4, AX
 9969:    95 41        mov AX, [r2++]
 996b:    50 80        add AX, r4
 996d:    75 00        jump A + 0x00
@@ -303,11 +303,11 @@ L_9aef:
 9af4:    3f           rotate_left AX, AX
 9af5:    15 f8        b_nz L_9aef
 9af7:    90 f0 ff     mov AX, 0xf0ff
-9afa:    2f 02        DMA load 2
+9afa:    2f 02        DMA load 0, 2
 9afc:    90 01 1c     mov AX, 0x011c
-9aff:    2f 00        DMA load 0
-9b01:    2f 34        DMA load 4
-9b03:    2f 06        DMA load 6
+9aff:    2f 00        DMA load 0, 0
+9b01:    2f 34        DMA load 3, 4
+9b03:    2f 06        DMA load 0, 6
 9b05:    80 46        mov AL, 0x46
 9b07:    a2 01        unknown
 9b09:    14 7a        b_z L_9b85
@@ -343,11 +343,11 @@ L_9b32:
 9b34:    3f           rotate_left AX, AX
 9b35:    15 fb        b_nz L_9b32
 9b37:    90 f0 ff     mov AX, 0xf0ff
-9b3a:    2f 02        DMA load 2
+9b3a:    2f 02        DMA load 0, 2
 9b3c:    90 01 1c     mov AX, 0x011c
-9b3f:    2f 00        DMA load 0
-9b41:    2f 34        DMA load 4
-9b43:    2f 06        DMA load 6
+9b3f:    2f 00        DMA load 0, 0
+9b41:    2f 34        DMA load 3, 4
+9b43:    2f 06        DMA load 0, 6
 9b45:    80 47        mov AL, 0x47
 9b47:    a2 01        unknown
 9b49:    14 7a        b_z L_9bc5
@@ -434,11 +434,11 @@ L_9bdc:
 9bed:    90 82 ff     mov AX, 0x82ff
 9bf0:    b9           mov [None], AX
 9bf1:    90 ff fb     mov AX, 0xfffb
-9bf4:    2f 02        DMA load 2
+9bf4:    2f 02        DMA load 0, 2
 9bf6:    90 41 4d     mov AX, 0x414d
-9bf9:    2f 00        DMA load 0
-9bfb:    2f 34        DMA load 4
-9bfd:    2f 06        DMA load 6
+9bf9:    2f 00        DMA load 0, 0
+9bfb:    2f 34        DMA load 3, 4
+9bfd:    2f 06        DMA load 0, 6
 9bff:    80 43        mov AL, 0x43
 9c01:    a2 01        unknown
 9c03:    14 7a        b_z L_9c7f
@@ -483,11 +483,11 @@ L_9c2c:
 
 L_9c32:
 9c32:    90 41 4d     mov AX, 0x414d
-9c35:    2f 00        DMA load 0
+9c35:    2f 00        DMA load 0, 0
 9c37:    90 ff f7     mov AX, 0xfff7
-9c3a:    2f 02        DMA load 2
-9c3c:    2f 34        DMA load 4
-9c3e:    2f 06        DMA load 6
+9c3a:    2f 02        DMA load 0, 2
+9c3c:    2f 34        DMA load 3, 4
+9c3e:    2f 06        DMA load 0, 6
 9c40:    80 43        mov AL, 0x43
 9c42:    a2 01        unknown
 9c44:    14 7a        b_z L_9cc0
@@ -544,7 +544,7 @@ Entry_01133_CMD_READ_TEST:
 9ca5:    08           flag8
 9ca6:    7a 01 06     call [0x0106]
 9ca9:    90 41 4d     mov AX, 0x414d
-9cac:    5c           mov r4, a
+9cac:    5c           xor BX, AX
 9cad:    90
 9cae:    81
 
@@ -577,11 +577,11 @@ L_9cca:
 
 L_9cd5:
 9cd5:    90 ff c3     mov AX, 0xffc3
-9cd8:    2f 02        DMA load 2
+9cd8:    2f 02        DMA load 0, 2
 9cda:    90 41 4d     mov AX, 0x414d
-9cdd:    2f 00        DMA load 0
-9cdf:    2f 34        DMA load 4
-9ce1:    2f 06        DMA load 6
+9cdd:    2f 00        DMA load 0, 0
+9cdf:    2f 34        DMA load 3, 4
+9ce1:    2f 06        DMA load 0, 6
 9ce3:    80 43        mov AL, 0x43
 9ce5:    a2 01        unknown
 9ce7:    14 7a        b_z L_9d63
@@ -609,8 +609,8 @@ L_9cd5:
 
 L_9cff:
 9cff:    00           HALT
-9d00:    2f 34        DMA load 4
-9d02:    2f 06        DMA load 6
+9d00:    2f 34        DMA load 3, 4
+9d02:    2f 06        DMA load 0, 6
 9d04:    80 45        mov AL, 0x45
 9d06:    a2 01        unknown
 9d08:    14 7a        b_z L_9d84
@@ -636,7 +636,7 @@ L_9d2a:
 9d2a:    3d           shift_left AX, AX
 9d2b:    b1 41 52     mov [0x4152], AX
 9d2e:    d0 03 36     mov BX, 0x0336
-9d31:    59           mov r1, a
+9d31:    59           sub BX, AX
 9d32:    19 a1        b_le L_9cd5
 9d34:    a1 f1 0a     mov [0xf10a], AL
 9d37:    7a 01 04     call [0x0104]
@@ -663,11 +663,11 @@ Entry_FINCH_SEEK_TEST:
 L_9d5d:
 9d5d:    02           flag2
 9d5e:    90 41 4d     mov AX, 0x414d
-9d61:    2f 00        DMA load 0
+9d61:    2f 00        DMA load 0, 0
 
 L_9d63:
-9d63:    2f 34        DMA load 4
-9d65:    2f 06        DMA load 6
+9d63:    2f 34        DMA load 3, 4
+9d65:    2f 06        DMA load 0, 6
 9d67:    80 43        mov AL, 0x43
 9d69:    a2 01        unknown
 9d6b:    14 7a        b_z L_9de7
@@ -714,11 +714,11 @@ L_9d94:
 
 L_9d9a:
 9d9a:    90 41 4d     mov AX, 0x414d
-9d9d:    2f 00        DMA load 0
+9d9d:    2f 00        DMA load 0, 0
 9d9f:    90 ff f7     mov AX, 0xfff7
-9da2:    2f 02        DMA load 2
-9da4:    2f 34        DMA load 4
-9da6:    2f 06        DMA load 6
+9da2:    2f 02        DMA load 0, 2
+9da4:    2f 34        DMA load 3, 4
+9da6:    2f 06        DMA load 0, 6
 9da8:    80 43        mov AL, 0x43
 9daa:    a2 01        unknown
 9dac:    14 7a        b_z L_9e28
@@ -748,7 +748,7 @@ L_9d9a:
 9de4:    d0 02 5c     mov BX, 0x025c
 
 L_9de7:
-9de7:    59           mov r1, a
+9de7:    59           sub BX, AX
 9de8:    15 b0        b_nz L_9d9a
 9dea:    3a           clear AX, AX
 9deb:    39           dec? AX, AX
@@ -772,7 +772,7 @@ Entry_FINCH_READ_TEST:
 9e07:    00           HALT
 9e08:    7a 01 06     call [0x0106]
 9e0b:    90 41 4d     mov AX, 0x414d
-9e0e:    5c           mov r4, a
+9e0e:    5c           xor BX, AX
 9e0f:    90
 9e10:    81
 
@@ -805,11 +805,11 @@ L_9e32:
 
 L_9e37:
 9e37:    90 ff c3     mov AX, 0xffc3
-9e3a:    2f 02        DMA load 2
+9e3a:    2f 02        DMA load 0, 2
 9e3c:    90 41 4d     mov AX, 0x414d
-9e3f:    2f 00        DMA load 0
-9e41:    2f 34        DMA load 4
-9e43:    2f 06        DMA load 6
+9e3f:    2f 00        DMA load 0, 0
+9e41:    2f 34        DMA load 3, 4
+9e43:    2f 06        DMA load 0, 6
 9e45:    80 43        mov AL, 0x43
 9e47:    a2 01        unknown
 9e49:    14 7a        b_z L_9ec5
@@ -837,8 +837,8 @@ L_9e37:
 
 L_9e61:
 9e61:    00           HALT
-9e62:    2f 34        DMA load 4
-9e64:    2f 06        DMA load 6
+9e62:    2f 34        DMA load 3, 4
+9e64:    2f 06        DMA load 0, 6
 9e66:    80 45        mov AL, 0x45
 9e68:    a2 01        unknown
 9e6a:    14 7a        b_z L_9ee6
@@ -864,11 +864,11 @@ L_9e8c:
 9e8c:    3d           shift_left AX, AX
 9e8d:    b1 41 52     mov [0x4152], AX
 9e90:    d0 02 5d     mov BX, 0x025d
-9e93:    59           mov r1, a
+9e93:    59           sub BX, AX
 9e94:    19 a1        b_le L_9e37
 9e96:    a1 f1 0a     mov [0xf10a], AL
 9e99:    7a 01 04     call [0x0104]
-9e9c:    06           flag6
+9e9c:    06           set_carry
 9e9d:    0b           unknown
 
 Entry_ROM_SELF_TEST:

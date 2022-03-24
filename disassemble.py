@@ -181,8 +181,8 @@ class Memory():
             (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
         ]
 
-        offset = f"0x{struct.unpack_from('xb', bytes)[0]:-02x}"
-        addr = f"0x{struct.unpack_from('>xH', bytes)[0]:04x}"
+        offset = f"{struct.unpack_from('xb', bytes)[0]:-#04x}"
+        addr = f"{struct.unpack_from('>xH', bytes)[0]:#06x}"
 
         if address_mode == 0 and not word:
             addr = addr[:4]
@@ -200,11 +200,11 @@ class Memory():
 
 OPs = [
     "inc?", "dec?", "clear", "neg?", "shift_right", "shift_left", "rotate_right", "rotate_left",
-    "add", "sub", "and", "or", "xor", "mov", "?alu15", "?alu16",
+    "add", "sub", "and", "or", "xor", "mov"
 ]
 
 class Alu():
-    # Implements all opcodes between 0x20 and 0x5f
+    # Implements most opcodes between 0x20 and 0x5d
 
     class AluInstance():
         def __init__(self, op, word, src, dest):
@@ -235,8 +235,12 @@ class Alu():
         if inst >= 0x40:
             op += 8
 
+        # These don't fit the pattern
+        if op >= len(OPs) or inst == 0x2e or inst == 0x2f:
+            return None
+
         if fast:
-            if inst & 0xd0 == 0x40:
+            if inst > 0x40:
                 src = 0
                 dest = 2
             else:
@@ -299,16 +303,14 @@ class B(I):
 
 
 instructions = [
-    Memory(),
+    # Um, this array is partially sorted for optimal decoding speed
+    Memory(), # Implements 80-FF
 
-    I("00101110 ssssdddd", "?? r{d}, r{s}"),
 
-    I("01011111", "mov SP, a"),
-    I("01011xxx", "mov r{x}, a"),
+    Alu(), # Implements (most of) 0x20-0x5f
 
-    I("00101111 xxxxNNNN", "DMA load {N}"),
-    Alu(),
-
+# Sorted by opcode from here on
+# 00
 
     #B("00000000", "HALT", kill_branch),
     I("00000000", "HALT"),
@@ -319,8 +321,8 @@ instructions = [
     I("00000011", "flag3"),
     I("00000100", "flag4"),
     I("00000101", "flag5"),
-    I("00000110", "flag6"),
-    I("00000111", "clear_carry?"),
+    I("00000110", "set_carry"),
+    I("00000111", "clear_carry"),
     I("00001000", "flag8"),
 
     B("00001001", "ret", kill_branch),
@@ -346,54 +348,18 @@ instructions = [
 
 # 20
 
-    I("00100yyy xxxxxxxx"), # 20-27 multi-byte
+    # Alu(),
 
 # 28
 
-    I("00101100", "rotate_right A"), # 2c
-    I("00101101", "rotate_left A"),  # 2d
-
-
-
-# 30
-    I("00110yyy xxxxxxxx"),
-
-# 38
-
-    I("00111010", "clear A"),
-
-# 40
-
-    I("01000000 00110001", "add A, B"),  # 40 31
-    I("01000001 00110001", "sub A, B"),  # 41 31
-    I("01000010 00110001", "and A, B"),  # 42 31
-    I("01000011 00110001", "or A, B"),   # 43 31
-    I("010000yy xxxxxxxx"),
-
-    I("01000100 xxxxxxxx"),
-    #I("01000101", "swap_bytes A"), # 45 - pretty sure this is single byte
-    I("01000101 xxxxxxxx"),
+    # Special cases that don't match the general ALU pattern
+    I("00101110 ssssdddd", "?? r{d}, r{s}"),
+    I("00101111 xxxxNNNN", "DMA load {x}, {N}"),
 
 # 48
-
-    I("01001000", "add B, A"), # 48
-    I("01001001", "sub B, A"), # 49
-    I("01001010", "and B, A"), # 4a
-    I("01001011", "or B, A"),  # 4b
-
-# 50
-
-    I("01010000 10000000", "add A, indexBase"),
-    I("01010000 xxxxxxxx"),
-    I("01010001 xxxxxxxx"),
-    I("01010010 xxxxxxxx"),
-    I("01010011 xxxxxxxx"),
-    I("01010100 xxxxxxxx"),
-    I("01010101 xxxxxxxx"),
-
-# 58
-
-    I("01011111", "mov sp, A"),
+    # Special cases that don't match the general ALU pattern
+    I("01011110", "mov r4, AX"),
+    I("01011111", "mov SP, AX"), # sp is r5
 
 # 60
     I("01100000 NNNNNNNN NNNNNNNN", "60 {N:#06x}"),  # 60 ??? Might be load immediate into index reg?
@@ -420,60 +386,9 @@ instructions = [
     B("01111011 SSSSSSSS", "call", relative_call),
     I("01111101 NNNNNNNN", "call A + {N:#04x}"),
 
-# 80-FF
+# 80
 
-    I("10000000 NNNNNNNN", "lib A, {N:#04x}"),          # 80
-    I("10010000 NNNNNNNN NNNNNNNN", "liw A, {N:#06x}"), # 90
-    I("11000000 NNNNNNNN", "lib B, {N:#04x}"),          # C0
-    I("11010000 NNNNNNNN NNNNNNNN", "liw B, {N:#06x}"), # D0
-
-    I("10000001 NNNNNNNN NNNNNNNN", "ldb A, {N:#06x}"), # 81
-    I("10010001 NNNNNNNN NNNNNNNN", "ldw A, {N:#06x}"), # 91
-    I("10100001 NNNNNNNN NNNNNNNN", "stb A, {N:#06x}"), # A1
-    I("10110001 NNNNNNNN NNNNNNNN", "stw A, {N:#06x}"), # B1
-
-    I("11100001 NNNNNNNN NNNNNNNN", "stb B, {N:#06x}"), # E1
-    I("11110001 NNNNNNNN NNNNNNNN", "stw B, {N:#06x}"), # F1
-
-    I("11000001 NNNNNNNN NNNNNNNN", "ldb B, {N:#06x}"), # C1
-    I("11010001 NNNNNNNN NNNNNNNN", "ldw A, {N:#06x}"), # D1
-
-    # unknown 3 byte instructions, in the order tested by instruction test rom
-    I("10010010 NNNNNNNN NNNNNNNN", "92 A, {N:#06x}"),  # 92
-    I("11010010 NNNNNNNN NNNNNNNN", "d2 A, {N:#06x}"),  # D2
-
-    # not in test rom
-
-    I("11100001 NNNNNNNN NNNNNNNN", "e1 A, {N:#06x}"),  # E1
-    I("10000010 NNNNNNNN NNNNNNNN", "82 A, {N:#06x}"),  # 82
-
-
-    I("10000100 SSSSSSSS", "ldb A, [[pc{S:+n}]]"),
-
-    I("10100101 10100010", "push_byte A"),
-    I("10000101 10100001", "pop_byte A"),
-    I("10000101 01000001", "ldb A, [sp]++"), # Indirect load from SP with indirect post increment
-
-    # I("10100010 NNNNNNNN NNNNNNNN", "push_word {N:#06x}"),
-
-    I("11010101 xxxxxxxx xxxxxxxx"),
-    I("11010001 xxxxxxxx"),
-    I("10010100 xxxxxxxx"),
-    I("11010100 xxxxxxxx"),
-    I("10000101 xxxxxxxx"),
-    I("11000101 xxxxxxxx"),
-    I("10100100 xxxxxxxx"),
-    I("11100101 xxxxxxxx"),
-
-    I("10100101 xxxxxxxx"),
-    I("11110101 xxxxxxxx"),
-    I("10110101 xxxxxxxx"),
-
-    I("10001011 xxxxxxxx"),
-
-    I("10000011 xxxxxxxx"),
-    I("10010101 xxxxxxxx"),
-
+    # Memory(),
 
 
     I("xxxxxxxx"),

@@ -27,7 +27,7 @@ Entry_CPU_INSTRUCTION_TEST:
                                 ; If the operand isn't consuemed, then a HALT instruction will be executed
 8886:    90 05 a1     mov AX, 0x05a1
 8889:    50 80        add AX, r4
-888b:    5c           mov r4, a ; This might be installing an exception handler?
+888b:    5c           xor BX, AX ; This might be installing an exception handler?
 888c:    90 00 10     mov AX, 0x0010
 
 L_888f:
@@ -36,7 +36,7 @@ L_888f:
 8893:    3f           rotate_left AX, AX
 8894:    15 f9        b_nz L_888f ; clearing all regsiters?
 8896:    03           flag3
-8897:    07           clear_carry?
+8897:    07           clear_carry
 8898:    c0 01        mov BL, 0x01 ; if A is empty. This would set the overflow flag
 889a:    11 01        b1 L_889d ; Some tests for all the branch instructions
 889c:    00           HALT
@@ -115,12 +115,12 @@ L_88ce:
 88d1:    00           HALT
 
 L_88d2:
-88d2:    07           clear_carry?
+88d2:    07           clear_carry
 88d3:    11 01        b1 L_88d6
 88d5:    00           HALT
 
 L_88d6:
-88d6:    06           flag6
+88d6:    06           set_carry
 88d7:    10 01        b0 L_88da
 88d9:    00           HALT
 
@@ -154,7 +154,7 @@ L_88ed:
 
 L_88f0:
 88f0:    02           flag2
-88f1:    06           flag6
+88f1:    06           set_carry
 88f2:    01           nop
 88f3:    10 01        b0 L_88f6
 88f5:    00           HALT
@@ -202,7 +202,7 @@ L_8913:
 8915:    00           HALT
 
 L_8916:
-8916:    06           flag6
+8916:    06           set_carry
 8917:    02           flag2
 8918:    22 70        clear AH, r3_low
 891a:    11 01        b1 L_891d
@@ -269,7 +269,7 @@ L_894c:
 894e:    00           HALT
 
 L_894f:
-894f:    06           flag6
+894f:    06           set_carry
 8950:    02           flag2
 8951:    22 60        clear AH, r3_high ; Using 60 in the operand means the following branch will be skipped
                                         ; if 22 doesn't consume it's operand
@@ -337,7 +337,7 @@ L_8985:
 8987:    00           HALT
 
 L_8988:
-8988:    06           flag6
+8988:    06           set_carry
 8989:    02           flag2
 898a:    32 20        clear AX, BX
 898c:    11 01        b1 L_898f
@@ -785,7 +785,7 @@ L_8b10:
 L_8b14:
 8b14:    80 55        mov AL, 0x55
 8b16:    02           flag2
-8b17:    06           flag6
+8b17:    06           set_carry
 8b18:    44 31        xor AL, BL
 8b1a:    10 01        b0 L_8b1d
 8b1c:    00           HALT
@@ -849,7 +849,7 @@ L_8b51:
 
 L_8b55:
 8b55:    90 aa aa     mov AX, 0xaaaa
-8b58:    06           flag6
+8b58:    06           set_carry
 8b59:    02           flag2
 8b5a:    54 20        xor AX, BX
 8b5c:    10 01        b0 L_8b5f
@@ -903,7 +903,7 @@ L_8b95:
 L_8ba2:
 8ba2:    90 80 00     mov AX, 0x8000
 8ba5:    d0 00 01     mov BX, 0x0001
-8ba8:    59           mov r1, a
+8ba8:    59           sub BX, AX
 8ba9:    12 01        b2 L_8bac
 8bab:    00           HALT
 
@@ -917,8 +917,8 @@ L_8baf:
 
 L_8bb2:
 8bb2:    03           flag3
-8bb3:    06           flag6
-8bb4:    58           mov r0, a
+8bb3:    06           set_carry
+8bb4:    58           add BX, AX
 8bb5:    13 01        b3 L_8bb8
 8bb7:    00           HALT
 
@@ -934,28 +934,28 @@ L_8bbb:
 L_8bc0:
 8bc0:    90 aa aa     mov AX, 0xaaaa
 8bc3:    d0 55 55     mov BX, 0x5555
-8bc6:    5e           mov r6, a
-8bc7:    5b           mov r3, a
-8bc8:    5a           mov r2, a
+8bc6:    5e           mov r4, AX
+8bc7:    5b           or BX, AX
+8bc8:    5a           and BX, AX
 8bc9:    14 01        b_z L_8bcc
 8bcb:    00           HALT
 
 L_8bcc:
-8bcc:    5a           mov r2, a
+8bcc:    5a           and BX, AX
 8bcd:    14 01        b_z L_8bd0
 8bcf:    00           HALT
 
 L_8bd0:
 8bd0:    55 82        mov BX, r4
 8bd2:    55 40        mov AX, r2
-8bd4:    5a           mov r2, a
+8bd4:    5a           and BX, AX
 8bd5:    51 40        sub AX, r2
 8bd7:    14 01        b_z L_8bda
 8bd9:    00           HALT
 
 L_8bda:
 8bda:    91 bf fc     mov AX, [0xbffc]
-8bdd:    5e           mov r6, a
+8bdd:    5e           mov r4, AX
 8bde:    91 00 26     mov AX, [0x0026]
 8be1:    14 01        b_z L_8be4
 8be3:    00           HALT
@@ -990,14 +990,14 @@ L_8bff:
 L_8c08:
 8c08:    61 00 2c     61 0x002c
 8c0b:    54 42        xor BX, r2
-8c0d:    58           mov r0, a
+8c0d:    58           add BX, AX
 8c0e:    33 20        neg? AX, BX
 8c10:    14 01        b_z L_8c13
 8c12:    00           HALT
 
 L_8c13:
 8c13:    91 bf fc     mov AX, [0xbffc]
-8c16:    5e           mov r6, a
+8c16:    5e           mov r4, AX
 8c17:    91 00 10     mov AX, [0x0010]
 8c1a:    50 80        add AX, r4
 8c1c:    b1 00 10     mov [0x0010], AX
@@ -1045,9 +1045,9 @@ L_8c5b:
 L_8c61:
 8c61:    93 0c        unknown
 8c63:    d3 0c        unknown
-8c65:    58           mov r0, a
+8c65:    58           add BX, AX
 8c66:    90 ff ba     mov AX, 0xffba
-8c69:    58           mov r0, a
+8c69:    58           add BX, AX
 8c6a:    14 01        b_z L_8c6d
 8c6c:    00           HALT
 
@@ -1062,7 +1062,7 @@ L_8c73:
 8c73:    60 00 20     60 0x0020
 8c76:    9a           mov AX, [None]
 8c77:    d0 ff ff     mov BX, 0xffff
-8c7a:    59           mov r1, a
+8c7a:    59           sub BX, AX
 8c7b:    14 01        b_z L_8c7e
 8c7d:    00           HALT
 
@@ -1125,7 +1125,7 @@ L_8cbe:
 8cbe:    60 00 10     60 0x0010
 8cc1:    95 44        mov r2, [r2++]
 8cc3:    d0 ff ff     mov BX, 0xffff
-8cc6:    59           mov r1, a
+8cc6:    59           sub BX, AX
 8cc7:    14 01        b_z L_8cca
 8cc9:    00           HALT
 
@@ -1190,7 +1190,7 @@ L_8d09:
 
 L_8d14:
 8d14:    90 00 3a     mov AX, 0x003a
-8d17:    5f           mov SP, a
+8d17:    5f           mov SP, AX
 8d18:    60 20 20     60 0x2020
 8d1b:    7b 06        call L_8d23
 8d1d:    01           nop
@@ -1223,7 +1223,7 @@ L_8d38:
 8d3e:    b5 41        mov [--r2], AX
 8d40:    55 42        mov BX, r2
 8d42:    90 09 f1     mov AX, 0x09f1
-8d45:    59           mov r1, a
+8d45:    59           sub BX, AX
 8d46:    14 01        b_z L_8d49
 8d48:    00           HALT
 
@@ -1242,17 +1242,17 @@ L_8d56:
 
 L_8d5a:
 8d5a:    90 60 66     mov AX, 0x6066
-8d5d:    2f 00        DMA load 0
-8d5f:    2f 21        DMA load 1
-8d61:    59           mov r1, a
+8d5d:    2f 00        DMA load 0, 0
+8d5f:    2f 21        DMA load 2, 1
+8d61:    59           sub BX, AX
 8d62:    14 01        b_z L_8d65
 8d64:    00           HALT
 
 L_8d65:
 8d65:    90 46 11     mov AX, 0x4611
-8d68:    2f 02        DMA load 2
-8d6a:    2f 23        DMA load 3
-8d6c:    59           mov r1, a
+8d68:    2f 02        DMA load 0, 2
+8d6a:    2f 23        DMA load 2, 3
+8d6c:    59           sub BX, AX
 8d6d:    14 01        b_z L_8d70
 8d6f:    00           HALT
 
@@ -1269,15 +1269,15 @@ L_8d70:
 8d82:    61 bf fe     61 0xbffe
 8d85:    91 bf fc     mov AX, [0xbffc]
 8d88:    d0 07 74     mov BX, 0x0774
-8d8b:    58           mov r0, a
+8d8b:    58           add BX, AX
 8d8c:    75 20        jump A + 0x20
 
 L_8d8e:
 8d8e:    a1 f1 0a     mov [0xf10a], AL
 8d91:    90 bf fc     mov AX, 0xbffc
-8d94:    5f           mov SP, a
+8d94:    5f           mov SP, AX
 8d95:    95 a1        mov AX, [SP++]
-8d97:    5e           mov r6, a
+8d97:    5e           mov r4, AX
 8d98:    65 a1        unknown
 8d9a:    90 00 7d     mov AX, 0x007d
 8d9d:    50 80        add AX, r4
@@ -1324,8 +1324,8 @@ L_8e2f:
 8e2f:    90 06 d9     mov AX, 0x06d9
 8e32:    50 80        add AX, r4
 8e34:    7d 00        call A + 0x00
-8e36:    47 40        ?alu16 AH, r2_high
-8e38:    ff           mov [None], BX
+8e36:    47           unknown
+8e37:    40 ff        add r7_low, r7_low
 8e39:    01           nop
 8e3a:    00           HALT
 8e3b:    02           flag2
@@ -1341,9 +1341,9 @@ L_8e2f:
 8e49:    7b 2a        call L_8e75
 8e4b:    05           flag5
 8e4c:    7b 27        call L_8e75
-8e4e:    06           flag6
+8e4e:    06           set_carry
 8e4f:    7b 24        call L_8e75
-8e51:    07           clear_carry?
+8e51:    07           clear_carry
 8e52:    7b 53        call L_8ea7
 8e54:    7b 1f        call L_8e75
 8e56:    00           HALT
@@ -1369,7 +1369,7 @@ L_8e75:
 8e7a:    20 00        inc? AH, AH
 8e7c:    7e           unknown
 8e7d:    45 5c        mov r6_high, r2_low
-8e7f:    5e           mov r6, a
+8e7f:    5e           mov r4, AX
 8e80:    20 80        inc? AH, SP_high
 8e82:    60 00 20     60 0x0020
 
@@ -1383,8 +1383,8 @@ L_8e88:
 8e8b:    ac           mov [None], AL
 8e8c:    7b 76        call L_8f04
 8e8e:    7b 49        call Fn_6d9
-8e90:    47 80        ?alu16 AH, SP_high
-8e92:    ff           mov [None], BX
+8e90:    47           unknown
+8e91:    80 ff        mov AL, 0xff
 8e93:    01           nop
 8e94:    00           HALT
 8e95:    02           flag2
@@ -1420,8 +1420,8 @@ L_8eb3:
 8ebf:    50 84        add r2, r4
 8ec1:    0f           unknown
 8ec2:    7b 15        call Fn_6d9
-8ec4:    47 40        ?alu16 AH, r2_high
-8ec6:    ff           mov [None], BX
+8ec4:    47           unknown
+8ec5:    40 ff        add r7_low, r7_low
 8ec7:    01           nop
 8ec8:    00           HALT
 8ec9:    02           flag2

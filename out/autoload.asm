@@ -14,7 +14,7 @@ ef0d:    90 01 00     mov AX, 0x0100
 ef10:    b1 ff f0     mov [0xfff0], AX
 ef13:    a1 ff f4     mov [0xfff4], AL
 ef16:    a1 ff f7     mov [0xfff7], AL
-ef19:    5f           mov SP, a
+ef19:    5f           mov SP, AX
 ef1a:    90 e8 8f     mov AX, 0xe88f
 ef1d:    b1 ff f2     mov [0xfff2], AX
 ef20:    80 03        mov AL, 0x03
@@ -46,14 +46,14 @@ efc5:    90 f0 a0     mov AX, 0xf0a0
 L_efc8:
 efc8:    55 0c        mov r6, AX
 efca:    90 00 f0     mov AX, 0x00f0
-efcd:    5f           mov SP, a
+efcd:    5f           mov SP, AX
 
 L_efce:
 efce:    7b 1f        call L_efef
 efd0:    4d           mov BL, AL
 efd1:    7b 1c        call L_efef
-efd3:    5b           mov r3, a
-efd4:    4e           ?alu15 BL, AL
+efd3:    5b           or BX, AX
+efd4:    4e           unknown
 efd5:    7b 18        call L_efef
 efd7:    45 16        mov r3_high, AL
 efd9:    7b 14        call L_efef

@@ -9,7 +9,7 @@ DiagEntryPoint:
 800a:    a1 f2 0d     mov [0xf20d], AL
 800d:    a1 f2 0f     mov [0xf20f], AL
 8010:    90 c0 00     mov AX, 0xc000
-8013:    5f           mov SP, a ; Set stack pointer just beyond top of Diag's 1KB of RAM
+8013:    5f           mov SP, AX ; Set stack pointer just beyond top of Diag's 1KB of RAM
 8014:    22 32        clear BH, BL
 8016:    14 0b        b_z L_8023
 8018:    90 80 77     mov AX, 0x8077
@@ -40,7 +40,7 @@ L_8045:
 8048:    16 b7        b_lt DiagEntryPoint
 804a:    3d           shift_left AX, AX
 804b:    d0 80 55     mov BX, 0x8055
-804e:    58           mov r0, a
+804e:    58           add BX, AX
 804f:    99           mov AX, [None]
 8050:    a1 f1 08     mov [0xf108], AL
 8053:    75 00        jump A + 0x00
@@ -88,20 +88,20 @@ Test_01:
 
 L_8090:
 8090:    c0 11        mov BL, 0x11
-8092:    2f 42        DMA load 2
-8094:    2f 03        DMA load 3
+8092:    2f 42        DMA load 4, 2
+8094:    2f 03        DMA load 0, 3
 8096:    51 40        sub AX, r2
 8098:    15 43        b_nz L_80dd
 809a:    c0 21        mov BL, 0x21
-809c:    2f 40        DMA load 0
-809e:    2f 01        DMA load 1
+809c:    2f 40        DMA load 4, 0
+809e:    2f 01        DMA load 0, 1
 80a0:    51 40        sub AX, r2
 80a2:    15 39        b_nz L_80dd
 80a4:    20 50        inc? AH, r2_low
 80a6:    20 40        inc? AH, r2_high
 80a8:    15 e6        b_nz L_8090
 80aa:    90 00 12     mov AX, 0x0012
-80ad:    5c           mov r4, a
+80ad:    5c           xor BX, AX
 
 L_80ae:
 80ae:    55 60        mov AX, r3
@@ -110,7 +110,7 @@ L_80ae:
 80b3:    20 70        inc? AH, r3_low
 80b5:    15 f7        b_nz L_80ae
 80b7:    90 00 12     mov AX, 0x0012
-80ba:    5c           mov r4, a
+80ba:    5c           xor BX, AX
 
 L_80bb:
 80bb:    80 a8        mov AL, 0xa8
@@ -190,7 +190,7 @@ Test_02:
 812d:    90 01 00     mov AX, 0x0100
 
 L_8130:
-8130:    5d           mov r5, a
+8130:    5d           mov BX, AX
 8131:    16 06        b_lt L_8139
 8133:    f5 01        mov [--AX], AX
 8135:    73 f9        jump L_8130
@@ -203,13 +203,13 @@ L_8139:
 
 L_813c:
 813c:    d8           mov BX, [None]
-813d:    59           mov r1, a
+813d:    59           sub BX, AX
 813e:    15 26        b_nz L_8166
 8140:    38           inc? AX, AX
 8141:    38           inc? AX, AX
 8142:    17 f8        b7 L_813c
 8144:    90 01 00     mov AX, 0x0100
-8147:    5c           mov r4, a
+8147:    5c           xor BX, AX
 
 L_8148:
 8148:    55 60        mov AX, r3
@@ -218,11 +218,11 @@ L_8148:
 814d:    55 66        mov r3, r3
 814f:    17 f7        b7 L_8148
 8151:    90 01 00     mov AX, 0x0100
-8154:    5c           mov r4, a
+8154:    5c           xor BX, AX
 
 L_8155:
 8155:    9b           mov AX, [None]
-8156:    5d           mov r5, a
+8156:    5d           mov BX, AX
 8157:    33 20        neg? AX, BX
 8159:    51 62        sub BX, r3
 815b:    15 09        b_nz L_8166
@@ -546,7 +546,7 @@ L_8333:
 833d:    73 a4        jump Test_08
 
 L_833f:
-833f:    5d           mov r5, a
+833f:    5d           mov BX, AX
 8340:    17 0b        b7 L_834d
 8342:    3a           clear AX, AX
 8343:    a1 f1 40     mov [0xf140], AL
@@ -604,11 +604,11 @@ Test_09:
 8389:    90 32 bf     mov AX, 0x32bf
 838c:    b1 f1 41     mov [0xf141], AX
 838f:    90 fe 6f     mov AX, 0xfe6f
-8392:    2f 02        DMA load 2
+8392:    2f 02        DMA load 0, 2
 8394:    90 01 00     mov AX, 0x0100
-8397:    2f 00        DMA load 0
-8399:    2f 04        DMA load 4
-839b:    2f 06        DMA load 6
+8397:    2f 00        DMA load 0, 0
+8399:    2f 04        DMA load 0, 4
+839b:    2f 06        DMA load 0, 6
 839d:    2a           clear AL, AL
 839e:    a1 f1 48     mov [0xf148], AL
 83a1:    79 84 52     call L_8452
@@ -669,10 +669,10 @@ L_83f8:
 83f8:    2a           clear AL, AL
 83f9:    a1 00 20     mov [0x0020], AL
 83fc:    90 e6 ff     mov AX, 0xe6ff
-83ff:    2f 02        DMA load 2
+83ff:    2f 02        DMA load 0, 2
 8401:    90 01 00     mov AX, 0x0100
-8404:    2f 00        DMA load 0
-8406:    2f 06        DMA load 6
+8404:    2f 00        DMA load 0, 0
+8406:    2f 06        DMA load 0, 6
 8408:    2a           clear AL, AL
 8409:    a1 f1 48     mov [0xf148], AL
 840c:    7b 44        call L_8452
@@ -683,7 +683,7 @@ L_83f8:
 8417:    73 a4        jump L_83bd
 
 L_8419:
-8419:    2f 03        DMA load 3
+8419:    2f 03        DMA load 0, 3
 841b:    38           inc? AX, AX
 841c:    14 04        b_z L_8422
 841e:    c0 d9        mov BL, 0xd9
@@ -692,9 +692,9 @@ L_8420:
 8420:    73 9b        jump L_83bd
 
 L_8422:
-8422:    2f 01        DMA load 1
+8422:    2f 01        DMA load 0, 1
 8424:    d0 1a 00     mov BX, 0x1a00
-8427:    59           mov r1, a
+8427:    59           sub BX, AX
 8428:    14 04        b_z L_842e
 842a:    c0 e9        mov BL, 0xe9
 842c:    73 8f        jump L_83bd
@@ -703,7 +703,7 @@ L_842e:
 842e:    90 00 0f     mov AX, 0x000f
 8431:    50 40        add AX, r2
 8433:    d1 f1 41     mov BX, [0xf141]
-8436:    59           mov r1, a
+8436:    59           sub BX, AX
 8437:    14 04        b_z L_843d
 8439:    c0 f9        mov BL, 0xf9
 843b:    73 e3        jump L_8420
@@ -803,11 +803,11 @@ Q_Command:
 84cc:    95 22        mov BX, [BX++]
 84ce:    55 0c        mov r6, AX
 84d0:    95 22        mov BX, [BX++]
-84d2:    5f           mov SP, a
+84d2:    5f           mov SP, AX
 84d3:    95 22        mov BX, [BX++]
-84d5:    5e           mov r6, a
+84d5:    5e           mov r4, AX
 84d6:    95 22        mov BX, [BX++]
-84d8:    5c           mov r4, a
+84d8:    5c           xor BX, AX
 84d9:    65 22        unknown
 84db:    d5 22        mov BX, [BX++]
 84dd:    91 00 10     mov AX, [0x0010]
@@ -883,7 +883,7 @@ L_8536:
 
 ReadHexWord:
 853a:    3a           clear AX, AX
-853b:    5e           mov r6, a
+853b:    5e           mov r4, AX
 853c:    a1 bf 92     mov [0xbf92], AL ; Diag SRAM
 
 L_853f:
@@ -948,7 +948,7 @@ L_8589:
 858b:    49           sub BL, AL
 858c:    15 04        b_nz L_8592
 858e:    02           flag2
-858f:    07           clear_carry?
+858f:    07           clear_carry
 8590:    2b           neg? AL, AL
 8591:    09           ret
 
@@ -1003,25 +1003,25 @@ L_85c4:
 85e2:    d0 83 00     mov BX, 0x8300
 85e5:    f5 a2        mov [--SP], BX
 85e7:    d0 81 00     mov BX, 0x8100
-85ea:    06           flag6
+85ea:    06           set_carry
 
 L_85eb:
 85eb:    27 30        rotate_left AH, BL
 85ed:    29           dec? AL, AL
 85ee:    17 fb        b7 L_85eb
 85f0:    f5 a2        mov [--SP], BX
-85f2:    2f 14        DMA load 4
-85f4:    2f 06        DMA load 6
-85f6:    2f a0        DMA load 0
+85f2:    2f 14        DMA load 1, 4
+85f4:    2f 06        DMA load 0, 6
+85f6:    2f a0        DMA load 10, 0
 85f8:    90 ff f6     mov AX, 0xfff6
-85fb:    2f 02        DMA load 2
+85fb:    2f 02        DMA load 0, 2
 85fd:    7b 22        call L_8621
 85ff:    43 90        or AH, SP_low
 8601:    01           nop
 8602:    00           HALT
-8603:    2f 00        DMA load 0
+8603:    2f 00        DMA load 0, 0
 8605:    90 f0 ff     mov AX, 0xf0ff
-8608:    2f 02        DMA load 2
+8608:    2f 02        DMA load 0, 2
 860a:    7b 7e        call L_868a
 860c:    45 15        mov r2_low, AL
 860e:    03           flag3
@@ -1032,7 +1032,7 @@ L_860f:
 L_8612:
 8612:    7b 0f        call WriteString
 8614:    "\r\nERROR\r\n\0"
-861e:    07           clear_carry?
+861e:    07           clear_carry
 861f:    73 90        jump L_85b1
 
 L_8621:
@@ -1053,10 +1053,10 @@ L_862f:
 
 ReadChar:
 8634:    7b 6d        call L_86a3
-8636:    84 ec        mov AL, [pc0x-14]
+8636:    84 ec        mov AL, [pc-0x14]
 8638:    2c           shift_right AL, AL
 8639:    11 f9        b1 ReadChar
-863b:    84 f3        mov AL, [pc0x-d]
+863b:    84 f3        mov AL, [pc-0xd]
 863d:    c0 80        mov BL, 0x80
 863f:    43 31        or AL, BL
 8641:    c0 e0        mov BL, 0xe0
@@ -1066,7 +1066,7 @@ ReadChar:
 8648:    42 31        and AL, BL
 
 L_864a:
-864a:    a4 e4        mov [PC0x-1c], AL
+864a:    a4 e4        mov [PC-0x1c], AL
 864c:    09           ret
 
 L_864d:
@@ -1076,7 +1076,7 @@ L_864d:
 8652:    a1 f1 40     mov [0xf140], AL
 8655:    94 2d        mov AX, [pc0x2d]
 8657:    d0 00 10     mov BX, 0x0010
-865a:    5a           mov r2, a
+865a:    5a           and BX, AX
 865b:    14 b5        b_z L_8612
 865d:    3a           clear AX, AX
 865e:    b1 f1 41     mov [0xf141], AX
@@ -1086,17 +1086,17 @@ L_864d:
 L_8664:
 8664:    94 1e        mov AX, [pc0x1e]
 8666:    d0 04 00     mov BX, 0x0400
-8669:    5a           mov r2, a
+8669:    5a           and BX, AX
 866a:    15 a6        b_nz L_8612
 866c:    d0 00 20     mov BX, 0x0020
-866f:    5a           mov r2, a
+866f:    5a           and BX, AX
 8670:    14 f2        b_z L_8664
-8672:    2f 04        DMA load 4
-8674:    2f 06        DMA load 6
+8672:    2f 04        DMA load 0, 4
+8674:    2f 06        DMA load 0, 6
 8676:    90 01 00     mov AX, 0x0100
-8679:    2f 00        DMA load 0
+8679:    2f 00        DMA load 0, 0
 867b:    90 ea 1f     mov AX, 0xea1f
-867e:    2f 02        DMA load 2
+867e:    2f 02        DMA load 0, 2
 8680:    7b 16        call L_8698
 8682:    00           HALT
 8683:    81 f1 44     mov AL, [0xf144]
@@ -1111,7 +1111,7 @@ L_868f:
 868f:    81 f8 01     mov AL, [0xf801]
 8692:    29           dec? AL, AL
 8693:    15 fa        b_nz L_868f
-8695:    84 f6        mov AL, [pc0x-a]
+8695:    84 f6        mov AL, [pc-0xa]
 8697:    09           ret
 
 L_8698:
@@ -1119,7 +1119,7 @@ L_8698:
 869a:    a1 f1 48     mov [0xf148], AL
 
 L_869d:
-869d:    84 e5        mov AL, [pc0x-1b]
+869d:    84 e5        mov AL, [pc-0x1b]
 869f:    2c           shift_right AL, AL
 86a0:    10 fb        b0 L_869d
 86a2:    09           ret
@@ -1158,8 +1158,8 @@ L_86c4:
 86d0:    41 01        sub AL, AH
 86d2:    15 49        b_nz L_871d
 86d4:    90 b8 00     mov AX, 0xb800
-86d7:    5b           mov r3, a
-86d8:    5c           mov r4, a
+86d7:    5b           or BX, AX
+86d8:    5c           xor BX, AX
 86d9:    d0 04 00     mov BX, 0x0400
 
 L_86dc:
@@ -1223,13 +1223,13 @@ AuxiliaryTestMenu:
 8734:    "\x0c\x1b\x1cAUXILIARY TESTS\r\n\n\0"
 874a:    60 88 00     60 0x8800
 874d:    3a           clear AX, AX
-874e:    5c           mov r4, a
+874e:    5c           xor BX, AX
 
 Aux_ReadTestEntry:
 874f:    95 41        mov AX, [r2++]
 8751:    19 21        b_le NextRom
 8753:    d0 07 ff     mov BX, 0x07ff
-8756:    59           mov r1, a
+8756:    59           sub BX, AX
 8757:    18 1b        b_gt NextRom
 8759:    30 60        inc? AX, r3
 875b:    d0 f8 00     mov BX, 0xf800
@@ -1311,7 +1311,7 @@ L_87da:
 87e9:    55 2a        mov SP, BX
 87eb:    60 80 01     60 0x8001
 87ee:    d0 f8 00     mov BX, 0xf800
-87f1:    5a           mov r2, a
+87f1:    5a           and BX, AX
 87f2:    55 28        mov r4, BX
 87f4:    a1 f1 0e     mov [0xf10e], AL
 87f7:    75 00        jump A + 0x00
