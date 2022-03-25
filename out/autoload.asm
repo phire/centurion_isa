@@ -6,7 +6,7 @@ ef02:    71 ef c0     jump 0xefc0 L_efc0
 L_ef05:
 ef05:    80 01        mov AL, 0x01
 ef07:    1d 01        b_sense3 L_ef0a
-ef09:    2a           clear AL, AL
+ef09:    2a           clear AL
 
 L_ef0a:
 ef0a:    a1 f1 4b     mov [0xf14b], AL
@@ -28,7 +28,7 @@ ef2a:    a1 f1 48     mov [0xf148], AL
 
 L_ef2d:
 ef2d:    81 f1 44     mov AL, [0xf144]
-ef30:    2c           shift_right AL, AL
+ef30:    2c           shift_right AL
 ef31:    15 cd        b_nz L_ef00
 ef33:    10 f8        b0 L_ef2d
 ef35:    81 f1 45     mov AL, [0xf145]
@@ -60,7 +60,7 @@ efd9:    7b 14        call L_efef
 efdb:    4c           xor BL, AL
 
 L_efdc:
-efdc:    3f           rotate_left AX, AX
+efdc:    3f           rotate_left AX
 efdd:    16 06        b_lt L_efe5
 efdf:    7b 0e        call L_efef
 efe1:    a5 61        mov [--r3], AL
@@ -69,22 +69,22 @@ efe3:    73 f7        jump L_efdc
 L_efe5:
 efe5:    7b 08        call L_efef
 efe7:    15 e2        b_nz L_efcb
-efe9:    45 99        mov SP_low, SP_low
+efe9:    45 99        mov r4_low, r4_low
 efeb:    15 e1        b_nz L_efce
 efed:    75 60        jump A + 0x60
 
 L_efef:
-efef:    85 c8        mov SP_high, [r6++]
+efef:    85 c8        mov AL, [r6++]
 eff1:    01           nop
 eff2:    16 d7        b_lt L_efcb
-eff4:    2c           shift_right AL, AL
+eff4:    2c           shift_right AL
 eff5:    11 03        b1 L_effa
-eff7:    a5 c8        mov [--r6], SP_high
+eff7:    a5 c8        mov [--r6], AL
 eff9:    03           flag3
 
 L_effa:
-effa:    2c           shift_right AL, AL
+effa:    2c           shift_right AL
 effb:    11 f2        b1 L_efef
-effd:    8e           mov AL, [None]
+effd:    8e           mov AL, single_byte[r6]
 effe:    48           add BL, AL
 efff:    09           ret

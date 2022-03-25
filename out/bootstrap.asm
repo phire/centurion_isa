@@ -24,7 +24,7 @@ fc19:    "D=\0"
 fc1c:    7b 72        call ReadCharTramp
 fc1e:    c0 c6        mov BL, 0xc6 ; B == 'F'
 fc20:    49           sub BL, AL
-fc21:    e5 a2        mov [--SP], BH
+fc21:    e5 a2        mov [--SP], BL
 fc23:    14 0a        b_z GetNextChar
 fc25:    c0 c3        mov BL, 0xc3 ; B == 'C'
 fc27:    49           sub BL, AL
@@ -38,7 +38,7 @@ fc2f:    7b 72        call ReadChar
 fc31:    c0 50        mov BL, 0x50
 fc33:    40 31        add AL, BL
 fc35:    16 48        b_lt PrintError ; Reject anything below ASCI 0x30 aka '0'
-fc37:    c5 a1        mov AL, [SP++]
+fc37:    c5 a1        mov BL, [SP++]
 fc39:    16 7f        b_lt L_fcba
 fc3b:    18 7f        b_gt LoadFromHawkTramp
 fc3d:    c0 03        mov BL, 0x03
@@ -46,18 +46,18 @@ fc3f:    49           sub BL, AL
 fc40:    18 3d        b_gt PrintError
 fc42:    d0 0f 00     mov BX, 0x0f00
 fc45:    f5 a2        mov [--SP], BX
-fc47:    32 20        clear AX, BX
+fc47:    32 20        clear AX
 fc49:    f5 a2        mov [--SP], BX
 fc4b:    c0 88        mov BL, 0x88
-fc4d:    e5 a2        mov [--SP], BH
+fc4d:    e5 a2        mov [--SP], BL
 fc4f:    d0 83 00     mov BX, 0x8300
 fc52:    f5 a2        mov [--SP], BX
 fc54:    d0 81 00     mov BX, 0x8100
 fc57:    06           set_carry
 
 L_fc58:
-fc58:    27 30        rotate_left AH, BL
-fc5a:    29           dec? AL, AL
+fc58:    27 30        rotate_left AH
+fc5a:    29           dec? AL
 fc5b:    17 fb        b7 L_fc58
 fc5d:    f5 a2        mov [--SP], BX
 fc5f:    2f 14        DMA load 1, 4
@@ -90,8 +90,8 @@ fc90:    73 11        jump ReadChar
 
 WriteString:
 fc92:    81 f2 00     mov AL, [0xf200]
-fc95:    2c           shift_right AL, AL
-fc96:    2c           shift_right AL, AL
+fc95:    2c           shift_right AL
+fc96:    2c           shift_right AL
 fc97:    11 f9        b1 WriteString
 fc99:    85 41        mov AL, [r2++]
 fc9b:    15 01        b_nz L_fc9e
@@ -103,7 +103,7 @@ fca1:    73 ef        jump WriteString
 
 ReadChar:
 fca3:    84 ee        mov AL, [pc-0x12]
-fca5:    2c           shift_right AL, AL
+fca5:    2c           shift_right AL
 fca6:    11 fb        b1 ReadChar
 fca8:    84 f5        mov AL, [pc-0xb]
 fcaa:    c0 80        mov BL, 0x80
@@ -132,17 +132,17 @@ fcc0:    c0 07        mov BL, 0x07
 fcc2:    49           sub BL, AL
 fcc3:    18 ba        b_gt PrintError
 fcc5:    a1 f1 40     mov [0xf140], AL ; HawkUnitSelect = A
-fcc8:    94 2d        mov AX, [pc0x2d]
+fcc8:    94 2d        mov AX, [pc+0x2d]
 fcca:    d0 00 10     mov BX, 0x0010
 fccd:    5a           and BX, AX
 fcce:    14 af        b_z PrintError
-fcd0:    3a           clear AX, AX
+fcd0:    3a           clear AX
 fcd1:    b1 f1 41     mov [0xf141], AX ; HawkSectorAddressReg = (0, 0, 0)
 fcd4:    7b 3b        call DiskCommand ; DiskCommand(3) - ReturnTrackZero
 fcd6:    03           flag3
 
 L_fcd7:
-fcd7:    94 1e        mov AX, [pc0x1e]
+fcd7:    94 1e        mov AX, [pc+0x1e]
 fcd9:    d0 04 00     mov BX, 0x0400
 fcdc:    5a           and BX, AX
 fcdd:    15 a0        b_nz PrintError
@@ -171,7 +171,7 @@ fd05:    a1 f8 00     mov [0xf800], AL
 
 L_fd08:
 fd08:    81 f8 01     mov AL, [0xf801]
-fd0b:    29           dec? AL, AL
+fd0b:    29           dec? AL
 fd0c:    15 fa        b_nz L_fd08
 fd0e:    84 f6        mov AL, [pc-0xa]
 fd10:    09           ret
@@ -182,7 +182,7 @@ fd13:    a1 f1 48     mov [0xf148], AL
 
 WaitForHawkCommand:
 fd16:    84 df        mov AL, [pc-0x21] ; 0xf144
-fd18:    2c           shift_right AL, AL
+fd18:    2c           shift_right AL
 fd19:    10 fb        b0 WaitForHawkCommand
 fd1b:    09           ret
 
@@ -190,7 +190,7 @@ L_fd1c:
 fd1c:    73 a0        jump L_fcbe
 
 L_fd1e:
-fd1e:    a5 a2        mov [--SP], BH
+fd1e:    a5 a2        mov [--SP], AL
 fd20:    90 1f 40     mov AX, 0x1f40
 fd23:    5e           mov r4, AX
 fd24:    90 81 00     mov AX, 0x8100
@@ -208,17 +208,17 @@ L_fd35:
 fd35:    a5 81        mov [--r4], AL
 fd37:    80 83        mov AL, 0x83
 fd39:    a5 81        mov [--r4], AL
-fd3b:    3a           clear AX, AX
+fd3b:    3a           clear AX
 fd3c:    b5 81        mov [--r4], AX
 fd3e:    80 85        mov AL, 0x85
 fd40:    a5 81        mov [--r4], AL
-fd42:    2a           clear AL, AL
+fd42:    2a           clear AL
 
 L_fd43:
 fd43:    a5 81        mov [--r4], AL
 fd45:    d0 01 90     mov BX, 0x0190
-fd48:    f5 81        mov [--r4], AX
-fd4a:    28           inc? AL, AL
+fd48:    f5 81        mov [--r4], BX
+fd4a:    28           inc? AL
 fd4b:    c0 0e        mov BL, 0x0e
 fd4d:    49           sub BL, AL
 fd4e:    15 f3        b_nz L_fd43
@@ -229,7 +229,7 @@ fd56:    7b 4e        call L_fda6
 fd58:    80 41        mov AL, 0x41
 fd5a:    a1 f8 08     mov [0xf808], AL
 fd5d:    0e           delay 4.5ms
-fd5e:    2a           clear AL, AL
+fd5e:    2a           clear AL
 fd5f:    a1 f8 08     mov [0xf808], AL
 fd62:    0e           delay 4.5ms
 fd63:    a1 f8 08     mov [0xf808], AL
@@ -237,7 +237,7 @@ fd66:    0e           delay 4.5ms
 fd67:    90 1f 40     mov AX, 0x1f40
 fd6a:    2f 00        DMA load 0, 0
 fd6c:    51 80        sub AX, r4
-fd6e:    3b           neg? AX, AX
+fd6e:    3b           neg? AX
 fd6f:    2f 02        DMA load 0, 2
 fd71:    2f 34        DMA load 3, 4
 fd73:    2f 06        DMA load 0, 6
@@ -278,19 +278,19 @@ fda6:    c1 f8 09     mov BL, [0xf809]
 fda9:    4a           and BL, AL
 fdaa:    15 fa        b_nz L_fda6
 fdac:    09           ret
-fdad:    8c           mov AL, [None]
+fdad:    8c           mov AL, single_byte[r4]
 fdae:    00           HALT
-fdaf:    8b           mov AL, [None]
+fdaf:    8b           mov AL, single_byte[r3]
 fdb0:    00           HALT
 fdb1:    95 41        mov AX, [r2++]
-fdb3:    b3 03        unknown
+fdb3:    b3 03        mov unknown, AX
 
 L_fdb5:
 fdb5:    79 4c 93     call L_4c93
 fdb8:    47           unknown
-fdb9:    be           mov [None], AX
-fdba:    6d a2        unknown
-fdbc:    32 40        clear AX, r2
+fdb9:    be           mov single_byte[r6], AX
+fdba:    6d a2        mov [--SP], r2
+fdbc:    32 40        clear AX
 
 L_fdbe:
 fdbe:    79 4c e7     call L_4ce7
@@ -319,22 +319,22 @@ fde2:    80 04        mov AL, 0x04
 
 L_fde4:
 fde4:    07           clear_carry
-fde5:    37 40        rotate_left AX, r2
-fde7:    29           dec? AL, AL
+fde5:    37 40        rotate_left AX
+fde7:    29           dec? AL
 fde8:    18 fa        b_gt L_fde4
 fdea:    40 35        add r2_low, BL
 fdec:    73 d0        jump L_fdbe
 
 L_fdee:
 fdee:    55 40        mov AX, r2
-fdf0:    65 a1        unknown
+fdf0:    65 a1        mov r2, [SP++]
 fdf2:    09           ret
 
 L_fdf3:
-fdf3:    65 a1        unknown
+fdf3:    65 a1        mov r2, [SP++]
 fdf5:    73 be        jump L_fdb5
-fdf7:    d5 41        mov AX, [r2++]
+fdf7:    d5 41        mov BX, [r2++]
 fdf9:    7d 80        call A + 0x80
 fdfb:    0c           unknown
 fdfc:    d0 4b 65     mov BX, 0x4b65
-fdff:    f5 00        mov [--AX], AX
+fdff:    f5 00        mov [--AX], BX
