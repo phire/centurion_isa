@@ -40,6 +40,16 @@ def bitstring_to_int(bitstring, signed=False):
     return num
 
 
+
+RegNames16 = [
+    "BA", "DC", "RT", "EF", "HL", "SP", "QU", "YZ",
+]
+
+RegNames8 = [
+    "B", "A", "D", "C", "R", "T", "E", "F", "H", "L", "S", "P", "Q", "U", "Y", "Z",
+]
+
+
 class InvalidInstruction():
     newpc = None
 
@@ -68,6 +78,8 @@ class InstructionMatch:
             "bytes": " ".join([f"{b:02x}" for b in self.bytes]),
             "pc": pc,
             "next_pc": self.next_pc[0],
+            "RegNames8": RegNames8,
+            "RegNames16": RegNames16,
         }
 
         if self.instruction.newpc is not None:
@@ -111,17 +123,6 @@ class I:
 
     def to_string(self, dict):
         return self.format.format(**dict)
-
-
-
-RegNames16 = [
-    "AX", "BX", "r2", "r3", "r4", "SP", "r6", "r7",
-]
-
-RegNames8 = [
-    "AH", "AL", "BH", "BL", "r2_high", "r2_low", "r3_high", "r3_low",
-    "r4_high", "r4_low", "SP_high", "SP_low", "r6_high", "r6_low", "r7_high", "r7_low",
-]
 
 class Memory():
     # Implements all opcodes 0x80 and above
@@ -172,19 +173,19 @@ class Memory():
             (2 + word, "mov {reg}, {addr}", "unknown"),               # 000 = immediate
             (3, "mov {reg}, [{addr}]", "mov [{addr}], {reg}"),        # 001 = direct
             (3, "mov {reg}, [[{addr}]]", "mov [[{addr}]], {reg}"),
-            (2, "mov {reg}, unknown", "mov unknown, {reg}"),
-            (2, "mov {reg}, [pc{offset}]","mov [PC{offset}], {reg}"), # 100 = PC relative
+            (2, "mov {reg}, [pc{offset}]", "mov [PC{offset}], {reg}"),
+            (2, "mov {reg}, [[pc{offset}]]","mov [[PC{offset}]], {reg}"), # 100 = PC relative
             (2, "mov {reg}, [{index}++]", "mov [--{index}], {reg}"), # 101 = indexed with increment
             (2, "mov {reg}, unknown", "mov unknown, {reg}"),
             (2, "mov {reg}, unknown", "mov unknown, {reg}"),
-            (1, "mov {reg}, single_byte[{index}]", "mov single_byte[{index}], {reg}"),     # indexed
-            (1, "mov {reg}, single_byte[{index}]", "mov single_byte[{index}], {reg}"),
-            (1, "mov {reg}, single_byte[{index}]", "mov single_byte[{index}], {reg}"),
-            (1, "mov {reg}, single_byte[{index}]", "mov single_byte[{index}], {reg}"),
-            (1, "mov {reg}, single_byte[{index}]", "mov single_byte[{index}], {reg}"),
-            (1, "mov {reg}, single_byte[{index}]", "mov single_byte[{index}], {reg}"),
-            (1, "mov {reg}, single_byte[{index}]", "mov single_byte[{index}], {reg}"),
-            (1, "mov {reg}, single_byte[{index}]", "mov single_byte[{index}], {reg}"),
+            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),     # indexed
+            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
+            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
+            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
+            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
+            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
+            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
+            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
         ]
 
         offset = f"{struct.unpack_from('xb', bytes)[0]:+#04x}"
@@ -210,7 +211,7 @@ OPs = [
 ]
 
 class Alu():
-    # Implements most opcodes between 0x20 and 0x5d
+    # Implements most opcodes between 0x20 and 0x5b
 
     class AluInstance():
         def __init__(self, op, word, src, dest):
@@ -223,9 +224,9 @@ class Alu():
         def to_string(self, dict):
             if self.op < 8:
                 if self.word:
-                    operands = f"{RegNames16[self.dest >> 1]}"
+                    operands = f"{RegNames16[self.src >> 1]}"
                 else:
-                    operands = f"{RegNames8[self.dest]}"
+                    operands = f"{RegNames8[self.src]}"
             else:
                 if self.word:
                     operands = f"{RegNames16[self.dest >> 1]}, {RegNames16[self.src >> 1]}"
@@ -237,7 +238,7 @@ class Alu():
     def match(self, pc, bitstring, bytes):
 
         inst = bytes[0]
-        if inst < 0x20 or inst >= 0x60:
+        if inst < 0x20 or inst >= 0x5f:
             return None
 
         word = inst & 0x10
@@ -248,8 +249,8 @@ class Alu():
             op += 8
 
         # These don't fit the pattern
-        if op >= len(OPs) or inst == 0x2e or inst == 0x2f:
-            return None
+        if inst & 0x0e == 0x0e or inst > 0x5b:
+           return None
 
         if fast:
             if inst > 0x40:
@@ -320,6 +321,20 @@ class B(I):
 
 instructions = [
     # Um, this array is partially sorted for optimal decoding speed
+
+    # these are instructions only used by the CPU6 ram mapping test
+    I("00101110 00011100", "aaa"),
+    I("00101110 00001100", "bbb"),
+    I("11111NNN NNNNNNNN NNNNNNNN", "stb? A, [{N:#07x}]"),
+    I("01000111 10000000 11111111 00000001 00000000 00000010 00000000", "check_parity_error"),
+    I("01000111 01000000 11111111 00000001 00000000 00000010 00000000", "disable_parity_halt"),
+
+
+    I("00110101 00000100", "set_data_bank {RegNames8[1]}"),
+    I("01111110 NNNNNNNN", "long_call"),
+    I("01111111 NNNNNNNN", "clear_data_bank??"),
+
+
     Memory(), # Implements 80-FF
 
 
@@ -333,13 +348,13 @@ instructions = [
 
     # Flag instructions:
     I("00000001", "nop"),
-    I("00000010", "flag2"),
-    I("00000011", "flag3"),
-    I("00000100", "EI"), # enable interrupts
-    I("00000101", "DI"), # disable interrupts
-    I("00000110", "set_carry"),
-    I("00000111", "clear_carry"),
-    I("00001000", "flag8"),
+    I("00000010", "fsn"),
+    I("00000011", "fcn"),
+    I("00000100", "fsi"), # enable interrupts
+    I("00000101", "fci"), # disable interrupts
+    I("00000110", "fsc"),
+    I("00000111", "fcc"),
+    I("00001000", "fca"), # Clears carry, sign, overflow and zero
 
     B("00001001", "ret", kill_branch),
     I("00001010", "reti"), #, kill_branch),
@@ -348,24 +363,24 @@ instructions = [
 
 # 10
 
-    B("00010000 SSSSSSSS", "b0", relative_branch),
-    B("00010001 SSSSSSSS", "b1", relative_branch),
-    B("00010010 SSSSSSSS", "b2", relative_branch),
-    B("00010011 SSSSSSSS", "b3", relative_branch),
-    B("00010100 SSSSSSSS", "b_z", relative_branch),
-    B("00010101 SSSSSSSS", "b_nz", relative_branch),
-    B("00010110 SSSSSSSS", "b_lt", relative_branch),
-    B("00010111 SSSSSSSS", "b7", relative_branch),
-    B("00011000 SSSSSSSS", "b_gt", relative_branch),
-    B("00011001 SSSSSSSS", "b_le", relative_branch), # lessthan or equal
-    B("00011010 SSSSSSSS", "b_sense0", relative_branch),
-    B("00011011 SSSSSSSS", "b_sense1", relative_branch),
-    B("00011100 SSSSSSSS", "b_sense2", relative_branch),
-    B("00011101 SSSSSSSS", "b_sense3", relative_branch),
+    B("00010000 SSSSSSSS", "bcs", relative_branch),
+    B("00010001 SSSSSSSS", "bcc", relative_branch),
+    B("00010010 SSSSSSSS", "bns", relative_branch),
+    B("00010011 SSSSSSSS", "bnc", relative_branch),
+    B("00010100 SSSSSSSS", "bzs", relative_branch),
+    B("00010101 SSSSSSSS", "bzc", relative_branch),
+    B("00010110 SSSSSSSS", "blt", relative_branch),
+    B("00010111 SSSSSSSS", "ble", relative_branch),
+    B("00011000 SSSSSSSS", "bgt", relative_branch),
+    B("00011001 SSSSSSSS", "ble", relative_branch), # lessthan or equal
+    B("00011010 SSSSSSSS", "bs1", relative_branch),
+    B("00011011 SSSSSSSS", "bs2", relative_branch),
+    B("00011100 SSSSSSSS", "bs3", relative_branch),
+    B("00011101 SSSSSSSS", "bs4", relative_branch),
 
 # 20
     I("00100010 00110010", "cpu_id"), # Returns 0 on CPU5, something else on CPU6
-    I("00100xxx xxxxxxxx", ""),
+    I("00100xxx xxxxxxxx", "special20"),
 
 # 28
 
@@ -374,12 +389,14 @@ instructions = [
     I("00101111 xxxxNNNN", "DMA load {x}, {N}"),
 
 # 30
-    I("00110xxx xxxxxxxx", ""),
+    I("00110xxx xxxxxxxx", "special30"),
 
 # 48
     # Special cases that don't match the general ALU pattern
-    I("01011110", "mov r4, AX"),
-    I("01011111", "mov SP, AX"), # sp is r5
+    I("01011100", "mov {RegNames16[3]}, {RegNames16[0]}"),
+    I("01011101", "mov {RegNames16[1]}, {RegNames16[0]}"),
+    I("01011110", "mov {RegNames16[4]}, {RegNames16[0]}"),
+    I("01011111", "mov {RegNames16[5]}, {RegNames16[0]}"),
 
 # 60
     I("01100000 NNNNNNNN NNNNNNNN", "60 {N:#06x}"),  # 60 ??? Might be load immediate into index reg?
@@ -406,7 +423,6 @@ instructions = [
     I("01111010 NNNNNNNN NNNNNNNN", "call [{N:#06x}]"),
     B("01111011 SSSSSSSS", "call", relative_call),
     I("01111101 NNNNNNNN", "call A + {N:#04x}"),
-
 # 80
 
     # Memory(),
@@ -417,7 +433,7 @@ instructions = [
 
 
 def disassemble_instruction(memory, pc):
-    bytes = memory[pc:pc+3]
+    bytes = memory[pc:pc+7]
     bitstring = ""
     for byte in bytes:
         bitstring += format(byte, '08b')

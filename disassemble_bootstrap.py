@@ -57,7 +57,7 @@ comments = [
     (0xfcd4, "DiskCommand(3) - ReturnTrackZero"),
 
     (0xfce9, "DMA transfer destination address"),
-    (0xfcee, "DMA source address? It's 0xf1ae backwards."),
+    (0xfcee, "DMA transfer size, 0xffff - (14 sectors at 400 bytes each)"),
     (0xfcf3, "DiskCommand(0) - Read"),
     (0xfcf6, "Check Command Status (0 == success?)"),
     (0xfcfb, "Transfer control to the IPL that was loaded off disk"),
