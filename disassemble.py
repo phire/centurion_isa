@@ -145,7 +145,7 @@ class Memory():
 
             address_mode = inst & 0xf
         elif inst & 0xf0 == 0x60:
-            # Instructions that operate on r3
+            # Instructions that operate on RT
             reg = 4
             word = True
 
@@ -170,32 +170,63 @@ class Memory():
 
 
         address_modes = [
-            (2 + word, "mov {reg}, {addr}", "unknown"),               # 000 = immediate
-            (3, "mov {reg}, [{addr}]", "mov [{addr}], {reg}"),        # 001 = direct
-            (3, "mov {reg}, [[{addr}]]", "mov [[{addr}]], {reg}"),
-            (2, "mov {reg}, [pc{offset}]", "mov [PC{offset}], {reg}"),
-            (2, "mov {reg}, [[pc{offset}]]","mov [[PC{offset}]], {reg}"), # 100 = PC relative
-            (2, "mov {reg}, [{index}++]", "mov [--{index}], {reg}"), # 101 = indexed with increment
-            (2, "mov {reg}, unknown", "mov unknown, {reg}"),
-            (2, "mov {reg}, unknown", "mov unknown, {reg}"),
-            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),     # indexed
-            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
-            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
-            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
-            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
-            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
-            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
-            (1, "mov {reg}, [{index}]", "mov [{index}], {reg}"),
+            (2 + word, "#{addr}"),               # 000 = immediate
+            (3, "({addr})"),        # 001 = direct
+            (3, "@({addr})"),
+            (2, "(PC{offset})"),
+            (2, "@(PC{offset})"), # 100 = PC relative
+            (2, "indexed_modes"), # 101 = indexed with increment
+            (2, "unknown"),
+            (2, "unknown"),
+            (1, "@({index})"),     # indexed
+            (1, "@({index})"),
+            (1, "@({index})"),
+            (1, "@({index})"),
+            (1, "@({index})"),
+            (1, "@({index})"),
+            (1, "@({index})"),
+            (1, "@({index})"),
         ]
 
-        offset = f"{struct.unpack_from('xb', bytes)[0]:+#04x}"
+        indexed_modes = [
+            "@({index})", # guess
+            "@({index})+",
+            "@-({index})",
+            "unknown_indexed"
+            "unknown_indexed",
+            "unknown_indexed",
+            "unknown_indexed",
+            "unknown_indexed",
+            "@({index}) {offset}", # guess
+            "@({index})+ {offset}",
+            "@-({index}) {offset}",
+            "unknown_indexed",
+            "unknown_indexed",
+            "unknown_indexed",
+            "unknown_indexed",
+            "unknown_indexed",
+        ]
+
+        offset_byte = bytes[1]
         addr = f"{struct.unpack_from('>xH', bytes)[0]:#06x}"
 
         if address_mode == 0 and not word:
             addr = addr[:4]
 
-        size, load_format, store_format = address_modes[address_mode]
-        format = load_format if load else store_format
+        format = ["st", "ld"][load]
+        format += [".b", ".w"][word]
+
+        size, addr_format = address_modes[address_mode]
+        if address_mode == 5:
+            indexed_mode = bytes[1] & 0x0f
+            addr_format = indexed_modes[indexed_mode]
+            if indexed_mode & 8 != 0:
+                offset_byte = bytes[2]
+                size += 1
+
+        offset = f"{struct.unpack_from('b', struct.pack('B', offset_byte))[0]:+#04x}"
+
+        format = f"{format} {reg_name}, {addr_format}"
 
         return InstructionMatch(pc, QuickInstuction(format), bytes[:size], {
             "reg": reg_name,
@@ -206,8 +237,8 @@ class Memory():
 
 
 OPs = [
-    "inc?", "dec?", "clear", "neg?", "shift_right", "shift_left", "rotate_right", "rotate_left",
-    "add", "sub", "and", "or", "xor", "mov"
+    "inc", "dec", "clr", "not", "srl", "sll", "rrc", "rlc",
+    "add", "sub", "and", "or", "xor", "mov", "unk6", "unk7"
 ]
 
 class Alu():
@@ -222,16 +253,17 @@ class Alu():
             self.dest = dest
 
         def to_string(self, dict):
+            op = OPs[self.op]
             if self.op < 8:
                 if self.word:
-                    operands = f"{RegNames16[self.src >> 1]}"
+                    return f"{op}.w {RegNames16[self.src >> 1]}"
                 else:
-                    operands = f"{RegNames8[self.src]}"
+                    return f"{op}.b {RegNames8[self.src]}"
             else:
                 if self.word:
-                    operands = f"{RegNames16[self.dest >> 1]}, {RegNames16[self.src >> 1]}"
+                    return f"{op}.w {RegNames16[self.dest >> 1]}, {RegNames16[self.src >> 1]}"
                 else:
-                    operands = f"{RegNames8[self.dest]}, {RegNames8[self.src]}"
+                    return f"{op}.b {RegNames8[self.dest]}, {RegNames8[self.src]}"
 
             return f"{OPs[self.op]} {operands}"
 
@@ -389,6 +421,7 @@ instructions = [
     I("00101111 xxxxNNNN", "DMA load {x}, {N}"),
 
 # 30
+    I("00111111", "dec {RegNames16[3]}"),
     I("00110xxx xxxxxxxx", "special30"),
 
 # 48
@@ -411,18 +444,18 @@ instructions = [
 
 # 70
 
-    B("01110001 NNNNNNNN NNNNNNNN", "jump {N:#06x}", abolsute_branch_uncondtionional),
-    B("01110010 NNNNNNNN NNNNNNNN", "jump [{N:#06x}] ;", kill_branch),
-    B("01110011 SSSSSSSS", "jump", relative_branch_unconditional),
-    B("01110101 NNNNNNNN", "jump A + {N:#04x}", kill_branch),
+    B("01110001 NNNNNNNN NNNNNNNN", "jump #{N:#06x}", abolsute_branch_uncondtionional),
+    B("01110010 NNNNNNNN NNNNNNNN", "jump @({N:#06x}) ;", kill_branch),
+    B("01110011 SSSSSSSS", "jump (PC{S:+#05x})", relative_branch_unconditional),
+    B("01110101 NNNNNNNN", "jump (A + {N:#04x})", kill_branch),
     B("01110110", "syscall", kill_branch), # "Return to interrupt level 15"
 
 # 78
 
-    B("01111001 NNNNNNNN NNNNNNNN", "call", absolute_call),
-    I("01111010 NNNNNNNN NNNNNNNN", "call [{N:#06x}]"),
-    B("01111011 SSSSSSSS", "call", relative_call),
-    I("01111101 NNNNNNNN", "call A + {N:#04x}"),
+    B("01111001 NNNNNNNN NNNNNNNN", "call #{N:#06x}", absolute_call),
+    I("01111010 NNNNNNNN NNNNNNNN", "call @({N:#06x})"),
+    B("01111011 SSSSSSSS", "call (PC{S:+#05x})", relative_call),
+    I("01111101 NNNNNNNN", "call (A + {N:#04x})"),
 # 80
 
     # Memory(),

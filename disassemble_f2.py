@@ -15,7 +15,7 @@ functions = [
 ]
 
 labels = [
-    (0x8aa1, "InstructionTestInitialRegisterState"),
+    (0x8da1, "InstructionTestInitialRegisterState"),
     (0x8f62, "ChecksumLoop"),
     (0x8fa6, "ChecksumFail"),
     (0x8f9b, "WaitForKey"),
@@ -79,6 +79,10 @@ if __name__ == "__main__":
     memory = b"\0" * (base_address) + bytes + b"\0" * (0x10000 - (len(bytes) + base_address))
 
    # scan_calls(memory, base_address, base_address)
+
+    for addr in range (0x8da1, 0x8dbb, 2):
+        memory_addr_info[addr].type = ">H"
+
 
     for (addr, name) in functions:
         memory_addr_info[base_address + addr].label = name
