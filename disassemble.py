@@ -42,11 +42,11 @@ def bitstring_to_int(bitstring, signed=False):
 
 
 RegNames16 = [
-    "BA", "DC", "RT", "EF", "HL", "SP", "QU", "YZ",
+    "WX", "YZ", "RT", "KL", "MN", "SP", "GH", "IJ",
 ]
 
 RegNames8 = [
-    "B", "A", "D", "C", "R", "T", "E", "F", "H", "L", "S", "P", "Q", "U", "Y", "Z",
+    "W", "X", "Y", "Z", "R", "T", "K", "L", "M", "N", "S", "P", "G", "H", "I", "Z",
 ]
 
 
