@@ -369,7 +369,7 @@ CheckUart:
 822e:    4a           and.b C, A
 822f:    15 05        bzc L_8236
 8231:    a1 f1 0a     st.b A, (0xf10a)
-8234:    3e           unknown
+8234:    3e           inc RT
 8235:    09           ret
 
 L_8236:
@@ -501,13 +501,13 @@ L_82ef:
 8304:    71 80 01     jump #0x8001 DiagEntryPoint
 
 L_8307:
-8307:    3e           unknown
-8308:    3e           unknown
+8307:    3e           inc RT
+8308:    3e           inc RT
 8309:    90 03 2c     ld.w BA, #0x032c
 830c:    51 40        sub.w BA, RT
 830e:    15 df        bzc L_82ef
-8310:    3f           dec EF
-8311:    3f           dec EF
+8310:    3f           dec RT
+8311:    3f           dec RT
 
 L_8312:
 8312:    55 40        mov.w BA, RT
@@ -526,8 +526,8 @@ L_8312:
 8327:    71 80 01     jump #0x8001 DiagEntryPoint
 
 L_832a:
-832a:    3f           dec EF
-832b:    3f           dec EF
+832a:    3f           dec RT
+832b:    3f           dec RT
 832c:    17 e4        ble L_8312
 832e:    a1 f1 0a     st.b A, (0xf10a)
 8331:    73 b0        jump (PC-0x50) Test_08
@@ -1170,7 +1170,7 @@ L_86e5:
 86e5:    8a           ld.b A, @(RT)
 86e6:    41 51        sub.b A, T
 86e8:    15 3a        bzc L_8724
-86ea:    3e           unknown
+86ea:    3e           inc RT
 86eb:    31 20        dec.w DC
 86ed:    15 f6        bzc L_86e5
 86ef:    d0 04 00     ld.w DC, #0x0400
@@ -1190,7 +1190,7 @@ L_8702:
 8703:    2b           not.b A
 8704:    41 51        sub.b A, T
 8706:    15 1c        bzc L_8724
-8708:    3e           unknown
+8708:    3e           inc RT
 8709:    31 20        dec.w DC
 870b:    15 f5        bzc L_8702
 870d:    a1 f1 0c     st.b A, (0xf10c)

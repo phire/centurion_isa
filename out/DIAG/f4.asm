@@ -191,7 +191,7 @@ L_99f6:
 99fb:    4a           and.b C, A
 99fc:    14 2b        bzs L_9a29
 99fe:    0e           delay 4.5ms
-99ff:    3f           dec EF
+99ff:    3f           dec RT
 9a00:    15 f4        bzc L_99f6
 9a02:    7a 01 12     call @(0x0112)
 9a05:    "*** BUSY DID NOT CLEAR ***\0"
@@ -206,7 +206,7 @@ L_9a2c:
 9a2c:    2c           srl.b A
 9a2d:    10 2b        bcs L_9a5a
 9a2f:    0e           delay 4.5ms
-9a30:    3f           dec EF
+9a30:    3f           dec RT
 9a31:    15 f9        bzc L_9a2c
 9a33:    7a 01 12     call @(0x0112)
 9a36:    "*** FOUT NEVER CAME ON ***\0"
@@ -248,7 +248,7 @@ L_9a97:
 9a9b:    2c           srl.b A
 9a9c:    11 2d        bcc L_9acb
 9a9e:    0e           delay 4.5ms
-9a9f:    3f           dec EF
+9a9f:    3f           dec RT
 9aa0:    15 f5        bzc L_9a97
 9aa2:    7a 01 12     call @(0x0112)
 9aa5:    "*** FIN DID NOT GO OFF ***\r\n\0"
@@ -284,7 +284,7 @@ L_9aef:
 9af1:    28           inc.b A
 9af2:    28           inc.b A
 9af3:    28           inc.b A
-9af4:    3f           dec EF
+9af4:    3f           dec RT
 9af5:    15 f8        bzc L_9aef
 9af7:    90 f0 ff     ld.w BA, #0xf0ff
 9afa:    2f 02        DMA load 0, 2
@@ -313,7 +313,7 @@ L_9aef:
 
 L_9b32:
 9b32:    a5 21        st.b A, @(DC)+
-9b34:    3f           dec EF
+9b34:    3f           dec RT
 9b35:    15 fb        bzc L_9b32
 9b37:    90 f0 ff     ld.w BA, #0xf0ff
 9b3a:    2f 02        DMA load 0, 2
@@ -350,7 +350,7 @@ L_9b77:
 9b7e:    20 00        inc.b B
 9b80:    20 00        inc.b B
 9b82:    20 00        inc.b B
-9b84:    3f           dec EF
+9b84:    3f           dec RT
 9b85:    15 f0        bzc L_9b77
 9b87:    95 a1        ld.w BA, @(SP)+
 9b89:    20 70        inc.b F

@@ -33,7 +33,7 @@ Entry_CPU_INSTRUCTION_TEST:
 L_888f:
 888f:    c5 61        ld.b C, @(EF)+
 8891:    e5 01        st.b C, @(BA)+
-8893:    3f           dec EF
+8893:    3f           dec RT
 8894:    15 f9        bzc L_888f ; clearing all registers?
 8896:    03           fcn
 8897:    07           fcc
@@ -597,22 +597,22 @@ L_8a67:
 8a6b:    00           HALT
 
 L_8a6c:
-8a6c:    3e           unknown
+8a6c:    3e           inc RT
 8a6d:    18 01        bgt L_8a70
 8a6f:    00           HALT
 
 L_8a70:
-8a70:    3f           dec EF
+8a70:    3f           dec RT
 8a71:    14 01        bzs L_8a74
 8a73:    00           HALT
 
 L_8a74:
-8a74:    3f           dec EF
+8a74:    3f           dec RT
 8a75:    16 01        blt L_8a78
 8a77:    00           HALT
 
 L_8a78:
-8a78:    3e           unknown
+8a78:    3e           inc RT
 8a79:    14 01        bzs L_8a7c
 8a7b:    00           HALT
 
@@ -1208,7 +1208,7 @@ L_8d2d:
 8d35:    00           HALT
 
 L_8d36:
-8d36:    3e           unknown
+8d36:    3e           inc RT
 8d37:    09           ret
 
 L_8d38:
@@ -1373,7 +1373,7 @@ nextByteValue:
 8e9b:    15 eb        bzc nextByteValue
 8e9d:    30 60        inc.w EF
 8e9f:    30 80        inc.w HL
-8ea1:    3f           dec EF
+8ea1:    3f           dec RT
 8ea2:    15 e1        bzc nextMemoryLcation
 8ea4:    7f 45        clear_data_bank??
 8ea6:    09           ret

@@ -60,7 +60,7 @@ efd9:    7b 14        call (PC+0x14) L_efef
 efdb:    4c           xor.b C, A
 
 L_efdc:
-efdc:    3f           dec EF
+efdc:    3f           dec RT
 efdd:    16 06        blt L_efe5
 efdf:    7b 0e        call (PC+0x0e) L_efef
 efe1:    a5 61        st.b A, @(EF)+

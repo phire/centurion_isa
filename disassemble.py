@@ -421,7 +421,8 @@ instructions = [
     I("00101111 xxxxNNNN", "DMA load {x}, {N}"),
 
 # 30
-    I("00111111", "dec {RegNames16[3]}"),
+    I("00111110", "inc {RegNames16[2]}"),
+    I("00111111", "dec {RegNames16[2]}"),
     I("00110xxx xxxxxxxx", "special30"),
 
 # 48

@@ -191,7 +191,7 @@ L_91eb:
 91f0:    4a           and.b C, A
 91f1:    14 2b        bzs L_921e
 91f3:    0e           delay 4.5ms
-91f4:    3f           dec EF
+91f4:    3f           dec RT
 91f5:    15 f4        bzc L_91eb
 91f7:    7a 01 12     call @(0x0112)
 91fa:    "*** BUSY DID NOT CLEAR ***\0"
@@ -206,7 +206,7 @@ L_9221:
 9221:    2c           srl.b A
 9222:    10 2b        bcs L_924f
 9224:    0e           delay 4.5ms
-9225:    3f           dec EF
+9225:    3f           dec RT
 9226:    15 f9        bzc L_9221
 9228:    7a 01 12     call @(0x0112)
 922b:    "*** FOUT NEVER CAME ON ***\0"
@@ -248,7 +248,7 @@ L_928c:
 9290:    2c           srl.b A
 9291:    11 2d        bcc L_92c0
 9293:    0e           delay 4.5ms
-9294:    3f           dec EF
+9294:    3f           dec RT
 9295:    15 f5        bzc L_928c
 9297:    7a 01 12     call @(0x0112)
 929a:    "*** FIN DID NOT GO OFF ***\r\n\0"
@@ -288,7 +288,7 @@ L_92e4:
 92e6:    28           inc.b A
 92e7:    28           inc.b A
 92e8:    28           inc.b A
-92e9:    3f           dec EF
+92e9:    3f           dec RT
 92ea:    15 f8        bzc L_92e4
 92ec:    90 ff 37     ld.w BA, #0xff37
 92ef:    2f 02        DMA load 0, 2
@@ -305,7 +305,7 @@ L_92e4:
 
 L_9309:
 9309:    a5 21        st.b A, @(DC)+
-930b:    3f           dec EF
+930b:    3f           dec RT
 930c:    15 fb        bzc L_9309
 930e:    90 ff 37     ld.w BA, #0xff37
 9311:    2f 02        DMA load 0, 2
@@ -328,7 +328,7 @@ L_932e:
 9334:    20 00        inc.b B
 9336:    20 00        inc.b B
 9338:    20 00        inc.b B
-933a:    3f           dec EF
+933a:    3f           dec RT
 933b:    15 f1        bzc L_932e
 933d:    20 70        inc.b F
 933f:    7a 01 04     call @(0x0104)
@@ -359,7 +359,7 @@ L_9383:
 9385:    28           inc.b A
 9386:    28           inc.b A
 9387:    28           inc.b A
-9388:    3f           dec EF
+9388:    3f           dec RT
 9389:    15 f8        bzc L_9383
 938b:    90 c0 00     ld.w BA, #0xc000
 938e:    2f 02        DMA load 0, 2
@@ -388,7 +388,7 @@ L_9383:
 
 L_93c6:
 93c6:    a5 21        st.b A, @(DC)+
-93c8:    3f           dec EF
+93c8:    3f           dec RT
 93c9:    15 fb        bzc L_93c6
 93cb:    90 c0 00     ld.w BA, #0xc000
 93ce:    2f 02        DMA load 0, 2
@@ -425,7 +425,7 @@ L_940b:
 9412:    20 00        inc.b B
 9414:    20 00        inc.b B
 9416:    20 00        inc.b B
-9418:    3f           dec EF
+9418:    3f           dec RT
 9419:    15 f0        bzc L_940b
 941b:    95 a1        ld.w BA, @(SP)+
 941d:    20 70        inc.b F
