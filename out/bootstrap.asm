@@ -25,13 +25,13 @@ fc1c:    7b 72        call (PC+0x72) ReadCharTramp
 fc1e:    c0 c6        ld.b C, #0xc6 ; B == 'F'
 fc20:    49           sub.b C, A
 fc21:    e5 a2        st.b C, -(SP)
-fc23:    14 0a        bzs GetNextChar
+fc23:    14 0a        bz GetNextChar
 fc25:    c0 c3        ld.b C, #0xc3 ; B == 'C'
 fc27:    49           sub.b C, A
-fc28:    14 05        bzs GetNextChar
+fc28:    14 05        bz GetNextChar
 fc2a:    c0 c8        ld.b C, #0xc8 ; B == 'H'
 fc2c:    49           sub.b C, A
-fc2d:    15 50        bzc PrintError
+fc2d:    15 50        bnz PrintError
 
 GetNextChar:
 fc2f:    7b 72        call (PC+0x72) ReadChar
@@ -92,9 +92,9 @@ WriteString:
 fc92:    81 f2 00     ld.b A, (0xf200)
 fc95:    2c           srl.b A
 fc96:    2c           srl.b A
-fc97:    11 f9        bcc WriteString
+fc97:    11 f9        bnc WriteString
 fc99:    85 41        ld.b A, (RT)+
-fc9b:    15 01        bzc L_fc9e
+fc9b:    15 01        bnz L_fc9e
 fc9d:    09           ret
 
 L_fc9e:
@@ -104,7 +104,7 @@ fca1:    73 ef        jump (PC-0x11) WriteString
 ReadChar:
 fca3:    84 ee        ld.b A, @(PC-0x12)
 fca5:    2c           srl.b A
-fca6:    11 fb        bcc ReadChar
+fca6:    11 fb        bnc ReadChar
 fca8:    84 f5        ld.b A, @(PC-0xb)
 fcaa:    c0 80        ld.b C, #0x80
 fcac:    43 31        or.b A, C ; char | 0x80 - Force bit 7 to be set
@@ -135,7 +135,7 @@ fcc5:    a1 f1 40     st.b A, (0xf140) ; HawkUnitSelect = A
 fcc8:    94 2d        ld.w BA, @(PC+0x2d)
 fcca:    d0 00 10     ld.w DC, #0x0010
 fccd:    5a           and.w DC, BA
-fcce:    14 af        bzs PrintError
+fcce:    14 af        bz PrintError
 fcd0:    3a           clr.w BA
 fcd1:    b1 f1 41     st.w BA, (0xf141) ; HawkSectorAddressReg = (0, 0, 0)
 fcd4:    7b 3b        call (PC+0x3b) DiskCommand ; DiskCommand(3) - ReturnTrackZero
@@ -145,10 +145,10 @@ L_fcd7:
 fcd7:    94 1e        ld.w BA, @(PC+0x1e)
 fcd9:    d0 04 00     ld.w DC, #0x0400
 fcdc:    5a           and.w DC, BA
-fcdd:    15 a0        bzc PrintError
+fcdd:    15 a0        bnz PrintError
 fcdf:    d0 00 20     ld.w DC, #0x0020
 fce2:    5a           and.w DC, BA
-fce3:    14 f2        bzs L_fcd7
+fce3:    14 f2        bz L_fcd7
 fce5:    2f 04        DMA load 0, 4
 fce7:    2f 06        DMA load 0, 6
 fce9:    90 01 00     ld.w BA, #0x0100 ; DMA transfer destination address
@@ -158,7 +158,7 @@ fcf1:    2f 02        DMA load 0, 2
 fcf3:    7b 1c        call (PC+0x1c) DiskCommand ; DiskCommand(0) - Read
 fcf5:    00           HALT
 fcf6:    81 f1 44     ld.b A, (0xf144) ; Check Command Status (0 == success?)
-fcf9:    15 84        bzc PrintError
+fcf9:    15 84        bnz PrintError
 fcfb:    71 01 03     jump #0x0103 IPL_Entry_point ; Transfer control to the IPL that was loaded off disk
 fcfe:    7b 2f        call (PC+0x2f) L_fd2f
 
@@ -172,7 +172,7 @@ fd05:    a1 f8 00     st.b A, (0xf800)
 L_fd08:
 fd08:    81 f8 01     ld.b A, (0xf801)
 fd0b:    29           dec.b A
-fd0c:    15 fa        bzc L_fd08
+fd0c:    15 fa        bnz L_fd08
 fd0e:    84 f6        ld.b A, @(PC-0xa)
 fd10:    09           ret
 
@@ -183,7 +183,7 @@ fd13:    a1 f1 48     st.b A, (0xf148)
 WaitForHawkCommand:
 fd16:    84 df        ld.b A, @(PC-0x21) ; 0xf144
 fd18:    2c           srl.b A
-fd19:    10 fb        bcs WaitForHawkCommand
+fd19:    10 fb        bc WaitForHawkCommand
 fd1b:    09           ret
 
 L_fd1c:
@@ -200,7 +200,7 @@ fd2b:    a5 81        st.b A, (HL)+
 fd2d:    85 a1        ld.b A, (SP)+
 
 L_fd2f:
-fd2f:    14 04        bzs L_fd35
+fd2f:    14 04        bz L_fd35
 fd31:    c0 0f        ld.b C, #0x0f
 fd33:    40 31        add.b A, C
 
@@ -221,7 +221,7 @@ fd48:    f5 81        st.w DC, (HL)+
 fd4a:    28           inc.b A
 fd4b:    c0 0e        ld.b C, #0x0e
 fd4d:    49           sub.b C, A
-fd4e:    15 f3        bzc L_fd43
+fd4e:    15 f3        bnz L_fd43
 fd50:    80 ff        ld.b A, #0xff
 fd52:    a5 81        st.b A, (HL)+
 fd54:    80 08        ld.b A, #0x08
@@ -267,7 +267,7 @@ fd9b:    71 01 03     jump #0x0103 IPL_Entry_point
 
 L_fd9e:
 fd9e:    81 f8 08     ld.b A, (0xf808)
-fda1:    15 01        bzc L_fda4
+fda1:    15 01        bnz L_fda4
 fda3:    09           ret
 
 L_fda4:
@@ -276,7 +276,7 @@ fda4:    73 da        jump (PC-0x26) L_fd80
 L_fda6:
 fda6:    c1 f8 09     ld.b C, (0xf809)
 fda9:    4a           and.b C, A
-fdaa:    15 fa        bzc L_fda6
+fdaa:    15 fa        bnz L_fda6
 fdac:    09           ret
 fdad:    8c           ld.b A, (HL)
 fdae:    00           HALT
@@ -294,10 +294,10 @@ fdbc:    32 40        clr.w RT
 L_fdbe:
 fdbe:    79 4c e7     call #0x4ce7 L_4ce7
 fdc1:    4d           mov.b C, A
-fdc2:    14 2a        bzs L_fdee
+fdc2:    14 2a        bz L_fdee
 fdc4:    c0 8d        ld.b C, #0x8d
 fdc6:    49           sub.b C, A
-fdc7:    14 25        bzs L_fdee
+fdc7:    14 25        bz L_fdee
 fdc9:    c0 b0        ld.b C, #0xb0
 fdcb:    49           sub.b C, A
 fdcc:    16 25        blt L_fdf3

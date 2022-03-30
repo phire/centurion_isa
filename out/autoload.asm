@@ -29,13 +29,13 @@ ef2a:    a1 f1 48     st.b A, (0xf148)
 L_ef2d:
 ef2d:    81 f1 44     ld.b A, (0xf144)
 ef30:    2c           srl.b A
-ef31:    15 cd        bzc L_ef00
-ef33:    10 f8        bcs L_ef2d
+ef31:    15 cd        bnz L_ef00
+ef33:    10 f8        bc L_ef2d
 ef35:    81 f1 45     ld.b A, (0xf145)
 ef38:    c0 30        ld.b C, #0x30
 ef3a:    42 31        and.b A, C
 ef3c:    49           sub.b C, A
-ef3d:    15 ee        bzc L_ef2d
+ef3d:    15 ee        bnz L_ef2d
 ef3f:    09           ret
 
 L_efc0:
@@ -68,21 +68,21 @@ efe3:    73 f7        jump (PC-0x09) L_efdc
 
 L_efe5:
 efe5:    7b 08        call (PC+0x08) L_efef
-efe7:    15 e2        bzc L_efcb
+efe7:    15 e2        bnz L_efcb
 efe9:    45 99        mov.b L, L
-efeb:    15 e1        bzc L_efce
+efeb:    15 e1        bnz L_efce
 efed:    75 60        jump (A + 0x60)
 
 L_efef:
 efef:    85 c8 01     ld.b A, +0x1(QU)+
 eff2:    16 d7        blt L_efcb
 eff4:    2c           srl.b A
-eff5:    11 03        bcc L_effa
+eff5:    11 03        bnc L_effa
 eff7:    a5 c8 03     st.b A, +0x3(QU)+
 
 L_effa:
 effa:    2c           srl.b A
-effb:    11 f2        bcc L_efef
+effb:    11 f2        bnc L_efef
 effd:    8e           ld.b A, (QU)
 effe:    48           add.b C, A
 efff:    09           ret

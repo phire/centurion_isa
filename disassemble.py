@@ -395,12 +395,12 @@ instructions = [
 
 # 10
 
-    B("00010000 SSSSSSSS", "bcs", relative_branch),
-    B("00010001 SSSSSSSS", "bcc", relative_branch),
-    B("00010010 SSSSSSSS", "bns", relative_branch),
-    B("00010011 SSSSSSSS", "bnc", relative_branch),
-    B("00010100 SSSSSSSS", "bzs", relative_branch),
-    B("00010101 SSSSSSSS", "bzc", relative_branch),
+    B("00010000 SSSSSSSS", "bc", relative_branch),
+    B("00010001 SSSSSSSS", "bnc", relative_branch),
+    B("00010010 SSSSSSSS", "bn", relative_branch),
+    B("00010011 SSSSSSSS", "bnn", relative_branch),
+    B("00010100 SSSSSSSS", "bz", relative_branch),
+    B("00010101 SSSSSSSS", "bnz", relative_branch),
     B("00010110 SSSSSSSS", "blt", relative_branch),
     B("00010111 SSSSSSSS", "ble", relative_branch),
     B("00011000 SSSSSSSS", "bgt", relative_branch),
