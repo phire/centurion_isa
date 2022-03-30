@@ -63,7 +63,7 @@ L_efdc:
 efdc:    3f           dec RT
 efdd:    16 06        blt L_efe5
 efdf:    7b 0e        call (PC+0x0e) L_efef
-efe1:    a5 61        st.b A, @(EF)+
+efe1:    a5 61        st.b A, (EF)+
 efe3:    73 f7        jump (PC-0x09) L_efdc
 
 L_efe5:
@@ -74,15 +74,15 @@ efeb:    15 e1        bzc L_efce
 efed:    75 60        jump (A + 0x60)
 
 L_efef:
-efef:    85 c8 01     ld.b A, @(QU)+ +0x1
+efef:    85 c8 01     ld.b A, +0x1(QU)+
 eff2:    16 d7        blt L_efcb
 eff4:    2c           srl.b A
 eff5:    11 03        bcc L_effa
-eff7:    a5 c8 03     st.b A, @(QU)+ +0x3
+eff7:    a5 c8 03     st.b A, +0x3(QU)+
 
 L_effa:
 effa:    2c           srl.b A
 effb:    11 f2        bcc L_efef
-effd:    8e           ld.b A, @(QU)
+effd:    8e           ld.b A, (QU)
 effe:    48           add.b C, A
 efff:    09           ret

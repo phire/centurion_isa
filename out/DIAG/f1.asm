@@ -41,7 +41,7 @@ L_8045:
 804a:    3d           sll.w BA
 804b:    d0 80 55     ld.w DC, #0x8055
 804e:    58           add.w DC, BA
-804f:    99           ld.w BA, @(DC)
+804f:    99           ld.w BA, (DC)
 8050:    a1 f1 08     st.b A, (0xf108)
 8053:    75 00        jump (A + 0x00)
 
@@ -110,7 +110,7 @@ L_8090:
 
 L_80ae:
 80ae:    55 60        mov.w BA, EF
-80b0:    bb           st.w BA, @(EF)
+80b0:    bb           st.w BA, (EF)
 80b1:    20 70        inc.b F
 80b3:    20 70        inc.b F
 80b5:    15 f7        bzc L_80ae
@@ -121,7 +121,7 @@ L_80bb:
 80bb:    80 a8        ld.b A, #0xa8
 80bd:    41 71        sub.b A, F
 80bf:    14 05        bzs L_80c6
-80c1:    9b           ld.w BA, @(EF)
+80c1:    9b           ld.w BA, (EF)
 80c2:    51 60        sub.w BA, EF
 80c4:    15 15        bzc L_80db
 
@@ -197,7 +197,7 @@ Test_02:
 L_8130:
 8130:    5d           mov DC, BA
 8131:    16 06        blt L_8139
-8133:    f5 01        st.w DC, @(BA)+
+8133:    f5 01        st.w DC, (BA)+
 8135:    73 f9        jump (PC-0x07) L_8130
 
 L_8137:
@@ -207,7 +207,7 @@ L_8139:
 8139:    90 01 00     ld.w BA, #0x0100
 
 L_813c:
-813c:    d8           ld.w DC, @(BA)
+813c:    d8           ld.w DC, (BA)
 813d:    59           sub.w DC, BA
 813e:    15 26        bzc L_8166
 8140:    38           inc.w BA
@@ -219,19 +219,19 @@ L_813c:
 L_8148:
 8148:    55 60        mov.w BA, EF
 814a:    3b           not.w BA
-814b:    b5 61        st.w BA, @(EF)+
+814b:    b5 61        st.w BA, (EF)+
 814d:    55 66        mov.w EF, EF
 814f:    17 f7        ble L_8148
 8151:    90 01 00     ld.w BA, #0x0100
 8154:    5c           mov EF, BA
 
 L_8155:
-8155:    9b           ld.w BA, @(EF)
+8155:    9b           ld.w BA, (EF)
 8156:    5d           mov DC, BA
 8157:    33 20        not.w DC
 8159:    51 62        sub.w DC, EF
 815b:    15 09        bzc L_8166
-815d:    95 61        ld.w BA, @(EF)+
+815d:    95 61        ld.w BA, (EF)+
 815f:    17 f4        ble L_8155
 8161:    a1 f1 0a     st.b A, (0xf10a)
 8164:    73 b5        jump (PC-0x4b) Test_02
@@ -265,9 +265,9 @@ Test_03:
 L_8186:
 8186:    90 10 00     ld.w BA, #0x1000
 8189:    40 50        add.b B, T
-818b:    b5 48 0c     st.w BA, @(RT)+ +0xc
+818b:    b5 48 0c     st.w BA, +0xc(RT)+
 818e:    90 81 a3     ld.w BA, #0x81a3
-8191:    b5 48 0e     st.w BA, @(RT)+ +0xe
+8191:    b5 48 0e     st.w BA, +0xe(RT)+
 8194:    90 00 10     ld.w BA, #0x0010
 8197:    40 15        add.b T, A
 8199:    15 eb        bzc L_8186
@@ -284,7 +284,7 @@ L_81a6:
 81a6:    60 00 10     ld.w RT, #0x0010
 
 L_81a9:
-81a9:    95 48 04     ld.w BA, @(RT)+ +0x4
+81a9:    95 48 04     ld.w BA, +0x4(RT)+
 81ac:    80 f0        ld.b A, #0xf0
 81ae:    42 10        and.b B, A
 81b0:    45 51        mov.b A, T
@@ -376,7 +376,7 @@ L_8236:
 8236:    45 31        mov.b A, C
 8238:    2d           sll.b A
 8239:    2d           sll.b A
-823a:    c5 41        ld.b C, @(RT)+
+823a:    c5 41        ld.b C, (RT)+
 823c:    48           add.b C, A
 823d:    a1 f1 0b     st.b A, (0xf10b)
 8240:    a1 f1 0c     st.b A, (0xf10c)
@@ -745,29 +745,29 @@ Test09_Vector:
 
 TOS_Entry:
     ; TestOS: This is a Monitor that operates over serial console
-846f:    b5 a2        st.w BA, @-(SP)
+846f:    b5 a2        st.w BA, -(SP)
 8471:    a1 f1 0a     st.b A, (0xf10a)
 8474:    b1 00 10     st.w BA, (0x0010)
 8477:    90 00 12     ld.w BA, #0x0012
-847a:    f5 01        st.w DC, @(BA)+
-847c:    6d 01        st.w RT, @(BA)+
+847a:    f5 01        st.w DC, (BA)+
+847c:    6d 01        st.w RT, (BA)+
 847e:    55 62        mov.w DC, EF
-8480:    f5 01        st.w DC, @(BA)+
+8480:    f5 01        st.w DC, (BA)+
 8482:    55 82        mov.w DC, HL
-8484:    f5 01        st.w DC, @(BA)+
+8484:    f5 01        st.w DC, (BA)+
 8486:    55 a2        mov.w DC, SP
 8488:    30 20        inc.w DC
 848a:    30 20        inc.w DC
-848c:    f5 01        st.w DC, @(BA)+
+848c:    f5 01        st.w DC, (BA)+
 848e:    55 c2        mov.w DC, QU
-8490:    f5 01        st.w DC, @(BA)+
+8490:    f5 01        st.w DC, (BA)+
 8492:    55 e2        mov.w DC, YZ
-8494:    f5 01        st.w DC, @(BA)+
+8494:    f5 01        st.w DC, (BA)+
 8496:    80 c5        ld.b A, #0xc5
 8498:    a1 f2 00     st.b A, (0xf200) ; Configure UART
-849b:    85 a1        ld.b A, @(SP)+
+849b:    85 a1        ld.b A, (SP)+
 849d:    7b 7a        call (PC+0x7a) WriteHexByte
-849f:    85 a1        ld.b A, @(SP)+
+849f:    85 a1        ld.b A, (SP)+
 84a1:    7b 76        call (PC+0x76) WriteHexByte
 
 TOS_PromptLoop:
@@ -795,18 +795,18 @@ G_Command:
 Q_Command:
 84c3:    b1 00 20     st.w BA, (0x0020)
 84c6:    d0 00 1e     ld.w DC, #0x001e
-84c9:    99           ld.w BA, @(DC)
+84c9:    99           ld.w BA, (DC)
 84ca:    55 0e        mov.w YZ, BA
-84cc:    95 22        ld.w BA, @-(DC)
+84cc:    95 22        ld.w BA, -(DC)
 84ce:    55 0c        mov.w QU, BA
-84d0:    95 22        ld.w BA, @-(DC)
+84d0:    95 22        ld.w BA, -(DC)
 84d2:    5f           mov SP, BA
-84d3:    95 22        ld.w BA, @-(DC)
+84d3:    95 22        ld.w BA, -(DC)
 84d5:    5e           mov HL, BA
-84d6:    95 22        ld.w BA, @-(DC)
+84d6:    95 22        ld.w BA, -(DC)
 84d8:    5c           mov EF, BA
-84d9:    65 22        ld.w RT, @-(DC)
-84db:    d5 22        ld.w DC, @-(DC)
+84d9:    65 22        ld.w RT, -(DC)
+84db:    d5 22        ld.w DC, -(DC)
 84dd:    91 00 10     ld.w BA, (0x0010)
 84e0:    72 00 20     jump @(0x0020) ;
 
@@ -815,7 +815,7 @@ M_Command:
 84e5:    55 86        mov.w EF, HL
 
 L_84e7:
-84e7:    8b           ld.b A, @(EF)
+84e7:    8b           ld.b A, (EF)
 84e8:    7b 2f        call (PC+0x2f) WriteHexByte
 
 L_84ea:
@@ -823,7 +823,7 @@ L_84ea:
 84ec:    45 91        mov.b A, L
 84ee:    c1 bf 92     ld.b C, (0xbf92)
 84f1:    14 01        bzs L_84f4
-84f3:    ab           st.b A, @(EF)
+84f3:    ab           st.b A, (EF)
 
 L_84f4:
 84f4:    13 04        bnc L_84fa
@@ -975,7 +975,7 @@ L_85b1:
 85b6:    7b 7c        call (PC+0x7c) ReadChar
 85b8:    c0 c8        ld.b C, #0xc8
 85ba:    49           sub.b C, A
-85bb:    e5 a2        st.b C, @-(SP)
+85bb:    e5 a2        st.b C, -(SP)
 85bd:    14 05        bzs L_85c4
 85bf:    c0 c6        ld.b C, #0xc6
 85c1:    49           sub.b C, A
@@ -986,19 +986,19 @@ L_85c4:
 85c6:    c0 50        ld.b C, #0x50
 85c8:    40 31        add.b A, C
 85ca:    16 46        blt L_8612
-85cc:    c5 a1        ld.b C, @(SP)+
+85cc:    c5 a1        ld.b C, (SP)+
 85ce:    14 7d        bzs L_864d
 85d0:    c0 03        ld.b C, #0x03
 85d2:    49           sub.b C, A
 85d3:    18 3d        bgt L_8612
 85d5:    d0 0f 00     ld.w DC, #0x0f00
-85d8:    f5 a2        st.w DC, @-(SP)
+85d8:    f5 a2        st.w DC, -(SP)
 85da:    32 20        clr.w DC
-85dc:    f5 a2        st.w DC, @-(SP)
+85dc:    f5 a2        st.w DC, -(SP)
 85de:    c0 88        ld.b C, #0x88
-85e0:    e5 a2        st.b C, @-(SP)
+85e0:    e5 a2        st.b C, -(SP)
 85e2:    d0 83 00     ld.w DC, #0x8300
-85e5:    f5 a2        st.w DC, @-(SP)
+85e5:    f5 a2        st.w DC, -(SP)
 85e7:    d0 81 00     ld.w DC, #0x8100
 85ea:    06           fsc
 
@@ -1006,7 +1006,7 @@ L_85eb:
 85eb:    27 30        rlc.b C
 85ed:    29           dec.b A
 85ee:    17 fb        ble L_85eb
-85f0:    f5 a2        st.w DC, @-(SP)
+85f0:    f5 a2        st.w DC, -(SP)
 85f2:    2f 14        DMA load 1, 4
 85f4:    2f 06        DMA load 0, 6
 85f6:    2f a0        DMA load 10, 0
@@ -1040,7 +1040,7 @@ WriteString:
 8626:    2c           srl.b A
 8627:    2c           srl.b A
 8628:    11 f9        bcc WriteString
-862a:    85 41        ld.b A, @(RT)+
+862a:    85 41        ld.b A, (RT)+
 862c:    15 01        bzc L_862f
 862e:    09           ret
 
@@ -1101,7 +1101,7 @@ L_8664:
 8688:    73 85        jump (PC-0x7b) L_860f
 
 L_868a:
-868a:    85 41        ld.b A, @(RT)+
+868a:    85 41        ld.b A, (RT)+
 868c:    a1 f8 00     st.b A, (0xf800)
 
 L_868f:
@@ -1112,7 +1112,7 @@ L_868f:
 8697:    09           ret
 
 L_8698:
-8698:    85 41        ld.b A, @(RT)+
+8698:    85 41        ld.b A, (RT)+
 869a:    a1 f1 48     st.b A, (0xf148)
 
 L_869d:
@@ -1146,12 +1146,12 @@ L_86c0:
 86c3:    3a           clr.w BA
 
 L_86c4:
-86c4:    85 41        ld.b A, @(RT)+
+86c4:    85 41        ld.b A, (RT)+
 86c6:    40 10        add.b B, A
 86c8:    d0 87 f9     ld.w DC, #0x87f9
 86cb:    51 42        sub.w DC, RT
 86cd:    15 f5        bzc L_86c4
-86cf:    8a           ld.b A, @(RT)
+86cf:    8a           ld.b A, (RT)
 86d0:    41 01        sub.b A, B
 86d2:    15 49        bzc L_871d
 86d4:    90 b8 00     ld.w BA, #0xb800
@@ -1160,14 +1160,14 @@ L_86c4:
 86d9:    d0 04 00     ld.w DC, #0x0400
 
 L_86dc:
-86dc:    a8           st.b A, @(BA)
+86dc:    a8           st.b A, (BA)
 86dd:    38           inc.w BA
 86de:    31 20        dec.w DC
 86e0:    15 fa        bzc L_86dc
 86e2:    d0 04 00     ld.w DC, #0x0400
 
 L_86e5:
-86e5:    8a           ld.b A, @(RT)
+86e5:    8a           ld.b A, (RT)
 86e6:    41 51        sub.b A, T
 86e8:    15 3a        bzc L_8724
 86ea:    3e           inc RT
@@ -1179,14 +1179,14 @@ L_86e5:
 L_86f4:
 86f4:    45 51        mov.b A, T
 86f6:    2b           not.b A
-86f7:    a5 41        st.b A, @(RT)+
+86f7:    a5 41        st.b A, (RT)+
 86f9:    31 20        dec.w DC
 86fb:    15 f7        bzc L_86f4
 86fd:    d0 04 00     ld.w DC, #0x0400
 8700:    55 64        mov.w RT, EF
 
 L_8702:
-8702:    8a           ld.b A, @(RT)
+8702:    8a           ld.b A, (RT)
 8703:    2b           not.b A
 8704:    41 51        sub.b A, T
 8706:    15 1c        bzc L_8724
@@ -1223,7 +1223,7 @@ AuxiliaryTestMenu:
 874e:    5c           mov EF, BA
 
 Aux_ReadTestEntry:
-874f:    95 41        ld.w BA, @(RT)+
+874f:    95 41        ld.w BA, (RT)+
 8751:    19 21        ble NextRom
 8753:    d0 07 ff     ld.w DC, #0x07ff
 8756:    59           sub.w DC, BA
@@ -1232,14 +1232,14 @@ Aux_ReadTestEntry:
 875b:    d0 f8 00     ld.w DC, #0xf800
 875e:    52 42        and.w DC, RT
 8760:    50 20        add.w BA, DC
-8762:    b5 a2        st.w BA, @-(SP)
+8762:    b5 a2        st.w BA, -(SP)
 8764:    55 60        mov.w BA, EF
 8766:    79 85 19     call #0x8519 WriteHexByte ; Print the Test Number
 8769:    c0 bd        ld.b C, #0xbd ; '='
 
 Aux_PrintTestName:
 876b:    79 85 0e     call #0x850e WriteByte ; Print('=')
-876e:    c5 41        ld.b C, @(RT)+
+876e:    c5 41        ld.b C, (RT)+
 8770:    15 f9        bzc Aux_PrintTestName ; Print the Test Name
 8772:    73 db        jump (PC-0x25) Aux_ReadTestEntry
 
@@ -1304,7 +1304,7 @@ L_87da:
 87e2:    38           inc.w BA
 87e3:    d0 c0 00     ld.w DC, #0xc000
 87e6:    50 20        add.w BA, DC
-87e8:    98           ld.w BA, @(BA)
+87e8:    98           ld.w BA, (BA)
 87e9:    55 2a        mov.w SP, DC
 87eb:    60 80 01     ld.w RT, #0x8001
 87ee:    d0 f8 00     ld.w DC, #0xf800

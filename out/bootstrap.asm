@@ -24,7 +24,7 @@ fc19:    "D=\0"
 fc1c:    7b 72        call (PC+0x72) ReadCharTramp
 fc1e:    c0 c6        ld.b C, #0xc6 ; B == 'F'
 fc20:    49           sub.b C, A
-fc21:    e5 a2        st.b C, @-(SP)
+fc21:    e5 a2        st.b C, -(SP)
 fc23:    14 0a        bzs GetNextChar
 fc25:    c0 c3        ld.b C, #0xc3 ; B == 'C'
 fc27:    49           sub.b C, A
@@ -38,20 +38,20 @@ fc2f:    7b 72        call (PC+0x72) ReadChar
 fc31:    c0 50        ld.b C, #0x50
 fc33:    40 31        add.b A, C
 fc35:    16 48        blt PrintError ; Reject anything below ASCI 0x30 aka '0'
-fc37:    c5 a1        ld.b C, @(SP)+
+fc37:    c5 a1        ld.b C, (SP)+
 fc39:    16 7f        blt L_fcba
 fc3b:    18 7f        bgt LoadFromHawkTramp
 fc3d:    c0 03        ld.b C, #0x03
 fc3f:    49           sub.b C, A
 fc40:    18 3d        bgt PrintError
 fc42:    d0 0f 00     ld.w DC, #0x0f00
-fc45:    f5 a2        st.w DC, @-(SP)
+fc45:    f5 a2        st.w DC, -(SP)
 fc47:    32 20        clr.w DC
-fc49:    f5 a2        st.w DC, @-(SP)
+fc49:    f5 a2        st.w DC, -(SP)
 fc4b:    c0 88        ld.b C, #0x88
-fc4d:    e5 a2        st.b C, @-(SP)
+fc4d:    e5 a2        st.b C, -(SP)
 fc4f:    d0 83 00     ld.w DC, #0x8300
-fc52:    f5 a2        st.w DC, @-(SP)
+fc52:    f5 a2        st.w DC, -(SP)
 fc54:    d0 81 00     ld.w DC, #0x8100
 fc57:    06           fsc
 
@@ -59,7 +59,7 @@ L_fc58:
 fc58:    27 30        rlc.b C
 fc5a:    29           dec.b A
 fc5b:    17 fb        ble L_fc58
-fc5d:    f5 a2        st.w DC, @-(SP)
+fc5d:    f5 a2        st.w DC, -(SP)
 fc5f:    2f 14        DMA load 1, 4
 fc61:    2f 06        DMA load 0, 6
 fc63:    2f a0        DMA load 10, 0
@@ -93,7 +93,7 @@ fc92:    81 f2 00     ld.b A, (0xf200)
 fc95:    2c           srl.b A
 fc96:    2c           srl.b A
 fc97:    11 f9        bcc WriteString
-fc99:    85 41        ld.b A, @(RT)+
+fc99:    85 41        ld.b A, (RT)+
 fc9b:    15 01        bzc L_fc9e
 fc9d:    09           ret
 
@@ -166,7 +166,7 @@ AlternativeEntryPoint:
 fd00:    71 fc 00     jump #0xfc00 EntryPoint
 
 L_fd03:
-fd03:    85 41        ld.b A, @(RT)+
+fd03:    85 41        ld.b A, (RT)+
 fd05:    a1 f8 00     st.b A, (0xf800)
 
 L_fd08:
@@ -177,7 +177,7 @@ fd0e:    84 f6        ld.b A, @(PC-0xa)
 fd10:    09           ret
 
 DiskCommand:
-fd11:    85 41        ld.b A, @(RT)+
+fd11:    85 41        ld.b A, (RT)+
 fd13:    a1 f1 48     st.b A, (0xf148)
 
 WaitForHawkCommand:
@@ -190,14 +190,14 @@ L_fd1c:
 fd1c:    73 a0        jump (PC-0x60) L_fcbe
 
 L_fd1e:
-fd1e:    a5 a2        st.b A, @-(SP)
+fd1e:    a5 a2        st.b A, -(SP)
 fd20:    90 1f 40     ld.w BA, #0x1f40
 fd23:    5e           mov HL, BA
 fd24:    90 81 00     ld.w BA, #0x8100
-fd27:    b5 81        st.w BA, @(HL)+
+fd27:    b5 81        st.w BA, (HL)+
 fd29:    80 84        ld.b A, #0x84
-fd2b:    a5 81        st.b A, @(HL)+
-fd2d:    85 a1        ld.b A, @(SP)+
+fd2b:    a5 81        st.b A, (HL)+
+fd2d:    85 a1        ld.b A, (SP)+
 
 L_fd2f:
 fd2f:    14 04        bzs L_fd35
@@ -205,25 +205,25 @@ fd31:    c0 0f        ld.b C, #0x0f
 fd33:    40 31        add.b A, C
 
 L_fd35:
-fd35:    a5 81        st.b A, @(HL)+
+fd35:    a5 81        st.b A, (HL)+
 fd37:    80 83        ld.b A, #0x83
-fd39:    a5 81        st.b A, @(HL)+
+fd39:    a5 81        st.b A, (HL)+
 fd3b:    3a           clr.w BA
-fd3c:    b5 81        st.w BA, @(HL)+
+fd3c:    b5 81        st.w BA, (HL)+
 fd3e:    80 85        ld.b A, #0x85
-fd40:    a5 81        st.b A, @(HL)+
+fd40:    a5 81        st.b A, (HL)+
 fd42:    2a           clr.b A
 
 L_fd43:
-fd43:    a5 81        st.b A, @(HL)+
+fd43:    a5 81        st.b A, (HL)+
 fd45:    d0 01 90     ld.w DC, #0x0190
-fd48:    f5 81        st.w DC, @(HL)+
+fd48:    f5 81        st.w DC, (HL)+
 fd4a:    28           inc.b A
 fd4b:    c0 0e        ld.b C, #0x0e
 fd4d:    49           sub.b C, A
 fd4e:    15 f3        bzc L_fd43
 fd50:    80 ff        ld.b A, #0xff
-fd52:    a5 81        st.b A, @(HL)+
+fd52:    a5 81        st.b A, (HL)+
 fd54:    80 08        ld.b A, #0x08
 fd56:    7b 4e        call (PC+0x4e) L_fda6
 fd58:    80 41        ld.b A, #0x41
@@ -278,17 +278,17 @@ fda6:    c1 f8 09     ld.b C, (0xf809)
 fda9:    4a           and.b C, A
 fdaa:    15 fa        bzc L_fda6
 fdac:    09           ret
-fdad:    8c           ld.b A, @(HL)
+fdad:    8c           ld.b A, (HL)
 fdae:    00           HALT
-fdaf:    8b           ld.b A, @(EF)
+fdaf:    8b           ld.b A, (EF)
 fdb0:    00           HALT
-fdb1:    95 41        ld.w BA, @(RT)+
+fdb1:    95 41        ld.w BA, (RT)+
 fdb3:    b3 03        st.w BA, (PC+0x3)
 
 L_fdb5:
 fdb5:    79 4c 93     call #0x4c93 L_4c93
 fdb8:    47 be        unk7.b Y, P
-fdba:    6d a2        st.w RT, @-(SP)
+fdba:    6d a2        st.w RT, -(SP)
 fdbc:    32 40        clr.w RT
 
 L_fdbe:
@@ -326,14 +326,14 @@ fdec:    73 d0        jump (PC-0x30) L_fdbe
 
 L_fdee:
 fdee:    55 40        mov.w BA, RT
-fdf0:    65 a1        ld.w RT, @(SP)+
+fdf0:    65 a1        ld.w RT, (SP)+
 fdf2:    09           ret
 
 L_fdf3:
-fdf3:    65 a1        ld.w RT, @(SP)+
+fdf3:    65 a1        ld.w RT, (SP)+
 fdf5:    73 be        jump (PC-0x42) L_fdb5
-fdf7:    d5 41        ld.w DC, @(RT)+
+fdf7:    d5 41        ld.w DC, (RT)+
 fdf9:    7d 80        call (A + 0x80)
 fdfb:    0c           unknown
 fdfc:    d0 4b 65     ld.w DC, #0x4b65
-fdff:    f5 00        st.w DC, @(BA)
+fdff:    f5 00        st.w DC, (BA)

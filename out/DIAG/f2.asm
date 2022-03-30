@@ -19,9 +19,9 @@ Entry_CPU_INSTRUCTION_TEST:
 884c:    50 80        add.w BA, HL
 884e:    7d 00        call (A + 0x00)
 8850:    "\x1b\x1c\x0cCPU INSTRUCTION TEST, CONTROL-C TO EXIT\r\n\0"
-887d:    6d a2        st.w RT, @-(SP)
+887d:    6d a2        st.w RT, -(SP)
 887f:    55 80        mov.w BA, HL
-8881:    b5 a2        st.w BA, @-(SP)
+8881:    b5 a2        st.w BA, -(SP)
 8883:    60 00 20     ld.w RT, #0x0020 ; This is a testing that the 60 3 byte instruction is working.
                                        ; Which it will use later to test other multi-byte instructions
                                        ; If the operand isn't consumed, then a HALT instruction will be executed
@@ -31,8 +31,8 @@ Entry_CPU_INSTRUCTION_TEST:
 888c:    90 00 10     ld.w BA, #0x0010
 
 L_888f:
-888f:    c5 61        ld.b C, @(EF)+
-8891:    e5 01        st.b C, @(BA)+
+888f:    c5 61        ld.b C, (EF)+
+8891:    e5 01        st.b C, (BA)+
 8893:    3f           dec RT
 8894:    15 f9        bzc L_888f ; clearing all registers?
 8896:    03           fcn
@@ -1062,34 +1062,34 @@ L_8c6d:
 
 L_8c73:
 8c73:    60 00 20     ld.w RT, #0x0020
-8c76:    9a           ld.w BA, @(RT)
+8c76:    9a           ld.w BA, (RT)
 8c77:    d0 ff ff     ld.w DC, #0xffff
 8c7a:    59           sub.w DC, BA
 8c7b:    14 01        bzs L_8c7e
 8c7d:    00           HALT
 
 L_8c7e:
-8c7e:    95 41        ld.w BA, @(RT)+
+8c7e:    95 41        ld.w BA, (RT)+
 8c80:    3b           not.w BA
 8c81:    14 01        bzs L_8c84
 8c83:    00           HALT
 
 L_8c84:
-8c84:    95 41        ld.w BA, @(RT)+
-8c86:    d5 41        ld.w DC, @(RT)+
+8c84:    95 41        ld.w BA, (RT)+
+8c86:    d5 41        ld.w DC, (RT)+
 8c88:    54 20        xor.w BA, DC
 8c8a:    3b           not.w BA
 8c8b:    14 01        bzs L_8c8e
 8c8d:    00           HALT
 
 L_8c8e:
-8c8e:    9a           ld.w BA, @(RT)
+8c8e:    9a           ld.w BA, (RT)
 8c8f:    14 01        bzs L_8c92
 8c91:    00           HALT
 
 L_8c92:
-8c92:    95 42        ld.w BA, @-(RT)
-8c94:    d5 42        ld.w DC, @-(RT)
+8c92:    95 42        ld.w BA, -(RT)
+8c94:    d5 42        ld.w DC, -(RT)
 8c96:    54 20        xor.w BA, DC
 8c98:    3b           not.w BA
 8c99:    14 01        bzs L_8c9c
@@ -1097,22 +1097,22 @@ L_8c92:
 
 L_8c9c:
 8c9c:    d0 00 24     ld.w DC, #0x0024
-8c9f:    9a           ld.w BA, @(RT)
-8ca0:    65 28 fe     ld.w RT, @(DC)+ -0x2
+8c9f:    9a           ld.w BA, (RT)
+8ca0:    65 28 fe     ld.w RT, -0x2(DC)+
 8ca3:    54 40        xor.w BA, RT
 8ca5:    14 01        bzs L_8ca8
 8ca7:    00           HALT
 
 L_8ca8:
-8ca8:    95 28 fc     ld.w BA, @(DC)+ -0x4
-8cab:    65 29 02     ld.w RT, @-(DC) +0x2
+8ca8:    95 28 fc     ld.w BA, -0x4(DC)+
+8cab:    65 29 02     ld.w RT, +0x2-(DC)
 8cae:    50 40        add.w BA, RT
 8cb0:    3b           not.w BA
 8cb1:    14 01        bzs L_8cb4
 8cb3:    00           HALT
 
 L_8cb4:
-8cb4:    99           ld.w BA, @(DC)
+8cb4:    99           ld.w BA, (DC)
 8cb5:    65 2a fc     ld.w RT, unknown_indexed
 8cb8:    54 40        xor.w BA, RT
 8cba:    3b           not.w BA
@@ -1194,14 +1194,14 @@ L_8d14:
 8d22:    00
 
 L_8d23:
-8d23:    95 41        ld.w BA, @(RT)+
+8d23:    95 41        ld.w BA, (RT)+
 8d25:    d0 01 01     ld.w DC, #0x0101
 8d28:    54 20        xor.w BA, DC
 8d2a:    14 01        bzs L_8d2d
 8d2c:    00           HALT
 
 L_8d2d:
-8d2d:    9d           ld.w BA, @(SP)
+8d2d:    9d           ld.w BA, (SP)
 8d2e:    d0 20 20     ld.w DC, #0x2020
 8d31:    54 20        xor.w BA, DC
 8d33:    14 01        bzs L_8d36
@@ -1214,7 +1214,7 @@ L_8d36:
 L_8d38:
 8d38:    60 09 ef     ld.w RT, #0x09ef
 8d3b:    90 11 ff     ld.w BA, #0x11ff
-8d3e:    b5 41        st.w BA, @(RT)+
+8d3e:    b5 41        st.w BA, (RT)+
 8d40:    55 42        mov.w DC, RT
 8d42:    90 09 f1     ld.w BA, #0x09f1
 8d45:    59           sub.w DC, BA
@@ -1223,7 +1223,7 @@ L_8d38:
 
 L_8d49:
 8d49:    60 09 ef     ld.w RT, #0x09ef
-8d4c:    95 41        ld.w BA, @(RT)+
+8d4c:    95 41        ld.w BA, (RT)+
 8d4e:    d0 11 ff     ld.w DC, #0x11ff
 8d51:    41 02        sub.b D, B
 8d53:    14 01        bzs L_8d56
@@ -1270,9 +1270,9 @@ L_8d8e:
 8d8e:    a1 f1 0a     st.b A, (0xf10a)
 8d91:    90 bf fc     ld.w BA, #0xbffc
 8d94:    5f           mov SP, BA
-8d95:    95 a1        ld.w BA, @(SP)+
+8d95:    95 a1        ld.w BA, (SP)+
 8d97:    5e           mov HL, BA
-8d98:    65 a1        ld.w RT, @(SP)+
+8d98:    65 a1        ld.w RT, (SP)+
 8d9a:    90 00 7d     ld.w BA, #0x007d
 8d9d:    50 80        add.w BA, HL
 8d9f:    75 00        jump (A + 0x00)
@@ -1348,7 +1348,7 @@ ReturnAddress:
 
 L_8e75:
 8e75:    3a           clr.w BA
-8e76:    85 41        ld.b A, @(RT)+
+8e76:    85 41        ld.b A, (RT)+
 8e78:    35 04        set_data_bank A
 8e7a:    20 00        inc.b B
 8e7c:    7e 45        long_call
@@ -1361,10 +1361,10 @@ nextMemoryLcation:
 8e85:    d0 01 00     ld.w DC, #0x0100
 
 nextByteValue:
-8e88:    8b           ld.b A, @(EF) ; EF = 0x120 or 0x140 etc
+8e88:    8b           ld.b A, (EF) ; EF = 0x120 or 0x140 etc
 8e89:    28           inc.b A
-8e8a:    ab           st.b A, @(EF)
-8e8b:    ac           st.b A, @(HL) ; HL is EF+0x100
+8e8a:    ab           st.b A, (EF)
+8e8b:    ac           st.b A, (HL) ; HL is EF+0x100
 8e8c:    7b 76        call (PC+0x76) ReadAllPages
 8e8e:    7b 49        call (PC+0x49) WriteAllPages
 8e90:    47 80 ff 01 00 02 00 check_parity_error
@@ -1386,11 +1386,11 @@ L_8ea7:
 8eb1:    80 01        ld.b A, #0x01
 
 L_8eb3:
-8eb3:    a5 a2        st.b A, @-(SP)
+8eb3:    a5 a2        st.b A, -(SP)
 8eb5:    2a           clr.b A
-8eb6:    a5 a2        st.b A, @-(SP)
-8eb8:    6d a2        st.w RT, @-(SP)
-8eba:    a5 a2        st.b A, @-(SP)
+8eb6:    a5 a2        st.b A, -(SP)
+8eb8:    6d a2        st.w RT, -(SP)
+8eba:    a5 a2        st.b A, -(SP)
 8ebc:    60 06 c2     ld.w RT, #0x06c2
 8ebf:    50 84        add.w RT, HL
 8ec1:    0f           unknown
@@ -1449,7 +1449,7 @@ ReadAllPages:
 
 L_8f2d:
 8f2d:    7f 45        clear_data_bank??
-8f2f:    65 a1        ld.w RT, @(SP)+
+8f2f:    65 a1        ld.w RT, (SP)+
 8f31:    90 07 cc     ld.w BA, #0x07cc
 8f34:    50 80        add.w BA, HL
 8f36:    7d 00        call (A + 0x00)
@@ -1465,13 +1465,13 @@ Entry_ROM_SELF_TEST:
 8f61:    3a           clr.w BA
 
 ChecksumLoop:
-8f62:    85 61        ld.b A, @(EF)+ ; Load Byte via base+index, post-increment index
+8f62:    85 61        ld.b A, (EF)+ ; Load Byte via base+index, post-increment index
 8f64:    40 10        add.b B, A
 8f66:    d0 07 dd     ld.w DC, #0x07dd
 8f69:    50 82        add.w DC, HL
 8f6b:    51 62        sub.w DC, EF
 8f6d:    15 f3        bzc ChecksumLoop
-8f6f:    8b           ld.b A, @(EF) ; Load Byte via base+index
+8f6f:    8b           ld.b A, (EF) ; Load Byte via base+index
 8f70:    41 01        sub.b A, B
 8f72:    15 32        bzc ChecksumFail
 
@@ -1503,7 +1503,7 @@ WriteString:
 8fcf:    2c           srl.b A
 8fd0:    2c           srl.b A
 8fd1:    11 f9        bcc WriteString
-8fd3:    85 41        ld.b A, @(RT)+
+8fd3:    85 41        ld.b A, (RT)+
 8fd5:    15 01        bzc L_8fd8
 8fd7:    09           ret
 

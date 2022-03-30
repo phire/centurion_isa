@@ -31,7 +31,7 @@ TEST_7:
 9098:    00 00        (0x0)
 
 WriteString:
-909a:    85 41        ld.b A, @(RT)+
+909a:    85 41        ld.b A, (RT)+
 909c:    15 01        bzc L_909f
 909e:    09           ret
 
@@ -55,15 +55,15 @@ ReadChar:
 90b9:    09           ret
 
 WriteHexWord:
-90ba:    a5 a2        st.b A, @-(SP)
+90ba:    a5 a2        st.b A, -(SP)
 90bc:    45 01        mov.b A, B
 90be:    7b 05        call (PC+0x05) WriteHexByte
-90c0:    85 a1        ld.b A, @(SP)+
+90c0:    85 a1        ld.b A, (SP)+
 90c2:    7b 01        call (PC+0x01) WriteHexByte
 90c4:    09           ret
 
 WriteHexByte:
-90c5:    a5 a2        st.b A, @-(SP)
+90c5:    a5 a2        st.b A, -(SP)
 90c7:    c0 f0        ld.b C, #0xf0
 90c9:    42 31        and.b A, C
 90cb:    07           fcc
@@ -81,7 +81,7 @@ WriteHexByte:
 
 L_90de:
 90de:    7b c3        call (PC-0x3d) WriteByte
-90e0:    85 a1        ld.b A, @(SP)+
+90e0:    85 a1        ld.b A, (SP)+
 90e2:    c0 0f        ld.b C, #0x0f
 90e4:    42 31        and.b A, C
 90e6:    c0 b0        ld.b C, #0xb0
@@ -130,7 +130,7 @@ L_9156:
 9159:    5f           mov SP, BA
 915a:    91 01 1a     ld.w BA, (0x011a)
 915d:    5e           mov HL, BA
-915e:    95 41        ld.w BA, @(RT)+
+915e:    95 41        ld.w BA, (RT)+
 9160:    50 80        add.w BA, HL
 9162:    75 00        jump (A + 0x00)
 
@@ -171,18 +171,18 @@ Init:
 91c9:    b1 01 0e     st.w BA, (0x010e)
 91cc:    55 80        mov.w BA, HL
 91ce:    b1 01 1a     st.w BA, (0x011a)
-91d1:    95 41        ld.w BA, @(RT)+
+91d1:    95 41        ld.w BA, (RT)+
 91d3:    b1 01 14     st.w BA, (0x0114)
 91d6:    38           inc.w BA
 91d7:    b1 01 16     st.w BA, (0x0116)
 91da:    55 40        mov.w BA, RT
-91dc:    65 a1        ld.w RT, @(SP)+
+91dc:    65 a1        ld.w RT, (SP)+
 91de:    69 01 00     st.w RT, (0x0100)
 91e1:    75 00        jump (A + 0x00)
 
 Fn_1e3:
 91e3:    7a 01 0c     call @(0x010c)
-91e6:    6d a2        st.w RT, @-(SP)
+91e6:    6d a2        st.w RT, -(SP)
 91e8:    60 03 e8     ld.w RT, #0x03e8
 
 L_91eb:
@@ -218,14 +218,14 @@ L_924f:
 924f:    03           fcn
 9250:    82 01 14     ld.b A, @(0x0114)
 9253:    15 03        bzc L_9258
-9255:    65 a1        ld.w RT, @(SP)+
+9255:    65 a1        ld.w RT, (SP)+
 9257:    09           ret
 
 L_9258:
-9258:    a5 a2        st.b A, @-(SP)
+9258:    a5 a2        st.b A, -(SP)
 925a:    7a 01 12     call @(0x0112)
 925d:    "*** \0"
-9262:    85 a1        ld.b A, @(SP)+
+9262:    85 a1        ld.b A, (SP)+
 9264:    7a 01 0a     call @(0x010a)
 9267:    7a 01 12     call @(0x0112)
 926a:    " ERROR ***\r\n\0"
@@ -233,12 +233,12 @@ L_9258:
 9279:    a1 01 08     st.b A, (0x0108)
 927c:    a1 f1 0b     st.b A, (0xf10b)
 927f:    a1 f1 0c     st.b A, (0xf10c)
-9282:    65 a1        ld.w RT, @(SP)+
+9282:    65 a1        ld.w RT, (SP)+
 9284:    02           fsn
 9285:    09           ret
 
 Fn_286:
-9286:    6d a2        st.w RT, @-(SP)
+9286:    6d a2        st.w RT, -(SP)
 9288:    0e           delay 4.5ms
 9289:    60 03 e8     ld.w RT, #0x03e8
 
@@ -257,7 +257,7 @@ L_928c:
 92bd:    72 01 0e     jump @(0x010e) ;
 
 L_92c0:
-92c0:    65 a1        ld.w RT, @(SP)+
+92c0:    65 a1        ld.w RT, (SP)+
 92c2:    09           ret
 92c3:    90
 92c4:    01
@@ -284,7 +284,7 @@ Entry_FLOPPY_COMMAND_BUFFER_TEST:
 92e1:    d0 01 1c     ld.w DC, #0x011c
 
 L_92e4:
-92e4:    a5 21        st.b A, @(DC)+
+92e4:    a5 21        st.b A, (DC)+
 92e6:    28           inc.b A
 92e7:    28           inc.b A
 92e8:    28           inc.b A
@@ -304,7 +304,7 @@ L_92e4:
 9306:    d0 01 1c     ld.w DC, #0x011c
 
 L_9309:
-9309:    a5 21        st.b A, @(DC)+
+9309:    a5 21        st.b A, (DC)+
 930b:    3f           dec RT
 930c:    15 fb        bzc L_9309
 930e:    90 ff 37     ld.w BA, #0xff37
@@ -322,7 +322,7 @@ L_9309:
 932c:    45 10        mov.b B, A
 
 L_932e:
-932e:    85 21        ld.b A, @(DC)+
+932e:    85 21        ld.b A, (DC)+
 9330:    41 01        sub.b A, B
 9332:    15 10        bzc L_9344
 9334:    20 00        inc.b B
@@ -333,7 +333,7 @@ L_932e:
 933d:    20 70        inc.b F
 933f:    7a 01 04     call @(0x0104)
 9342:    02           fsn
-9343:    da           ld.w DC, @(RT)
+9343:    da           ld.w DC, (RT)
 
 L_9344:
 9344:    7a 01 12     call @(0x0112)
@@ -355,7 +355,7 @@ Entry_CMD_AUX_MEMORY_TEST:
 9380:    d0 01 1c     ld.w DC, #0x011c
 
 L_9383:
-9383:    a5 21        st.b A, @(DC)+
+9383:    a5 21        st.b A, (DC)+
 9385:    28           inc.b A
 9386:    28           inc.b A
 9387:    28           inc.b A
@@ -387,7 +387,7 @@ L_9383:
 93c3:    d0 01 1c     ld.w DC, #0x011c
 
 L_93c6:
-93c6:    a5 21        st.b A, @(DC)+
+93c6:    a5 21        st.b A, (DC)+
 93c8:    3f           dec RT
 93c9:    15 fb        bzc L_93c6
 93cb:    90 c0 00     ld.w BA, #0xc000
@@ -411,15 +411,15 @@ L_93c6:
 93f7:    80 ff        ld.b A, #0xff
 93f9:    a2 01 14     st.b A, @(0x0114)
 93fc:    7a 01 18     call @(0x0118)
-93ff:    b5 a2        st.w BA, @-(SP)
+93ff:    b5 a2        st.w BA, -(SP)
 9401:    60 3f ff     ld.w RT, #0x3fff
 9404:    d0 01 1c     ld.w DC, #0x011c
 9407:    55 60        mov.w BA, EF
 9409:    45 10        mov.b B, A
 
 L_940b:
-940b:    85 21        ld.b A, @(DC)+
-940d:    bd           st.w BA, @(SP)
+940b:    85 21        ld.b A, (DC)+
+940d:    bd           st.w BA, (SP)
 940e:    41 01        sub.b A, B
 9410:    15 12        bzc L_9424
 9412:    20 00        inc.b B
@@ -427,7 +427,7 @@ L_940b:
 9416:    20 00        inc.b B
 9418:    3f           dec RT
 9419:    15 f0        bzc L_940b
-941b:    95 a1        ld.w BA, @(SP)+
+941b:    95 a1        ld.w BA, (SP)+
 941d:    20 70        inc.b F
 941f:    7a 01 04     call @(0x0104)
 9422:    03           fcn
@@ -436,19 +436,19 @@ L_940b:
 L_9424:
 9424:    a1 f1 0b     st.b A, (0xf10b)
 9427:    a1 f1 0c     st.b A, (0xf10c)
-942a:    f5 a2        st.w DC, @-(SP)
+942a:    f5 a2        st.w DC, -(SP)
 942c:    7a 01 12     call @(0x0112)
 942f:    "*** ERROR, ADDR=\0"
-9440:    95 a1        ld.w BA, @(SP)+
+9440:    95 a1        ld.w BA, (SP)+
 9442:    39           dec.w BA
 9443:    7a 01 10     call @(0x0110)
 9446:    7a 01 12     call @(0x0112)
 9449:    " EXP=\0"
-944f:    85 a1        ld.b A, @(SP)+
+944f:    85 a1        ld.b A, (SP)+
 9451:    7a 01 0a     call @(0x010a)
 9454:    7a 01 12     call @(0x0112)
 9457:    " ACT=\0"
-945d:    85 a1        ld.b A, @(SP)+
+945d:    85 a1        ld.b A, (SP)+
 945f:    7a 01 0a     call @(0x010a)
 9462:    7a 01 12     call @(0x0112)
 9465:    " ***\0"
@@ -463,9 +463,9 @@ Entry_CMD_SEEK_TEST:
 9478:    06           fsc
 9479:    d0 41 4d     ld.w DC, #0x414d
 947c:    90 81 00     ld.w BA, #0x8100
-947f:    b5 21        st.w BA, @(DC)+
+947f:    b5 21        st.w BA, (DC)+
 9481:    90 82 ff     ld.w BA, #0x82ff
-9484:    b9           st.w BA, @(DC)
+9484:    b9           st.w BA, (DC)
 9485:    90 ff fb     ld.w BA, #0xfffb
 9488:    2f 02        DMA load 0, 2
 948a:    90 41 4d     ld.w BA, #0x414d
@@ -489,13 +489,13 @@ L_94a6:
 94ae:    12 ed        bns L_949d
 94b0:    d0 41 4f     ld.w DC, #0x414f
 94b3:    90 84 00     ld.w BA, #0x8400
-94b6:    b5 21        st.w BA, @(DC)+
+94b6:    b5 21        st.w BA, (DC)+
 94b8:    80 83        ld.b A, #0x83
-94ba:    a5 21        st.b A, @(DC)+
+94ba:    a5 21        st.b A, (DC)+
 94bc:    3a           clr.w BA
-94bd:    b5 21        st.w BA, @(DC)+
+94bd:    b5 21        st.w BA, (DC)+
 94bf:    39           dec.w BA
-94c0:    a9           st.b A, @(DC)
+94c0:    a9           st.b A, (DC)
 94c1:    38           inc.w BA
 94c2:    38           inc.w BA
 94c3:    b1 41 b1     st.w BA, (0x41b1)
@@ -567,26 +567,26 @@ L_9523:
 9555:    90 41 4d     ld.w BA, #0x414d
 9558:    5c           mov EF, BA
 9559:    90 81 00     ld.w BA, #0x8100
-955c:    b5 61        st.w BA, @(EF)+
+955c:    b5 61        st.w BA, (EF)+
 955e:    90 84 00     ld.w BA, #0x8400
-9561:    b5 61        st.w BA, @(EF)+
+9561:    b5 61        st.w BA, (EF)+
 9563:    80 83        ld.b A, #0x83
-9565:    a5 61        st.b A, @(EF)+
+9565:    a5 61        st.b A, (EF)+
 9567:    3a           clr.w BA
-9568:    b5 61        st.w BA, @(EF)+
+9568:    b5 61        st.w BA, (EF)+
 956a:    80 85        ld.b A, #0x85
-956c:    a5 61        st.b A, @(EF)+
+956c:    a5 61        st.b A, (EF)+
 956e:    d0 10 00     ld.w DC, #0x1000
 
 L_9571:
-9571:    e5 61        st.b C, @(EF)+
+9571:    e5 61        st.b C, (EF)+
 9573:    90 01 90     ld.w BA, #0x0190
-9576:    b5 61        st.w BA, @(EF)+
+9576:    b5 61        st.w BA, (EF)+
 9578:    20 30        inc.b C
 957a:    21 20        dec.b D
 957c:    15 f3        bzc L_9571
 957e:    80 ff        ld.b A, #0xff
-9580:    ab           st.b A, @(EF)
+9580:    ab           st.b A, (EF)
 
 L_9581:
 9581:    90 ff c3     ld.w BA, #0xffc3
@@ -648,9 +648,9 @@ Entry_FLOPPY_SEEK_TEST:
 95f1:    7a 01 06     call @(0x0106)
 95f4:    d0 41 4d     ld.w DC, #0x414d
 95f7:    90 81 01     ld.w BA, #0x8101
-95fa:    b5 21        st.w BA, @(DC)+
+95fa:    b5 21        st.w BA, (DC)+
 95fc:    80 82        ld.b A, #0x82
-95fe:    a9           st.b A, @(DC)
+95fe:    a9           st.b A, (DC)
 95ff:    90 ff fc     ld.w BA, #0xfffc
 9602:    2f 02        DMA load 0, 2
 9604:    90 41 4d     ld.w BA, #0x414d
@@ -674,7 +674,7 @@ L_9620:
 9628:    12 ed        bns L_9617
 962a:    d0 41 4f     ld.w DC, #0x414f
 962d:    90 83 01     ld.w BA, #0x8301
-9630:    b9           st.w BA, @(DC)
+9630:    b9           st.w BA, (DC)
 9631:    80 01        ld.b A, #0x01
 9633:    a1 41 b1     st.b A, (0x41b1)
 
@@ -743,19 +743,19 @@ L_968d:
 96bf:    90 41 4d     ld.w BA, #0x414d
 96c2:    5c           mov EF, BA
 96c3:    90 81 01     ld.w BA, #0x8101
-96c6:    b5 61        st.w BA, @(EF)+
+96c6:    b5 61        st.w BA, (EF)+
 96c8:    90 83 01     ld.w BA, #0x8301
-96cb:    b5 61        st.w BA, @(EF)+
+96cb:    b5 61        st.w BA, (EF)+
 96cd:    d0 10 00     ld.w DC, #0x1000
 
 L_96d0:
 96d0:    80 88        ld.b A, #0x88
-96d2:    a5 61        st.b A, @(EF)+
-96d4:    e5 61        st.b C, @(EF)+
+96d2:    a5 61        st.b A, (EF)+
+96d4:    e5 61        st.b C, (EF)+
 96d6:    2a           clr.b A
-96d7:    a5 61        st.b A, @(EF)+
+96d7:    a5 61        st.b A, (EF)+
 96d9:    90 01 90     ld.w BA, #0x0190
-96dc:    b5 61        st.w BA, @(EF)+
+96dc:    b5 61        st.w BA, (EF)+
 96de:    20 30        inc.b C
 96e0:    21 20        dec.b D
 96e2:    15 ec        bzc L_96d0
@@ -816,13 +816,13 @@ L_9733:
 9752:    3a           clr.w BA
 
 L_9753:
-9753:    85 61        ld.b A, @(EF)+
+9753:    85 61        ld.b A, (EF)+
 9755:    40 10        add.b B, A
 9757:    d0 07 96     ld.w DC, #0x0796
 975a:    50 82        add.w DC, HL
 975c:    51 62        sub.w DC, EF
 975e:    15 f3        bzc L_9753
-9760:    8b           ld.b A, @(EF)
+9760:    8b           ld.b A, (EF)
 9761:    41 01        sub.b A, B
 9763:    15 18        bzc L_977d
 9765:    7a 01 12     call @(0x0112)

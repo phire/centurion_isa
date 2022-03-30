@@ -178,28 +178,28 @@ class Memory():
             (2, "indexed_modes"), # 101 = indexed with increment
             (2, "unknown"),
             (2, "unknown"),
-            (1, "@({index})"),     # indexed
-            (1, "@({index})"),
-            (1, "@({index})"),
-            (1, "@({index})"),
-            (1, "@({index})"),
-            (1, "@({index})"),
-            (1, "@({index})"),
-            (1, "@({index})"),
+            (1, "({index})"),     # indexed
+            (1, "({index})"),
+            (1, "({index})"),
+            (1, "({index})"),
+            (1, "({index})"),
+            (1, "({index})"),
+            (1, "({index})"),
+            (1, "({index})"),
         ]
 
         indexed_modes = [
-            "@({index})", # guess
-            "@({index})+",
-            "@-({index})",
+            "({index})", # guess
+            "({index})+",
+            "-({index})",
             "unknown_indexed"
             "unknown_indexed",
             "unknown_indexed",
             "unknown_indexed",
             "unknown_indexed",
-            "@({index}) {offset}", # guess
-            "@({index})+ {offset}",
-            "@-({index}) {offset}",
+            "{offset}({index})", # guess
+            "{offset}({index})+",
+            "{offset}-({index})",
             "unknown_indexed",
             "unknown_indexed",
             "unknown_indexed",
