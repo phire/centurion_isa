@@ -241,31 +241,39 @@ OPs = [
     "add", "sub", "and", "or", "xor", "mov", "unk6", "unk7"
 ]
 
+ImplcitTable = [
+    (0x10, 6),
+    (0x00, 6),
+    (0x13, 14),
+    (0x02, 12)
+]
+
 class Alu():
     # Implements most opcodes between 0x20 and 0x5b
 
     class AluInstance():
-        def __init__(self, op, word, src, dest):
+        def __init__(self, op, word, src, dest, postfix):
             self.newpc = None
             self.op = op
             self.word = word
             self.src = src
             self.dest = dest
+            self.postfix = postfix
 
         def to_string(self, dict):
             op = OPs[self.op]
+            op += [".b", ".w"][self.word] + self.postfix
+
             if self.op < 8:
                 if self.word:
-                    return f"{op}.w {RegNames16[self.src >> 1]}"
+                    return f"{op} {RegNames16[self.src >> 1]}"
                 else:
-                    return f"{op}.b {RegNames8[self.src]}"
+                    return f"{op} {RegNames8[self.src]}"
             else:
                 if self.word:
-                    return f"{op}.w {RegNames16[self.dest >> 1]}, {RegNames16[self.src >> 1]}"
+                    return f"{op} {RegNames16[self.dest >> 1]}, {RegNames16[self.src >> 1]}"
                 else:
-                    return f"{op}.b {RegNames8[self.dest]}, {RegNames8[self.src]}"
-
-            return f"{OPs[self.op]} {operands}"
+                    return f"{op} {RegNames8[self.dest]}, {RegNames8[self.src]}"
 
     def match(self, pc, bitstring, bytes):
 
@@ -273,8 +281,8 @@ class Alu():
         if inst < 0x20 or inst >= 0x5f:
             return None
 
-        word = inst & 0x10
-        fast = inst & 0x08
+        word = inst & 0x10 != 0
+        fast = inst & 0x08 != 0
         op = inst & 0x07
 
         if inst >= 0x40:
@@ -284,6 +292,7 @@ class Alu():
         if inst & 0x0e == 0x0e or inst > 0x5b:
            return None
 
+        postfix = ""
         if fast:
             if inst > 0x40:
                 src = 0
@@ -296,6 +305,7 @@ class Alu():
                 dest += 1
 
             bytes = [inst]
+            postfix = '!'
         else:
             bytetwo = bytes[1]
             dest = bytetwo & 0xf
@@ -306,7 +316,11 @@ class Alu():
                 return None
             bytes = [inst, bytetwo]
 
-        return InstructionMatch(pc, self.AluInstance(op, word, src, dest), bytes, {})
+            expected, limit = ImplcitTable[op >> 4 - 2]
+            if bytetwo == expected and op < limit:
+                postfix = '*'
+
+        return InstructionMatch(pc, self.AluInstance(op, word, src, dest, postfix), bytes, {})
 
 
 
