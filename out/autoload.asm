@@ -14,7 +14,7 @@ ef0d:    90 01 00     ld.w WX, #0x0100
 ef10:    b1 ff f0     st.w WX, (0xfff0)
 ef13:    a1 ff f4     st.b X, (0xfff4)
 ef16:    a1 ff f7     st.b X, (0xfff7)
-ef19:    5f           mov SP, WX
+ef19:    5f           mov.w SP, WX
 ef1a:    90 e8 8f     ld.w WX, #0xe88f
 ef1d:    b1 ff f2     st.w WX, (0xfff2)
 ef20:    80 03        ld.b X, #0x03
@@ -46,7 +46,7 @@ efc5:    90 f0 a0     ld.w WX, #0xf0a0
 L_efc8:
 efc8:    55 0c        mov.w GH, WX
 efca:    90 00 f0     ld.w WX, #0x00f0
-efcd:    5f           mov SP, WX
+efcd:    5f           mov.w SP, WX
 
 L_efce:
 efce:    7b 1f        call (PC+0x1f) L_efef

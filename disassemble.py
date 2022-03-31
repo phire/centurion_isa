@@ -432,7 +432,37 @@ instructions = [
 
     # Special cases that don't match the general ALU pattern
     I("00101110 ssssdddd", "?? r{d}, r{s}"),
-    I("00101111 xxxxNNNN", "DMA load {x}, {N}"),
+    # ugly, but indexing dynamic indexing into RegNames16 isn't supported :(
+    I("00101111 00000000", "dma_load_addr.w WX"),
+    I("00101111 00100000", "dma_load_addr.w YZ"),
+    I("00101111 01000000", "dma_load_addr.w RT"),
+    I("00101111 01100000", "dma_load_addr.w KL"),
+    I("00101111 10000000", "dma_load_addr.w MN"),
+    I("00101111 10100000", "dma_load_addr.w SP"),
+    I("00101111 00000010", "dma_load_count.w WX"),
+    I("00101111 00100010", "dma_load_count.w YZ"),
+    I("00101111 01000010", "dma_load_count.w RT"),
+    I("00101111 01100010", "dma_load_count.w KL"),
+    I("00101111 10000010", "dma_load_count.w MN"),
+    I("00101111 10100010", "dma_load_count.w SP"),
+    I("00101111 00000001", "dma_store_addr.w WX"),
+    I("00101111 00100001", "dma_store_addr.w YZ"),
+    I("00101111 01000001", "dma_store_addr.w RT"),
+    I("00101111 01100001", "dma_store_addr.w KL"),
+    I("00101111 10000001", "dma_store_addr.w MN"),
+    I("00101111 10100001", "dma_store_addr.w SP"),
+    I("00101111 00000011", "dma_store_count.w WX"),
+    I("00101111 00100011", "dma_store_count.w YZ"),
+    I("00101111 01000011", "dma_store_count.w RT"),
+    I("00101111 01100011", "dma_store_count.w KL"),
+    I("00101111 10000011", "dma_store_count.w MN"),
+    I("00101111 10100011", "dma_store_count.w SP"),
+
+    I("00101111 dddd0100", "dma_set_mode {d}"),
+    I("00101111 00000110", "dma_enable"),
+
+
+    I("00101111 xxxxNNNN", "dma? {x}, {N}"),
 
 # 30
     I("00111110", "inc {RegNames16[2]}"),
@@ -441,10 +471,10 @@ instructions = [
 
 # 48
     # Special cases that don't match the general ALU pattern
-    I("01011100", "mov {RegNames16[3]}, {RegNames16[0]}"),
-    I("01011101", "mov {RegNames16[1]}, {RegNames16[0]}"),
-    I("01011110", "mov {RegNames16[4]}, {RegNames16[0]}"),
-    I("01011111", "mov {RegNames16[5]}, {RegNames16[0]}"),
+    I("01011100", "mov.w {RegNames16[3]}, {RegNames16[0]}"),
+    I("01011101", "mov.w {RegNames16[1]}, {RegNames16[0]}"),
+    I("01011110", "mov.w {RegNames16[4]}, {RegNames16[0]}"),
+    I("01011111", "mov.w {RegNames16[5]}, {RegNames16[0]}"),
 
 # 60
     I("01100000 NNNNNNNN NNNNNNNN", "60 {N:#06x}"),  # 60 ??? Might be load immediate into index reg?

@@ -27,7 +27,7 @@ Entry_CPU_INSTRUCTION_TEST:
                                        ; If the operand isn't consumed, then a HALT instruction will be executed
 8886:    90 05 a1     ld.w WX, #0x05a1
 8889:    50 80        add.w WX, MN
-888b:    5c           mov KL, WX ; This might be installing an exception handler?
+888b:    5c           mov.w KL, WX ; This might be installing an exception handler?
 888c:    90 00 10     ld.w WX, #0x0010
 
 L_888f:
@@ -934,7 +934,7 @@ L_8bbb:
 L_8bc0:
 8bc0:    90 aa aa     ld.w WX, #0xaaaa
 8bc3:    d0 55 55     ld.w YZ, #0x5555
-8bc6:    5e           mov MN, WX
+8bc6:    5e           mov.w MN, WX
 8bc7:    5b           or.w! YZ, WX
 8bc8:    5a           and.w! YZ, WX
 8bc9:    14 01        bz L_8bcc
@@ -955,7 +955,7 @@ L_8bd0:
 
 L_8bda:
 8bda:    91 bf fc     ld.w WX, (0xbffc)
-8bdd:    5e           mov MN, WX
+8bdd:    5e           mov.w MN, WX
 8bde:    91 00 26     ld.w WX, (0x0026)
 8be1:    14 01        bz L_8be4
 8be3:    00           HALT
@@ -997,7 +997,7 @@ L_8c08:
 
 L_8c13:
 8c13:    91 bf fc     ld.w WX, (0xbffc)
-8c16:    5e           mov MN, WX
+8c16:    5e           mov.w MN, WX
 8c17:    91 00 10     ld.w WX, (0x0010)
 8c1a:    50 80        add.w WX, MN
 8c1c:    b1 00 10     st.w WX, (0x0010)
@@ -1184,7 +1184,7 @@ L_8d09:
 
 L_8d14:
 8d14:    90 00 3a     ld.w WX, #0x003a
-8d17:    5f           mov SP, WX
+8d17:    5f           mov.w SP, WX
 8d18:    60 20 20     ld.w RT, #0x2020
 8d1b:    7b 06        call (PC+0x06) L_8d23
 8d1d:    01           nop
@@ -1236,16 +1236,16 @@ L_8d56:
 
 L_8d5a:
 8d5a:    90 60 66     ld.w WX, #0x6066
-8d5d:    2f 00        DMA load 0, 0
-8d5f:    2f 21        DMA load 2, 1
+8d5d:    2f 00        dma_load_addr.w WX
+8d5f:    2f 21        dma_store_addr.w YZ
 8d61:    59           sub.w! YZ, WX
 8d62:    14 01        bz L_8d65
 8d64:    00           HALT
 
 L_8d65:
 8d65:    90 46 11     ld.w WX, #0x4611
-8d68:    2f 02        DMA load 0, 2
-8d6a:    2f 23        DMA load 2, 3
+8d68:    2f 02        dma_load_count.w WX
+8d6a:    2f 23        dma_store_count.w YZ
 8d6c:    59           sub.w! YZ, WX
 8d6d:    14 01        bz L_8d70
 8d6f:    00           HALT
@@ -1269,9 +1269,9 @@ L_8d70:
 L_8d8e:
 8d8e:    a1 f1 0a     st.b X, (0xf10a)
 8d91:    90 bf fc     ld.w WX, #0xbffc
-8d94:    5f           mov SP, WX
+8d94:    5f           mov.w SP, WX
 8d95:    95 a1        ld.w WX, (SP)+
-8d97:    5e           mov MN, WX
+8d97:    5e           mov.w MN, WX
 8d98:    65 a1        ld.w RT, (SP)+
 8d9a:    90 00 7d     ld.w WX, #0x007d
 8d9d:    50 80        add.w WX, MN
@@ -1352,8 +1352,8 @@ L_8e75:
 8e78:    35 04        set_data_bank X
 8e7a:    20 00        inc.b W
 8e7c:    7e 45        long_call
-8e7e:    5c           mov KL, WX
-8e7f:    5e           mov MN, WX
+8e7e:    5c           mov.w KL, WX
+8e7f:    5e           mov.w MN, WX
 8e80:    20 80        inc.b M
 8e82:    60 00 20     ld.w RT, #0x0020
 

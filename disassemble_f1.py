@@ -17,6 +17,10 @@ strings = [
 functions = [
     (0x8077, "Fail", "Takes 4 bit error code, displays ((error code << 4) | 0xf) on hex displays"),
 
+    (0x80e3, "FlashFail", "Takes a error code, sets the fail decimal places and flashes the error\n"
+                          "code until button is pressed (450ms on, 450ms off)\n"
+                          "continues execution"),
+
     (0x850e, "WriteByte"),
     (0x8519, "WriteHexByte"),
     (0x8520, "WriteHexNibble"),

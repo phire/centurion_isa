@@ -9,7 +9,7 @@ DiagEntryPoint:
 800a:    a1 f2 0d     st.b X, (0xf20d)
 800d:    a1 f2 0f     st.b X, (0xf20f)
 8010:    90 c0 00     ld.w WX, #0xc000
-8013:    5f           mov SP, WX ; Set stack pointer just beyond top of Diag's 1KB of RAM
+8013:    5f           mov.w SP, WX ; Set stack pointer just beyond top of Diag's 1KB of RAM
 8014:    22 32        cpu_id
 8016:    14 0b        bz L_8023
 8018:    90 80 77     ld.w WX, #0x8077
@@ -93,20 +93,20 @@ Test_01:
 
 L_8090:
 8090:    c0 11        ld.b Z, #0x11
-8092:    2f 42        DMA load 4, 2
-8094:    2f 03        DMA load 0, 3
+8092:    2f 42        dma_load_count.w RT
+8094:    2f 03        dma_store_count.w WX
 8096:    51 40        sub.w WX, RT
 8098:    15 43        bnz L_80dd
 809a:    c0 21        ld.b Z, #0x21
-809c:    2f 40        DMA load 4, 0
-809e:    2f 01        DMA load 0, 1
+809c:    2f 40        dma_load_addr.w RT
+809e:    2f 01        dma_store_addr.w WX
 80a0:    51 40        sub.w WX, RT
 80a2:    15 39        bnz L_80dd
 80a4:    20 50        inc.b T
 80a6:    20 40        inc.b R
 80a8:    15 e6        bnz L_8090
 80aa:    90 00 12     ld.w WX, #0x0012
-80ad:    5c           mov KL, WX
+80ad:    5c           mov.w KL, WX
 
 L_80ae:
 80ae:    55 60        mov.w WX, KL
@@ -115,7 +115,7 @@ L_80ae:
 80b3:    20 70        inc.b L
 80b5:    15 f7        bnz L_80ae
 80b7:    90 00 12     ld.w WX, #0x0012
-80ba:    5c           mov KL, WX
+80ba:    5c           mov.w KL, WX
 
 L_80bb:
 80bb:    80 a8        ld.b X, #0xa8
@@ -143,13 +143,16 @@ L_80db:
 80db:    c0 31        ld.b Z, #0x31
 
 L_80dd:
-80dd:    7b 04        call (PC+0x04) L_80e3
+80dd:    7b 04        call (PC+0x04) FlashFail
 80df:    73 ee        jump (PC-0x12) L_80cf
 
 L_80e1:
 80e1:    73 92        jump (PC-0x6e) L_8075
 
-L_80e3:
+FlashFail:
+    ; Takes a error code, sets the fail decimal places and flashes the error
+    ; code until button is pressed (450ms on, 450ms off)
+    ; continues execution
 80e3:    e1 f1 10     st.b Z, (0xf110)
 80e6:    a1 f1 0b     st.b X, (0xf10b)
 80e9:    a1 f1 0c     st.b X, (0xf10c)
@@ -173,7 +176,7 @@ L_8102:
 8106:    90 0f 00     ld.w WX, #0x0f00
 8109:    81 f1 10     ld.b X, (0xf110)
 810c:    42 01        and.b X, W
-810e:    15 d3        bnz L_80e3
+810e:    15 d3        bnz FlashFail
 8110:    73 cf        jump (PC-0x31) L_80e1
 
 L_8112:
@@ -195,13 +198,13 @@ Test_02:
 812d:    90 01 00     ld.w WX, #0x0100
 
 L_8130:
-8130:    5d           mov YZ, WX
+8130:    5d           mov.w YZ, WX
 8131:    16 06        blt L_8139
 8133:    f5 01        st.w YZ, (WX)+
 8135:    73 f9        jump (PC-0x07) L_8130
 
 L_8137:
-8137:    73 aa        jump (PC-0x56) L_80e3
+8137:    73 aa        jump (PC-0x56) FlashFail
 
 L_8139:
 8139:    90 01 00     ld.w WX, #0x0100
@@ -214,7 +217,7 @@ L_813c:
 8141:    38           inc.w! WX
 8142:    17 f8        ble L_813c
 8144:    90 01 00     ld.w WX, #0x0100
-8147:    5c           mov KL, WX
+8147:    5c           mov.w KL, WX
 
 L_8148:
 8148:    55 60        mov.w WX, KL
@@ -223,11 +226,11 @@ L_8148:
 814d:    55 66        mov.w KL, KL
 814f:    17 f7        ble L_8148
 8151:    90 01 00     ld.w WX, #0x0100
-8154:    5c           mov KL, WX
+8154:    5c           mov.w KL, WX
 
 L_8155:
 8155:    9b           ld.w WX, (KL)
-8156:    5d           mov YZ, WX
+8156:    5d           mov.w YZ, WX
 8157:    33 20        not.w YZ
 8159:    51 62        sub.w YZ, KL
 815b:    15 09        bnz L_8166
@@ -310,7 +313,7 @@ L_81d1:
 81d4:    28           inc.b! X
 81d5:    28           inc.b! X
 81d6:    4d           mov.b! Z, X
-81d7:    79 80 e3     call #0x80e3 L_80e3
+81d7:    79 80 e3     call #0x80e3 FlashFail
 81da:    73 a7        jump (PC-0x59) Test_03
 
 Test_04:
@@ -414,7 +417,7 @@ Test06_Vector:
 8274:    91 f2 00     ld.w WX, (0xf200)
 8277:    a1 f2 01     st.b X, (0xf201)
 827a:    91 00 0a     ld.w WX, (0x000a)
-827d:    5f           mov SP, WX
+827d:    5f           mov.w SP, WX
 827e:    7b a9        call (PC-0x57) CheckUart
 8280:    06           fsc
 
@@ -474,7 +477,7 @@ L_82dc:
 82dc:    c0 17        ld.b Z, #0x17
 
 L_82de:
-82de:    79 80 e3     call #0x80e3 L_80e3
+82de:    79 80 e3     call #0x80e3 FlashFail
 82e1:    73 a3        jump (PC-0x5d) L_8286
 
 Test_08:
@@ -539,11 +542,11 @@ L_8333:
 8336:    2d           sll.b! X
 8337:    c0 08        ld.b Z, #0x08
 8339:    48           add.b! Z, X
-833a:    79 80 e3     call #0x80e3 L_80e3
+833a:    79 80 e3     call #0x80e3 FlashFail
 833d:    73 a4        jump (PC-0x5c) Test_08
 
 L_833f:
-833f:    5d           mov YZ, WX
+833f:    5d           mov.w YZ, WX
 8340:    17 0b        ble L_834d
 8342:    3a           clr.w! WX
 8343:    a1 f1 40     st.b X, (0xf140)
@@ -602,11 +605,11 @@ HawkTest:
 8389:    90 32 bf     ld.w WX, #0x32bf
 838c:    b1 f1 41     st.w WX, (0xf141)
 838f:    90 fe 6f     ld.w WX, #0xfe6f
-8392:    2f 02        DMA load 0, 2
+8392:    2f 02        dma_load_count.w WX
 8394:    90 01 00     ld.w WX, #0x0100
-8397:    2f 00        DMA load 0, 0
-8399:    2f 04        DMA load 0, 4
-839b:    2f 06        DMA load 0, 6
+8397:    2f 00        dma_load_addr.w WX
+8399:    2f 04        dma_set_mode 0
+839b:    2f 06        dma_enable
 839d:    2a           clr.b! X
 839e:    a1 f1 48     st.b X, (0xf148)
 83a1:    79 84 52     call #0x8452 L_8452
@@ -631,7 +634,7 @@ L_83b3:
 83bc:    48           add.b! Z, X
 
 L_83bd:
-83bd:    79 80 e3     call #0x80e3 L_80e3
+83bd:    79 80 e3     call #0x80e3 FlashFail
 83c0:    73 bd        jump (PC-0x43) HawkTest
 
 L_83c2:
@@ -667,10 +670,10 @@ L_83f8:
 83f8:    2a           clr.b! X
 83f9:    a1 00 20     st.b X, (0x0020)
 83fc:    90 e6 ff     ld.w WX, #0xe6ff
-83ff:    2f 02        DMA load 0, 2
+83ff:    2f 02        dma_load_count.w WX
 8401:    90 01 00     ld.w WX, #0x0100
-8404:    2f 00        DMA load 0, 0
-8406:    2f 06        DMA load 0, 6
+8404:    2f 00        dma_load_addr.w WX
+8406:    2f 06        dma_enable
 8408:    2a           clr.b! X
 8409:    a1 f1 48     st.b X, (0xf148)
 840c:    7b 44        call (PC+0x44) L_8452
@@ -681,7 +684,7 @@ L_83f8:
 8417:    73 a4        jump (PC-0x5c) L_83bd
 
 L_8419:
-8419:    2f 03        DMA load 0, 3
+8419:    2f 03        dma_store_count.w WX
 841b:    38           inc.w! WX
 841c:    14 04        bz L_8422
 841e:    c0 d9        ld.b Z, #0xd9
@@ -690,7 +693,7 @@ L_8420:
 8420:    73 9b        jump (PC-0x65) L_83bd
 
 L_8422:
-8422:    2f 01        DMA load 0, 1
+8422:    2f 01        dma_store_addr.w WX
 8424:    d0 1a 00     ld.w YZ, #0x1a00
 8427:    59           sub.w! YZ, WX
 8428:    14 04        bz L_842e
@@ -800,11 +803,11 @@ Q_Command:
 84cc:    95 22        ld.w WX, -(YZ)
 84ce:    55 0c        mov.w GH, WX
 84d0:    95 22        ld.w WX, -(YZ)
-84d2:    5f           mov SP, WX
+84d2:    5f           mov.w SP, WX
 84d3:    95 22        ld.w WX, -(YZ)
-84d5:    5e           mov MN, WX
+84d5:    5e           mov.w MN, WX
 84d6:    95 22        ld.w WX, -(YZ)
-84d8:    5c           mov KL, WX
+84d8:    5c           mov.w KL, WX
 84d9:    65 22        ld.w RT, -(YZ)
 84db:    d5 22        ld.w YZ, -(YZ)
 84dd:    91 00 10     ld.w WX, (0x0010)
@@ -880,7 +883,7 @@ L_8536:
 
 ReadHexWord:
 853a:    3a           clr.w! WX
-853b:    5e           mov MN, WX
+853b:    5e           mov.w MN, WX
 853c:    a1 bf 92     st.b X, (0xbf92) ; Diag SRAM
 
 L_853f:
@@ -1007,18 +1010,18 @@ L_85eb:
 85ed:    29           dec.b! X
 85ee:    17 fb        ble L_85eb
 85f0:    f5 a2        st.w YZ, -(SP)
-85f2:    2f 14        DMA load 1, 4
-85f4:    2f 06        DMA load 0, 6
-85f6:    2f a0        DMA load 10, 0
+85f2:    2f 14        dma_set_mode 1
+85f4:    2f 06        dma_enable
+85f6:    2f a0        dma_load_addr.w SP
 85f8:    90 ff f6     ld.w WX, #0xfff6
-85fb:    2f 02        DMA load 0, 2
+85fb:    2f 02        dma_load_count.w WX
 85fd:    7b 22        call (PC+0x22) L_8621
 85ff:    43 90        or.b W, N
 8601:    01           nop
 8602:    00           HALT
-8603:    2f 00        DMA load 0, 0
+8603:    2f 00        dma_load_addr.w WX
 8605:    90 f0 ff     ld.w WX, #0xf0ff
-8608:    2f 02        DMA load 0, 2
+8608:    2f 02        dma_load_count.w WX
 860a:    7b 7e        call (PC+0x7e) L_868a
 860c:    45 15        mov.b T, X
 860e:    03           fcn
@@ -1088,12 +1091,12 @@ L_8664:
 866c:    d0 00 20     ld.w YZ, #0x0020
 866f:    5a           and.w! YZ, WX
 8670:    14 f2        bz L_8664
-8672:    2f 04        DMA load 0, 4
-8674:    2f 06        DMA load 0, 6
+8672:    2f 04        dma_set_mode 0
+8674:    2f 06        dma_enable
 8676:    90 01 00     ld.w WX, #0x0100
-8679:    2f 00        DMA load 0, 0
+8679:    2f 00        dma_load_addr.w WX
 867b:    90 ea 1f     ld.w WX, #0xea1f
-867e:    2f 02        DMA load 0, 2
+867e:    2f 02        dma_load_count.w WX
 8680:    7b 16        call (PC+0x16) L_8698
 8682:    00           HALT
 8683:    81 f1 44     ld.b X, (0xf144)
@@ -1156,7 +1159,7 @@ L_86c4:
 86d2:    15 49        bnz L_871d
 86d4:    90 b8 00     ld.w WX, #0xb800
 86d7:    5b           or.w! YZ, WX
-86d8:    5c           mov KL, WX
+86d8:    5c           mov.w KL, WX
 86d9:    d0 04 00     ld.w YZ, #0x0400
 
 L_86dc:
@@ -1204,7 +1207,7 @@ L_871d:
 871d:    c0 1c        ld.b Z, #0x1c
 
 L_871f:
-871f:    79 80 e3     call #0x80e3 L_80e3
+871f:    79 80 e3     call #0x80e3 FlashFail
 8722:    73 8e        jump (PC-0x72) Test_0c
 
 L_8724:
@@ -1220,7 +1223,7 @@ AuxiliaryTestMenu:
 8734:    "\x0c\x1b\x1cAUXILIARY TESTS\r\n\n\0"
 874a:    60 88 00     ld.w RT, #0x8800
 874d:    3a           clr.w! WX
-874e:    5c           mov KL, WX
+874e:    5c           mov.w KL, WX
 
 Aux_ReadTestEntry:
 874f:    95 41        ld.w WX, (RT)+

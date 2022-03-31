@@ -127,9 +127,9 @@ L_9142:
 
 L_9156:
 9156:    90 c0 00     ld.w WX, #0xc000
-9159:    5f           mov SP, WX
+9159:    5f           mov.w SP, WX
 915a:    91 01 1a     ld.w WX, (0x011a)
-915d:    5e           mov MN, WX
+915d:    5e           mov.w MN, WX
 915e:    95 41        ld.w WX, (RT)+
 9160:    50 80        add.w WX, MN
 9162:    75 00        jump (A + 0x00)
@@ -291,11 +291,11 @@ L_92e4:
 92e9:    3f           dec RT
 92ea:    15 f8        bnz L_92e4
 92ec:    90 ff 37     ld.w WX, #0xff37
-92ef:    2f 02        DMA load 0, 2
+92ef:    2f 02        dma_load_count.w WX
 92f1:    90 01 1c     ld.w WX, #0x011c
-92f4:    2f 00        DMA load 0, 0
-92f6:    2f 34        DMA load 3, 4
-92f8:    2f 06        DMA load 0, 6
+92f4:    2f 00        dma_load_addr.w WX
+92f6:    2f 34        dma_set_mode 3
+92f8:    2f 06        dma_enable
 92fa:    80 43        ld.b X, #0x43
 92fc:    a2 01 14     st.b X, @(0x0114)
 92ff:    7a 01 18     call @(0x0118)
@@ -308,11 +308,11 @@ L_9309:
 930b:    3f           dec RT
 930c:    15 fb        bnz L_9309
 930e:    90 ff 37     ld.w WX, #0xff37
-9311:    2f 02        DMA load 0, 2
+9311:    2f 02        dma_load_count.w WX
 9313:    90 01 1c     ld.w WX, #0x011c
-9316:    2f 00        DMA load 0, 0
-9318:    2f 34        DMA load 3, 4
-931a:    2f 06        DMA load 0, 6
+9316:    2f 00        dma_load_addr.w WX
+9318:    2f 34        dma_set_mode 3
+931a:    2f 06        dma_enable
 931c:    80 44        ld.b X, #0x44
 931e:    a2 01 14     st.b X, @(0x0114)
 9321:    7a 01 18     call @(0x0118)
@@ -362,11 +362,11 @@ L_9383:
 9388:    3f           dec RT
 9389:    15 f8        bnz L_9383
 938b:    90 c0 00     ld.w WX, #0xc000
-938e:    2f 02        DMA load 0, 2
+938e:    2f 02        dma_load_count.w WX
 9390:    90 01 1c     ld.w WX, #0x011c
-9393:    2f 00        DMA load 0, 0
-9395:    2f 34        DMA load 3, 4
-9397:    2f 06        DMA load 0, 6
+9393:    2f 00        dma_load_addr.w WX
+9395:    2f 34        dma_set_mode 3
+9397:    2f 06        dma_enable
 9399:    80 46        ld.b X, #0x46
 939b:    a2 01 14     st.b X, @(0x0114)
 939e:    7a 01 0c     call @(0x010c)
@@ -391,11 +391,11 @@ L_93c6:
 93c8:    3f           dec RT
 93c9:    15 fb        bnz L_93c6
 93cb:    90 c0 00     ld.w WX, #0xc000
-93ce:    2f 02        DMA load 0, 2
+93ce:    2f 02        dma_load_count.w WX
 93d0:    90 01 1c     ld.w WX, #0x011c
-93d3:    2f 00        DMA load 0, 0
-93d5:    2f 34        DMA load 3, 4
-93d7:    2f 06        DMA load 0, 6
+93d3:    2f 00        dma_load_addr.w WX
+93d5:    2f 34        dma_set_mode 3
+93d7:    2f 06        dma_enable
 93d9:    80 47        ld.b X, #0x47
 93db:    a2 01 14     st.b X, @(0x0114)
 93de:    7a 01 0c     call @(0x010c)
@@ -467,11 +467,11 @@ Entry_CMD_SEEK_TEST:
 9481:    90 82 ff     ld.w WX, #0x82ff
 9484:    b9           st.w WX, (YZ)
 9485:    90 ff fb     ld.w WX, #0xfffb
-9488:    2f 02        DMA load 0, 2
+9488:    2f 02        dma_load_count.w WX
 948a:    90 41 4d     ld.w WX, #0x414d
-948d:    2f 00        DMA load 0, 0
-948f:    2f 34        DMA load 3, 4
-9491:    2f 06        DMA load 0, 6
+948d:    2f 00        dma_load_addr.w WX
+948f:    2f 34        dma_set_mode 3
+9491:    2f 06        dma_enable
 9493:    80 43        ld.b X, #0x43
 9495:    a2 01 14     st.b X, @(0x0114)
 9498:    7a 01 18     call @(0x0118)
@@ -502,11 +502,11 @@ L_94a6:
 
 L_94c6:
 94c6:    90 41 4d     ld.w WX, #0x414d
-94c9:    2f 00        DMA load 0, 0
+94c9:    2f 00        dma_load_addr.w WX
 94cb:    90 ff f7     ld.w WX, #0xfff7
-94ce:    2f 02        DMA load 0, 2
-94d0:    2f 34        DMA load 3, 4
-94d2:    2f 06        DMA load 0, 6
+94ce:    2f 02        dma_load_count.w WX
+94d0:    2f 34        dma_set_mode 3
+94d2:    2f 06        dma_enable
 94d4:    80 43        ld.b X, #0x43
 94d6:    a2 01 14     st.b X, @(0x0114)
 94d9:    7a 01 18     call @(0x0118)
@@ -565,7 +565,7 @@ L_9523:
 9550:    7a 01 18     call @(0x0118)
 9553:    12 44        bn L_9599
 9555:    90 41 4d     ld.w WX, #0x414d
-9558:    5c           mov KL, WX
+9558:    5c           mov.w KL, WX
 9559:    90 81 00     ld.w WX, #0x8100
 955c:    b5 61        st.w WX, (KL)+
 955e:    90 84 00     ld.w WX, #0x8400
@@ -590,11 +590,11 @@ L_9571:
 
 L_9581:
 9581:    90 ff c3     ld.w WX, #0xffc3
-9584:    2f 02        DMA load 0, 2
+9584:    2f 02        dma_load_count.w WX
 9586:    90 41 4d     ld.w WX, #0x414d
-9589:    2f 00        DMA load 0, 0
-958b:    2f 34        DMA load 3, 4
-958d:    2f 06        DMA load 0, 6
+9589:    2f 00        dma_load_addr.w WX
+958b:    2f 34        dma_set_mode 3
+958d:    2f 06        dma_enable
 958f:    80 43        ld.b X, #0x43
 9591:    a2 01 14     st.b X, @(0x0114)
 9594:    7a 01 18     call @(0x0118)
@@ -607,11 +607,11 @@ L_9599:
 
 L_95a2:
 95a2:    90 e6 ff     ld.w WX, #0xe6ff
-95a5:    2f 02        DMA load 0, 2
+95a5:    2f 02        dma_load_count.w WX
 95a7:    90 01 1c     ld.w WX, #0x011c
-95aa:    2f 00        DMA load 0, 0
-95ac:    2f 34        DMA load 3, 4
-95ae:    2f 06        DMA load 0, 6
+95aa:    2f 00        dma_load_addr.w WX
+95ac:    2f 34        dma_set_mode 3
+95ae:    2f 06        dma_enable
 95b0:    80 45        ld.b X, #0x45
 95b2:    a2 01 14     st.b X, @(0x0114)
 95b5:    7a 01 18     call @(0x0118)
@@ -652,11 +652,11 @@ Entry_FLOPPY_SEEK_TEST:
 95fc:    80 82        ld.b X, #0x82
 95fe:    a9           st.b X, (YZ)
 95ff:    90 ff fc     ld.w WX, #0xfffc
-9602:    2f 02        DMA load 0, 2
+9602:    2f 02        dma_load_count.w WX
 9604:    90 41 4d     ld.w WX, #0x414d
-9607:    2f 00        DMA load 0, 0
-9609:    2f 34        DMA load 3, 4
-960b:    2f 06        DMA load 0, 6
+9607:    2f 00        dma_load_addr.w WX
+9609:    2f 34        dma_set_mode 3
+960b:    2f 06        dma_enable
 960d:    80 43        ld.b X, #0x43
 960f:    a2 01 14     st.b X, @(0x0114)
 9612:    7a 01 18     call @(0x0118)
@@ -680,11 +680,11 @@ L_9620:
 
 L_9636:
 9636:    90 41 4d     ld.w WX, #0x414d
-9639:    2f 00        DMA load 0, 0
+9639:    2f 00        dma_load_addr.w WX
 963b:    90 ff fb     ld.w WX, #0xfffb
-963e:    2f 02        DMA load 0, 2
-9640:    2f 34        DMA load 3, 4
-9642:    2f 06        DMA load 0, 6
+963e:    2f 02        dma_load_count.w WX
+9640:    2f 34        dma_set_mode 3
+9642:    2f 06        dma_enable
 9644:    80 43        ld.b X, #0x43
 9646:    a2 01 14     st.b X, @(0x0114)
 9649:    7a 01 18     call @(0x0118)
@@ -741,7 +741,7 @@ L_968d:
 96ba:    7a 01 18     call @(0x0118)
 96bd:    12 3d        bn L_96fc
 96bf:    90 41 4d     ld.w WX, #0x414d
-96c2:    5c           mov KL, WX
+96c2:    5c           mov.w KL, WX
 96c3:    90 81 01     ld.w WX, #0x8101
 96c6:    b5 61        st.w WX, (KL)+
 96c8:    90 83 01     ld.w WX, #0x8301
@@ -762,11 +762,11 @@ L_96d0:
 
 L_96e4:
 96e4:    90 ff ab     ld.w WX, #0xffab
-96e7:    2f 02        DMA load 0, 2
+96e7:    2f 02        dma_load_count.w WX
 96e9:    90 41 4d     ld.w WX, #0x414d
-96ec:    2f 00        DMA load 0, 0
-96ee:    2f 34        DMA load 3, 4
-96f0:    2f 06        DMA load 0, 6
+96ec:    2f 00        dma_load_addr.w WX
+96ee:    2f 34        dma_set_mode 3
+96f0:    2f 06        dma_enable
 96f2:    80 43        ld.b X, #0x43
 96f4:    a2 01 14     st.b X, @(0x0114)
 96f7:    7a 01 18     call @(0x0118)
@@ -779,11 +779,11 @@ L_96fc:
 
 L_9705:
 9705:    90 e6 ff     ld.w WX, #0xe6ff
-9708:    2f 02        DMA load 0, 2
+9708:    2f 02        dma_load_count.w WX
 970a:    90 01 1c     ld.w WX, #0x011c
-970d:    2f 00        DMA load 0, 0
-970f:    2f 34        DMA load 3, 4
-9711:    2f 06        DMA load 0, 6
+970d:    2f 00        dma_load_addr.w WX
+970f:    2f 34        dma_set_mode 3
+9711:    2f 06        dma_enable
 9713:    80 45        ld.b X, #0x45
 9715:    a2 01 14     st.b X, @(0x0114)
 9718:    7a 01 18     call @(0x0118)
