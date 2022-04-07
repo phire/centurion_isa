@@ -42,11 +42,11 @@ def bitstring_to_int(bitstring, signed=False):
 
 
 RegNames16 = [
-    "WX", "YZ", "RT", "KL", "MN", "SP", "GH", "IJ",
+    "AX", "BX", "RT", "DX", "EX", "SP", "GX", "HX",
 ]
 
 RegNames8 = [
-    "W", "X", "Y", "Z", "R", "T", "K", "L", "M", "N", "S", "P", "G", "H", "I", "Z",
+    "AH", "AL", "BH", "BL", "RH", "RL", "DH", "DL", "EH", "EL", "SH", "SL", "GH", "GL", "HL", "HH",
 ]
 
 
@@ -477,15 +477,7 @@ instructions = [
     I("01011111", "mov.w {RegNames16[5]}, {RegNames16[0]}"),
 
 # 60
-    I("01100000 NNNNNNNN NNNNNNNN", "60 {N:#06x}"),  # 60 ??? Might be load immediate into index reg?
-    I("01100001 NNNNNNNN NNNNNNNN", "61 {N:#06x}"),  # 61
-
-    I("01100101 xxxxxxxx"), # suspect
-
-    I("01101001 NNNNNNNN NNNNNNNN", "69 A, {N:#06x}"),  # 69
-
-    I("01101101 xxxxxxxx"), # suspect
-
+    # ld.w RT, .... instruction are here. Handled by Memory()
 
 # 70
 
