@@ -640,14 +640,17 @@ L_95d6:
 95e7:    3d           sll! AX
 
 Entry_FLOPPY_SEEK_TEST:
+; This code is basically the same as Finch hard drive,
+; the same board is used, so i didn't do a thorough disassembly.
+; The only things to note here is that floppy geometry is
+; 75 tracks, 16 sectors, 400 bytes per sector.
 95e8:    90 01 80     ld AX, #0x0180
 95eb:    50 80        add AX, EX
-95ed:    7d 00        call (A + 0x00)
-95ef:    f8
-95f0:    00
+95ed:    7d 00        call (A + 0x00)	; Init
+95ef:    f8 00				; FFC_BASE
 95f1:    7a 01 06     call @(0x0106)
 95f4:    d0 41 4d     ld BX, #0x414d
-95f7:    90 81 01     ld AX, #0x8101
+95f7:    90 81 01     ld AX, #0x8101	; Unit number 1 ???
 95fa:    b5 21        st AX, (BX)+
 95fc:    80 82        ld AL, #0x82
 95fe:    a9           st AL, (BX)
@@ -676,7 +679,7 @@ L_9620:
 962d:    90 83 01     ld AX, #0x8301
 9630:    b9           st AX, (BX)
 9631:    80 01        ld AL, #0x01
-9633:    a1 41 b1     st AL, (0x41b1)
+9633:    a1 41 b1     st AL, (0x41b1)	; One track per step
 
 L_9636:
 9636:    90 41 4d     ld AX, #0x414d
@@ -708,10 +711,10 @@ L_9674:
 9679:    c1 41 50     ld BL, (0x4150)
 967c:    40 31        add AL, BL
 967e:    a1 41 50     st AL, (0x4150)
-9681:    c0 4b        ld BL, #0x4b
+9681:    c0 4b        ld BL, #0x4b	; 75 tracks
 9683:    49           sub! BL, AL
 9684:    15 b0        bnz L_9636
-9686:    80 ff        ld AL, #0xff
+9686:    80 ff        ld AL, #0xff	; -1 track per step, going backwards
 9688:    a1 41 b1     st AL, (0x41b1)
 968b:    73 a9        jump (PC-0x57) L_9636
 
@@ -722,14 +725,16 @@ L_968d:
 9694:    17 a0        ble L_9636
 9696:    7a 01 04     call @(0x0104)
 9699:    05           fci
-969a:    f4 90        st BX, @(PC-0x70)
-969c:    01           nop
-969d:    80 50        ld AL, #0x50
-969f:    80 7d        ld AL, #0x7d
-96a1:    00           HALT
-96a2:    f8 00 7a     stb? A, [0x0007a]
-96a5:    01           nop
-96a6:    06           fsc
+969a:    f4
+
+Entry_FLOPPY_READ_TEST:
+; Floppy read test also steps in power of 2, but starts at track 1.
+969B:    90 01 80     ld AX, #0x0180
+         50 80        add AX, EX
+	 7d 00        call (A + 0x00)	; Init
+96a2:    f8 00				; FFC_BASE
+         7a 01 06     call @(0x0106)	; PrintCtrlCToExit
+; Restart point is here
 96a7:    80 41        ld AL, #0x41
 96a9:    a2 01 14     st AL, @(0x0114)
 96ac:    7a 01 0c     call @(0x010c)
@@ -742,19 +747,19 @@ L_968d:
 96bd:    12 3d        bn L_96fc
 96bf:    90 41 4d     ld AX, #0x414d
 96c2:    5c           mov DX, AX
-96c3:    90 81 01     ld AX, #0x8101
+96c3:    90 81 01     ld AX, #0x8101	; 01 is a unit number
 96c6:    b5 61        st AX, (DX)+
-96c8:    90 83 01     ld AX, #0x8301
+96c8:    90 83 01     ld AX, #0x8301	; This includes track number, we start from 1
 96cb:    b5 61        st AX, (DX)+
-96cd:    d0 10 00     ld BX, #0x1000
+96cd:    d0 10 00     ld BX, #0x1000	; 16 sectors
 
 L_96d0:
 96d0:    80 88        ld AL, #0x88
-96d2:    a5 61        st AL, (DX)+
-96d4:    e5 61        st BL, (DX)+
-96d6:    2a           clr! AL
+96d2:    a5 61        st AL, (DX)+	; 0x88
+96d4:    e5 61        st BL, (DX)+	; Sector number
+96d6:    2a           clr! AL		; 0
 96d7:    a5 61        st AL, (DX)+
-96d9:    90 01 90     ld AX, #0x0190
+96d9:    90 01 90     ld AX, #0x0190	; sector length = 400 bytes
 96dc:    b5 61        st AX, (DX)+
 96de:    20 30        inc BL
 96e0:    21 20        dec BH
@@ -778,7 +783,7 @@ L_96fc:
 9702:    72 01 0e     jump @(0x010e) ;
 
 L_9705:
-9705:    90 e6 ff     ld AX, #0xe6ff
+9705:    90 e6 ff     ld AX, #0xe6ff	; 6400 bytes = 16 sectors * 400 bytes
 9708:    2f 02        dma_load_count WX
 970a:    90 01 1c     ld AX, #0x011c
 970d:    2f 00        dma_load_addr WX
@@ -790,28 +795,26 @@ L_9705:
 971b:    13 16        bnn L_9733
 971d:    7a 01 12     call @(0x0112)
 9720:    "TRACK=\0"
-9727:    81 41 50     ld AL, (0x4150)
+9727:    81 41 50     ld AL, (0x4150)	; track number
 972a:    7a 01 0a     call @(0x010a)
 972d:    7a 01 12     call @(0x0112)
 9730:    "\r\n\0"
 
 L_9733:
-9733:    81 41 50     ld AL, (0x4150)
+9733:    81 41 50     ld AL, (0x4150)	; track *= 2
 9736:    2d           sll! AL
 9737:    a1 41 50     st AL, (0x4150)
-973a:    c0 4b        ld BL, #0x4b
+973a:    c0 4b        ld BL, #0x4b	; 75 tracks ??? 
 973c:    49           sub! BL, AL
 973d:    19 a5        ble L_96e4
 973f:    a1 f1 0a     st AL, (0xf10a)
-9742:    7a 01 04     call @(0x0104)
-9745:    06           fsc
-9746:    a7 90        st AL, unknown
-9748:    01           nop
-9749:    80 50        ld AL, #0x50
-974b:    80 7d        ld AL, #0x7d
-974d:    00           HALT
-974e:    00           HALT
-974f:    00           HALT
+9742:    7a 01 04     call @(0x0104)	; FinishTest
+9745:    06 a7				; Restart point = 0x96a7
+; This is self test for this ROM, the same as in F4, nothing interesting
+         90 01 80     ld AX, #0x0180
+	 50 80        add AX, EX
+ 	 7d 00        call (A + 0)
+974e:    00 00				; Controller base address - not used
 9750:    55 86        mov DX, EX
 9752:    3a           clr! AX
 
@@ -836,7 +839,7 @@ L_977d:
 978d:    a1 f1 0b     st AL, (0xf10b)
 9790:    a1 f1 0c     st AL, (0xf10c)
 9793:    72 01 0e     jump @(0x010e) ;
-9796:    8c
+9796:    8c				; Checksum byte
 9797:    00
 9798:    00
 9799:    00

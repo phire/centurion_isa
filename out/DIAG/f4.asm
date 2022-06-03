@@ -1,4 +1,11 @@
-
+; This is a header for this ROM.
+; It looks like these ROMs are pluggable. There's nothing that refers to this table
+; in this ROM, so i have a suggestion that there's a "master" rom which scans all the
+; slots where an "auxiliary test" rom is present; and composes list of tests (applications,
+; if you want) in runtime.
+; This leads to a suggestions that a new tests (or, let's call them applets) can be added
+; to the Diag card by simply adding a ROM with a table like this in the beginning.
+; The "master ROM" is expected to see them and add to the list.
 TEST_0:
 9800:    02 ce        (0x2ce)	; Entry_01133_CMD_AUX_MEMORY_TEST - 0x9800
 9802:    "01133 CMD AUX MEMORY TEST\r\n\0"
@@ -27,7 +34,7 @@ TEST_6:
 9890:    06 9e        (0x69e)	; Entry_ROM_SELF_TEST - 0x9800
 9892:    "ROM SELF TEST\r\n\n\0"
 
-TEST_7:
+TEST_7:				; Terminator
 98a3:    00 00        (0x0)
 
 WriteString:
@@ -144,6 +151,14 @@ PrintCtrlCToExit:
 998a:    09           ret
 
 Init:
+; Every test begins with a call to this routine. All reusable functions are called
+; indirectly via address table, built in RAM by this function. Also interesting
+; to note that this address table and its slots are the same between all auxiliary
+; test ROMs. We can think of it as of a mini-BIOS, or "kernal". Since the structure
+; of this table appears the same in all auxiliary ROMs, this suggests that this "BIOS"
+; portion is copypasted from somewhere else. So, we may have more software components,
+; like bootloaders, WIPL, etc, sharing the same (or similar) function table.
+;
 ; Entry parameters:
 ; EX = 0x9800 - base address of this ROM
 ; RT = a pointer to a table of two 16-bit words:
@@ -191,7 +206,8 @@ Init:
 
 WaitForReady:
 ; This routine waits for the completion of the command by the controller
-; and reads the result code
+; and reads the result code.
+; Any error here is considered critical, test execution aborts immediately
 					; Wait for the last command byte to be consumed
 99ee:    7a 01 0c     call @(0x010c)	; WaitNotFIn
 					; Now wait for BUSY to clear
@@ -220,7 +236,8 @@ L_9a2c:					; Now check that FOUT is set
 9a2d:    10 2b        bc L_9a5a
 9a2f:    0e           delay 4.5ms
 9a30:    3f           dec RT
-9a31:    15 f9        bnz L_9a2c	; Is it a bug ? Should we have re-read STATUS_REG ?
+9a31:    15 f9        bnz L_9a2c	; This looks like a bug. We're re-testing AL by shifting
+					; it right, but we don't actually re-read it from the controller.
 9a33:    7a 01 12     call @(0x0112)
 9a36:    "*** FOUT NEVER CAME ON ***\0"
 9a51:    a1 f1 0b     st AL, (0xf10b)
@@ -283,6 +300,12 @@ Entry_01133_CMD_AUX_MEMORY_TEST:
          73 09        jump (PC + 9)	; AUX_Mem_Test
 
 Entry_FINCH_AUX_MEMORY_TEST:
+; This test checks 3840 bytes of FFC's on-board memory.
+; I suggest that for some reason this is not all of the memory, because as
+; we can see from read tests below, disks are read on a per-track basis,
+; and each track is 6400 bytes long (16 sectors, 400 bytes per sector)
+; Yes, the same code is used for CMD board, the only difference is controller
+; base address: 0xf808 for CMD vs 0xf800 for FFC.
 9ad9:    90 01 8b     ld AX, #0x018b
 9adc:    50 80        add AX, EX
 9ade:    7d 00        call (A + 0x00)	; Init
@@ -308,9 +331,12 @@ L_9aef:
 9aff:    2f 00        dma_load_addr WX
 9b01:    2f 34        dma_set_mode 3
 9b03:    2f 06        dma_enable
-					; Multi-byte commands are sent sequentially,
-					; each time we need to wait for FIN status bit to go down.
-					; The bit indicates that the controller hasn't consumed the byte yet
+; These are the only two commands, whose parameters are sent using the
+; memory-mapped command register. All other operations (seek, read, etc)
+; only use a single byte as command; request parameters are sent as a
+; data packet over DMA.
+; After writing each byte we need to wait for FIN status bit to go down.
+; The bit indicates that the controller hasn't consumed the byte yet
 9b05:    80 46        ld AL, #0x46	; Write AUX ?
 9b07:    a2 01 14     st AL, @(0x0114)	; COMMAND_REG
 9b0a:    7a 01 0c     call @(0x010c)	; WaitNotFIn
@@ -398,14 +424,25 @@ L_9b90:
 9bd6:    72 01 0e     jump @(0x010e)	; PressSpaceThenExit
 
 Entry_01133_CMD_SEEK_TEST:
+; This test seeks back and forth to each track of the Phoenix drive
+; It runs continuously until interrupted by Ctrl-C.
+; An error in communication between the controller board and CPU is considered
+; fatal. A remote error code, returned by the board as a result of operation,
+; is logged in hexadecimal, but the test continues. After Ctrl-C the test reports
+; "PASS" if no errors have been found or "FAILED" if there has been at least one
+; error code reported by the FFC controller.
+; The drive has total of 822 tracks.
 9bd9:    90 01 8b     ld AX, #0x018b
 9bdc:    50 80        add AX, EX
 9bde:    7d 00        call (A + 0x00)	; Init
 9be0:    f8 08				; CMD_REGS_BASE
          7a 01 06
 ; This is restart point
+; All the code below differs from the aux memory test. The command
+; is sent to the card via DMA; controller's command register does not
+; provide any parameters.
 9be5:    d0 41 4d     ld BX, #0x414d
-9be8:    90 81 00     ld AX, #0x8100	; packet[0,1] = 0x8100 - unit select ?
+9be8:    90 81 00     ld AX, #0x8100	; packet[0,1] = 0x8100 - perhaps unit #0, see Finch code
 9beb:    b5 21        st AX, (BX)+
 9bed:    90 82 ff     ld AX, #0x82ff	; packet[2,3] = 0x82FF
 9bf0:    b9           st AX, (BX)
@@ -571,6 +608,9 @@ L_9d2a:
 9d3a:    04 a9
 
 Entry_FINCH_SEEK_TEST:
+; The same as CMD seek test, but uses Finch hard drive unit #2
+; Seeks back and forth to each track until interrupted. The drive
+; has 604 tracks.
 9d3c:    90 01 8b     ld AX, #0x018b
 9d3f:    50 80        add AX, EX
 9d41:    7d 00        call (A + 0x00)	; Init
@@ -580,7 +620,7 @@ Entry_FINCH_SEEK_TEST:
 9d47:    06           fsc
 9d48:    d0 41 4d     ld BX, #0x414d	; Data packet address
 9d4b:    90 81 02     ld AX, #0x8102
-9d4e:    b5 21        st AX, (BX)+	; packet[0, 1] = 0x8102 - unit select ???
+9d4e:    b5 21        st AX, (BX)+	; packet[0, 1] = 0x8102 - this selects unit 2
 9d50:    90 84 00     ld AX, #0x8400
 9d53:    b5 21        st AX, (BX)+	; packet[2, 3] = 0x8400
 9d55:    90 82 ff     ld AX, #0x82ff
@@ -667,6 +707,14 @@ L_9df1:					; track_per_step < 0
 9dfd:    05 48
 
 Entry_FINCH_READ_TEST:
+; This test reads certain tracks fron the Finch hard drive.
+; Each track (16 sectors, 400 bytes each) is read into a 6400 bytes
+; buffer in main RAM. No checks are done on the contents; apparently
+; data integrity is entirely verified by the controller card.
+; The test does not read all tracks, but only those with a number being
+; power of 2. The sequence starts at zero:
+; 0 1 2 4 8 16 ...
+; The test completes by itself after reaching track number 604.
 9dff:    90 01 8b     ld AX, #0x018b
 9e02:    50 80        add AX, EX
 9e04:    7d 00        call (A + 0x00)	; Init
@@ -745,12 +793,12 @@ L_9e58:
 9e83:    "\r\n\0"
 
 L_9e86:
-9e86:    91 41 52     ld AX, (0x4152)
+9e86:    91 41 52     ld AX, (0x4152)	; Update track number
 9e89:    15 01        bnz L_9e8c
-9e8b:    38           inc! AX
+9e8b:    38           inc! AX		; From track 0 we go to track 1
 
 L_9e8c:
-9e8c:    3d           sll! AX
+9e8c:    3d           sll! AX		; And then track number becomes next power of 2
 9e8d:    b1 41 52     st AX, (0x4152)
 9e90:    d0 02 5d     ld BX, #0x025d	; 604 tracks total
 9e93:    59           sub! BX, AX
@@ -767,14 +815,14 @@ Entry_ROM_SELF_TEST:
 9ea7:    55 86        mov DX, EX
 9ea9:    3a           clr! AX
 
-L_9eaa:
+L_9eaa:					; Simply calculate 8-bit sum of all bytes in this ROM...
 9eaa:    85 61        ld AL, (DX)+
 9eac:    40 10        add AH, AL
 9eae:    d0 06 ed     ld BX, #0x06ed
 9eb1:    50 82        add BX, EX
 9eb3:    51 62        sub BX, DX
 9eb5:    15 f3        bnz L_9eaa
-9eb7:    8b           ld AL, (DX)
+9eb7:    8b           ld AL, (DX)	; And compare it with the last byte.
 9eb8:    41 01        sub AL, AH
 9eba:    15 18        bnz L_9ed4
 9ebc:    7a 01 12     call @(0x0112)
