@@ -369,7 +369,6 @@ instructions = [
     # these are instructions only used by the CPU6 ram mapping test
     I("00101110 00011100", "aaa"),
     I("00101110 00001100", "bbb"),
-    I("11111NNN NNNNNNNN NNNNNNNN", "stb? A, [{N:#07x}]"),
     I("01000111 10000000 11111111 00000001 00000000 00000010 00000000", "check_parity_error"),
     I("01000111 01000000 11111111 00000001 00000000 00000010 00000000", "disable_parity_halt"),
 
@@ -691,7 +690,13 @@ def read_annotations(name):
 
            if type == "code":
                entry_points.append(address)
-               memory_addr_info[address].label = f"Entry_{hex(address)}"
+               if len(items) > 2:
+                   label = items[2].strip()
+               else:
+                   label = f"Entry_{hex(address)}"
+               memory_addr_info[address].label = label
+           elif type == "label":
+               memory_addr_info[address].label = items[2].strip()
            elif type != "":
                memory_addr_info[address].visited = True
                memory_addr_info[address].type = type
