@@ -57,6 +57,8 @@ if __name__ == "__main__":
     body_addr = parse_header(memory, base_address, base_address)
 
     scan_strings(memory, body_addr)
+    scan_call_args(memory, body_addr)
 
+    read_annotations("roms/Diag_F3_Rev_1.0.comments")
 
     disassemble(memory)

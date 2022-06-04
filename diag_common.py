@@ -58,6 +58,15 @@ def add_string(mem, address):
     address += 1
     entry_points.append(address)
 
+def add_word(mem, address):
+    memory_addr_info[address].visited = True
+    memory_addr_info[address].type = ">H"
+
+     # resume execution after the word
+    address += 2
+    entry_points.append(address)
+    
+
 def scan_strings(mem, address):
     while True:
         if mem[address] == 0x7a and mem[address+1] == 0x01 and mem[address+2] == 0x12:
@@ -82,4 +91,21 @@ def scan_calls (mem, base_address, addr):
 
         addr += 1
         if addr >= 0x10000:
+            break
+
+def scan_call_args(mem, address):
+    while True:
+        # call @(0x0104) - FinishTest
+        # A word is a relative address of a restart point
+        if mem[address] == 0x7a and mem[address+1] == 0x01 and mem[address+2] == 0x04:
+            address += 3
+            add_word(mem, address)
+        # call (A + 0x00) - Init
+        # A word is a hardware base address to use
+        elif mem[address] == 0x7d and mem[address+1] == 0x00:
+            address += 2
+            add_word(mem, address)
+
+        address += 1
+        if address >= 0xfd00:
             break
