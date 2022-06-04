@@ -654,36 +654,52 @@ def apply_comments(comments):
 def read_annotations(name):
     with open(name, "r") as f:
         for line in f.readlines():
-           # Limit splitting to two commas, comments may contain commas themselves
+           comment_pos = line.find(';')
+           if comment_pos == -1:
+               comment = None
+           else:
+               comment = line[comment_pos + 1:].strip()
+               line = line[:comment_pos]
+
            items = line.split(',', 2)
+           addr_str = items[0].strip()
 
-           type = items[1].strip()
-
-           if type == "":
-               text = "\n" + items[2].strip()
-               # Continuation of a multi-line comment
+           if addr_str == "":
+               # No address specified.
+               # This is a continuation of a multi-line comment
+               text = "\n" + comment
                if pre_comment:
                    memory_addr_info[last_comment].pre_comment += text
                else:
                    memory_addr_info[last_comment].comment += text
                continue
            
-           address = int(items[0].strip(), 0)
+           address = int(addr_str, 0)
+           if len(items) < 2:
+               type = ""
+           else:
+               type = items[1].strip()
+               # "comment" is optional, a missing or empty field has the same meaning
+               if type == "comment":
+                   type = ""
+
+           if type == "pre_comment":
+               memory_addr_info[address].pre_comment = comment
+               last_comment = address
+               pre_comment = True
+               continue
 
            if type == "code":
                entry_points.append(address)
                memory_addr_info[address].label = f"Entry_{hex(address)}"
-           elif type == "comment":
-               memory_addr_info[address].comment = items[2].strip()
-               last_comment = address
-               pre_comment = False
-           elif type == "pre_comment":
-               memory_addr_info[address].pre_comment = items[2].strip()
-               last_comment = address
-               pre_comment = True
-           else:
+           elif type != "":
                memory_addr_info[address].visited = True
                memory_addr_info[address].type = type
+
+           if comment is not None:
+               memory_addr_info[address].comment = comment
+               last_comment = address
+               pre_comment = False
 
 if __name__ == "__main__":
     # print(disassemble_instruction( b"\x1510", 0).next_pc)]
