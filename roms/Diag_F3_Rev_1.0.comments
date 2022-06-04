@@ -1,0 +1,43 @@
+0x913f ,	comment	; 
+0x921b ,	comment	; 
+0x924c ,	comment	; 
+0x92bd ,	comment	; 
+0x936a ,	comment	; 
+0x946a ,	comment	; 
+0x94a3 ,	comment	; 
+0x959f ,	comment	; 
+0x95e8,	pre_comment 	; This code is basically the same as Finch hard drive,
+	 	; the same board is used, so i didn't do a thorough disassembly.
+	 	; The only things to note here is that floppy geometry is
+	 	; 75 tracks, 16 sectors, 400 bytes per sector.
+0x95ed ,	comment	; Init
+0x95ef ,	comment	; FFC_BASE
+0x95f7 ,	comment	; Unit number 1 ???
+0x961d ,	comment	; 
+0x9633 ,	comment	; One track per step
+0x9681 ,	comment	; 75 tracks
+0x9686 ,	comment	; -1 track per step, going backwards
+0x969b ,	pre_comment 	; Floppy read test also steps in power of 2, but starts at track 1.
+0x96a2 ,	pre_comment 	; Init
+0x96a2 ,	comment	; FFC_BASE
+0x96a4 , pre_comment	; Restart point is here
+0x96a4 ,	comment ; PrintCtrlCToExit
+0x96c3 ,	comment	; 01 is a unit number
+0x96c8 ,	comment	; This includes track number, we start from 1
+0x96cd ,	comment	; 16 sectors
+0x96d2 ,	comment	; 0x88
+0x96d4 ,	comment	; Sector number
+0x96d6 ,	comment	; 0
+0x96d9 ,	comment	; sector length = 400 bytes
+0x9702 ,	comment	; 
+0x9705 ,	comment	; 6400 bytes = 16 sectors * 400 bytes
+0x9727 ,	comment	; track number
+0x9733 ,	comment	; track *= 2
+0x973a ,	comment	; 75 tracks ???
+0x9742 ,	comment	; FinishTest
+0x9745 ,	comment	; Restart point = 0x96a7
+0x9747 , pre_comment	; This is self test for this ROM, the same as in F4, nothing interesting
+0x974e ,	comment	; Controller base address - not used
+0x977a ,	comment	; 
+0x9793 ,	comment	; 
+0x9796 ,	comment	; Checksum byte

@@ -7,15 +7,16 @@ from diag_common import *
 
 functions = [
     (0x0a5, 0x112, "WriteString"),
+    (0x0ae, None,  "WriteChar"),
     (0x0bb, 0x102, "ReadChar"),
-    (0x0c5, 0x110, "Fn_0c5"),
-    (0x0d0, 0x10a, "Fn_0d0"),
+    (0x0c5, 0x110, "WriteHex16"),
+    (0x0d0, 0x10a, "WriteHex"),
     (0x101, 0x104, "FinishTest"), # Prints Pass or Fail. checks 0x108 to see if test passed or failed
     (0x133, 0x10e, "PressSpaceThenExit"),
     (0x16f, 0x106, "PrintCtrlCToExit"), # prints out "(CONTROL-C TO EXIT)"
     (0x18b, 0x100, "Init"),
-    (0x1ee, 0x118, "Fn_1ee"), # not called
-    (0x291, 0x10c, "Fn_291"), # not called
+    (0x1ee, 0x118, "WaitForReady"),
+    (0x291, 0x10c, "WaitNotFIn"),
 ]
 
 if __name__ == "__main__":
@@ -28,16 +29,20 @@ if __name__ == "__main__":
 
     for (addr, indirect_addr, name) in functions:
         memory_addr_info[base_address + addr].label = name
-        memory_addr_info[indirect_addr].label = name
+        if indirect_addr is not None:
+            memory_addr_info[indirect_addr].label = name
         entry_points.append(base_address + addr)
 
     body_addr = parse_header(memory, base_address, base_address)
 
     scan_strings(memory, body_addr)
+    scan_call_args(memory, body_addr)
 
     entry_points.append(0x9ae2)
     entry_points.append(0x9d45)
     entry_points.append(0x9e08)
     entry_points.append(0x9ea7)
+
+    read_annotations("roms/Diag_F4_1133CMD.comments")
 
     disassemble(memory)
