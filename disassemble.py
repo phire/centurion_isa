@@ -694,7 +694,7 @@ if __name__ == "__main__":
 
     all_args.add_argument("-i", "--input", required=True, help="input file")
     all_args.add_argument("-s", "--start", required=True, help="starting address of this file")
-    all_args.add_argument("-a", "--annotations", help="annotations file")
+    all_args.add_argument("-a", "--annotations", action='append', help="annotations file")
     args = vars(all_args.parse_args())
 
     filename = args["input"]
@@ -703,8 +703,8 @@ if __name__ == "__main__":
     entry_points.append(base_address)
     memory_addr_info[base_address].label = "Start"
 
-    if args["annotations"]:
-        read_annotations(args["annotations"])
+    for ann_filename in args["annotations"]:
+        read_annotations(ann_filename)
 
     with open(filename, "rb") as f:
         bytes = f.read()
