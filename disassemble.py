@@ -480,7 +480,7 @@ instructions = [
 # 70
 
     B("01110001 NNNNNNNN NNNNNNNN", "jump #{N:#06x}", abolsute_branch_uncondtionional),
-    B("01110010 NNNNNNNN NNNNNNNN", "jump @({N:#06x}) ;", kill_branch),
+    B("01110010 NNNNNNNN NNNNNNNN", "jump @({N:#06x})", kill_branch),
     B("01110011 SSSSSSSS", "jump (PC{S:+#05x})", relative_branch_unconditional),
     B("01110101 NNNNNNNN", "jump (A + {N:#04x})", kill_branch),
     B("01110110", "syscall", kill_branch), # "Return to interrupt level 15"
