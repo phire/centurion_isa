@@ -17,11 +17,11 @@ L_0108:
 0112:    90 05 06     ld AX, #0x0506
 0115:    b1 00 fe     st AX, (0x00fe)
 0118:    83 ed        ld AL, (PC-0x13)	 ; 0xc5
-011a:    a1 04 3d     st AL, (0x043d)
-011d:    a1 05 6e     st AL, (0x056e)
-0120:    90 00 f0     ld AX, #0x00f0	 ; Stack at 0xf0 ???
+011a:    a1 04 3d     st AL, (0x043d)	 ; Patch ld AL, #0xc5 instruction at addr 043c
+011d:    a1 05 6e     st AL, (0x056e)	 ; Patch ld BL, #0xc5 instruction at addr 056d
+0120:    90 00 f0     ld AX, #0x00f0	 ; Initialize stack
 0123:    5f           mov SP, AX
-0124:    80 f1        ld AL, #0xf1
+0124:    80 f1        ld AL, #0xf1	 ; This sends RTZ command to our disks.
 0126:    7b 19        call (PC+0x19) L_0141
 0128:    80 f5        ld AL, #0xf5
 012a:    7b 15        call (PC+0x15) L_0141
@@ -33,7 +33,8 @@ L_0108:
 0136:    73 37        jump (PC+0x37) L_016f
 
 L_0138:
-0138:    61 00 1a     ld RT, (0x001a)	 ; Clearly corrupt here
+    ; We go here is sense1 switch is set (DIAG board is present)
+0138:    61 00 1a     ld RT, (0x001a)	 ; The binary is clearly corrupt here
 013b:    50 54        add RT, RT
 013d:    ff           (0xff)
 013e:    ec           (0xec)
@@ -43,62 +44,62 @@ Entry_0x13f:
 
 L_0141:
     ; Self-modifying code ahead!!!
-    ; The function at L_014b probes for DSK board at base address (AL << 16) + 0x40
+    ; The function at L_014b probes for 8 units on a DSK board at base address (AL << 16) + 0x40
     ; and, if successful, sends an RTZ command.
     ; These four stores patch the base address in the code below
 0141:    a3 09        st AL, (PC+0x9)	 ; 14c
 0143:    a3 0d        st AL, (PC+0xd)	 ; 152
-0145:    a3 16        st AL, (PC+0x16)
-0147:    a3 1a        st AL, (PC+0x1a)
-0149:    80 07        ld AL, #0x07
+0145:    a3 16        st AL, (PC+0x16)	 ; 015d
+0147:    a3 1a        st AL, (PC+0x1a)	 ; 0163
+0149:    80 07        ld AL, #0x07	 ; Start probing from unit 7
 
 L_014b:
+    ; Probe drive units from 7 to 0 and send RTZ command to connected ones
 014b:    a1 fd 40     st AL, (0xfd40)	 ; Unit select
-014e:    d0 30 00     ld BX, #0x3000	 ; Should be a READ command ?
+014e:    d0 30 00     ld BX, #0x3000	 ; BL = 0 (RTZ), BH = value to check flags against
 0151:    c1 fd 45     ld BL, (0xfd45)	 ; Read command register ??? Some flaga ???
 0154:    42 23        and BL, BH	 ; command_reg & 0x30
 0156:    41 23        sub BL, BH
-0158:    15 11        bnz L_016b	 ; Should be 0x30. If not, we decrement AL and repeat the whole thing
+0158:    15 11        bnz L_016b	 ; Should be 0x30. If not, skip this unit (not present)
 015a:    c0 03        ld BL, #0x03
 015c:    e1 fd 48     st BL, (0xfd48)	 ; RTZ (recalibrate)
 015f:    d0 30 00     ld BX, #0x3000
 
 L_0162:
-0162:    c1 fd 45     ld BL, (0xfd45)	 ; Wait for command_reg & 0x30 == 0x30 ( busy ?)
+0162:    c1 fd 45     ld BL, (0xfd45)	 ; Wait for command_reg & 0x30 == 0x30; this indicates drive ready
 0165:    42 23        and BL, BH
 0167:    41 23        sub BL, BH
 0169:    15 f7        bnz L_0162
 
 L_016b:
-016b:    29           dec! AL
+016b:    29           dec! AL	 ; Next unit, down to 0
 016c:    17 dd        ble L_014b
 016e:    09           ret
 
 L_016f:
+    ; Continuation of boot process
 016f:    90 10 00     ld AX, #0x1000
 0172:    5b           or! BX, AX
-0173:    5c           mov DX, AX
+0173:    5c           mov DX, AX	 ; DX = 4096
 
 L_0174:
-0174:    8a           ld AL, (RT)
-0175:    c0 ff        ld BL, #0xff
+    ; This locates end of RAM, effectively probing how much RAM we've got
+0174:    8a           ld AL, (RT)	 ; Preserve original (RT) value
+0175:    c0 ff        ld BL, #0xff	 ; Try to store 0xff
 0177:    ea           st BL, (RT)
-0178:    ca           ld BL, (RT)
-0179:    14 0a        bz L_0185
-017b:    aa           st AL, (RT)
-017c:    50 64        add RT, DX
-017e:    90 f0 00     ld AX, #0xf000
+0178:    ca           ld BL, (RT)	 ; Load it back
+0179:    14 0a        bz L_0185	 ; Exit if we got zero (failed to store)
+017b:    aa           st AL, (RT)	 ; Put original value back
+017c:    50 64        add RT, DX	 ; RT += 4096 (page size ?)
+017e:    90 f0 00     ld AX, #0xf000	 ; Reached 0xf000 ?
 0181:    51 40        sub AX, RT
-0183:    15 ef        bnz L_0174
+0183:    15 ef        bnz L_0174	 ; Repeat until we reach 0xf000
 
 L_0185:
-0185:    69 03 3d     st RT, (0x033d)	 ; Corrupt here
-0188:    55           (0x55)
-
-Entry_0x189:
-0189:    42 50        and AH, RL
-018b:    32 fd        special30
-018d:    55 f1        mov AX, HX
+0185:    69 03 3d     st RT, (0x033d)	 ; Store final address of our RAM
+0188:    55 42        mov BX, RT
+018a:    50 32        add BX, BX
+018c:    fd 55 f1     stb? A, [0x555f1]	 ; This looks like a severely corrupt binary, can't continue
 018f:    04           fsi
 0190:    a0 50        st AL, #0x50
 0192:    32 fe        special30
@@ -385,9 +386,11 @@ L_0339:
 0339:    71 01 bb     jump #0x01bb L_01bb
 
 L_033c:
-033c:    d0 80 00     ld BX, #0x8000
-033f:    58           add! BX, AX
-0340:    75 20        jump (A + 0x20)
+033c:    d0           (0xd0)
+033d:    80 00        (0x8000)	 ; This variable stores end of RAM
+033f:    58
+0340:    75
+0341:    20
 0342:    10, "\nHDIPL 6.2"
 034e:    4, "NAME"
 0354:    4, "DISK"
@@ -510,7 +513,8 @@ L_042a:
 L_043a:
 043a:    32 80        clr EX
 043c:    80 c5        ld AL, #0xc5
-043e:    75 60        jump (A + 0x60)
+043e:    75 60        jump (A + 0x60)	 ; This should jump to 0x125, but that isn't a valid location
+                                     	 ; Most likely our binary is corrupt around here
 
 L_0440:
 0440:    c5 81        ld BL, (EX)+
