@@ -551,7 +551,18 @@ def recursive_disassemble(memory, entry):
 
         pc = next_pc
 
-def disassemble(memory, entry_points):
+def escape_char(c):
+    # if char is printable, print it
+    if c >= 32 and c <= 126:
+        return chr(c)
+    elif c == 10: # else escape it
+        return "\\n"
+    elif c == 13:
+        return "\\r"
+    else:
+        return f"\\x{c:02x}"
+
+def disassemble(memory):
     for entry in entry_points:
         recursive_disassemble(memory, entry)
 
@@ -580,19 +591,25 @@ def disassemble(memory, entry_points):
             str += f"{i:04x}:    \""
 
             while c := memory[i] & 0x7f:
-                # if char is printable, print it
-                if c >= 32 and c <= 126:
-                    str += chr(c)
-                elif c == 10: # else escape it
-                    str += "\\n"
-                elif c == 13:
-                    str += "\\r"
-                else:
-                    str += f"\\x{c:02x}"
+                str += escape_char(c)
                 i += 1
             str += "\\0\""
 
             i += 1
+
+        elif info.type == "pstring16":
+            # Pascal-style string, prefixed by a WORD of length.
+            # Note high bit still needs to be stripped
+            l = (memory[i] & 0x7f) * 256 + (memory[i + 1] & 0x7f)
+            str += f"{i:04x}:    {l:d}, \""
+            i += 2
+
+            for j in range(0, l):
+                c = memory[i + j] & 0x7f
+                str += escape_char(c)
+            str += "\""
+
+            i += l
 
         elif info.type != None:
             value = struct.unpack_from(info.type, memory[i:i+4])[0]
