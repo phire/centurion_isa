@@ -1,8 +1,6 @@
 import struct
 from disassemble import *
 
-entry_points = []
-
 def labelname(name):
     name = name.replace(" ", "_")
     return "Entry_" + "".join([c for c in name if c.isalnum() or c in "_"])
