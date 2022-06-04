@@ -1,19 +1,43 @@
 0x108,	pre_comment 	; Entry point
 0x109 ,	comment	; Initialize some vars
 0x118 ,	comment	; 0xc5
-0x120 ,	comment	; Stack at 0xf0 ???
-0x138 ,	comment	; Clearly corrupt here
+0x11a ,	comment	; Patch ld AL, #0xc5 instruction at addr 043c
+0x11d ,	comment	; Patch ld BL, #0xc5 instruction at addr 056d
+0x120 ,	comment	; Initialize stack
+0x124 ,	comment	; This sends RTZ command to our disks.
+0x138,	pre_comment 	; We go here is sense1 switch is set (DIAG board is present)
+0x138 ,	comment	; The binary is clearly corrupt here
 0x141,	pre_comment 	; Self-modifying code ahead!!!
-	 	; The function at L_014b probes for DSK board at base address (AL << 16) + 0x40
+	 	; The function at L_014b probes for 8 units on a DSK board at base address (AL << 16) + 0x40
 	 	; and, if successful, sends an RTZ command.
 	 	; These four stores patch the base address in the code below
 0x141 ,	comment	; 14c
 0x143 ,	comment	; 152
+0x145 ,	comment	; 015d
+0x147 ,	comment	; 0163
+0x149 ,	comment	; Start probing from unit 7
+0x14b,	pre_comment 	; Probe drive units from 7 to 0 and send RTZ command to connected ones
 0x14b ,	comment	; Unit select
-0x14e ,	comment	; Should be a READ command ?
+0x14e ,	comment	; BL = 0 (RTZ), BH = value to check flags against
 0x151 ,	comment	; Read command register ??? Some flaga ???
 0x154 ,	comment	; command_reg & 0x30
-0x158 ,	comment	; Should be 0x30. If not, we decrement AL and repeat the whole thing
+0x158 ,	comment	; Should be 0x30. If not, skip this unit (not present)
 0x15c ,	comment	; RTZ (recalibrate)
-0x162 ,	comment	; Wait for command_reg & 0x30 == 0x30 ( busy ?)
-0x185 ,	comment	; Corrupt here
+0x162 ,	comment	; Wait for command_reg & 0x30 == 0x30; this indicates drive ready
+0x16b ,	comment	; Next unit, down to 0
+0x16f,	pre_comment 	; Continuation of boot process
+0x173 ,	comment	; DX = 4096
+0x174,	pre_comment 	; This locates end of RAM, effectively probing how much RAM we've got
+0x174 ,	comment	; Preserve original (RT) value
+0x175 ,	comment	; Try to store 0xff
+0x178 ,	comment	; Load it back
+0x179 ,	comment	; Exit if we got zero (failed to store)
+0x17b ,	comment	; Put original value back
+0x17c ,	comment	; RT += 4096 (page size ?)
+0x17e ,	comment	; Reached 0xf000 ?
+0x183 ,	comment	; Repeat until we reach 0xf000
+0x185 ,	comment	; Store final address of our RAM
+0x18c ,	comment	; This looks like a severely corrupt binary, can't continue
+0x33d ,	comment	; This variable stores end of RAM
+0x43e ,	comment	; This should jump to 0x125, but that isn't a valid location
+		; Most likely our binary is corrupt around here
