@@ -641,9 +641,9 @@ def disassemble(memory):
         if info.comment:
             indent = len(str)
             lines = info.comment.split("\n")
-            str += f" ; {lines[0]}"
+            str += f"\t ; {lines[0]}"
             for line in lines[1:]:
-                str += "\n" + " " * indent + f" ; {line}"
+                str += "\n" + " " * indent + f"\t ; {line}"
 
         print(str)
 
