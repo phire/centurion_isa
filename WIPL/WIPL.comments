@@ -1,19 +1,19 @@
-0x108,	pre_comment , Entry point
-0x109 	,comment,	 Initialize some vars
-0x118 	,comment,	 0xc5
-0x120 	,comment,	 Stack at 0xf0 ???
-0x138 	,comment,	 Clearly corrupt here
-0x141,	pre_comment , Self-modifying code ahead!!!
-	,	 , The function at L_014b probes for DSK board at base address (AL << 16) + 0x40
-	,	 , and, if successful, sends an RTZ command.
-	,	 , These four stores patch the base address in the code below
-0x141 	,comment,	 14c
-0x143 	,comment,	 152
-0x14b 	,comment,	 Unit select
-0x14e 	,comment,	 Should be a READ command ?
-0x151 	,comment,	 Read command register ??? Some flaga ???
-0x154 	,comment,	 command_reg & 0x30
-0x158 	,comment,	 Should be 0x30. If not, we decrement AL and repeat the whole thing
-0x15c 	,comment,	 RTZ (recalibrate)
-0x162 	,comment,	 Wait for command_reg & 0x30 == 0x30 ( busy ?)
-0x185 	,comment,	 Corrupt here
+0x108,	pre_comment 	; Entry point
+0x109 ,	comment	; Initialize some vars
+0x118 ,	comment	; 0xc5
+0x120 ,	comment	; Stack at 0xf0 ???
+0x138 ,	comment	; Clearly corrupt here
+0x141,	pre_comment 	; Self-modifying code ahead!!!
+	 	; The function at L_014b probes for DSK board at base address (AL << 16) + 0x40
+	 	; and, if successful, sends an RTZ command.
+	 	; These four stores patch the base address in the code below
+0x141 ,	comment	; 14c
+0x143 ,	comment	; 152
+0x14b ,	comment	; Unit select
+0x14e ,	comment	; Should be a READ command ?
+0x151 ,	comment	; Read command register ??? Some flaga ???
+0x154 ,	comment	; command_reg & 0x30
+0x158 ,	comment	; Should be 0x30. If not, we decrement AL and repeat the whole thing
+0x15c ,	comment	; RTZ (recalibrate)
+0x162 ,	comment	; Wait for command_reg & 0x30 == 0x30 ( busy ?)
+0x185 ,	comment	; Corrupt here

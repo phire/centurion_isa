@@ -29,8 +29,8 @@ for line in lines:
         # We've found an address. Dump the accumulated pre_comments
         prefix = hex(address) + ",\tpre_comment"
         for text in pre_comment:
-            print(prefix, ",", text)
-            prefix = "\t,\t"
+            print(prefix, "\t;", text)
+            prefix = "\t"
         pre_comment = []
 
     if comment_start == -1:
@@ -41,14 +41,14 @@ for line in lines:
     text = line[comment_start + 1:].strip()
 
     if address is not None:
-        print(hex(address), "\t,comment,\t", text)
+        print(hex(address), ",\tcomment\t;", text)
         # This possibly starts a multi-line comment
         continuation = True
         continue;
 
     # An empty line with a sole comment. It can be a part of a multi-line comment
     if (continuation):
-        print("\t,\t,", text)
+        print("\t\t;", text)
     else:
         # This is part of a pre-comment. We don't know the address, so
         # accumulate these lines until we find one.
