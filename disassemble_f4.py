@@ -40,4 +40,4 @@ if __name__ == "__main__":
     entry_points.append(0x9e08)
     entry_points.append(0x9ea7)
 
-    disassemble(memory, entry_points)
+    disassemble(memory)
