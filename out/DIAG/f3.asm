@@ -118,7 +118,7 @@ PressSpaceThenExit:
 9128:    7a 01 12     call @(0x0112)
 912b:    "\r\nPRESS SPACE\x07\r\n\0"
 913c:    7a 01 02     call @(0x0102)
-913f:    72 01 00     jump @(0x0100) ;
+913f:    72 01 00     jump @(0x0100)
 
 L_9142:
 9142:    7a 01 12     call @(0x0112)
@@ -197,7 +197,7 @@ L_91eb:
 91fa:    "*** BUSY DID NOT CLEAR ***\0"
 9215:    a1 f1 0b     st AL, (0xf10b)
 9218:    a1 f1 0c     st AL, (0xf10c)
-921b:    72 01 0e     jump @(0x010e) ;
+921b:    72 01 0e     jump @(0x010e)
 
 L_921e:
 921e:    60 03 e8     ld RT, #0x03e8
@@ -212,7 +212,7 @@ L_9221:
 922b:    "*** FOUT NEVER CAME ON ***\0"
 9246:    a1 f1 0b     st AL, (0xf10b)
 9249:    a1 f1 0c     st AL, (0xf10c)
-924c:    72 01 0e     jump @(0x010e) ;
+924c:    72 01 0e     jump @(0x010e)
 
 L_924f:
 924f:    03           fcn
@@ -254,7 +254,7 @@ L_928c:
 929a:    "*** FIN DID NOT GO OFF ***\r\n\0"
 92b7:    a1 f1 0b     st AL, (0xf10b)
 92ba:    a1 f1 0c     st AL, (0xf10c)
-92bd:    72 01 0e     jump @(0x010e) ;
+92bd:    72 01 0e     jump @(0x010e)
 
 L_92c0:
 92c0:    65 a1        ld RT, (SP)+
@@ -266,17 +266,16 @@ L_92c0:
 92c7:    80
 92c8:    7d
 92c9:    00
-92ca:    f8
-92cb:    08
-92cc:    73
-92cd:    09
+92ca:    f8 08        (0xf808)
+92cc:    73 09        jump (PC+0x09) L_92d7
 
 Entry_FLOPPY_COMMAND_BUFFER_TEST:
 92ce:    90 01 80     ld AX, #0x0180
 92d1:    50 80        add AX, EX
 92d3:    7d 00        call (A + 0x00)
-92d5:    f8
-92d6:    00
+92d5:    f8 00        (0xf800)
+
+L_92d7:
 92d7:    7a 01 06     call @(0x0106)
 92da:    32 60        clr DX
 92dc:    60 00 c8     ld RT, #0x00c8
@@ -332,23 +331,21 @@ L_932e:
 933b:    15 f1        bnz L_932e
 933d:    20 70        inc DL
 933f:    7a 01 04     call @(0x0104)
-9342:    02           fsn
-9343:    da           ld BX, (RT)
+9342:    02 da        (0x2da)
 
 L_9344:
 9344:    7a 01 12     call @(0x0112)
 9347:    "*** COMMAND BUFFER ERROR ***\0"
 9364:    a1 f1 0b     st AL, (0xf10b)
 9367:    a1 f1 0c     st AL, (0xf10c)
-936a:    72 01 0e     jump @(0x010e) ;
+936a:    72 01 0e     jump @(0x010e)
 
 Entry_CMD_AUX_MEMORY_TEST:
 936d:    90 01 80     ld AX, #0x0180
 9370:    50 80        add AX, EX
 9372:    7d 00        call (A + 0x00)
-9374:    f8 08 7a     stb? A, [0x0087a]
-9377:    01           nop
-9378:    06           fsc
+9374:    f8 08        (0xf808)
+9376:    7a 01 06     call @(0x0106)
 9379:    32 60        clr DX
 937b:    60 3f ff     ld RT, #0x3fff
 937e:    55 60        mov AX, DX
@@ -430,8 +427,7 @@ L_940b:
 941b:    95 a1        ld AX, (SP)+
 941d:    20 70        inc DL
 941f:    7a 01 04     call @(0x0104)
-9422:    03           fcn
-9423:    79
+9422:    03 79        (0x379)
 
 L_9424:
 9424:    a1 f1 0b     st AL, (0xf10b)
@@ -452,15 +448,14 @@ L_9424:
 945f:    7a 01 0a     call @(0x010a)
 9462:    7a 01 12     call @(0x0112)
 9465:    " ***\0"
-946a:    72 01 0e     jump @(0x010e) ;
+946a:    72 01 0e     jump @(0x010e)
 
 Entry_CMD_SEEK_TEST:
 946d:    90 01 80     ld AX, #0x0180
 9470:    50 80        add AX, EX
 9472:    7d 00        call (A + 0x00)
-9474:    f8 08 7a     stb? A, [0x0087a]
-9477:    01           nop
-9478:    06           fsc
+9474:    f8 08        (0xf808)
+9476:    7a 01 06     call @(0x0106)
 9479:    d0 41 4d     ld BX, #0x414d
 947c:    90 81 00     ld AX, #0x8100
 947f:    b5 21        st AX, (BX)+
@@ -480,7 +475,7 @@ Entry_CMD_SEEK_TEST:
 L_949d:
 949d:    a1 f1 0b     st AL, (0xf10b)
 94a0:    a1 f1 0c     st AL, (0xf10c)
-94a3:    72 01 0e     jump @(0x010e) ;
+94a3:    72 01 0e     jump @(0x010e)
 
 L_94a6:
 94a6:    80 45        ld AL, #0x45
@@ -546,14 +541,14 @@ L_9523:
 9527:    b1 41 52     st AX, (0x4152)
 952a:    17 9a        ble L_94c6
 952c:    7a 01 04     call @(0x0104)
-952f:    04           fsi
-9530:    79 90 01     call #0x9001 L_9001
-9533:    80 50        ld AL, #0x50
-9535:    80 7d        ld AL, #0x7d
-9537:    00           HALT
-9538:    f8 08 7a     stb? A, [0x0087a]
-953b:    01           nop
-953c:    06           fsc
+952f:    04 79        (0x479)
+
+Entry_CMD_READ_TEST:
+9531:    90 01 80     ld AX, #0x0180
+9534:    50 80        add AX, EX
+9536:    7d 00        call (A + 0x00)
+9538:    f8 08        (0xf808)
+953a:    7a 01 06     call @(0x0106)
 953d:    80 41        ld AL, #0x41
 953f:    a2 01 14     st AL, @(0x0114)
 9542:    7a 01 0c     call @(0x010c)
@@ -603,7 +598,7 @@ L_9581:
 L_9599:
 9599:    a1 f1 0b     st AL, (0xf10b)
 959c:    a1 f1 0c     st AL, (0xf10c)
-959f:    72 01 0e     jump @(0x010e) ;
+959f:    72 01 0e     jump @(0x010e)
 
 L_95a2:
 95a2:    90 e6 ff     ld AX, #0xe6ff
@@ -636,21 +631,20 @@ L_95d6:
 95de:    19 a1        ble L_9581
 95e0:    a1 f1 0a     st AL, (0xf10a)
 95e3:    7a 01 04     call @(0x0104)
-95e6:    05           fci
-95e7:    3d           sll! AX
+95e6:    05 3d        (0x53d)
 
 Entry_FLOPPY_SEEK_TEST:
-; This code is basically the same as Finch hard drive,
-; the same board is used, so i didn't do a thorough disassembly.
-; The only things to note here is that floppy geometry is
-; 75 tracks, 16 sectors, 400 bytes per sector.
+    ; This code is basically the same as Finch hard drive,
+    ; the same board is used, so i didn't do a thorough disassembly.
+    ; The only things to note here is that floppy geometry is
+    ; 75 tracks, 16 sectors, 400 bytes per sector.
 95e8:    90 01 80     ld AX, #0x0180
 95eb:    50 80        add AX, EX
-95ed:    7d 00        call (A + 0x00)	; Init
-95ef:    f8 00				; FFC_BASE
+95ed:    7d 00        call (A + 0x00)	 ; Init
+95ef:    f8 00        (0xf800)	 ; FFC_BASE
 95f1:    7a 01 06     call @(0x0106)
 95f4:    d0 41 4d     ld BX, #0x414d
-95f7:    90 81 01     ld AX, #0x8101	; Unit number 1 ???
+95f7:    90 81 01     ld AX, #0x8101	 ; Unit number 1 ???
 95fa:    b5 21        st AX, (BX)+
 95fc:    80 82        ld AL, #0x82
 95fe:    a9           st AL, (BX)
@@ -668,7 +662,7 @@ Entry_FLOPPY_SEEK_TEST:
 L_9617:
 9617:    a1 f1 0b     st AL, (0xf10b)
 961a:    a1 f1 0c     st AL, (0xf10c)
-961d:    72 01 0e     jump @(0x010e) ;
+961d:    72 01 0e     jump @(0x010e)
 
 L_9620:
 9620:    80 45        ld AL, #0x45
@@ -679,7 +673,7 @@ L_9620:
 962d:    90 83 01     ld AX, #0x8301
 9630:    b9           st AX, (BX)
 9631:    80 01        ld AL, #0x01
-9633:    a1 41 b1     st AL, (0x41b1)	; One track per step
+9633:    a1 41 b1     st AL, (0x41b1)	 ; One track per step
 
 L_9636:
 9636:    90 41 4d     ld AX, #0x414d
@@ -711,10 +705,10 @@ L_9674:
 9679:    c1 41 50     ld BL, (0x4150)
 967c:    40 31        add AL, BL
 967e:    a1 41 50     st AL, (0x4150)
-9681:    c0 4b        ld BL, #0x4b	; 75 tracks
+9681:    c0 4b        ld BL, #0x4b	 ; 75 tracks
 9683:    49           sub! BL, AL
 9684:    15 b0        bnz L_9636
-9686:    80 ff        ld AL, #0xff	; -1 track per step, going backwards
+9686:    80 ff        ld AL, #0xff	 ; -1 track per step, going backwards
 9688:    a1 41 b1     st AL, (0x41b1)
 968b:    73 a9        jump (PC-0x57) L_9636
 
@@ -724,17 +718,17 @@ L_968d:
 9691:    a1 41 50     st AL, (0x4150)
 9694:    17 a0        ble L_9636
 9696:    7a 01 04     call @(0x0104)
-9699:    05           fci
-969a:    f4
+9699:    05 f4        (0x5f4)
 
 Entry_FLOPPY_READ_TEST:
-; Floppy read test also steps in power of 2, but starts at track 1.
-969B:    90 01 80     ld AX, #0x0180
-         50 80        add AX, EX
-	 7d 00        call (A + 0x00)	; Init
-96a2:    f8 00				; FFC_BASE
-         7a 01 06     call @(0x0106)	; PrintCtrlCToExit
-; Restart point is here
+    ; Floppy read test also steps in power of 2, but starts at track 1.
+969b:    90 01 80     ld AX, #0x0180
+969e:    50 80        add AX, EX
+96a0:    7d 00        call (A + 0x00)
+    ; Init
+96a2:    f8 00        (0xf800)	 ; FFC_BASE
+    ; Restart point is here
+96a4:    7a 01 06     call @(0x0106)	 ; PrintCtrlCToExit
 96a7:    80 41        ld AL, #0x41
 96a9:    a2 01 14     st AL, @(0x0114)
 96ac:    7a 01 0c     call @(0x010c)
@@ -747,19 +741,19 @@ Entry_FLOPPY_READ_TEST:
 96bd:    12 3d        bn L_96fc
 96bf:    90 41 4d     ld AX, #0x414d
 96c2:    5c           mov DX, AX
-96c3:    90 81 01     ld AX, #0x8101	; 01 is a unit number
+96c3:    90 81 01     ld AX, #0x8101	 ; 01 is a unit number
 96c6:    b5 61        st AX, (DX)+
-96c8:    90 83 01     ld AX, #0x8301	; This includes track number, we start from 1
+96c8:    90 83 01     ld AX, #0x8301	 ; This includes track number, we start from 1
 96cb:    b5 61        st AX, (DX)+
-96cd:    d0 10 00     ld BX, #0x1000	; 16 sectors
+96cd:    d0 10 00     ld BX, #0x1000	 ; 16 sectors
 
 L_96d0:
 96d0:    80 88        ld AL, #0x88
-96d2:    a5 61        st AL, (DX)+	; 0x88
-96d4:    e5 61        st BL, (DX)+	; Sector number
-96d6:    2a           clr! AL		; 0
+96d2:    a5 61        st AL, (DX)+	 ; 0x88
+96d4:    e5 61        st BL, (DX)+	 ; Sector number
+96d6:    2a           clr! AL	 ; 0
 96d7:    a5 61        st AL, (DX)+
-96d9:    90 01 90     ld AX, #0x0190	; sector length = 400 bytes
+96d9:    90 01 90     ld AX, #0x0190	 ; sector length = 400 bytes
 96dc:    b5 61        st AX, (DX)+
 96de:    20 30        inc BL
 96e0:    21 20        dec BH
@@ -780,10 +774,10 @@ L_96e4:
 L_96fc:
 96fc:    a1 f1 0b     st AL, (0xf10b)
 96ff:    a1 f1 0c     st AL, (0xf10c)
-9702:    72 01 0e     jump @(0x010e) ;
+9702:    72 01 0e     jump @(0x010e)
 
 L_9705:
-9705:    90 e6 ff     ld AX, #0xe6ff	; 6400 bytes = 16 sectors * 400 bytes
+9705:    90 e6 ff     ld AX, #0xe6ff	 ; 6400 bytes = 16 sectors * 400 bytes
 9708:    2f 02        dma_load_count WX
 970a:    90 01 1c     ld AX, #0x011c
 970d:    2f 00        dma_load_addr WX
@@ -795,26 +789,28 @@ L_9705:
 971b:    13 16        bnn L_9733
 971d:    7a 01 12     call @(0x0112)
 9720:    "TRACK=\0"
-9727:    81 41 50     ld AL, (0x4150)	; track number
+9727:    81 41 50     ld AL, (0x4150)	 ; track number
 972a:    7a 01 0a     call @(0x010a)
 972d:    7a 01 12     call @(0x0112)
 9730:    "\r\n\0"
 
 L_9733:
-9733:    81 41 50     ld AL, (0x4150)	; track *= 2
+9733:    81 41 50     ld AL, (0x4150)	 ; track *= 2
 9736:    2d           sll! AL
 9737:    a1 41 50     st AL, (0x4150)
-973a:    c0 4b        ld BL, #0x4b	; 75 tracks ??? 
+973a:    c0 4b        ld BL, #0x4b	 ; 75 tracks ???
 973c:    49           sub! BL, AL
 973d:    19 a5        ble L_96e4
 973f:    a1 f1 0a     st AL, (0xf10a)
-9742:    7a 01 04     call @(0x0104)	; FinishTest
-9745:    06 a7				; Restart point = 0x96a7
-; This is self test for this ROM, the same as in F4, nothing interesting
-         90 01 80     ld AX, #0x0180
-	 50 80        add AX, EX
- 	 7d 00        call (A + 0)
-974e:    00 00				; Controller base address - not used
+9742:    7a 01 04     call @(0x0104)	 ; FinishTest
+9745:    06 a7        (0x6a7)	 ; Restart point = 0x96a7
+
+Entry_ROM_SELF_TEST:
+    ; This is self test for this ROM, the same as in F4, nothing interesting
+9747:    90 01 80     ld AX, #0x0180
+974a:    50 80        add AX, EX
+974c:    7d 00        call (A + 0x00)
+974e:    00 00        (0x0)	 ; Controller base address - not used
 9750:    55 86        mov DX, EX
 9752:    3a           clr! AX
 
@@ -831,15 +827,15 @@ L_9753:
 9765:    7a 01 12     call @(0x0112)
 9768:    "\n\r*** PASS ***\0"
 9777:    a1 f1 0a     st AL, (0xf10a)
-977a:    72 01 0e     jump @(0x010e) ;
+977a:    72 01 0e     jump @(0x010e)
 
 L_977d:
 977d:    7a 01 12     call @(0x0112)
 9780:    "*** FAIL ***\0"
 978d:    a1 f1 0b     st AL, (0xf10b)
 9790:    a1 f1 0c     st AL, (0xf10c)
-9793:    72 01 0e     jump @(0x010e) ;
-9796:    8c				; Checksum byte
+9793:    72 01 0e     jump @(0x010e)
+9796:    8c	 ; Checksum byte
 9797:    00
 9798:    00
 9799:    00
