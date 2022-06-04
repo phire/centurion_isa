@@ -59,4 +59,4 @@ if __name__ == "__main__":
     scan_strings(memory, body_addr)
 
 
-    disassemble(memory, entry_points)
+    disassemble(memory)

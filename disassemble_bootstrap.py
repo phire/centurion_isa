@@ -5,7 +5,7 @@ from disassemble import *
 filename = "roms/bootstrap_unscrambled.bin"
 base_address = 0xfc00
 
-entry_points = [
+entry_points += [
     0xfc00,
 
     # Our disasmebler doesn't currently find all code in bootstrap ROM, so we manually add some
@@ -123,4 +123,4 @@ if __name__ == "__main__":
 
     apply_comments(comments)
 
-    disassemble(memory, entry_points)
+    disassemble(memory)

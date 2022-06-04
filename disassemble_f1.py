@@ -193,4 +193,4 @@ if __name__ == "__main__":
 
 
 
-    disassemble(memory, entry_points)
+    disassemble(memory)

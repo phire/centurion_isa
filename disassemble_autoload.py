@@ -5,7 +5,7 @@ from disassemble import *
 filename = "roms/DSK-MM1702A"
 base_address = 0xef00
 
-entry_points = [
+entry_points += [
     0xef00,
 ]
 
@@ -26,4 +26,4 @@ if __name__ == "__main__":
 
     # apply_comments(comments)
 
-    disassemble(memory, entry_points)
+    disassemble(memory)

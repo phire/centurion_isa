@@ -5,8 +5,6 @@ import struct
 
 signed_wildcards = ("S")
 
-label_id = 0
-
 class MemInfo:
     def __init__(self):
         self.instruction = None
@@ -16,6 +14,7 @@ class MemInfo:
         self.comment = None
         self.pre_comment = None
 
+entry_points = []
 memory_addr_info = defaultdict(MemInfo)
 
 def bitstring_to_int(bitstring, signed=False):
@@ -652,27 +651,65 @@ def apply_comments(comments):
     for addr, comment in comments:
         memory_addr_info[addr].comment = comment
 
+def read_annotations(name):
+    with open(name, "r") as f:
+        for line in f.readlines():
+           items = line.split(',')
+
+           type = items[1].strip()
+
+           if type == "":
+               text = "\n" + items[2].strip()
+               # Continuation of a multi-line comment
+               if pre_comment:
+                   memory_addr_info[last_comment].pre_comment += text
+               else:
+                   memory_addr_info[last_comment].comment += text
+               continue
+           
+           address = int(items[0].strip(), 0)
+
+           if type == "code":
+               entry_points.append(address)
+               memory_addr_info[address].label = f"Entry_{hex(address)}"
+           elif type == "comment":
+               memory_addr_info[address].comment = items[2].strip()
+               last_comment = address
+               pre_comment = False
+           elif type == "pre_comment":
+               memory_addr_info[address].pre_comment = items[2].strip()
+               last_comment = address
+               pre_comment = True
+           else:
+               memory_addr_info[address].visited = True
+               memory_addr_info[address].type = type
+
 if __name__ == "__main__":
     # print(disassemble_instruction( b"\x1510", 0).next_pc)]
     # exit()
 
-    import sys
+    import argparse
 
-    filename = sys.argv[1]
-    base_address = int(sys.argv[2], 16)
+    all_args = argparse.ArgumentParser()
 
-    with open(sys.argv[1], "rb") as f:
+    all_args.add_argument("-i", "--input", required=True, help="input file")
+    all_args.add_argument("-s", "--start", required=True, help="starting address of this file")
+    all_args.add_argument("-a", "--annotations", help="annotations file")
+    args = vars(all_args.parse_args())
+
+    filename = args["input"]
+    base_address = int(args["start"], 16)
+
+    entry_points.append(base_address)
+    memory_addr_info[base_address].label = "Start"
+
+    if args["annotations"]:
+        read_annotations(args["annotations"])
+
+    with open(filename, "rb") as f:
         bytes = f.read()
 
     memory = b"\0" * (base_address) + bytes + b"\0" * (0x10000 - (len(bytes) + base_address))
 
-    entry_points = []
-
-    for arg in sys.argv[3:]:
-        entry = int(arg, 16)
-        entry_points.append(entry)
-        memory_addr_info[entry].label = f"Entry{label_id}"
-        label_id += 1
-
-    disassemble(memory, entry_points)
+    disassemble(memory)
 
