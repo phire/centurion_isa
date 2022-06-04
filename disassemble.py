@@ -654,7 +654,8 @@ def apply_comments(comments):
 def read_annotations(name):
     with open(name, "r") as f:
         for line in f.readlines():
-           items = line.split(',')
+           # Limit splitting to two commas, comments may contain commas themselves
+           items = line.split(',', 2)
 
            type = items[1].strip()
 
