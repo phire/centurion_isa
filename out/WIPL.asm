@@ -33,7 +33,7 @@ L_0108:
 0136:    73 37        jump (PC+0x37) L_016f
 
 L_0138:
-    ; We go here is sense1 switch is set (DIAG board is present)
+    ; We go here if sense1 switch is set (DIAG board is present)
 0138:    61 00 1a     ld RT, (0x001a)	 ; The binary is clearly corrupt here
 013b:    50 54        add RT, RT
 013d:    ff           (0xff)
@@ -99,15 +99,17 @@ L_0185:
 0185:    69 03 3d     st RT, (0x033d)	 ; Store final address of our RAM
 0188:    55 42        mov BX, RT
 018a:    50 32        add BX, BX
-018c:    fd 55 f1     stb? A, [0x555f1]	 ; This looks like a severely corrupt binary, can't continue
+018c:    fd           st BX, (SP)	 ; This looks like a severely corrupt binary, can't continue
+018d:    55 f1        mov AX, HX
 018f:    04           fsi
 0190:    a0 50        st AL, #0x50
 0192:    32 fe        special30
 0194:    70           unknown
 0195:    f1 04 a2     st BX, (0x04a2)
 0198:    50 32        add BX, BX
-019a:    fe 70 55     stb? A, [0x67055]
-019d:    2a           clr! AL
+019a:    fe           st BX, (GX)
+019b:    70           unknown
+019c:    55 2a        mov SP, BX
 019e:    d0 fe e5     ld BX, #0xfee5
 01a1:    50 42        add BX, RT
 01a3:    f1 02 b6     st BX, (0x02b6)
@@ -123,69 +125,59 @@ L_01b6:
 01b6:    a1 03 77     st AL, (0x0377)
 01b9:    73 42        jump (PC+0x42) L_01fd
 
-L_01bb:
+BadUserInput:
+    ; The code jumps here when some checks, done on user input (numbers etc), fail
+    ; So, we think it's "invalid user input"
 01bb:    04           fsi
 01bc:    47 4c        unk7 GH, RH
 01be:    00           HALT
-01bf:    ff 02 65     stb? A, [0x70265]
-01c2:    47 9c        unk7 GH, EL
+01bf:    ff           st BX, (HX)
+01c0:    02           fsn
+01c1:    65 47        ld RT, +0x47(RT)
+01c3:    9c           ld AX, (EX)
 01c4:    09           ret
-01c5:    a0
-01c6:    03
-01c7:    65
-01c8:    79
-01c9:    05
-01ca:    5a
-01cb:    79
-01cc:    05
-01cd:    36
-01ce:    03
-01cf:    42
-01d0:    80
-01d1:    8a
-01d2:    a1
-01d3:    03
-01d4:    44
-01d5:    7c
-01d6:    f5
-01d7:    03
-01d8:    4e
-01d9:    79
-01da:    06
-01db:    09
-01dc:    03
-01dd:    63
-01de:    79
-01df:    05
-01e0:    36
-01e1:    03
-01e2:    54
-01e3:    79
-01e4:    06
-01e5:    09
-01e6:    03
-01e7:    74
-01e8:    79
-01e9:    05
-01ea:    36
-01eb:    03
-01ec:    5a
-01ed:    80
-01ee:    01
-01ef:    a1
-01f0:    05
-01f1:    ea
-01f2:    79
-01f3:    06
-01f4:    09
-01f5:    03
-01f6:    78
-01f7:    79
-01f8:    05
-01f9:    36
-01fa:    03
-01fb:    60
-01fc:    05
+
+Entry_0x1c5:
+01c5:    a0 03        st AL, #0x03
+01c7:    65 79 05     ld RT, +0x5-(DX)
+01ca:    5a           and! BX, AX
+01cb:    79 05 36     call #0x0536 PrintString
+01ce:    03 42        (0x342)	 ; WIPL version string
+
+Entry_0x1d0:
+01d0:    80 8a        ld AL, #0x8a
+01d2:    a1 03 44     st AL, (0x0344)
+01d5:    7c f5        unknown_7c
+01d7:    03 4e        (0x34e)	 ; "NAME"
+
+Entry_0x1d9:
+01d9:    79 06 09     call #0x0609 ReadLine
+01dc:    03 63        (0x363)	 ; name_buffer
+
+Entry_0x1de:
+01de:    79 05 36     call #0x0536 PrintString
+01e1:    03 54        (0x354)	 ; "DISK"
+
+Entry_0x1e3:
+01e3:    79 06 09     call #0x0609 ReadLine
+01e6:    03 74        (0x374)	 ; disk_buffer
+
+Entry_0x1e8:
+01e8:    79 05 36     call #0x0536 PrintString
+01eb:    03 5a        (0x35a)	 ; "CODE"
+
+Entry_0x1ed:
+01ed:    80 01        ld AL, #0x01
+01ef:    a1 05 ea     st AL, (0x05ea)
+01f2:    79 06 09     call #0x0609 ReadLine
+01f5:    03 78        (0x378)	 ; code_buffer
+
+Entry_0x1f7:
+01f7:    79 05 36     call #0x0536 PrintString
+01fa:    03 60        (0x360)
+
+Entry_0x1fc:
+01fc:    05           fci
 
 L_01fd:
 01fd:    79 06 78     call #0x0678 L_0678
@@ -226,16 +218,16 @@ L_021c:
 023a:    19 03        ble L_023f
 
 L_023c:
-023c:    71 01 bb     jump #0x01bb L_01bb
+023c:    71 01 bb     jump #0x01bb BadUserInput
 
 L_023f:
 023f:    e2 04 b1     st BL, @(0x04b1)
-0242:    90 03 78     ld AX, #0x0378
+0242:    90 03 78     ld AX, #0x0378	 ; code_buffer
 0245:    5e           mov EX, AX
 0246:    95 81        ld AX, (EX)+
 0248:    14 06        bz L_0250
-024a:    79 03 c9     call #0x03c9 L_03c9
-024d:    b1 01 05     st AX, (0x0105)
+024a:    79 03 c9     call #0x03c9 StrToNum
+024d:    b1 01 05     st AX, (0x0105)	 ; InputValue
 
 L_0250:
 0250:    60 00 0e     ld RT, #0x000e
@@ -243,12 +235,15 @@ L_0250:
 0256:    00           HALT
 0257:    85 88 08     ld AL, +0x8(EX)+
 025a:    28           inc! AL
-025b:    14 09        bz L_0266
+025b:    14 09        bz L_0266	 ; Proceed to disk code checking
 025d:    04           fsi
-025e:    79 05 36     call #0x0536 L_0536
-0261:    03           fcn
-0262:    7f 73        clear_data_bank??
-0264:    d7 ff        ld BX, unknown
+025e:    79 05 36     call #0x0536 PrintString
+0261:    03 7f        (0x37f)	 ; Incorrect disk format
+
+Entry_0x263:
+0263:    73 d7        jump (PC-0x29) L_023c
+0265:    ff	 ; This is a "check disk code" flag.
+           	 ; If zero, the check will be bypassed.
 
 L_0266:
 0266:    95 88 06     ld AX, +0x6(EX)+
@@ -262,30 +257,33 @@ L_0266:
 L_0273:
 0273:    d0 3c b1     ld BX, #0x3cb1
 0276:    44 32        xor BH, BL
-0278:    54 02        xor BX, AX
+0278:    54 02        xor BX, AX	 ; disk_code = 0x3cb1 ^ AX
 027a:    81 02 65     ld AL, (0x0265)
 027d:    15 05        bnz L_0284
-027f:    f1 01 05     st BX, (0x0105)
+027f:    f1 01 05     st BX, (0x0105)	 ; InputValue = expected_disk_code
 0282:    73 0f        jump (PC+0x0f) L_0293
 
 L_0284:
-0284:    91 01 05     ld AX, (0x0105)
-0287:    59           sub! BX, AX
+    ; Check the disk code
+0284:    91 01 05     ld AX, (0x0105)	 ; InputValue
+0287:    59           sub! BX, AX	 ; BX = expected disk code
 0288:    14 09        bz L_0293
 028a:    04           fsi
-028b:    79 05 36     call #0x0536 L_0536
-028e:    03           fcn
-028f:    9f           ld AX, (HX)
-0290:    71 04 9d     jump #0x049d L_049d
+028b:    79 05 36     call #0x0536 PrintString
+028e:    03 9f        (0x39f)	 ; Incorrect disk code
+0290:    71
+0291:    04
+0292:    9d
 
 L_0293:
+    ; Disk code is correct
 0293:    95 88 04     ld AX, +0x4(EX)+
 0296:    44 10        xor AH, AL
 0298:    d0 3c b1     ld BX, #0x3cb1
 029b:    54 02        xor BX, AX
-029d:    91 01 05     ld AX, (0x0105)
+029d:    91 01 05     ld AX, (0x0105)	 ; InputValue
 02a0:    50 20        add AX, BX
-02a2:    35 03        special30
+02a2:    35 03        special30	 ; Should be sll ax, 4
 02a4:    5b           or! BX, AX
 02a5:    79 04 b0     call #0x04b0 L_04b0
 02a8:    00           HALT
@@ -343,6 +341,8 @@ L_02f4:
 02fa:    91 04 a2     ld AX, (0x04a2)
 02fd:    58           add! BX, AX
 02fe:    f5 a2        st BX, -(SP)
+
+Entry_0x300:
 0300:    95 81        ld AX, (EX)+
 0302:    61 04 8a     ld RT, (0x048a)
 0305:    50 04        add RT, AX
@@ -379,11 +379,11 @@ L_0321:
 0334:    90
 
 L_0335:
-0335:    fe e5 7b     stb? A, [0x6e57b]
-0338:    03           fcn
+0335:    fe           st BX, (GX)
+0336:    e5 7b 03     st BL, unknown_indexed
 
 L_0339:
-0339:    71 01 bb     jump #0x01bb L_01bb
+0339:    71 01 bb     jump #0x01bb BadUserInput
 
 L_033c:
 033c:    d0           (0xd0)
@@ -400,7 +400,7 @@ Entry_0x360:
 0360:    00           HALT
 0361:    01           nop
 0362:    8c           ld AL, (EX)
-0363:    00           HALT
+0363:    00           HALT	 ; name_buffer
 0364:    05           fci
 0365:    a0 a0        st AL, #0xa0
 0367:    a0 a0        st AL, #0xa0
@@ -409,21 +409,27 @@ Entry_0x360:
 036d:    a0 a0        st AL, #0xa0
 036f:    a0 a0        st AL, #0xa0
 0371:    a0 a0        st AL, #0xa0
-0373:    a0 00        st AL, #0x00
-0375:    01           nop
-0376:    b0 b0 00     st AX, #0xb000
-0379:    00           HALT
-037a:    a0 a0        st AL, #0xa0
-037c:    a0 a0        st AL, #0xa0
+0373:    a0           (0xa0)
+0374:    00	 ; disk_buffer
+0375:    01
+0376:    b0 b0        (0xb0b0)
+0378:    00	 ; code_buffer
+0379:    00
+037a:    a0
+037b:    a0
+037c:    a0
+037d:    a0
 037e:    a0
 037f:    30, "AB 47 - INCORRECT DISK FORMAT\r"
 039f:    28, "AB 48 - INCORRECT DISK CODE\r"
 
-Entry_0x3bd:
+AsciiToHex:
+    ; This function converts one hexadecimal digit from its ASCII representation
+    ; to value. Result is returned in BL.
 03bd:    c0 b9        ld BL, #0xb9
 03bf:    49           sub! BL, AL
 03c0:    19 03        ble L_03c5
-03c2:    c0 ff        ld BL, #0xff
+03c2:    c0 ff        ld BL, #0xff	 ; -1 is returned on error
 03c4:    09           ret
 
 L_03c5:
@@ -431,183 +437,257 @@ L_03c5:
 03c7:    49           sub! BL, AL
 03c8:    09           ret
 
-L_03c9:
-03c9:    8c           ld AL, (EX)
-03ca:    7b f1        call (PC-0x0f) Entry_0x3bd
+StrToNum:
+    ; Parses a numeric string, pointed to by EX, and returns the
+    ; parsed value in AX. EX is updated to point at the first non-digit character
+03c9:    8c           ld AL, (EX)	 ; Check the first character
+03ca:    7b f1        call (PC-0x0f) AsciiToHex
 03cc:    17 03        ble L_03d1
-03ce:    71 01 bb     jump #0x01bb L_01bb
+03ce:    71 01 bb     jump #0x01bb BadUserInput	 ; The character is invalid
 
 L_03d1:
+    ; A correcr digit has been entered
 03d1:    3a           clr! AX
-03d2:    b5 a2        st AX, -(SP)
-03d4:    85 81        ld AL, (EX)+
-03d6:    7b e5        call (PC-0x1b) Entry_0x3bd
+03d2:    b5 a2        st AX, -(SP)	 ; value = 0
+
+L_03d4:
+03d4:    85 81        ld AL, (EX)+	 ; Do the conversion again, increment pointer this time
+03d6:    7b e5        call (PC-0x1b) AsciiToHex
 03d8:    17 05        ble L_03df
-03da:    31 80        dec EX
-03dc:    95 a1        ld AX, (SP)+
+03da:    31 80        dec EX	 ; Invalid character, restore the pointer
+                            	 ; It now points behind our number
+03dc:    95 a1        ld AX, (SP)+	 ; return value
 03de:    09           ret
 
 L_03df:
-03df:    9d           ld AX, (SP)
-03e0:    ed           st BL, (SP)
+03df:    9d           ld AX, (SP)	 ; AX = value
+03e0:    ed           st BL, (SP)	 ; (SP) = digit
 03e1:    3d           sll! AX
-03e2:    5d           mov BX, AX
-03e3:    35 01        special30
-03e5:    58           add! BX, AX
-03e6:    3a           clr! AX
+03e2:    5d           mov BX, AX	 ; BX = value << 1
+03e3:    35 01        special30	 ; should be sll AX, 2
+03e5:    58           add! BX, AX	 ; BX = (value << 1) + (value << 3) = value * 10
+03e6:    3a           clr! AX	 ; AX = digit
 03e7:    8d           ld AL, (SP)
-03e8:    58           add! BX, AX
-03e9:    fd 73 e8     stb? A, [0x573e8]
-03ec:    95 a1        ld AX, (SP)+
-03ee:    95 a1        ld AX, (SP)+
-03f0:    b3 36        st AX, (PC+0x36)
-03f2:    95 a1        ld AX, (SP)+
-03f4:    30 05        special30
-03f6:    b3 5c        st AX, (PC+0x5c)
-03f8:    3a           clr! AX
-03f9:    39           dec! AX
-03fa:    b3 5e        st AX, (PC+0x5e)
-03fc:    7b 53        call (PC+0x53) L_0451
-03fe:    d0 00 4c     ld BX, #0x004c
-0401:    59           sub! BX, AX
-0402:    15 26        bnz L_042a
-0404:    95 88 1b     ld AX, +0x1b(EX)+
-0407:    b3 40        st AX, (PC+0x40)
-0409:    50 48        add EX, RT
-040b:    30 80        inc EX
-040d:    7b 31        call (PC+0x31) L_0440
-040f:    30 80        inc EX
-
-L_0411:
-0411:    7b 2d        call (PC+0x2d) L_0440
-0413:    45 33        mov BL, BL
-0415:    14 13        bz L_042a
-
-L_0417:
-0417:    d5 81        ld BX, (EX)+
-0419:    93 2e        ld AX, (PC+0x2e)
-041b:    58           add! BX, AX
-041c:    99           ld AX, (BX)
-041d:    50 60        add AX, DX
-041f:    b9           st AX, (BX)
-0420:    31 41        special30
-0422:    18 f3        bgt L_0417
-
-L_0424:
-0424:    85 81        ld AL, (EX)+
-0426:    73 e9        jump (PC-0x17) L_0411
+03e8:    58           add! BX, AX	 ; BX += digit
+03e9:    fd           st BX, (SP)	 ; value = value * 10 + digit
+03ea:    73 e8        jump (PC-0x18) L_03d4
+03ec:    95
+03ed:    a1
+03ee:    95
+03ef:    a1
+03f0:    b3
+03f1:    36
+03f2:    95
+03f3:    a1
+03f4:    30
+03f5:    05
+03f6:    b3
+03f7:    5c
+03f8:    3a
+03f9:    39
+03fa:    b3
+03fb:    5e
+03fc:    7b
+03fd:    53
+03fe:    d0
+03ff:    00
+0400:    4c
+0401:    59
+0402:    15
+0403:    26
+0404:    95
+0405:    88
+0406:    1b
+0407:    b3
+0408:    40
+0409:    50
+040a:    48
+040b:    30
+040c:    80
+040d:    7b
+040e:    31
+040f:    30
+0410:    80
+0411:    7b
+0412:    2d
+0413:    45
+0414:    33
+0415:    14
+0416:    13
+0417:    d5
+0418:    81
+0419:    93
+041a:    2e
+041b:    58
+041c:    99
+041d:    50
+041e:    60
+041f:    b9
+0420:    31
+0421:    41
+0422:    18
+0423:    f3
+0424:    85
+0425:    81
+0426:    73
+0427:    e9
 0428:    00
 0429:    00
+042a:    55
+042b:    44
+042c:    14
+042d:    0c
+042e:    55
+042f:    40
+0430:    39
+0431:    67
+0432:    4a
+0433:    86
+0434:    50
+0435:    46
+0436:    50
+0437:    48
+0438:    73
+0439:    ea
+043a:    32
+043b:    80
+043c:    80
+043d:    c5
+043e:    75	 ; This should jump to 0x125, but that isn't a valid location
+           	 ; Most likely our binary is corrupt around here
+043f:    60
+0440:    c5
+0441:    81
+0442:    16
+0443:    0d
+0444:    3a
+0445:    85
+0446:    81
+0447:    bd
+0448:    90
+0449:    00
+044a:    00
+044b:    5c
+044c:    95
+044d:    81
+044e:    50
+044f:    06
+0450:    09
+0451:    6d
+0452:    a2
+0453:    90
+0454:    00
+0455:    00
+0456:    65
+0457:    08
+0458:    01
+0459:    90
+045a:    00
+045b:    00
+045c:    38
+045d:    b3
+045e:    fb
+045f:    50
+0460:    04
+0461:    d3
+0462:    c5
+0463:    59
+0464:    11
+0465:    30
+0466:    3a
+0467:    b3
+0468:    f1
+0469:    93
+046a:    e9
+046b:    30
+046c:    02
+046d:    b3
+046e:    e5
+046f:    65
+0470:    08
+0471:    01
+0472:    5d
+0473:    98
+0474:    17
+0475:    20
+0476:    3a
+0477:    85
+0478:    28
+0479:    02
+047a:    28
+047b:    14
+047c:    20
+047d:    29
+047e:    5d
+047f:    3d
+0480:    58
+0481:    93
+0482:    1f
+0483:    58
+0484:    94
+0485:    ce
+0486:    f3
+0487:    cc
+0488:    3b
+0489:    60
+048a:    57
+048b:    79
+048c:    50
+048d:    04
+048e:    7b
+048f:    20
+0490:    01
+0491:    63
+0492:    c1
+0493:    65
+0494:    48
+0495:    01
+0496:    7b
+0497:    18
+0498:    00
+0499:    65
+049a:    a1
+049b:    73
+049c:    a3
 
-L_042a:
-042a:    55 44        mov RT, RT
-042c:    14 0c        bz L_043a
-042e:    55 40        mov AX, RT
-0430:    39           dec! AX
-0431:    67 4a        ld RT, unknown
-0433:    86 50        ld AL, unknown
-0435:    46 50        unk6 AH, RL
-0437:    48           add! BL, AL
-0438:    73 ea        jump (PC-0x16) L_0424
-
-L_043a:
-043a:    32 80        clr EX
-043c:    80 c5        ld AL, #0xc5
-043e:    75 60        jump (A + 0x60)	 ; This should jump to 0x125, but that isn't a valid location
-                                     	 ; Most likely our binary is corrupt around here
-
-L_0440:
-0440:    c5 81        ld BL, (EX)+
-0442:    16 0d        blt L_0451
-0444:    3a           clr! AX
-0445:    85 81        ld AL, (EX)+
-0447:    bd           st AX, (SP)
-0448:    90 00 00     ld AX, #0x0000
-044b:    5c           mov DX, AX
-044c:    95 81        ld AX, (EX)+
-044e:    50 06        add DX, AX
-0450:    09           ret
-
-L_0451:
-0451:    6d a2        st RT, -(SP)
-0453:    90 00 00     ld AX, #0x0000
-0456:    65 08 01     ld RT, +0x1(AX)+
-0459:    90 00 00     ld AX, #0x0000
-045c:    38           inc! AX
-045d:    b3 fb        st AX, (PC-0x5)
-045f:    50 04        add RT, AX
-0461:    d3 c5        ld BX, (PC-0x3b)
-0463:    59           sub! BX, AX
-0464:    11 30        bnc L_0496
-0466:    3a           clr! AX
-0467:    b3 f1        st AX, (PC-0xf)
-0469:    93 e9        ld AX, (PC-0x17)
-046b:    30 02        special30
-046d:    b3 e5        st AX, (PC-0x1b)
-046f:    65 08 01     ld RT, +0x1(AX)+
-0472:    5d           mov BX, AX
-0473:    98           ld AX, (AX)
-0474:    17 20        ble L_0496
-0476:    3a           clr! AX
-0477:    85 28 02     ld AL, +0x2(BX)+
-047a:    28           inc! AL
-047b:    14 20        bz L_049d
-047d:    29           dec! AL
-047e:    5d           mov BX, AX
-047f:    3d           sll! AX
-0480:    58           add! BX, AX
-0481:    93 1f        ld AX, (PC+0x1f)
-0483:    58           add! BX, AX
-0484:    94 ce        ld AX, @(PC-0x32)
-0486:    f3 cc        st BX, (PC-0x34)
-0488:    3b           not! AX
-0489:    60 57 79     ld RT, #0x5779
-048c:    50 04        add RT, AX
-048e:    7b 20        call (PC+0x20) L_04b0
-0490:    01           nop
-0491:    63 c1        ld RT, (PC-0x3f)
-0493:    65 48 01     ld RT, +0x1(RT)+
-
-L_0496:
-0496:    7b 18        call (PC+0x18) L_04b0
-0498:    00           HALT
-0499:    65 a1        ld RT, (SP)+
-049b:    73 a3        jump (PC-0x5d) L_0440
-
-L_049d:
-049d:    00           HALT
-049e:    73 fd        jump (PC-0x03) L_049d
+Stop:
+049d:    00
+049e:    73
+049f:    fd
 04a0:    7d
 04a1:    55
-04a2:    7b
-04a3:    c5
 
-L_04a4:
+LoadAddress:
+04a2:    7b c5        (0x7bc5)
+
+SetDmaForSectorLoad:
 04a4:    2f 00        dma_load_addr WX
-04a6:    90 fe 6f     ld AX, #0xfe6f
+04a6:    90 fe 6f     ld AX, #0xfe6f	 ; 400 bytes == 1 sector
 04a9:    2f 02        dma_load_count WX
 04ab:    2f 04        dma_set_mode 0
 04ad:    2f 06        dma_enable
 04af:    09           ret
 
 L_04b0:
+    ; I think the function which starts here loads a list of sectors.
+    ; Perhaps we're dealing with a filesystem here
 04b0:    90 f1 40     ld AX, #0xf140
 04b3:    5e           mov EX, AX
-04b4:    93 ea        ld AX, (PC-0x16)
+04b4:    93 ea        ld AX, (PC-0x16)	 ; Load AX from 0x04a0
 04b6:    c5 41        ld BL, (RT)+
 04b8:    14 02        bz L_04bc
-04ba:    93 e6        ld AX, (PC-0x1a)
+04ba:    93 e6        ld AX, (PC-0x1a)	 ; AX = LoadAddress
 
 L_04bc:
-04bc:    b3 10        st AX, (PC+0x10)
-04be:    7b e4        call (PC-0x1c) L_04a4
+04bc:    b3 10        st AX, (PC+0x10)	 ; Preserve loading address (patch instruction below)
+04be:    7b e4        call (PC-0x1c) SetDmaForSectorLoad	 ; Setup DMA to read
 04c0:    7b 1f        call (PC+0x1f) L_04e1
 04c2:    80 00        ld AL, #0x00
 04c4:    a5 88 08     st AL, +0x8(EX)+
 04c7:    7b 2c        call (PC+0x2c) L_04f5
 04c9:    24 00        srl* AH
 04cb:    15 05        bnz L_04d2
-04cd:    90 7d 55     ld AX, #0x7d55
+04cd:    90 7d 55     ld AX, #0x7d55	 ; AX = loading address (this insn is patched)
 04d0:    5e           mov EX, AX
 04d1:    09           ret
 
@@ -683,7 +763,7 @@ L_0533:
 0533:    bd           st AX, (SP)
 0534:    73 e1        jump (PC-0x1f) L_0517
 
-L_0536:
+PrintString:
 0536:    7b 22        call (PC+0x22) L_055a
 0538:    7e 45        long_call
 053a:    9a           ld AX, (RT)
@@ -798,177 +878,119 @@ L_0595:
 05c1:    01
 05c2:    73
 05c3:    de
-05c4:    7e
-05c5:    81
-05c6:    55
-05c7:    98
-05c8:    f2
-05c9:    00
-05ca:    83
-05cb:    a2
-05cc:    f6
-05cd:    19
-05ce:    00
-05cf:    90
-05d0:    05
-05d1:    a6
-05d2:    d7
-05d3:    6e
-05d4:    3a
-05d5:    d7
-05d6:    60
-05d7:    80
-05d8:    06
-05d9:    f6
-05da:    19
-05db:    0a
-05dc:    f6
-05dd:    19
-05de:    0e
-05df:    e6
-05e0:    60
-05e1:    45
-05e2:    10
-05e3:    14
-05e4:    fa
-05e5:    c0
-05e6:    80
-05e7:    43
-05e8:    31
-05e9:    c0
-05ea:    00
-05eb:    15
-05ec:    03
-05ed:    79
-05ee:    05
-05ef:    64
-05f0:    c0
-05f1:    e0
-05f2:    49
-05f3:    16
-05f4:    05
-05f5:    c0
-05f6:    20
-05f7:    49
-05f8:    45
-05f9:    31
-05fa:    c0
-05fb:    8a
-05fc:    49
-05fd:    15
-05fe:    07
-05ff:    d0
-0600:    06
-0601:    6f
-0602:    14
-0603:    02
-0604:    55
-0605:    24
-0606:    7f
-0607:    81
-0608:    09
-0609:    93
-060a:    f5
-060b:    b3
-060c:    58
-060d:    90
-060e:    06
-060f:    6f
-0610:    b3
-0611:    ee
-0612:    9a
-0613:    6d
-0614:    a2
-0615:    38
-0616:    5b
-0617:    80
-0618:    bd
-0619:    79
-061a:    05
-061b:    64
-061c:    7b
-061d:    a6
-061e:    c0
-061f:    88
-0620:    49
-0621:    14
-0622:    05
-0623:    c0
-0624:    95
-0625:    49
-0626:    15
-0627:    1c
-0628:    d5
-0629:    a4
-062a:    a3
-062b:    0c
-062c:    30
-062d:    20
-062e:    51
-062f:    42
-0630:    14
-0631:    0c
-0632:    80
-0633:    a0
-0634:    79
-0635:    05
-0636:    64
-0637:    80
-0638:    95
-0639:    7c
-063a:    fa
-063b:    3f
-063c:    73
-063d:    de
-063e:    80
-063f:    86
-0640:    7c
-0641:    f3
-0642:    73
-0643:    d8
-0644:    c0
-0645:    8d
-0646:    49
-0647:    14
-0648:    12
-0649:    a3
-064a:    0c
-064b:    95
-064c:    a4
-064d:    d0
-064e:    00
-064f:    85
-0650:    58
-0651:    51
-0652:    42
-0653:    17
-0654:    06
-0655:    3e
-0656:    80
-0657:    b0
-0658:    aa
-0659:    73
-065a:    c1
-065b:    95
-065c:    a4
-065d:    38
-065e:    51
-065f:    40
-0660:    65
-0661:    a1
-0662:    b5
-0663:    45
-0664:    d0
-0665:    01
-0666:    bb
-0667:    f3
-0668:    97
-0669:    22
-066a:    30
-066b:    e1
-066c:    05
-066d:    ea
-066e:    09
+
+L_05c4:
+05c4:    7e 81        long_call
+05c6:    55 98        mov EX, EX
+05c8:    f2 00 83     st BX, @(0x0083)
+05cb:    a2 f6 19     st AL, @(0xf619)
+05ce:    00           HALT
+05cf:    90 05 a6     ld AX, #0x05a6
+05d2:    d7 6e        ld BX, unknown
+05d4:    3a           clr! AX
+05d5:    d7 60        ld BX, unknown
+05d7:    80 06        ld AL, #0x06
+05d9:    f6 19        st BX, unknown
+05db:    0a           reti
+05dc:    f6 19        st BX, unknown
+05de:    0e           delay 4.5ms
+
+L_05df:
+05df:    e6 60        st BL, unknown
+05e1:    45 10        mov AH, AL
+05e3:    14 fa        bz L_05df
+05e5:    c0 80        ld BL, #0x80
+05e7:    43 31        or AL, BL
+05e9:    c0 00        ld BL, #0x00
+05eb:    15 03        bnz L_05f0
+05ed:    79 05 64     call #0x0564 L_0564
+
+L_05f0:
+05f0:    c0 e0        ld BL, #0xe0
+05f2:    49           sub! BL, AL
+05f3:    16 05        blt L_05fa
+05f5:    c0 20        ld BL, #0x20
+05f7:    49           sub! BL, AL
+05f8:    45 31        mov AL, BL
+
+L_05fa:
+05fa:    c0 8a        ld BL, #0x8a
+05fc:    49           sub! BL, AL
+05fd:    15 07        bnz L_0606
+05ff:    d0 06 6f     ld BX, #0x066f
+0602:    14 02        bz L_0606
+0604:    55 24        mov RT, BX
+
+L_0606:
+0606:    7f 81        clear_data_bank??
+0608:    09           ret
+
+ReadLine:
+    ; This routine supposedly reads a line from the terminal
+0609:    93 f5        ld AX, (PC-0xb)
+060b:    b3 58        st AX, (PC+0x58)
+060d:    90 06 6f     ld AX, #0x066f
+0610:    b3 ee        st AX, (PC-0x12)
+0612:    9a           ld AX, (RT)
+0613:    6d a2        st RT, -(SP)
+0615:    38           inc! AX
+0616:    5b           or! BX, AX
+0617:    80 bd        ld AL, #0xbd
+0619:    79 05 64     call #0x0564 L_0564
+
+L_061c:
+061c:    7b a6        call (PC-0x5a) L_05c4
+061e:    c0 88        ld BL, #0x88
+0620:    49           sub! BL, AL
+0621:    14 05        bz L_0628
+0623:    c0 95        ld BL, #0x95
+0625:    49           sub! BL, AL
+0626:    15 1c        bnz L_0644
+
+L_0628:
+0628:    d5 a4        ld BX, unknown_indexed
+062a:    a3 0c        st AL, (PC+0xc)
+062c:    30 20        inc BX
+062e:    51 42        sub BX, RT
+0630:    14 0c        bz L_063e
+0632:    80 a0        ld AL, #0xa0
+0634:    79 05 64     call #0x0564 L_0564
+0637:    80 95        ld AL, #0x95
+0639:    7c fa        unknown_7c
+063b:    3f           dec RT
+063c:    73 de        jump (PC-0x22) L_061c
+
+L_063e:
+063e:    80 86        ld AL, #0x86
+0640:    7c f3        unknown_7c
+0642:    73 d8        jump (PC-0x28) L_061c
+
+L_0644:
+0644:    c0 8d        ld BL, #0x8d
+0646:    49           sub! BL, AL
+0647:    14 12        bz L_065b
+0649:    a3 0c        st AL, (PC+0xc)
+064b:    95 a4        ld AX, unknown_indexed
+064d:    d0 00 85     ld BX, #0x0085
+0650:    58           add! BX, AX
+0651:    51 42        sub BX, RT
+0653:    17 06        ble L_065b
+0655:    3e           inc RT
+0656:    80 b0        ld AL, #0xb0
+0658:    aa           st AL, (RT)
+0659:    73 c1        jump (PC-0x3f) L_061c
+
+L_065b:
+065b:    95 a4        ld AX, unknown_indexed
+065d:    38           inc! AX
+065e:    51 40        sub AX, RT
+0660:    65 a1        ld RT, (SP)+
+0662:    b5 45        st AX, unknown_indexed
+0664:    d0 01 bb     ld BX, #0x01bb
+0667:    f3 97        st BX, (PC-0x69)
+0669:    22 30        clr BL
+066b:    e1 05 ea     st BL, (0x05ea)
+066e:    09           ret
 066f:    65
 0670:    a1
 0671:    3a

@@ -5,7 +5,7 @@
 0x11d ,	comment	; Patch ld BL, #0xc5 instruction at addr 056d
 0x120 ,	comment	; Initialize stack
 0x124 ,	comment	; This sends RTZ command to our disks.
-0x138,	pre_comment 	; We go here is sense1 switch is set (DIAG board is present)
+0x138,	pre_comment 	; We go here if sense1 switch is set (DIAG board is present)
 0x138 ,	comment	; The binary is clearly corrupt here
 0x141,	pre_comment 	; Self-modifying code ahead!!!
 	 	; The function at L_014b probes for 8 units on a DSK board at base address (AL << 16) + 0x40
@@ -38,6 +38,63 @@
 0x183 ,	comment	; Repeat until we reach 0xf000
 0x185 ,	comment	; Store final address of our RAM
 0x18c ,	comment	; This looks like a severely corrupt binary, can't continue
+0x1bb,	pre_comment 	; The code jumps here when some checks, done on user input (numbers etc), fail
+	 	; So, we think it's "invalid user input"
+0x1ce ,	comment	; WIPL version string
+0x1d7 ,	comment	; "NAME"
+0x1dc ,	comment	; name_buffer
+0x1e1 ,	comment	; "DISK"
+0x1e6 ,	comment	; disk_buffer
+0x1eb ,	comment	; "CODE"
+0x1f5 ,	comment	; code_buffer
+0x242 ,	comment	; code_buffer
+0x24d ,	comment	; InputValue
+0x25b ,	comment	; Proceed to disk code checking
+0x261 ,	comment	; Incorrect disk format
+0x265 ,	comment	; This is a "check disk code" flag.
+		; If zero, the check will be bypassed.
+0x278 ,	comment	; disk_code = 0x3cb1 ^ AX
+0x27f ,	comment	; InputValue = expected_disk_code
+0x284,	pre_comment 	; Check the disk code
+0x284 ,	comment	; InputValue
+0x287 ,	comment	; BX = expected disk code
+0x28e ,	comment	; Incorrect disk code
+0x293,	pre_comment 	; Disk code is correct
+0x29d ,	comment	; InputValue
+0x2a2 ,	comment	; Should be sll ax, 4
 0x33d ,	comment	; This variable stores end of RAM
+0x363 ,	comment	; name_buffer
+0x374 ,	comment	; disk_buffer
+0x378 ,	comment	; code_buffer
+0x3bd,	pre_comment 	; This function converts one hexadecimal digit from its ASCII representation
+	 	; to value. Result is returned in BL.
+0x3c2 ,	comment	; -1 is returned on error
+0x3c9,	pre_comment 	; Parses a numeric string, pointed to by EX, and returns the
+	 	; parsed value in AX. EX is updated to point at the first non-digit character
+0x3c9 ,	comment	; Check the first character
+0x3ce ,	comment	; The character is invalid
+0x3d1,	pre_comment 	; A correcr digit has been entered
+0x3d2 ,	comment	; value = 0
+0x3d4 ,	comment	; Do the conversion again, increment pointer this time
+0x3da ,	comment	; Invalid character, restore the pointer
+		; It now points behind our number
+0x3dc ,	comment	; return value
+0x3df ,	comment	; AX = value
+0x3e0 ,	comment	; (SP) = digit
+0x3e2 ,	comment	; BX = value << 1
+0x3e3 ,	comment	; should be sll AX, 2
+0x3e5 ,	comment	; BX = (value << 1) + (value << 3) = value * 10
+0x3e6 ,	comment	; AX = digit
+0x3e8 ,	comment	; BX += digit
+0x3e9 ,	comment	; value = value * 10 + digit
 0x43e ,	comment	; This should jump to 0x125, but that isn't a valid location
 		; Most likely our binary is corrupt around here
+0x4a6 ,	comment	; 400 bytes == 1 sector
+0x4b0,	pre_comment 	; I think the function which starts here loads a list of sectors.
+	 	; Perhaps we're dealing with a filesystem here
+0x4b4 ,	comment	; Load AX from 0x04a0
+0x4ba ,	comment	; AX = LoadAddress
+0x4bc ,	comment	; Preserve loading address (patch instruction below)
+0x4be ,	comment	; Setup DMA to read
+0x4cd ,	comment	; AX = loading address (this insn is patched)
+0x609,	pre_comment 	; This routine supposedly reads a line from the terminal
