@@ -561,6 +561,10 @@ def escape_char(c):
     else:
         return f"\\x{c:02x}"
 
+def get_pstring16_length(memory, addr):
+    # Parity is still applied to length bytes
+    return (memory[addr] & 0x7f) * 256 + (memory[addr + 1] & 0x7f)
+
 def disassemble(memory):
     for entry in entry_points:
         recursive_disassemble(memory, entry)
@@ -599,7 +603,7 @@ def disassemble(memory):
         elif info.type == "pstring16":
             # Pascal-style string, prefixed by a WORD of length.
             # Note high bit still needs to be stripped
-            l = (memory[i] & 0x7f) * 256 + (memory[i + 1] & 0x7f)
+            l = get_pstring16_length(memory, i)
             str += f"{i:04x}:    {l:d}, \""
             i += 2
 
@@ -651,7 +655,7 @@ def apply_comments(comments):
     for addr, comment in comments:
         memory_addr_info[addr].comment = comment
 
-def read_annotations(name):
+def read_annotations(name, memory):
     with open(name, "r") as f:
         for line in f.readlines():
            comment_pos = line.find(';')
@@ -701,6 +705,18 @@ def read_annotations(name):
            elif type != "":
                memory_addr_info[address].visited = True
                memory_addr_info[address].type = type
+               # Data is often embedded in the code, generate an entry point at the end
+               # so that disassembly continues.
+               if type[0:2] == ">B":
+                   entry_points.append(address + 1)
+               elif type[0:2] == ">H":
+                   entry_points.append(address + 2)
+               elif type == "cstring":
+                   while c := memory[address] & 0x7f:
+                       i += 1
+                   entry_points.append(address + 1)
+               elif type == "pstring16":
+                   entry_points.append(address + 2 + get_pstring16_length(memory, address))
 
            if comment is not None:
                memory_addr_info[address].comment = comment
@@ -726,13 +742,13 @@ if __name__ == "__main__":
     entry_points.append(base_address)
     memory_addr_info[base_address].label = "Start"
 
-    for ann_filename in args["annotations"]:
-        read_annotations(ann_filename)
-
     with open(filename, "rb") as f:
         bytes = f.read()
 
     memory = b"\0" * (base_address) + bytes + b"\0" * (0x10000 - (len(bytes) + base_address))
+
+    for ann_filename in args["annotations"]:
+        read_annotations(ann_filename, memory)
 
     disassemble(memory)
 
