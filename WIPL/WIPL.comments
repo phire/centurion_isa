@@ -38,8 +38,9 @@
 0x183 ,	comment	; Repeat until we reach 0xf000
 0x185 ,	comment	; Store final address of our RAM
 0x18c ,	comment	; This looks like a severely corrupt binary, can't continue
-0x1bb,	pre_comment 	; The code jumps here when some checks, done on user input (numbers etc), fail
-	 	; So, we think it's "invalid user input"
+0x1bb,	pre_comment 	; The code jumps here when for instance empty string was entered on CODE prompt
+	 	; According to known behavior, thus jumps back to WIPL prompt, effectively
+	 	; restarting it
 0x1ce ,	comment	; WIPL version string
 0x1d7 ,	comment	; "NAME"
 0x1dc ,	comment	; name_buffer
@@ -49,22 +50,33 @@
 0x1f5 ,	comment	; code_buffer
 0x242 ,	comment	; code_buffer
 0x24d,	pre_comment 	; EX points at the first non-numeric character after the code
-0x24d ,	comment	; InputValue
-0x257,	pre_comment 	; Here we have loaded something; EX is an address
+0x24d ,	comment	; Store entered_disk_code
+0x250 ,	comment	; Track 0 side 0 sector 15
+0x257,	pre_comment 	; EX is an address of the loaded sector
+0x257 ,	comment	; Disk format flag
+0x25a ,	comment	; Must be equal to 0xff
 0x25b ,	comment	; Proceed to disk code checking
 0x261 ,	comment	; Incorrect disk format
 0x265 ,	comment	; This is a "check disk code" flag.
 		; If zero, the check will be bypassed.
+0x266 ,	comment	; Disk code is derived from this value
 0x26a ,	comment	; This whole thing rotates AX right WITHOUT carry
-0x278 ,	comment	; disk_code = 0x3cb1 ^ AX
-0x27f ,	comment	; InputValue = expected_disk_code
+0x273 ,	comment	; Some more obfuscation
+0x278 ,	comment	; BX is the final expected value here
+0x27a ,	comment	; This is "request check" flag. We don't know how/where it's set.
+0x27d ,	comment	; If not zero, the check is required
+0x27f ,	comment	; entered_disk_code = expected_entered_disk_code
+0x282 ,	comment	; Bypass
 0x284,	pre_comment 	; Check the disk code
-0x284 ,	comment	; InputValue
-0x287 ,	comment	; BX = expected disk code
+0x284 ,	comment	; AX - entered_disk_code
+0x287 ,	comment	; BX = expected_disk_code
+0x288 ,	comment	; Proceed if there's a match
 0x28e ,	comment	; Incorrect disk code
 0x293,	pre_comment 	; Disk code is correct
-0x29d ,	comment	; InputValue
-0x2a2 ,	comment	; Should be sll ax, 4
+	 	; Note we're doing some further manipulations with it, i don't get the
+	 	; point, LoadSector routine doesn't use AX and BX, in fact it will overwrite them.
+0x29d ,	comment	; entered_disk_code
+0x2a5,	pre_comment 	; RT is also not changed here. Are we reloading 0x000e ? This is strange...
 0x33d ,	comment	; This variable stores end of RAM
 0x363 ,	comment	; name_buffer
 0x374 ,	comment	; disk_buffer
@@ -93,11 +105,33 @@
 0x43e ,	comment	; This should jump to 0x125, but that isn't a valid location
 		; Most likely our binary is corrupt around here
 0x4a6 ,	comment	; 400 bytes == 1 sector
-0x4b0,	pre_comment 	; I think the function which starts here loads a list of sectors.
-	 	; Perhaps we're dealing with a filesystem here
-0x4b4 ,	comment	; Load AX from 0x04a0
-0x4ba ,	comment	; AX = LoadAddress
-0x4bc ,	comment	; Preserve loading address (patch instruction below)
+0x4b0,	pre_comment 	; This function loads one sector from the drive.
+	 	; CHS address of the sector to read needs to be placed into X (RT) register
+	 	; in HAWK native format (CCCCCCCC CCCHSSSS) before calling this function.
+	 	; This routine uses two buffers, whose addresses are stored in two
+	 	; variables above. The buffer to use is chosen by the literal byte
+	 	; argument: 0 or 1. Address of the buffer is returned in EX.
+0x4b3 ,	comment	; EX = DSK_BASE
+0x4b4 ,	comment	; AX = LoadBuffer0
+0x4b8 ,	comment	; If literal argument is not 0...
+0x4ba ,	comment	; .. then AX = LoadBuffer1
+0x4bc ,	comment	; Preserve loading address (patch instruction at 04cd)
 0x4be ,	comment	; Setup DMA to read
+0x4c4 ,	comment	; READ command
+0x4c9,	pre_comment 	; Upon completion status register value will be in AX
+0x4c9 ,	comment	; Check HAWK_STATUS & 0x0100
+0x4cb ,	comment	; If bit set, recalibrate, seek and retry (read error)
 0x4cd ,	comment	; AX = loading address (this insn is patched)
+0x4d4 ,	comment	; RTZ command
+0x4dd ,	comment	; AX = loading address (from the patched insn)
+0x4df ,	comment	; Retry
+0x4ea ,	comment	; Write sector address register
+0x4ed ,	comment	; SEEK command
+0x4f5,	pre_comment 	; This location is only called when READ operation is initiated.
+	 	; I suggest it waits for data transfer to end.
+0x4f5 ,	comment	; HAWK status
+0x4f8 ,	comment	; Wait for STATUS & 0x01 == 0
+0x4fb,	pre_comment 	; And this waits for a generic operation completion
+0x4fb ,	comment	; HAWK status
+0x4fe ,	comment	; Wait for STATUS & 0x30 == 0x30
 0x609,	pre_comment 	; This routine supposedly reads a line from the terminal
