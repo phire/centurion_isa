@@ -48,11 +48,14 @@
 0x1eb ,	comment	; "CODE"
 0x1f5 ,	comment	; code_buffer
 0x242 ,	comment	; code_buffer
+0x24d,	pre_comment 	; EX points at the first non-numeric character after the code
 0x24d ,	comment	; InputValue
+0x257,	pre_comment 	; Here we have loaded something; EX is an address
 0x25b ,	comment	; Proceed to disk code checking
 0x261 ,	comment	; Incorrect disk format
 0x265 ,	comment	; This is a "check disk code" flag.
 		; If zero, the check will be bypassed.
+0x26a ,	comment	; This whole thing rotates AX right WITHOUT carry
 0x278 ,	comment	; disk_code = 0x3cb1 ^ AX
 0x27f ,	comment	; InputValue = expected_disk_code
 0x284,	pre_comment 	; Check the disk code
