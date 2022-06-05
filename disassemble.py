@@ -273,6 +273,23 @@ class Alu():
                 else:
                     return f"{op} {RegNames8[self.dest]}, {RegNames8[self.src]}"
 
+    class AluWithImmInstance():
+        def __init__(self, op, word, reg, imm):
+            self.newpc = None
+            self.op = op
+            self.word = word
+            self.reg = reg
+            self.imm = imm
+
+        def to_string(self, dict):
+            op = OPs[self.op]
+
+            if self.word:
+                return f"{op} {RegNames16[self.reg >> 1]}, {self.imm}"
+            else:
+                return f"{op} {RegNames8[self.reg]}, {self.imm}"
+
+
     def match(self, pc, bitstring, bytes):
 
         inst = bytes[0]
@@ -308,6 +325,18 @@ class Alu():
             bytetwo = bytes[1]
             dest = bytetwo & 0xf
             src = (bytetwo >> 4) & 0xf
+
+            if inst & 0xe0 == 0x20:
+                # This covers 20...27 and 30...37
+                # These operations operate between a register and immediate,
+                # which is encoded in low nibble ("dest")
+                sub_op = inst & 0xef
+                if sub_op != 0x22 and sub_op != 0x23:
+                    # Shifts and rotates effectively add 1 to 'imm' value
+                    dest += 1
+
+                bytes = [inst, bytetwo]
+                return InstructionMatch(pc, self.AluWithImmInstance(op, word, src, dest), bytes, {})
 
             if inst < 0x40 and dest != 0:
                 # these encoding make little sense, and there seems to be other instructions here
@@ -423,7 +452,6 @@ instructions = [
 
 # 20
     I("00100010 00110010", "cpu_id"), # Returns 0 on CPU5, something else on CPU6
-    I("00100xxx xxxxxxxx", "special20"),
 
 # 28
 
@@ -464,7 +492,6 @@ instructions = [
 # 30
     I("00111110", "inc {RegNames16[2]}"),
     I("00111111", "dec {RegNames16[2]}"),
-    I("00110xxx xxxxxxxx", "special30"),
 
 # 48
     # Special cases that don't match the general ALU pattern
