@@ -413,7 +413,7 @@ instructions = [
     B("00010100 SSSSSSSS", "bz", relative_branch),
     B("00010101 SSSSSSSS", "bnz", relative_branch),
     B("00010110 SSSSSSSS", "blt", relative_branch),
-    B("00010111 SSSSSSSS", "ble", relative_branch),
+    B("00010111 SSSSSSSS", "bp", relative_branch), # positive
     B("00011000 SSSSSSSS", "bgt", relative_branch),
     B("00011001 SSSSSSSS", "ble", relative_branch), # lessthan or equal
     B("00011010 SSSSSSSS", "bs1", relative_branch),
