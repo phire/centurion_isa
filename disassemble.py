@@ -391,13 +391,13 @@ instructions = [
 
     # Flag instructions:
     I("00000001", "nop"),
-    I("00000010", "fsn"),
-    I("00000011", "fcn"),
-    I("00000100", "fsi"), # enable interrupts
-    I("00000101", "fci"), # disable interrupts
-    I("00000110", "fsc"),
-    I("00000111", "fcc"),
-    I("00001000", "fca"), # Clears carry, sign, overflow and zero
+    I("00000010", "sf"), # set fault
+    I("00000011", "rf"), # clear fault
+    I("00000100", "ei"), # enable interrupts
+    I("00000101", "di"), # disable interrupts
+    I("00000110", "sl"), # set link/carry
+    I("00000111", "rl"), # clear link/carry
+    I("00001000", "cl"), # Complements carry
 
     B("00001001", "ret", kill_branch),
     I("00001010", "reti"), #, kill_branch),
