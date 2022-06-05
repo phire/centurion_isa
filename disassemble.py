@@ -191,7 +191,7 @@ class Memory():
             "({index})", # guess
             "({index})+",
             "-({index})",
-            "unknown_indexed"
+            "unknown_indexed",
             "unknown_indexed",
             "unknown_indexed",
             "unknown_indexed",
