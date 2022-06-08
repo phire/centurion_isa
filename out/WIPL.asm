@@ -34,8 +34,8 @@ L_0108:
 
 L_0138:
     ; We go here if sense1 switch is set (DIAG board is present)
-0138:    61 00 1a     ld RT, (0x001a)	 ; The binary is clearly corrupt here
-013b:    50 54        add RT, RT
+0138:    61 00 1a     ld RT, (0x001a)
+013b:    50 54        add RT, RT	 ; Wrong disassembly here
 013d:    ff           (0xff)
 013e:    ec           (0xec)
 013f:    73 44        jump (PC+0x44) L_0185
@@ -97,8 +97,8 @@ L_0185:
 0185:    69 03 3d     st RT, (0x033d)	 ; Store final address of our RAM
 0188:    55 42        mov BX, RT
 018a:    50 32        add BX, BX
-018c:    fd           st BX, (SP)	 ; This looks like a severely corrupt binary, can't continue
-018d:    55 f1        mov AX, HX
+018c:    fd           st BX, (SP)
+018d:    55 f1        mov AX, HX	 ; The code starting from here is definitely disassembled incorrectly
 018f:    04           ei
 0190:    a0 50        st AL, #0x50
 0192:    32 fe        clr HX, 14
@@ -109,8 +109,8 @@ L_0185:
 019b:    70           unknown
 019c:    55 2a        mov SP, BX
 019e:    d0 fe e5     ld BX, #0xfee5
-01a1:    50 42        add BX, RT
-01a3:    f1 02 b6     st BX, (0x02b6)
+01a1:    50 42        add BX, RT	 ; BX = top of RAM - 283
+01a3:    f1 02 b6     st BX, (0x02b6)	 ; This will be address of our trampoline code
 01a6:    80 bd        ld AL, #0xbd
 01a8:    a1 06 18     st AL, (0x0618)
 01ab:    90 01 bb     ld AX, #0x01bb
@@ -144,7 +144,7 @@ Entry_0x1c5:
 01ce:    03 42        (0x342)	 ; WIPL version string
 01d0:    80 8a        ld AL, #0x8a
 01d2:    a1 03 44     st AL, (0x0344)
-01d5:    7c f5        unknown_7c
+01d5:    7c f5        call @(PC-0x0b) @0x1cc
 01d7:    03 4e        (0x34e)	 ; "NAME"
 01d9:    79 06 09     call #0x0609 ReadLine
 01dc:    03 63        (0x363)	 ; name_buffer
@@ -164,50 +164,48 @@ Entry_0x1c5:
 
 L_01fd:
 01fd:    79 06 78     call #0x0678 L_0678
-0200:    03           rf
-0201:    63 90        ld RT, (PC-0x70)
-0203:    03           rf
-0204:    74           unknown
+0200:    03 63        (0x363)	 ; name_buffer
+0202:    90 03 74     ld AX, #0x0374	 ; disk_buffer
 0205:    5e           mov EX, AX
-0206:    d5 81        ld BX, (EX)+
+0206:    d5 81        ld BX, (EX)+	 ; String length
 0208:    31 20        dec BX, 1
-020a:    14 10        bz L_021c
-020c:    80 a0        ld AL, #0xa0
-020e:    c5 88 01     ld BL, +0x1(EX)
+020a:    14 10        bz L_021c	 ; Just one char means board offset 0
+020c:    80 a0        ld AL, #0xa0	 ; ' ' (space)
+020e:    c5 88 01     ld BL, +0x1(EX)	 ; Check character[1]
 0211:    49           sub! BL, AL
 0212:    14 08        bz L_021c
-0214:    c5 81        ld BL, (EX)+
+0214:    c5 81        ld BL, (EX)+	 ; BL = *char++
 0216:    49           sub! BL, AL
 0217:    14 03        bz L_021c
 0219:    80 f0        ld AL, #0xf0
-021b:    49           sub! BL, AL
+021b:    49           sub! BL, AL	 ; magic_value = 'p' - char
 
 L_021c:
-021c:    45 31        mov AL, BL
+021c:    45 31        mov AL, BL	 ; magic_value
 021e:    25 11        sll AL, 2
 0220:    d0 f1 40     ld BX, #0xf140
-0223:    43 12        or BH, AL
-0225:    f1 04 b1     st BX, (0x04b1)
+0223:    43 12        or BH, AL	 ; DSK0_BASE | (magic_value << 2)
+0225:    f1 04 b1     st BX, (0x04b1)	 ; Set DSK board address
 0228:    25 11        sll AL, 2
 022a:    c0 04        ld BL, #0x04
-022c:    48           add! BL, AL
-022d:    e1 04 ac     st BL, (0x04ac)
+022c:    48           add! BL, AL	 ; dma_mode_byte = magic_value << 4
+022d:    e1 04 ac     st BL, (0x04ac)	 ; Patch dma_set_mode insn
 0230:    8c           ld AL, (EX)
-0231:    c0 b0        ld BL, #0xb0
+0231:    c0 b0        ld BL, #0xb0	 ; '0'
 0233:    49           sub! BL, AL
 0234:    16 06        blt BackToPrompt_tramp
 0236:    80 07        ld AL, #0x07
-0238:    41 31        sub AL, BL
+0238:    41 31        sub AL, BL	 ; Valid units 0 - 7
 023a:    19 03        ble L_023f
 
 BackToPrompt_tramp:
 023c:    71 01 bb     jump #0x01bb BackToPrompt
 
 L_023f:
-023f:    e2 04 b1     st BL, @(0x04b1)
+023f:    e2 04 b1     st BL, @(0x04b1)	 ; This writes Hawk unit select register
 0242:    90 03 78     ld AX, #0x0378	 ; code_buffer
 0245:    5e           mov EX, AX
-0246:    95 81        ld AX, (EX)+
+0246:    95 81        ld AX, (EX)+	 ; Check string length
 0248:    14 06        bz L_0250
 024a:    79 03 c9     call #0x03c9 StrToNum
     ; EX points at the first non-numeric character after the code
@@ -225,8 +223,19 @@ L_0250:
 025e:    79 05 36     call #0x0536 PrintString
 0261:    03 7f        (0x37f)	 ; Incorrect disk format
 0263:    73 d7        jump (PC-0x29) BackToPrompt_tramp
-0265:    ff	 ; This is a "check disk code" flag.
-           	 ; If zero, the check will be bypassed.
+0265:    ff	 ; This is a "check disk code" flag. If zero, the check will be bypassed.
+           	 ; In pristine bootloader, read from the disk image, there's a 00 at this location.
+           	 ; So, it is patched at runtime. This means there should be a way to bypass the check,
+           	 ; but i don't know how and didn't search for it since we now have code recovery tool.
+           	 ; Some more info from KenR, which may explain things we see:
+           	 ; 
+           	 ; The [ Code = ] when booting from the disk was just a simple password to be allowed to read from the disk.
+           	 ; It was just a one time security check at boot time.  The [ Code = ] was an added feature to the Centurion
+           	 ; system sometime in around 1981.  Why I recall this is because I got hung up with a bug in the first release
+           	 ; of the new "Code" feature. Bug was the code value was set to a value the customer picked during disk format
+           	 ; and worked fine until the system was rebooted then the code value set no longer worked...!   Yes... what fun
+           	 ; this bug was.  The OPSYS system programmer was able to figure out a work around so the customer could get back
+           	 ; into the system till the bug was fixed.
 
 L_0266:
 0266:    95 88 06     ld AX, +0x6(EX)	 ; Disk code is derived from this value
@@ -258,65 +267,106 @@ L_0284:
 
 L_0293:
     ; Disk code is correct
-    ; Note we're doing some further manipulations with it, i don't get the
-    ; point, LoadSector routine doesn't use AX and BX, in fact it will overwrite them.
-0293:    95 88 04     ld AX, +0x4(EX)
+0293:    95 88 04     ld AX, +0x4(EX)	 ; sector_base + 4
 0296:    44 10        xor AH, AL
-0298:    d0 3c b1     ld BX, #0x3cb1
+0298:    d0 3c b1     ld BX, #0x3cb1	 ; The same magic constant as used for making the code
 029b:    54 02        xor BX, AX
-029d:    91 01 05     ld AX, (0x0105)	 ; entered_disk_code
-02a0:    50 20        add AX, BX
+029d:    91 01 05     ld AX, (0x0105)	 ; entered_disk_code, which we now know is correct
+02a0:    50 20        add AX, BX	 ; More mathemagic
 02a2:    35 03        sll AX, 4
 02a4:    5b           or! BX, AX
-    ; RT is also not changed here. Are we reloading 0x000e ? This is strange...
+    ; There's definitely some code discontinuity here. The exact reason is unknown,
+    ; but this allows to suppose that during installation the IPL is composed of
+    ; several parts. Disk driver will be different for different controller.
+    ; Accorting to KenR:
+    ; 
+    ; the WIPL command had to also write a small disk I/O driver into track zero so
+    ; once the track is loaded into the system memory the program like HDIPL 6.2  now
+    ; knows how to read the files from a Hawk disk platter.  The WIPL data written on
+    ; to a CMD disk would have a CMD I/O driver and the data written on to a Finch disk
+    ; would have a Finch I/O driver as part of the IPL track.
+    ; 
+    ; So, well, this ends up reloading sector 14 because RT has not been touched, since
+    ; the previous call, and the routine itself takes care to preserve it.
 02a5:    79 04 b0     call #0x04b0 LoadSector
 02a8:    00           (0x0)
-02a9:    95 88 0e     ld AX, +0xe(EX)
+02a9:    95 88 0e     ld AX, +0xe(EX)	 ; EX is still sector address
 02ac:    b1 04 8a     st AX, (0x048a)
-02af:    30 8f        inc EX, 16
-02b1:    79 05 07     call #0x0507 L_0507
-02b4:    01           nop
-02b5:    1b 7e        bs2 L_0335
-02b7:    e5 03        st BL, unknown_indexed
-02b9:    ec           st BL, (EX)
+    ; And here we start searching for a bootable file (let's say so).
+    ; The boot directory (let's say so) is composed of 16-byte entries.
+    ; Each entry contains exactly 10 characters of a file name and 6 bytes of some
+    ; data (would be logical to assume file start and length, at least).
+    ; On the very first entry we start our search at (sector_base + 16), this
+    ; makes sense because the first 16 bytes of sector 14 (where we start from)
+    ; are occupied by special boot information (format flag, key, etc), which
+    ; we've checked above.
+    ; The search goes on to next sector(s), until we hit an entry, starting with
+    ; 0x84 0x8d bytes. In the disk image we have we see these bytes prefixing
+    ; what we think is a data file name.
+    ; It's also a bit strange to see search starting from sector 14, because we know
+    ; that sector 14 contains bad block table, and in the image we have it indeed
+    ; looks like a bad block table. Nevertheless, the table isn't going to contain any
+    ; valid sensible 10 ASCII characters, so we'll just skip over it.
+    ; Perhaps there are variations of media format, which don't suggest the use ot a
+    ; bad block table, we don't know.
+02af:    30 8f        inc EX, 16	 ; name_on_disk = sector_base + 16
+                                	 ; Before proceeding, we copy part of ourselves to the top of RAM.
+                                	 ; I guess we're preparing to load the boot file into low memory, which would
+                                	 ; overwrite us.
+                                	 ; Calls to the relocated fragment are done via CallHighMem routine
+02b1:    79 05 07     call #0x0507 memcpy
+02b4:    01 1b        (0x11b)	 ; length = 283 bytes
+02b6:    7e e5        (0x7ee5)	 ; destination, set to top_of_ram - 283
+02b8:    03 ec        (0x3ec)	 ; source
 
 L_02ba:
-02ba:    9c           ld AX, (EX)
+    ; Here we are trying to find our "name" on the disk
+    ; Names are stored starting at sector 15 in a series of entries, 16 bytes each.
+    ; Each name is exactly 10 characters long, padded up with spaces. Remaining 6
+    ; bytes probably specify file location on the disk.
+    ; Entries proceed to following sectors until the table terminated with a word of 0x848d.
+    ; This is probably disk's root directory.
+02ba:    9c           ld AX, (EX)	 ; Check if we hit the terminator
 02bb:    d0 84 8d     ld BX, #0x848d
 02be:    59           sub! BX, AX
-02bf:    15 03        bnz L_02c4
+02bf:    15 03        bnz L_02c4	 ; Go back to the prompt if so
 02c1:    71 02 3c     jump #0x023c BackToPrompt_tramp
 
 L_02c4:
 02c4:    90 03 65     ld AX, #0x0365
-02c7:    5c           mov DX, AX
-02c8:    90 0a 00     ld AX, #0x0a00
+02c7:    5c           mov DX, AX	 ; DX = name_buffer + 2 - start of entered NAME string, skip over length
+02c8:    90 0a 00     ld AX, #0x0a00	 ; AH = 10 - maximum length
 
 L_02cb:
-02cb:    85 61        ld AL, (DX)+
-02cd:    21 00        dec AH, 1
-02cf:    16 23        blt L_02f4
-02d1:    c5 81        ld BL, (EX)+
+02cb:    85 61        ld AL, (DX)+	 ; c1 = *entered_name++
+02cd:    21 00        dec AH, 1	 ; length--
+02cf:    16 23        blt L_02f4	 ; Proceed if the name matches
+02d1:    c5 81        ld BL, (EX)+	 ; c2 = *name_on_disk
 02d3:    49           sub! BL, AL
-02d4:    14 f5        bz L_02cb
-02d6:    45 01        mov AL, AH
+02d4:    14 f5        bz L_02cb	 ; If matches, go chech the next char
+02d6:    45 01        mov AL, AH	 ; Mismatch
 02d8:    22 00        clr AH, 0
-02da:    50 08        add EX, AX
-02dc:    50 98        add EX, EX
+02da:    50 08        add EX, AX	 ; name_on_disk += length (remaining) - this skips past the string
+02dc:    50 98        add EX, EX	 ; EX = EX + 6 - this skips over to the next entry
 02de:    00           HALT
 02df:    06           sl
-02e0:    d1 04 a0     ld BX, (0x04a0)
-02e3:    50 32        add BX, BX
+02e0:    d1 04 a0     ld BX, (0x04a0)	 ; BX = LoadBuffer0 - sector address
+02e3:    50 32        add BX, BX	 ; This makes sense as add BX, BX, 400 - point at the end of sector
 02e5:    01           nop
-02e6:    90 51 82     ld AX, #0x5182
-02e9:    15 cf        bnz L_02ba
-02eb:    3e           inc RT
+02e6:    90           (0x90)
+02e7:    51 82        sub BX, EX
+02e9:    15 cf        bnz L_02ba	 ; Check the next entry if not reached the end
+02eb:    3e           inc RT	 ; Go to the next sector
 02ec:    90 ff a9     ld AX, #0xffa9
-02ef:    7b 4b        call (PC+0x4b) L_033c
+02ef:    7b 4b        call (PC+0x4b) CallHighMem	 ; Call (end_of_ram - 87) = LoadSector
 02f1:    00           HALT
-02f2:    73 c6        jump (PC-0x3a) L_02ba
+02f2:    73 c6        jump (PC-0x3a) L_02ba	 ; Restart the search from the beginning.
+                                           	 ; EX will point at the beginning of the sector this time!!!
 
 L_02f4:
+    ; NAME found. EX points right after the string in the loaded sector.
+    ; Since length of the name is exactly 10 bytes, we have three words,
+    ; specifying something. The code below reads them.
 02f4:    3a           clr! AX
 02f5:    85 81        ld AL, (EX)+
 02f7:    5d           mov BX, AX
@@ -331,7 +381,7 @@ L_02f4:
 0307:    85 81        ld AL, (EX)+
 0309:    b5 a2        st AX, -(SP)
 030b:    90 ff a9     ld AX, #0xffa9
-030e:    7b 2c        call (PC+0x2c) L_033c
+030e:    7b 2c        call (PC+0x2c) CallHighMem	 ; Call (end_of_ram - 87) = LoadSector
 0310:    01           nop
 0311:    d5 a8 02     ld BX, +0x2(SP)
 0314:    3a           clr! AX
@@ -352,24 +402,20 @@ L_0321:
 0323:    80 0f        ld AL, #0x0f
 0325:    4a           and! BL, AL
 0326:    80 04        ld AL, #0x04
-0328:    49           sub! BL, AL
-0329:    15 0e        bnz L_0339
+0328:    49           sub! BL, AL	 ; Here we check something else.
+0329:    15 0e        bnz L_0339	 ; If the check fails, we will jump back to the IPL prompt
 032b:    90 ff ff     ld AX, #0xffff
 032e:    d3 0d        ld BX, (PC+0xd)
 0330:    58           add! BX, AX
 0331:    f1 00 fe     st BX, (0x00fe)
-0334:    90
-
-L_0335:
-0335:    fe           st BX, (GX)
-0336:    e5 7b 03     st BL, unknown_indexed
+0334:    90 fe e5     ld AX, #0xfee5
+0337:    7b 03        call (PC+0x03) CallHighMem	 ; Call (end_of_ram - 283) - boot the file ???
 
 L_0339:
 0339:    71 01 bb     jump #0x01bb BackToPrompt
 
-L_033c:
-033c:    d0           (0xd0)
-033d:    80 00        (0x8000)	 ; This variable stores end of RAM
+CallHighMem:
+033c:    d0 80 00     ld BX, #0x8000	 ; BX = end of RAM, patched in the beginning
 033f:    58           add! BX, AX
 0340:    75 20        jump (A + 0x20)
 0342:    10, "\nHDIPL 6.2"
@@ -448,184 +494,124 @@ L_03df:
 03e8:    58           add! BX, AX	 ; BX += digit
 03e9:    fd           st BX, (SP)	 ; value = value * 10 + digit
 03ea:    73 e8        jump (PC-0x18) L_03d4
-03ec:    95
-03ed:    a1
-03ee:    95
-03ef:    a1
-03f0:    b3
-03f1:    36
-03f2:    95
-03f3:    a1
-03f4:    30
-03f5:    05
-03f6:    b3
-03f7:    5c
-03f8:    3a
-03f9:    39
-03fa:    b3
-03fb:    5e
-03fc:    7b
-03fd:    53
-03fe:    d0
-03ff:    00
-0400:    4c
-0401:    59
-0402:    15
-0403:    26
-0404:    95
-0405:    88
-0406:    1b
-0407:    b3
-0408:    40
-0409:    50
-040a:    48
-040b:    30
-040c:    80
-040d:    7b
-040e:    31
-040f:    30
-0410:    80
-0411:    7b
-0412:    2d
-0413:    45
-0414:    33
-0415:    14
-0416:    13
-0417:    d5
-0418:    81
-0419:    93
-041a:    2e
-041b:    58
-041c:    99
-041d:    50
-041e:    60
-041f:    b9
-0420:    31
-0421:    41
-0422:    18
-0423:    f3
-0424:    85
-0425:    81
-0426:    73
-0427:    e9
+
+RelocatablePart:
+    ; This code is copied to high RAM (top - 283) and operates from there
+    ; Note that it includes Hawk disk driver. The code is apparently fully relocatable
+03ec:    95 a1        ld AX, (SP)+
+03ee:    95 a1        ld AX, (SP)+
+03f0:    b3 36        st AX, (PC+0x36)
+03f2:    95 a1        ld AX, (SP)+
+03f4:    30 05        inc AX, 6
+03f6:    b3 5c        st AX, (PC+0x5c)
+03f8:    3a           clr! AX
+03f9:    39           dec! AX
+03fa:    b3 5e        st AX, (PC+0x5e)
+03fc:    7b 53        call (PC+0x53) L_0451
+03fe:    d0 00 4c     ld BX, #0x004c
+0401:    59           sub! BX, AX
+0402:    15 26        bnz L_042a
+0404:    95 88 1b     ld AX, +0x1b(EX)
+0407:    b3 40        st AX, (PC+0x40)
+0409:    50 48        add EX, RT
+040b:    30 80        inc EX, 1
+040d:    7b 31        call (PC+0x31) L_0440
+040f:    30 80        inc EX, 1
+
+L_0411:
+0411:    7b 2d        call (PC+0x2d) L_0440
+0413:    45 33        mov BL, BL
+0415:    14 13        bz L_042a
+
+L_0417:
+0417:    d5 81        ld BX, (EX)+
+0419:    93 2e        ld AX, (PC+0x2e)
+041b:    58           add! BX, AX
+041c:    99           ld AX, (BX)
+041d:    50 60        add AX, DX
+041f:    b9           st AX, (BX)
+0420:    31 41        dec RT, 2
+0422:    18 f3        bgt L_0417
+
+L_0424:
+0424:    85 81        ld AL, (EX)+
+0426:    73 e9        jump (PC-0x17) L_0411
 0428:    00
 0429:    00
-042a:    55
-042b:    44
-042c:    14
-042d:    0c
-042e:    55
-042f:    40
-0430:    39
-0431:    67
-0432:    4a
-0433:    86
-0434:    50
-0435:    46
-0436:    50
-0437:    48
-0438:    73
-0439:    ea
-043a:    32
-043b:    80
-043c:    80
-043d:    c5
-043e:    75	 ; This should jump to 0x125, but that isn't a valid location
-           	 ; Most likely our binary is corrupt around here
-043f:    60
-0440:    c5
-0441:    81
-0442:    16
-0443:    0d
-0444:    3a
-0445:    85
-0446:    81
-0447:    bd
-0448:    90
-0449:    00
-044a:    00
-044b:    5c
-044c:    95
-044d:    81
-044e:    50
-044f:    06
-0450:    09
-0451:    6d
-0452:    a2
-0453:    90
-0454:    00
-0455:    00
-0456:    65
-0457:    08
-0458:    01
-0459:    90
-045a:    00
-045b:    00
-045c:    38
-045d:    b3
-045e:    fb
-045f:    50
-0460:    04
-0461:    d3
-0462:    c5
-0463:    59
-0464:    11
-0465:    30
-0466:    3a
-0467:    b3
-0468:    f1
-0469:    93
-046a:    e9
-046b:    30
-046c:    02
-046d:    b3
-046e:    e5
-046f:    65
-0470:    08
-0471:    01
-0472:    5d
-0473:    98
-0474:    17
-0475:    20
-0476:    3a
-0477:    85
-0478:    28
-0479:    02
-047a:    28
-047b:    14
-047c:    20
-047d:    29
-047e:    5d
-047f:    3d
-0480:    58
-0481:    93
-0482:    1f
-0483:    58
-0484:    94
-0485:    ce
-0486:    f3
-0487:    cc
-0488:    3b
-0489:    60
-048a:    57
-048b:    79
-048c:    50
-048d:    04
-048e:    7b
-048f:    20
-0490:    01
-0491:    63
-0492:    c1
-0493:    65
-0494:    48
-0495:    01
-0496:    7b
-0497:    18
-0498:    00
-0499:    65
-049a:    a1
-049b:    73
-049c:    a3
+
+L_042a:
+042a:    55 44        mov RT, RT
+042c:    14 0c        bz L_043a
+042e:    55 40        mov AX, RT
+0430:    39           dec! AX
+0431:    67 4a        ld RT, unknown
+0433:    86 50        ld AL, unknown
+0435:    46 50        unk6 AH, RL
+0437:    48           add! BL, AL
+0438:    73 ea        jump (PC-0x16) L_0424
+
+L_043a:
+043a:    32 80        clr EX, 0
+043c:    80 c5        ld AL, #0xc5
+043e:    75 60        jump (A + 0x60)
+
+L_0440:
+0440:    c5 81        ld BL, (EX)+
+0442:    16 0d        blt L_0451
+0444:    3a           clr! AX
+0445:    85 81        ld AL, (EX)+
+0447:    bd           st AX, (SP)
+0448:    90 00 00     ld AX, #0x0000
+044b:    5c           mov DX, AX
+044c:    95 81        ld AX, (EX)+
+044e:    50 06        add DX, AX
+0450:    09           ret
+
+L_0451:
+0451:    6d a2        st RT, -(SP)
+0453:    90 00 00     ld AX, #0x0000
+0456:    65 08 01     ld RT, +0x1(AX)
+0459:    90 00 00     ld AX, #0x0000
+045c:    38           inc! AX
+045d:    b3 fb        st AX, (PC-0x5)
+045f:    50 04        add RT, AX
+0461:    d3 c5        ld BX, (PC-0x3b)
+0463:    59           sub! BX, AX
+0464:    11 30        bnc L_0496
+0466:    3a           clr! AX
+0467:    b3 f1        st AX, (PC-0xf)
+0469:    93 e9        ld AX, (PC-0x17)
+046b:    30 02        inc AX, 3
+046d:    b3 e5        st AX, (PC-0x1b)
+046f:    65 08 01     ld RT, +0x1(AX)
+0472:    5d           mov BX, AX
+0473:    98           ld AX, (AX)
+0474:    17 20        bp L_0496
+0476:    3a           clr! AX
+0477:    85 28 02     ld AL, +0x2(BX)
+047a:    28           inc! AL
+047b:    14 20        bz Stop
+047d:    29           dec! AL
+047e:    5d           mov BX, AX
+047f:    3d           sll! AX
+0480:    58           add! BX, AX
+0481:    93 1f        ld AX, (PC+0x1f)
+0483:    58           add! BX, AX
+0484:    94 ce        ld AX, @(PC-0x32)
+0486:    f3 cc        st BX, (PC-0x34)
+0488:    3b           not! AX
+0489:    60 57 79     ld RT, #0x5779
+048c:    50 04        add RT, AX
+048e:    7b 20        call (PC+0x20) LoadSector
+0490:    01           nop
+0491:    63 c1        ld RT, (PC-0x3f)
+0493:    65 48 01     ld RT, +0x1(RT)
+
+L_0496:
+0496:    7b 18        call (PC+0x18) LoadSector
+0498:    00           HALT
+0499:    65 a1        ld RT, (SP)+
+049b:    73 a3        jump (PC-0x5d) L_0440
 
 Stop:
 049d:    00           HALT
@@ -710,32 +696,38 @@ WaitForHawkCmdCompletion:
 0505:    09           ret
 0506:    00
 
-L_0507:
-0507:    95 41        ld AX, (RT)+
+memcpy:
+    ; This is the end of a fragment, which gets copied to top of RAM.
+    ; This function preserves DX and EX
+0507:    95 41        ld AX, (RT)+	 ; length = arg[0, 1]
+                                  	 ; I completely fail to understand these two instructions. I mean - i understand what they mean,
+                                  	 ; but what's the real purpose of this fragment here ? In pristine on-disk WIPL it looks the same.
+                                  	 ; Is this patched during installation ?
 0509:    5d           mov BX, AX
 050a:    71 05 0d     jump #0x050d 0x50d
-050d:    f5 a2        st BX, -(SP)
-050f:    59           sub! BX, AX
+050d:    f5 a2        st BX, -(SP)	 ; push length
+050f:    59           sub! BX, AX	 ; length = min(AX, BX)
 0510:    19 21        ble L_0533
-0512:    da           ld BX, (RT)
+0512:    da           ld BX, (RT)	 ; arg[2, 3]
 0513:    79 06 9a     call #0x069a L_069a
 0516:    a0
 
 L_0517:
-0517:    dd           ld BX, (SP)
-0518:    55 60        mov AX, DX
+0517:    dd           ld BX, (SP)	 ; BX = length
+0518:    55 60        mov AX, DX	 ; Preserve DX
 051a:    bd           st AX, (SP)
-051b:    95 41        ld AX, (RT)+
+051b:    95 41        ld AX, (RT)+	 ; dest
 051d:    5c           mov DX, AX
-051e:    95 41        ld AX, (RT)+
-0520:    6d a2        st RT, -(SP)
-0522:    55 24        mov RT, BX
+051e:    95 41        ld AX, (RT)+	 ; src
+0520:    6d a2        st RT, -(SP)	 ; push RT, will use as back counter
+0522:    55 24        mov RT, BX	 ; RT = length
 
 L_0524:
+    ; Copy RT bytes from (AX) to (DX)
 0524:    3f           dec RT
 0525:    17 06        bp L_052d
-0527:    65 a1        ld RT, (SP)+
-0529:    95 a1        ld AX, (SP)+
+0527:    65 a1        ld RT, (SP)+	 ; pop RT
+0529:    95 a1        ld AX, (SP)+	 ; pop DX
 052b:    5c           mov DX, AX
 052c:    09           ret
 
@@ -911,7 +903,12 @@ L_0606:
 0608:    09           ret
 
 ReadLine:
-    ; This routine supposedly reads a line from the terminal
+    ; This routine supposedly reads a line from the terminal; i didn't care
+    ; about the guts.
+    ; The line is prefixed by 16-bit length, just like strings we print.
+    ; It is also supposed to be padded with spaces (0xA0) up to a certain
+    ; fixed length of at least 10 chars. NAME comparison wouldn't work without
+    ; it as it compares exactly 10 characters.
 0609:    93 f5        ld AX, (PC-0xb)
 060b:    b3 58        st AX, (PC+0x58)
 060d:    90 06 6f     ld AX, #0x066f
@@ -941,13 +938,13 @@ L_0628:
 0632:    80 a0        ld AL, #0xa0
 0634:    79 05 64     call #0x0564 L_0564
 0637:    80 95        ld AL, #0x95
-0639:    7c fa        unknown_7c
+0639:    7c fa        call @(PC-0x06) @0x635
 063b:    3f           dec RT
 063c:    73 de        jump (PC-0x22) L_061c
 
 L_063e:
 063e:    80 86        ld AL, #0x86
-0640:    7c f3        unknown_7c
+0640:    7c f3        call @(PC-0x0d) @0x635
 0642:    73 d8        jump (PC-0x28) L_061c
 
 L_0644:
