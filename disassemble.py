@@ -246,17 +246,21 @@ ImplcitTable = [
     (0x02, 12)
 ]
 
+def get_be16(memory, addr):
+    return memory[addr] * 256 + memory[addr + 1]
+
 class Alu():
     # Implements most opcodes between 0x20 and 0x5b
 
     class AluInstance():
-        def __init__(self, op, word, src, dest, postfix):
+        def __init__(self, op, word, src, dest, postfix, literal):
             self.newpc = None
             self.op = op
             self.word = word
             self.src = src
             self.dest = dest
             self.postfix = postfix
+            self.literal = literal
 
         def to_string(self, dict):
             op = OPs[self.op]
@@ -264,14 +268,19 @@ class Alu():
 
             if self.op < 8:
                 if self.word:
-                    return f"{op} {RegNames16[self.src >> 1]}"
+                    str = f"{op} {RegNames16[self.src >> 1]}"
                 else:
-                    return f"{op} {RegNames8[self.src]}"
+                    str = f"{op} {RegNames8[self.src]}"
             else:
                 if self.word:
-                    return f"{op} {RegNames16[self.dest >> 1]}, {RegNames16[self.src >> 1]}"
+                    str = f"{op} {RegNames16[self.dest >> 1]}, {RegNames16[self.src >> 1]}"
                 else:
-                    return f"{op} {RegNames8[self.dest]}, {RegNames8[self.src]}"
+                    str = f"{op} {RegNames8[self.dest]}, {RegNames8[self.src]}"
+
+            if self.literal is not None:
+                str += f", #{self.literal:#06x}"
+
+            return str
 
     class AluWithImmInstance():
         def __init__(self, op, word, reg, imm):
@@ -308,6 +317,8 @@ class Alu():
            return None
 
         postfix = ""
+        literal = None
+
         if fast:
             if inst > 0x40:
                 src = 0
@@ -325,6 +336,8 @@ class Alu():
             bytetwo = bytes[1]
             dest = bytetwo & 0xf
             src = (bytetwo >> 4) & 0xf
+            l0 = bytes[2]
+            l1 = bytes[3]
 
             if inst & 0xe0 == 0x20:
                 # This covers 20...27 and 30...37
@@ -347,8 +360,11 @@ class Alu():
             if bytetwo == expected and op < limit:
                 postfix = '*'
 
-        return InstructionMatch(pc, self.AluInstance(op, word, src, dest, postfix), bytes, {})
+            if word and (src & 1 != 0):
+                bytes = [inst, bytetwo, l0, l1]
+                literal = get_be16(bytes, 2)
 
+        return InstructionMatch(pc, self.AluInstance(op, word, src, dest, postfix, literal), bytes, {})
 
 
 
@@ -598,7 +614,7 @@ def escape_char(c):
 
 def get_pstring16_length(memory, addr):
     # Parity is still applied to length bytes
-    return (memory[addr] & 0x7f) * 256 + (memory[addr + 1] & 0x7f)
+    return get_be16(memory, addr) & 0x7f7f
 
 def disassemble(memory):
     for entry in entry_points:
