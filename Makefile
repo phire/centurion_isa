@@ -20,3 +20,6 @@ out/bootstrap.asm: disassemble.py disassemble_bootstrap.py
 
 out/autoload.asm: disassemble.py disassemble_autoload.py
 	python3 disassemble_autoload.py > out/autoload.asm
+	
+out/WIPL.asm: disassemble.py WIPL/WIPL.bin WIPL/WIPL.annotations WIPL/WIPL.comments
+	python3 disassemble.py -i -i WIPL/WIPL.bin -s 0x100 -a WIPL/WIPL.annotations -a WIPL/WIPL.comments > out/WIPL.asm
