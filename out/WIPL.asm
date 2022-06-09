@@ -34,11 +34,9 @@ L_0108:
 
 L_0138:
     ; We go here if sense1 switch is set (DIAG board is present)
-0138:    61 00 1a     ld RT, (0x001a)
-013b:    50 54        add RT, RT	 ; Wrong disassembly here
-013d:    ff           (0xff)
-013e:    ec           (0xec)
-013f:    73 44        jump (PC+0x44) L_0185
+0138:    61 00 1a     ld RT, (0x001a)	 ; RT = (0x001a) - 20
+013b:    50 54 ff ec  add RT, RT, #0xffec	 ; Looks like DIAG overrides our mem test and tells us
+013f:    73 44        jump (PC+0x44) L_0185	 ; size of RAM to use
 
 L_0141:
     ; Self-modifying code ahead!!!
@@ -77,7 +75,7 @@ L_016b:
 L_016f:
     ; Continuation of boot process
 016f:    90 10 00     ld AX, #0x1000
-0172:    5b           or! BX, AX
+0172:    5b           mov RT, AX
 0173:    5c           mov DX, AX	 ; DX = 4096
 
 L_0174:
@@ -96,17 +94,11 @@ L_0174:
 L_0185:
 0185:    69 03 3d     st RT, (0x033d)	 ; Store final address of our RAM
 0188:    55 42        mov BX, RT
-018a:    50 32        add BX, BX
-018c:    fd           st BX, (SP)
-018d:    55 f1        mov AX, HX	 ; The code starting from here is definitely disassembled incorrectly
-018f:    04           ei
-0190:    a0 50        st AL, #0x50
-0192:    32 fe        clr HX, 14
-0194:    70           unknown
+018a:    50 32 fd 55  add BX, BX, #0xfd55
+018e:    f1 04 a0     st BX, (0x04a0)
+0191:    50 32 fe 70  add BX, BX, #0xfe70
 0195:    f1 04 a2     st BX, (0x04a2)
-0198:    50 32        add BX, BX
-019a:    fe           st BX, (GX)
-019b:    70           unknown
+0198:    50 32 fe 70  add BX, BX, #0xfe70
 019c:    55 2a        mov SP, BX
 019e:    d0 fe e5     ld BX, #0xfee5
 01a1:    50 42        add BX, RT	 ; BX = top of RAM - 283
@@ -128,18 +120,21 @@ BackToPrompt:
     ; According to known behavior, thus jumps back to WIPL prompt, effectively
     ; restarting it
 01bb:    04           ei
-01bc:    47 4c        unk7 GH, RH
-01be:    00           HALT
-01bf:    ff           st BX, (HX)
-01c0:    02           sf
-01c1:    65 47        ld RT, unknown_indexed
-01c3:    9c           ld AX, (EX)
-01c4:    09           ret
-
-Entry_0x1c5:
-01c5:    a0 03        st AL, #0x03
-01c7:    65 79 05     ld RT, +0x5(DX)+
-01ca:    5a           and! BX, AX
+    ; We don't currently understand what 47 instruction really does, but this
+    ; is the only reference to 0x0265, where a "skip code check" flag is stored.
+    ; And we also know that in pristine WIPL, obtained from disk dump, the respective
+    ; location contains zero; while in this one, which has been extracted by dumping
+    ; from the TOS after it hit the "Stop" loop and the machine has been restarted,
+    ; we see a 0xff. So, apparently, this sequence stores an 0xFF at 0x0265
+01bc:    47 4c        unk7 GH, RH	 ; fill
+01be:    00           (0x0)	 ; 1 byte
+01bf:    ff           (0xff)	 ; with this value
+01c0:    02 65        (0x265)	 ; starting at 0x265
+01c2:    47 9c        unk7 GH, EL	 ; fill (0x365), 0xa0, 10
+01c4:    09           (0x9)
+01c5:    a0           (0xa0)
+01c6:    03 65        (0x365)
+01c8:    79 05 5a     call #0x055a L_055a
 01cb:    79 05 36     call #0x0536 PrintString
 01ce:    03 42        (0x342)	 ; WIPL version string
 01d0:    80 8a        ld AL, #0x8a
@@ -266,28 +261,17 @@ L_0284:
 0290:    71 04 9d     jump #0x049d Stop
 
 L_0293:
-    ; Disk code is correct
+    ; Disk code is correct. Now we read what we'll call a "boot directory".
+    ; Number of starting block is stored at (sector_base + 4) in a scrambled
+    ; form. The disk code is used to unscramble it.
 0293:    95 88 04     ld AX, +0x4(EX)	 ; sector_base + 4
 0296:    44 10        xor AH, AL
 0298:    d0 3c b1     ld BX, #0x3cb1	 ; The same magic constant as used for making the code
 029b:    54 02        xor BX, AX
 029d:    91 01 05     ld AX, (0x0105)	 ; entered_disk_code, which we now know is correct
-02a0:    50 20        add AX, BX	 ; More mathemagic
+02a0:    50 20        add AX, BX	 ; AX = track number here
 02a2:    35 03        sll AX, 4
-02a4:    5b           or! BX, AX
-    ; There's definitely some code discontinuity here. The exact reason is unknown,
-    ; but this allows to suppose that during installation the IPL is composed of
-    ; several parts. Disk driver will be different for different controller.
-    ; Accorting to KenR:
-    ; 
-    ; the WIPL command had to also write a small disk I/O driver into track zero so
-    ; once the track is loaded into the system memory the program like HDIPL 6.2  now
-    ; knows how to read the files from a Hawk disk platter.  The WIPL data written on
-    ; to a CMD disk would have a CMD I/O driver and the data written on to a Finch disk
-    ; would have a Finch I/O driver as part of the IPL track.
-    ; 
-    ; So, well, this ends up reloading sector 14 because RT has not been touched, since
-    ; the previous call, and the routine itself takes care to preserve it.
+02a4:    5b           mov RT, AX	 ; sector = track * 16 (sectors per track)
 02a5:    79 04 b0     call #0x04b0 LoadSector
 02a8:    00           (0x0)
 02a9:    95 88 0e     ld AX, +0xe(EX)	 ; EX is still sector address
@@ -303,25 +287,19 @@ L_0293:
     ; The search goes on to next sector(s), until we hit an entry, starting with
     ; 0x84 0x8d bytes. In the disk image we have we see these bytes prefixing
     ; what we think is a data file name.
-    ; It's also a bit strange to see search starting from sector 14, because we know
-    ; that sector 14 contains bad block table, and in the image we have it indeed
-    ; looks like a bad block table. Nevertheless, the table isn't going to contain any
-    ; valid sensible 10 ASCII characters, so we'll just skip over it.
-    ; Perhaps there are variations of media format, which don't suggest the use ot a
-    ; bad block table, we don't know.
-02af:    30 8f        inc EX, 16	 ; name_on_disk = sector_base + 16
-                                	 ; Before proceeding, we copy part of ourselves to the top of RAM.
-                                	 ; I guess we're preparing to load the boot file into low memory, which would
-                                	 ; overwrite us.
-                                	 ; Calls to the relocated fragment are done via CallHighMem routine
-02b1:    79 05 07     call #0x0507 memcpy
+02af:    30 8f        inc EX, 16	 ; name_on_disk = sector_base + 16, this skips the first entry.
+                                	 ; That first entry looks like a volume name on the image we have.
+02b1:    79 05 07     call #0x0507 memcpy	 ; Before proceeding, we copy part of ourselves to the top of RAM.
+                                         	 ; I guess we're preparing to load the boot file into low memory, which would
+                                         	 ; overwrite us.
+                                         	 ; Calls to the relocated fragment are done via CallHighMem routine
 02b4:    01 1b        (0x11b)	 ; length = 283 bytes
 02b6:    7e e5        (0x7ee5)	 ; destination, set to top_of_ram - 283
 02b8:    03 ec        (0x3ec)	 ; source
 
 L_02ba:
     ; Here we are trying to find our "name" on the disk
-    ; Names are stored starting at sector 15 in a series of entries, 16 bytes each.
+    ; Names are stored in a series of entries, 16 bytes each.
     ; Each name is exactly 10 characters long, padded up with spaces. Remaining 6
     ; bytes probably specify file location on the disk.
     ; Entries proceed to following sectors until the table terminated with a word of 0x848d.
@@ -347,13 +325,9 @@ L_02cb:
 02d6:    45 01        mov AL, AH	 ; Mismatch
 02d8:    22 00        clr AH, 0
 02da:    50 08        add EX, AX	 ; name_on_disk += length (remaining) - this skips past the string
-02dc:    50 98        add EX, EX	 ; EX = EX + 6 - this skips over to the next entry
-02de:    00           HALT
-02df:    06           sl
+02dc:    50 98 00 06  add EX, EX, #0x0006	 ; EX = EX + 6 - this skips over to the next entry
 02e0:    d1 04 a0     ld BX, (0x04a0)	 ; BX = LoadBuffer0 - sector address
-02e3:    50 32        add BX, BX	 ; This makes sense as add BX, BX, 400 - point at the end of sector
-02e5:    01           nop
-02e6:    90           (0x90)
+02e3:    50 32 01 90  add BX, BX, #0x0190	 ; This makes sense as add BX, BX, 400 - point at the end of sector
 02e7:    51 82        sub BX, EX
 02e9:    15 cf        bnz L_02ba	 ; Check the next entry if not reached the end
 02eb:    3e           inc RT	 ; Go to the next sector
@@ -386,7 +360,7 @@ L_02f4:
 0311:    d5 a8 02     ld BX, +0x2(SP)
 0314:    3a           clr! AX
 0315:    85 28 04     ld AL, +0x4(BX)
-0318:    5b           or! BX, AX
+0318:    5b           mov RT, AX
 0319:    3a           clr! AX
 031a:    38           inc! AX
 
@@ -745,9 +719,9 @@ PrintString:
 0538:    7e 45        long_call
 053a:    9a           ld AX, (RT)
 053b:    5c           mov DX, AX
-053c:    55 98        mov EX, EX
-053e:    f2 00 65     st BX, @(0x0065)
-0541:    61 19 11     ld RT, (0x1911)
+053c:    55 98 f2 00  mov EX, #0xf200
+0540:    65 61        ld RT, (DX)+
+0542:    19 11        ble L_0555
 
 L_0544:
 0544:    85 61        ld AL, (DX)+
@@ -759,9 +733,11 @@ L_0544:
 054e:    45 31        mov AL, BL
 
 L_0550:
-0550:    7b 12        call (PC+0x12) L_0564
+0550:    7b 12        call (PC+0x12) PrintChar
 0552:    3f           dec RT
 0553:    18 ef        bgt L_0544
+
+L_0555:
 0555:    7f 45        clear_data_bank??
 0557:    30 41        inc RT, 2
 0559:    09           ret
@@ -771,55 +747,49 @@ L_055a:
 055c:    c3 42        ld BL, (PC+0x42)
 055e:    49           sub! BL, AL
 055f:    14 02        bz L_0563
-0561:    7b 01        call (PC+0x01) L_0564
+0561:    7b 01        call (PC+0x01) PrintChar
 
 L_0563:
 0563:    09           ret
 
-L_0564:
+PrintChar:
 0564:    7e 81        long_call
-0566:    55 98        mov EX, EX
-0568:    f2 00 f6     st BX, @(0x00f6)
-056b:    19 0d        ble L_057a
-056d:    c0 c5        ld BL, #0xc5
-056f:    f6 39        st BX, unknown
-0571:    00           HALT
+0566:    55 98 f2 00  mov EX, #0xf200	 ; Serisl port 0 base address
+056a:    f6 19 0d     st AL, +0xd(EX)
+056d:    c0 c5        ld BL, #0xc5	 ; Set up baud rate ?
+056f:    f6 39 00     st BL, +0x0(EX)
 0572:    c0 8c        ld BL, #0x8c
-0574:    49           sub! BL, AL
-0575:    14 13        bz L_058a
+0574:    49           sub! BL, AL	 ; If character is 0x0c (form feed)...
+0575:    14 13        bz L_058a	 ; Print with a delay
 0577:    c0 8d        ld BL, #0x8d
-0579:    49           sub! BL, AL
-
-L_057a:
+0579:    49           sub! BL, AL	 ; If character is \r...
 057a:    15 14        bnz L_0590
-057c:    7b 17        call (PC+0x17) L_0595
-057e:    80 8a        ld AL, #0x8a
-0580:    7b 13        call (PC+0x13) L_0595
+057c:    7b 17        call (PC+0x17) RawPrintChar
+057e:    80 8a        ld AL, #0x8a	 ; Add \n
+0580:    7b 13        call (PC+0x13) RawPrintChar
 0582:    80 8d        ld AL, #0x8d
-0584:    a3 1a        st AL, (PC+0x1a)
+0584:    a3 1a        st AL, (PC+0x1a)	 ; (0x5a0) - preserve the original character ???
 0586:    0e           delay 4.5ms
 0587:    7f 81        clear_data_bank??
 0589:    09           ret
 
 L_058a:
-058a:    7b 09        call (PC+0x09) L_0595
+058a:    7b 09        call (PC+0x09) RawPrintChar
 058c:    0e           delay 4.5ms
 058d:    7f 81        clear_data_bank??
 058f:    09           ret
 
 L_0590:
-0590:    7b 03        call (PC+0x03) L_0595
+0590:    7b 03        call (PC+0x03) RawPrintChar
 0592:    7f 81        clear_data_bank??
 0594:    09           ret
 
-L_0595:
-0595:    f6 38        st BX, unknown
-0597:    00           HALT
+RawPrintChar:
+0595:    f6 38 00     ld BL, +0x0(EX)
 0598:    24 31        srl BL, 2
-059a:    11 f9        bnc L_0595
-059c:    f6 19        st BX, unknown
-059e:    01           nop
-059f:    a0 bd        st AL, #0xbd
+059a:    11 f9        bnc RawPrintChar
+059c:    f6 19 01     st AL, +0x1(EX)
+059f:    a0 bd        st AL, #0xbd	 ; Shouldn't this be ld ?
 05a1:    09           ret
 05a2:    f6
 05a3:    38
@@ -858,19 +828,16 @@ L_0595:
 
 L_05c4:
 05c4:    7e 81        long_call
-05c6:    55 98        mov EX, EX
-05c8:    f2 00 83     st BX, @(0x0083)
-05cb:    a2 f6 19     st AL, @(0xf619)
-05ce:    00           HALT
+05c6:    55 98 f2 00  mov EX, #0xf200
+05ca:    83 a2        ld AL, (PC-0x5e)
+05cc:    f6 19 00     st AL, +0x0(EX)
 05cf:    90 05 a6     ld AX, #0x05a6
 05d2:    d7 6e        ld BX, unknown
 05d4:    3a           clr! AX
 05d5:    d7 60        ld BX, unknown
 05d7:    80 06        ld AL, #0x06
-05d9:    f6 19        st BX, unknown
-05db:    0a           reti
-05dc:    f6 19        st BX, unknown
-05de:    0e           delay 4.5ms
+05d9:    f6 19 0a     st AL, +0xa(EX)
+05dc:    f6 19 0e     st AL, +0xe(EX)
 
 L_05df:
 05df:    e6 60        st BL, unknown
@@ -880,7 +847,7 @@ L_05df:
 05e7:    43 31        or AL, BL
 05e9:    c0 00        ld BL, #0x00
 05eb:    15 03        bnz L_05f0
-05ed:    79 05 64     call #0x0564 L_0564
+05ed:    79 05 64     call #0x0564 PrintChar
 
 L_05f0:
 05f0:    c0 e0        ld BL, #0xe0
@@ -916,9 +883,9 @@ ReadLine:
 0612:    9a           ld AX, (RT)
 0613:    6d a2        st RT, -(SP)
 0615:    38           inc! AX
-0616:    5b           or! BX, AX
+0616:    5b           mov RT, AX
 0617:    80 bd        ld AL, #0xbd
-0619:    79 05 64     call #0x0564 L_0564
+0619:    79 05 64     call #0x0564 PrintChar
 
 L_061c:
 061c:    7b a6        call (PC-0x5a) L_05c4
@@ -936,7 +903,7 @@ L_0628:
 062e:    51 42        sub BX, RT
 0630:    14 0c        bz L_063e
 0632:    80 a0        ld AL, #0xa0
-0634:    79 05 64     call #0x0564 L_0564
+0634:    79 05 64     call #0x0564 PrintChar
 0637:    80 95        ld AL, #0x95
 0639:    7c fa        call @(PC-0x06) @0x635
 063b:    3f           dec RT
@@ -1013,7 +980,7 @@ L_0694:
 
 L_069a:
 069a:    6d a2        st RT, -(SP)
-069c:    5b           or! BX, AX
+069c:    5b           mov RT, AX
 069d:    85 a4        ld AL, unknown_indexed
 
 L_069f:
