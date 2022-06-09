@@ -361,6 +361,10 @@ def relative_branch_unconditional(next_pc, S, **kwargs):
 def relative_call(next_pc, S, **kwargs):
     return [next_pc, next_pc + S]
 
+def indirect_relative_call(next_pc, S, **kwargs):
+    # FIXME: Provide memory view here and do the indirection
+    return [next_pc]
+
 def abolsute_branch_uncondtionional(N, **kwargs):
     return [N]
 
@@ -379,6 +383,10 @@ class B(I):
     def to_string(self, dict):
         if self.newpc == kill_branch:
             return self.name.format(**dict)
+        if self.newpc == indirect_relative_call:
+            dest = dict["next_pc"] + dict["S"]
+            label = f"@{dest:#04x}"
+            return f"{self.name.format(**dict)} {label}"
         if self.newpc == relative_branch or self.newpc == relative_branch_unconditional:
             dest = dict["next_pc"] + dict["S"]
         elif self.newpc == relative_call:
@@ -509,13 +517,13 @@ instructions = [
     B("01110010 NNNNNNNN NNNNNNNN", "jump @({N:#06x})", kill_branch),
     B("01110011 SSSSSSSS", "jump (PC{S:+#05x})", relative_branch_unconditional),
     B("01110101 NNNNNNNN", "jump (A + {N:#04x})", kill_branch),
-    I("01111100 xxxxxxxx", "unknown_7c"),
     B("01110110", "syscall", kill_branch), # "Return to interrupt level 15"
 
 # 78
 
     B("01111001 NNNNNNNN NNNNNNNN", "call #{N:#06x}", absolute_call),
     I("01111010 NNNNNNNN NNNNNNNN", "call @({N:#06x})"),
+    B("01111100 SSSSSSSS", "call @(PC{S:+#05x})", indirect_relative_call),
     B("01111011 SSSSSSSS", "call (PC{S:+#05x})", relative_call),
     I("01111101 NNNNNNNN", "call (A + {N:#04x})"),
 # 80

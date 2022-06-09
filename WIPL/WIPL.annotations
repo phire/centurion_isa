@@ -11,13 +11,16 @@
 0x1eb , >H
 0x1f5 , >H
 0x1fa, >H
+0x200, >H
 0x23c , label,		BackToPrompt_tramp
 0x256 , >B
 0x261 ,	>H
 0x28e , >H
+0x2e6 , >B
 0x2a8 , >B
-0x33c ,  >B
-0x33d ,  >H
+0x2b4 , >H
+0x2b6 , >H
+0x2b8 , >H
 0x342 ,	 pstring16
 0x34e ,	 pstring16
 0x354 ,	 pstring16
@@ -26,8 +29,10 @@
 0x376 ,	 >H
 0x37f ,	 pstring16
 0x39f ,	 pstring16
+0x33c ,	 label,		CallHighMem
 0x3bd ,	 label,		AsciiToHex
 0x3c9 ,  label,		StrToNum
+0x3ec ,  code,		RelocatablePart
 0x49d ,	 label,		Stop
 0x4a0 ,	 >H
 0x4a0 ,	 label,		LoadBuffer0
@@ -38,5 +43,6 @@
 0x4e1 ,  label,		SeekToTrack
 0x4f5 ,	 label,		WaitForDataReady
 0x4fb ,	 label,		WaitForHawkCmdCompletion
+0x507 ,  label,		memcpy
 0x536 ,	 label,		PrintString
 0x609 , label,		ReadLine

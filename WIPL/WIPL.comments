@@ -6,7 +6,7 @@
 0x120 ,	comment	; Initialize stack
 0x124 ,	comment	; This sends RTZ command to our disks.
 0x138,	pre_comment 	; We go here if sense1 switch is set (DIAG board is present)
-0x138 ,	comment	; The binary is clearly corrupt here
+0x13b ,	comment	; Wrong disassembly here
 0x141,	pre_comment 	; Self-modifying code ahead!!!
 	 	; The function at L_014b probes for 8 units on a DSK board at base address (AL << 16) + 0x40
 	 	; and, if successful, sends an RTZ command.
@@ -37,7 +37,9 @@
 0x17e ,	comment	; Reached 0xf000 ?
 0x183 ,	comment	; Repeat until we reach 0xf000
 0x185 ,	comment	; Store final address of our RAM
-0x18c ,	comment	; This looks like a severely corrupt binary, can't continue
+0x18d ,	comment	; The code starting from here is definitely disassembled incorrectly
+0x1a1 ,	comment	; BX = top of RAM - 283
+0x1a3 ,	comment	; This will be address of our trampoline code
 0x1bb,	pre_comment 	; The code jumps here when for instance empty string was entered on CODE prompt
 	 	; According to known behavior, thus jumps back to WIPL prompt, effectively
 	 	; restarting it
@@ -48,7 +50,24 @@
 0x1e6 ,	comment	; disk_buffer
 0x1eb ,	comment	; "CODE"
 0x1f5 ,	comment	; code_buffer
+0x200 ,	comment	; name_buffer
+0x202 ,	comment	; disk_buffer
+0x206 ,	comment	; String length
+0x20a ,	comment	; Just one char means board offset 0
+0x20c ,	comment	; ' ' (space)
+0x20e ,	comment	; Check character[1]
+0x214 ,	comment	; BL = *char++
+0x21b ,	comment	; magic_value = 'p' - char
+0x21c ,	comment	; magic_value
+0x223 ,	comment	; DSK0_BASE | (magic_value << 2)
+0x225 ,	comment	; Set DSK board address
+0x22c ,	comment	; dma_mode_byte = magic_value << 4
+0x22d ,	comment	; Patch dma_set_mode insn
+0x231 ,	comment	; '0'
+0x238 ,	comment	; Valid units 0 - 7
+0x23f ,	comment	; This writes Hawk unit select register
 0x242 ,	comment	; code_buffer
+0x246 ,	comment	; Check string length
 0x24d,	pre_comment 	; EX points at the first non-numeric character after the code
 0x24d ,	comment	; Store entered_disk_code
 0x250 ,	comment	; Track 0 side 0 sector 15
@@ -57,8 +76,19 @@
 0x25a ,	comment	; Must be equal to 0xff
 0x25b ,	comment	; Proceed to disk code checking
 0x261 ,	comment	; Incorrect disk format
-0x265 ,	comment	; This is a "check disk code" flag.
-		; If zero, the check will be bypassed.
+0x265 ,	comment	; This is a "check disk code" flag. If zero, the check will be bypassed.
+		; In pristine bootloader, read from the disk image, there's a 00 at this location.
+		; So, it is patched at runtime. This means there should be a way to bypass the check,
+		; but i don't know how and didn't search for it since we now have code recovery tool.
+		; Some more info from KenR, which may explain things we see:
+		; 
+		; The [ Code = ] when booting from the disk was just a simple password to be allowed to read from the disk.
+		; It was just a one time security check at boot time.  The [ Code = ] was an added feature to the Centurion
+		; system sometime in around 1981.  Why I recall this is because I got hung up with a bug in the first release
+		; of the new "Code" feature. Bug was the code value was set to a value the customer picked during disk format
+		; and worked fine until the system was rebooted then the code value set no longer worked...!   Yes... what fun
+		; this bug was.  The OPSYS system programmer was able to figure out a work around so the customer could get back
+		; into the system till the bug was fixed.
 0x266 ,	comment	; Disk code is derived from this value
 0x26a ,	comment	; This whole thing rotates AX right WITHOUT carry
 0x273 ,	comment	; Some more obfuscation
@@ -73,11 +103,82 @@
 0x288 ,	comment	; Proceed if there's a match
 0x28e ,	comment	; Incorrect disk code
 0x293,	pre_comment 	; Disk code is correct
-	 	; Note we're doing some further manipulations with it, i don't get the
-	 	; point, LoadSector routine doesn't use AX and BX, in fact it will overwrite them.
-0x29d ,	comment	; entered_disk_code
-0x2a5,	pre_comment 	; RT is also not changed here. Are we reloading 0x000e ? This is strange...
-0x33d ,	comment	; This variable stores end of RAM
+0x293 ,	comment	; sector_base + 4
+0x298 ,	comment	; The same magic constant as used for making the code
+0x29d ,	comment	; entered_disk_code, which we now know is correct
+0x2a0 ,	comment	; More mathemagic
+0x2a5,	pre_comment 	; There's definitely some code discontinuity here. The exact reason is unknown,
+	 	; but this allows to suppose that during installation the IPL is composed of
+	 	; several parts. Disk driver will be different for different controller.
+	 	; Accorting to KenR:
+	 	; 
+	 	; the WIPL command had to also write a small disk I/O driver into track zero so
+	 	; once the track is loaded into the system memory the program like HDIPL 6.2  now
+	 	; knows how to read the files from a Hawk disk platter.  The WIPL data written on
+	 	; to a CMD disk would have a CMD I/O driver and the data written on to a Finch disk
+	 	; would have a Finch I/O driver as part of the IPL track.
+	 	; 
+	 	; So, well, this ends up reloading sector 14 because RT has not been touched, since
+	 	; the previous call, and the routine itself takes care to preserve it.
+0x2a9 ,	comment	; EX is still sector address
+0x2af,	pre_comment 	; And here we start searching for a bootable file (let's say so).
+	 	; The boot directory (let's say so) is composed of 16-byte entries.
+	 	; Each entry contains exactly 10 characters of a file name and 6 bytes of some
+	 	; data (would be logical to assume file start and length, at least).
+	 	; On the very first entry we start our search at (sector_base + 16), this
+	 	; makes sense because the first 16 bytes of sector 14 (where we start from)
+	 	; are occupied by special boot information (format flag, key, etc), which
+	 	; we've checked above.
+	 	; The search goes on to next sector(s), until we hit an entry, starting with
+	 	; 0x84 0x8d bytes. In the disk image we have we see these bytes prefixing
+	 	; what we think is a data file name.
+	 	; It's also a bit strange to see search starting from sector 14, because we know
+	 	; that sector 14 contains bad block table, and in the image we have it indeed
+	 	; looks like a bad block table. Nevertheless, the table isn't going to contain any
+	 	; valid sensible 10 ASCII characters, so we'll just skip over it.
+	 	; Perhaps there are variations of media format, which don't suggest the use ot a
+	 	; bad block table, we don't know.
+0x2af ,	comment	; name_on_disk = sector_base + 16
+		; Before proceeding, we copy part of ourselves to the top of RAM.
+		; I guess we're preparing to load the boot file into low memory, which would
+		; overwrite us.
+		; Calls to the relocated fragment are done via CallHighMem routine
+0x2b4 ,	comment	; length = 283 bytes
+0x2b6 ,	comment	; destination, set to top_of_ram - 283
+0x2b8 ,	comment	; source
+0x2ba,	pre_comment 	; Here we are trying to find our "name" on the disk
+	 	; Names are stored starting at sector 15 in a series of entries, 16 bytes each.
+	 	; Each name is exactly 10 characters long, padded up with spaces. Remaining 6
+	 	; bytes probably specify file location on the disk.
+	 	; Entries proceed to following sectors until the table terminated with a word of 0x848d.
+	 	; This is probably disk's root directory.
+0x2ba ,	comment	; Check if we hit the terminator
+0x2bf ,	comment	; Go back to the prompt if so
+0x2c7 ,	comment	; DX = name_buffer + 2 - start of entered NAME string, skip over length
+0x2c8 ,	comment	; AH = 10 - maximum length
+0x2cb ,	comment	; c1 = *entered_name++
+0x2cd ,	comment	; length--
+0x2cf ,	comment	; Proceed if the name matches
+0x2d1 ,	comment	; c2 = *name_on_disk
+0x2d4 ,	comment	; If matches, go chech the next char
+0x2d6 ,	comment	; Mismatch
+0x2da ,	comment	; name_on_disk += length (remaining) - this skips past the string
+0x2dc ,	comment	; EX = EX + 6 - this skips over to the next entry
+0x2e0 ,	comment	; BX = LoadBuffer0 - sector address
+0x2e3 ,	comment	; This makes sense as add BX, BX, 400 - point at the end of sector
+0x2e9 ,	comment	; Check the next entry if not reached the end
+0x2eb ,	comment	; Go to the next sector
+0x2ef ,	comment	; Call (end_of_ram - 87) = LoadSector
+0x2f2 ,	comment	; Restart the search from the beginning.
+		; EX will point at the beginning of the sector this time!!!
+0x2f4,	pre_comment 	; NAME found. EX points right after the string in the loaded sector.
+	 	; Since length of the name is exactly 10 bytes, we have three words,
+	 	; specifying something. The code below reads them.
+0x30e ,	comment	; Call (end_of_ram - 87) = LoadSector
+0x328 ,	comment	; Here we check something else.
+0x329 ,	comment	; If the check fails, we will jump back to the IPL prompt
+0x337 ,	comment	; Call (end_of_ram - 283) - boot the file ???
+0x33c ,	comment	; BX = end of RAM, patched in the beginning
 0x363 ,	comment	; name_buffer
 0x374 ,	comment	; disk_buffer
 0x378 ,	comment	; code_buffer
@@ -102,8 +203,8 @@
 0x3e6 ,	comment	; AX = digit
 0x3e8 ,	comment	; BX += digit
 0x3e9 ,	comment	; value = value * 10 + digit
-0x43e ,	comment	; This should jump to 0x125, but that isn't a valid location
-		; Most likely our binary is corrupt around here
+0x3ec,	pre_comment 	; This code is copied to high RAM (top - 283) and operates from there
+	 	; Note that it includes Hawk disk driver. The code is apparently fully relocatable
 0x4a6 ,	comment	; 400 bytes == 1 sector
 0x4b0,	pre_comment 	; This function loads one sector from the drive.
 	 	; CHS address of the sector to read needs to be placed into X (RT) register
@@ -134,4 +235,27 @@
 0x4fb,	pre_comment 	; And this waits for a generic operation completion
 0x4fb ,	comment	; HAWK status
 0x4fe ,	comment	; Wait for STATUS & 0x30 == 0x30
-0x609,	pre_comment 	; This routine supposedly reads a line from the terminal
+0x507,	pre_comment 	; This is the end of a fragment, which gets copied to top of RAM.
+	 	; This function preserves DX and EX
+0x507 ,	comment	; length = arg[0, 1]
+		; I completely fail to understand these two instructions. I mean - i understand what they mean,
+		; but what's the real purpose of this fragment here ? In pristine on-disk WIPL it looks the same.
+		; Is this patched during installation ?
+0x50d ,	comment	; push length
+0x50f ,	comment	; length = min(AX, BX)
+0x512 ,	comment	; arg[2, 3]
+0x517 ,	comment	; BX = length
+0x518 ,	comment	; Preserve DX
+0x51b ,	comment	; dest
+0x51e ,	comment	; src
+0x520 ,	comment	; push RT, will use as back counter
+0x522 ,	comment	; RT = length
+0x524,	pre_comment 	; Copy RT bytes from (AX) to (DX)
+0x527 ,	comment	; pop RT
+0x529 ,	comment	; pop DX
+0x609,	pre_comment 	; This routine supposedly reads a line from the terminal; i didn't care
+	 	; about the guts.
+	 	; The line is prefixed by 16-bit length, just like strings we print.
+	 	; It is also supposed to be padded with spaces (0xA0) up to a certain
+	 	; fixed length of at least 10 chars. NAME comparison wouldn't work without
+	 	; it as it compares exactly 10 characters.
