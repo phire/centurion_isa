@@ -131,7 +131,34 @@ class Memory():
     def match(self, pc, bitstring, bytes):
         inst = bytes[0]
 
-        if inst & 0x80 == 0x80:
+        if inst == 0xf6:
+            load = True
+            word = False
+
+            bytetwo = bytes[1]
+            offset_byte = bytes[2]
+
+            reg = (bytetwo >> 4) & 0xf
+            index = bytetwo & 0xf
+                        
+            size = 3
+
+            reg_name = RegNames8[reg]
+            index_name = RegNames16[index >> 1]
+            op = ["ld", "st"][index & 1]
+            addr = f"{struct.unpack_from('>xH', bytes)[0]:#06x}"
+
+            offset = f"{struct.unpack_from('b', struct.pack('B', offset_byte))[0]:+#04x}"
+            format = f"{op} {reg_name}, {offset}({index_name})"
+
+            return InstructionMatch(pc, QuickInstuction(format), bytes[:size], {
+                "reg": reg_name,
+                "index": index_name,
+                "addr": addr,
+                "offset": offset,
+            })
+            
+        elif inst & 0x80 == 0x80:
             # Instructions that operate on A & B
             # bit 6: Accumulator select - 0 for "A", 1 for "B"
             reg = 0 if inst & 0x40 == 0 else 2
@@ -266,7 +293,8 @@ class Alu():
             op = OPs[self.op]
             op += self.postfix
 
-            if self.op < 8:
+            # mov with a literal ignores the second operand
+            if self.op < 8 or (self.op == 13 and self.literal is not None):
                 if self.word:
                     str = f"{op} {RegNames16[self.src >> 1]}"
                 else:
@@ -430,6 +458,8 @@ instructions = [
     I("01111110 NNNNNNNN", "long_call"),
     I("01111111 NNNNNNNN", "clear_data_bank??"),
 
+    # This is caught and incorrectly parsed by Alu(), so place it here to override
+    I("01011011", "mov RT, AX"),
 
     Memory(), # Implements 80-FF
 
