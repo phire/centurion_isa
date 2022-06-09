@@ -43,6 +43,6 @@ if __name__ == "__main__":
     entry_points.append(0x9e08)
     entry_points.append(0x9ea7)
 
-    read_annotations("roms/Diag_F4_1133CMD.comments")
+    read_annotations("roms/Diag_F4_1133CMD.comments", memory)
 
     disassemble(memory)
