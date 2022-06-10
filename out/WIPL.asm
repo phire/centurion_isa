@@ -10,17 +10,17 @@ Start:
 
 L_0108:
     ; Entry point
-0108:    3a           clr! AX
-0109:    b1 00 6c     st AX, (0x006c)	 ; Initialize some vars
-010c:    b1 00 fc     st AX, (0x00fc)
-010f:    b1 00 ae     st AX, (0x00ae)
-0112:    90 05 06     ld AX, #0x0506
-0115:    b1 00 fe     st AX, (0x00fe)
+0108:    3a           clr! A
+0109:    b1 00 6c     st A, (0x006c)	 ; Initialize some vars
+010c:    b1 00 fc     st A, (0x00fc)
+010f:    b1 00 ae     st A, (0x00ae)
+0112:    90 05 06     ld A, #0x0506
+0115:    b1 00 fe     st A, (0x00fe)
 0118:    83 ed        ld AL, (PC-0x13)	 ; 0xc5
 011a:    a1 04 3d     st AL, (0x043d)	 ; Patch ld AL, #0xc5 instruction at addr 043c
 011d:    a1 05 6e     st AL, (0x056e)	 ; Patch ld BL, #0xc5 instruction at addr 056d
-0120:    90 00 f0     ld AX, #0x00f0	 ; Initialize stack
-0123:    5f           mov SP, AX
+0120:    90 00 f0     ld A, #0x00f0	 ; Initialize stack
+0123:    5f           mov S, A
 0124:    80 f1        ld AL, #0xf1	 ; This sends RTZ command to our disks.
 0126:    7b 19        call (PC+0x19) L_0141
 0128:    80 f5        ld AL, #0xf5
@@ -34,8 +34,8 @@ L_0108:
 
 L_0138:
     ; We go here if sense1 switch is set (DIAG board is present)
-0138:    61 00 1a     ld RT, (0x001a)	 ; RT = (0x001a) - 20
-013b:    50 54 ff ec  add RT, RT, #0xffec	 ; Looks like DIAG overrides our mem test and tells us
+0138:    61 00 1a     ld X, (0x001a)	 ; RT = (0x001a) - 20
+013b:    50 54 ff ec  add X, X, #0xffec	 ; Looks like DIAG overrides our mem test and tells us
 013f:    73 44        jump (PC+0x44) L_0185	 ; size of RAM to use
 
 L_0141:
@@ -52,14 +52,14 @@ L_0141:
 L_014b:
     ; Probe drive units from 7 to 0 and send RTZ command to connected ones
 014b:    a1 fd 40     st AL, (0xfd40)	 ; Unit select
-014e:    d0 30 00     ld BX, #0x3000	 ; BL = 0 (RTZ), BH = value to check flags against
+014e:    d0 30 00     ld B, #0x3000	 ; BL = 0 (RTZ), BH = value to check flags against
 0151:    c1 fd 45     ld BL, (0xfd45)	 ; Read command register ??? Some flaga ???
 0154:    42 23        and BL, BH	 ; command_reg & 0x30
 0156:    41 23        sub BL, BH
 0158:    15 11        bnz L_016b	 ; Should be 0x30. If not, skip this unit (not present)
 015a:    c0 03        ld BL, #0x03
 015c:    e1 fd 48     st BL, (0xfd48)	 ; RTZ (recalibrate)
-015f:    d0 30 00     ld BX, #0x3000
+015f:    d0 30 00     ld B, #0x3000
 
 L_0162:
 0162:    c1 fd 45     ld BL, (0xfd45)	 ; Wait for command_reg & 0x30 == 0x30; this indicates drive ready
@@ -74,39 +74,39 @@ L_016b:
 
 L_016f:
     ; Continuation of boot process
-016f:    90 10 00     ld AX, #0x1000
+016f:    90 10 00     ld A, #0x1000
 0172:    5b           mov RT, AX
-0173:    5c           mov DX, AX	 ; DX = 4096
+0173:    5c           mov Y, A	 ; DX = 4096
 
 L_0174:
     ; This locates end of RAM, effectively probing how much RAM we've got
-0174:    8a           ld AL, (RT)	 ; Preserve original (RT) value
+0174:    8a           ld AL, (X)	 ; Preserve original (RT) value
 0175:    c0 ff        ld BL, #0xff	 ; Try to store 0xff
-0177:    ea           st BL, (RT)
-0178:    ca           ld BL, (RT)	 ; Load it back
+0177:    ea           st BL, (X)
+0178:    ca           ld BL, (X)	 ; Load it back
 0179:    14 0a        bz L_0185	 ; Exit if we got zero (failed to store)
-017b:    aa           st AL, (RT)	 ; Put original value back
-017c:    50 64        add RT, DX	 ; RT += 4096 (page size ?)
-017e:    90 f0 00     ld AX, #0xf000	 ; Reached 0xf000 ?
-0181:    51 40        sub AX, RT
+017b:    aa           st AL, (X)	 ; Put original value back
+017c:    50 64        add X, Y	 ; RT += 4096 (page size ?)
+017e:    90 f0 00     ld A, #0xf000	 ; Reached 0xf000 ?
+0181:    51 40        sub A, X
 0183:    15 ef        bnz L_0174	 ; Repeat until we reach 0xf000
 
 L_0185:
-0185:    69 03 3d     st RT, (0x033d)	 ; Store final address of our RAM
-0188:    55 42        mov BX, RT
-018a:    50 32 fd 55  add BX, BX, #0xfd55
-018e:    f1 04 a0     st BX, (0x04a0)
-0191:    50 32 fe 70  add BX, BX, #0xfe70
-0195:    f1 04 a2     st BX, (0x04a2)
-0198:    50 32 fe 70  add BX, BX, #0xfe70
-019c:    55 2a        mov SP, BX
-019e:    d0 fe e5     ld BX, #0xfee5
-01a1:    50 42        add BX, RT	 ; BX = top of RAM - 283
-01a3:    f1 02 b6     st BX, (0x02b6)	 ; This will be address of our trampoline code
+0185:    69 03 3d     st X, (0x033d)	 ; Store final address of our RAM
+0188:    55 42        mov B, X
+018a:    50 32 fd 55  add B, B, #0xfd55
+018e:    f1 04 a0     st B, (0x04a0)
+0191:    50 32 fe 70  add B, B, #0xfe70
+0195:    f1 04 a2     st B, (0x04a2)
+0198:    50 32 fe 70  add B, B, #0xfe70
+019c:    55 2a        mov S, B
+019e:    d0 fe e5     ld B, #0xfee5
+01a1:    50 42        add B, X	 ; BX = top of RAM - 283
+01a3:    f1 02 b6     st B, (0x02b6)	 ; This will be address of our trampoline code
 01a6:    80 bd        ld AL, #0xbd
 01a8:    a1 06 18     st AL, (0x0618)
-01ab:    90 01 bb     ld AX, #0x01bb
-01ae:    b1 06 00     st AX, (0x0600)
+01ab:    90 01 bb     ld A, #0x01bb
+01ae:    b1 06 00     st A, (0x0600)
 01b1:    80 b1        ld AL, #0xb1
 01b3:    1d 01        bs4 L_01b6
 01b5:    29           dec! AL
@@ -126,11 +126,11 @@ BackToPrompt:
     ; location contains zero; while in this one, which has been extracted by dumping
     ; from the TOS after it hit the "Stop" loop and the machine has been restarted,
     ; we see a 0xff. So, apparently, this sequence stores an 0xFF at 0x0265
-01bc:    47 4c        unk7 GH, RH	 ; fill
+01bc:    47 4c        unk7 CH, XH	 ; fill
 01be:    00           (0x0)	 ; 1 byte
 01bf:    ff           (0xff)	 ; with this value
 01c0:    02 65        (0x265)	 ; starting at 0x265
-01c2:    47 9c        unk7 GH, EL	 ; fill (0x365), 0xa0, 10
+01c2:    47 9c        unk7 CH, ZL	 ; fill (0x365), 0xa0, 10
 01c4:    09           (0x9)
 01c5:    a0           (0xa0)
 01c6:    03 65        (0x365)
@@ -160,16 +160,16 @@ BackToPrompt:
 L_01fd:
 01fd:    79 06 78     call #0x0678 L_0678
 0200:    03 63        (0x363)	 ; name_buffer
-0202:    90 03 74     ld AX, #0x0374	 ; disk_buffer
-0205:    5e           mov EX, AX
-0206:    d5 81        ld BX, (EX)+	 ; String length
-0208:    31 20        dec BX, 1
+0202:    90 03 74     ld A, #0x0374	 ; disk_buffer
+0205:    5e           mov Z, A
+0206:    d5 81        ld B, (Z)+	 ; String length
+0208:    31 20        dec B, 1
 020a:    14 10        bz L_021c	 ; Just one char means board offset 0
 020c:    80 a0        ld AL, #0xa0	 ; ' ' (space)
-020e:    c5 88 01     ld BL, +0x1(EX)	 ; Check character[1]
+020e:    c5 88 01     ld BL, +0x1(Z)	 ; Check character[1]
 0211:    49           sub! BL, AL
 0212:    14 08        bz L_021c
-0214:    c5 81        ld BL, (EX)+	 ; BL = *char++
+0214:    c5 81        ld BL, (Z)+	 ; BL = *char++
 0216:    49           sub! BL, AL
 0217:    14 03        bz L_021c
 0219:    80 f0        ld AL, #0xf0
@@ -178,14 +178,14 @@ L_01fd:
 L_021c:
 021c:    45 31        mov AL, BL	 ; magic_value
 021e:    25 11        sll AL, 2
-0220:    d0 f1 40     ld BX, #0xf140
+0220:    d0 f1 40     ld B, #0xf140
 0223:    43 12        or BH, AL	 ; DSK0_BASE | (magic_value << 2)
-0225:    f1 04 b1     st BX, (0x04b1)	 ; Set DSK board address
+0225:    f1 04 b1     st B, (0x04b1)	 ; Set DSK board address
 0228:    25 11        sll AL, 2
 022a:    c0 04        ld BL, #0x04
 022c:    48           add! BL, AL	 ; dma_mode_byte = magic_value << 4
 022d:    e1 04 ac     st BL, (0x04ac)	 ; Patch dma_set_mode insn
-0230:    8c           ld AL, (EX)
+0230:    8c           ld AL, (Z)
 0231:    c0 b0        ld BL, #0xb0	 ; '0'
 0233:    49           sub! BL, AL
 0234:    16 06        blt BackToPrompt_tramp
@@ -198,20 +198,20 @@ BackToPrompt_tramp:
 
 L_023f:
 023f:    e2 04 b1     st BL, @(0x04b1)	 ; This writes Hawk unit select register
-0242:    90 03 78     ld AX, #0x0378	 ; code_buffer
-0245:    5e           mov EX, AX
-0246:    95 81        ld AX, (EX)+	 ; Check string length
+0242:    90 03 78     ld A, #0x0378	 ; code_buffer
+0245:    5e           mov Z, A
+0246:    95 81        ld A, (Z)+	 ; Check string length
 0248:    14 06        bz L_0250
 024a:    79 03 c9     call #0x03c9 StrToNum
     ; EX points at the first non-numeric character after the code
-024d:    b1 01 05     st AX, (0x0105)	 ; Store entered_disk_code
+024d:    b1 01 05     st A, (0x0105)	 ; Store entered_disk_code
 
 L_0250:
-0250:    60 00 0e     ld RT, #0x000e	 ; Track 0 side 0 sector 15
+0250:    60 00 0e     ld X, #0x000e	 ; Track 0 side 0 sector 15
 0253:    79 04 b0     call #0x04b0 LoadSector
 0256:    00           (0x0)
     ; EX is an address of the loaded sector
-0257:    85 88 08     ld AL, +0x8(EX)	 ; Disk format flag
+0257:    85 88 08     ld AL, +0x8(Z)	 ; Disk format flag
 025a:    28           inc! AL	 ; Must be equal to 0xff
 025b:    14 09        bz L_0266	 ; Proceed to disk code checking
 025d:    04           ei
@@ -233,27 +233,27 @@ L_0250:
            	 ; into the system till the bug was fixed.
 
 L_0266:
-0266:    95 88 06     ld AX, +0x6(EX)	 ; Disk code is derived from this value
-0269:    3b           not! AX
+0266:    95 88 06     ld A, +0x6(Z)	 ; Disk code is derived from this value
+0269:    3b           not! A
 026a:    c0 80        ld BL, #0x80	 ; This whole thing rotates AX right WITHOUT carry
 026c:    07           rl
-026d:    36 00        rrc AX, 1
+026d:    36 00        rrc A, 1
 026f:    11 02        bnc L_0273
 0271:    43 30        or AH, BL
 
 L_0273:
-0273:    d0 3c b1     ld BX, #0x3cb1	 ; Some more obfuscation
+0273:    d0 3c b1     ld B, #0x3cb1	 ; Some more obfuscation
 0276:    44 32        xor BH, BL
-0278:    54 02        xor BX, AX	 ; BX is the final expected value here
+0278:    54 02        xor B, A	 ; BX is the final expected value here
 027a:    81 02 65     ld AL, (0x0265)	 ; This is "request check" flag. We don't know how/where it's set.
 027d:    15 05        bnz L_0284	 ; If not zero, the check is required
-027f:    f1 01 05     st BX, (0x0105)	 ; entered_disk_code = expected_entered_disk_code
+027f:    f1 01 05     st B, (0x0105)	 ; entered_disk_code = expected_entered_disk_code
 0282:    73 0f        jump (PC+0x0f) L_0293	 ; Bypass
 
 L_0284:
     ; Check the disk code
-0284:    91 01 05     ld AX, (0x0105)	 ; AX - entered_disk_code
-0287:    59           sub! BX, AX	 ; BX = expected_disk_code
+0284:    91 01 05     ld A, (0x0105)	 ; AX - entered_disk_code
+0287:    59           sub! B, A	 ; BX = expected_disk_code
 0288:    14 09        bz L_0293	 ; Proceed if there's a match
 028a:    04           ei
 028b:    79 05 36     call #0x0536 PrintString
@@ -264,18 +264,18 @@ L_0293:
     ; Disk code is correct. Now we read what we'll call a "boot directory".
     ; Number of starting block is stored at (sector_base + 4) in a scrambled
     ; form. The disk code is used to unscramble it.
-0293:    95 88 04     ld AX, +0x4(EX)	 ; sector_base + 4
+0293:    95 88 04     ld A, +0x4(Z)	 ; sector_base + 4
 0296:    44 10        xor AH, AL
-0298:    d0 3c b1     ld BX, #0x3cb1	 ; The same magic constant as used for making the code
-029b:    54 02        xor BX, AX
-029d:    91 01 05     ld AX, (0x0105)	 ; entered_disk_code, which we now know is correct
-02a0:    50 20        add AX, BX	 ; AX = track number here
-02a2:    35 03        sll AX, 4
+0298:    d0 3c b1     ld B, #0x3cb1	 ; The same magic constant as used for making the code
+029b:    54 02        xor B, A
+029d:    91 01 05     ld A, (0x0105)	 ; entered_disk_code, which we now know is correct
+02a0:    50 20        add A, B	 ; AX = track number here
+02a2:    35 03        sll A, 4
 02a4:    5b           mov RT, AX	 ; sector = track * 16 (sectors per track)
 02a5:    79 04 b0     call #0x04b0 LoadSector
 02a8:    00           (0x0)
-02a9:    95 88 0e     ld AX, +0xe(EX)	 ; EX is still sector address
-02ac:    b1 04 8a     st AX, (0x048a)
+02a9:    95 88 0e     ld A, +0xe(Z)	 ; EX is still sector address
+02ac:    b1 04 8a     st A, (0x048a)
     ; And here we start searching for a bootable file (let's say so).
     ; The boot directory (let's say so) is composed of 16-byte entries.
     ; Each entry contains exactly 10 characters of a file name and 6 bytes of some
@@ -287,8 +287,8 @@ L_0293:
     ; The search goes on to next sector(s), until we hit an entry, starting with
     ; 0x84 0x8d bytes. In the disk image we have we see these bytes prefixing
     ; what we think is a data file name.
-02af:    30 8f        inc EX, 16	 ; name_on_disk = sector_base + 16, this skips the first entry.
-                                	 ; That first entry looks like a volume name on the image we have.
+02af:    30 8f        inc Z, 16	 ; name_on_disk = sector_base + 16, this skips the first entry.
+                               	 ; That first entry looks like a volume name on the image we have.
 02b1:    79 05 07     call #0x0507 memcpy	 ; Before proceeding, we copy part of ourselves to the top of RAM.
                                          	 ; I guess we're preparing to load the boot file into low memory, which would
                                          	 ; overwrite us.
@@ -304,34 +304,34 @@ L_02ba:
     ; bytes probably specify file location on the disk.
     ; Entries proceed to following sectors until the table terminated with a word of 0x848d.
     ; This is probably disk's root directory.
-02ba:    9c           ld AX, (EX)	 ; Check if we hit the terminator
-02bb:    d0 84 8d     ld BX, #0x848d
-02be:    59           sub! BX, AX
+02ba:    9c           ld A, (Z)	 ; Check if we hit the terminator
+02bb:    d0 84 8d     ld B, #0x848d
+02be:    59           sub! B, A
 02bf:    15 03        bnz L_02c4	 ; Go back to the prompt if so
 02c1:    71 02 3c     jump #0x023c BackToPrompt_tramp
 
 L_02c4:
-02c4:    90 03 65     ld AX, #0x0365
-02c7:    5c           mov DX, AX	 ; DX = name_buffer + 2 - start of entered NAME string, skip over length
-02c8:    90 0a 00     ld AX, #0x0a00	 ; AH = 10 - maximum length
+02c4:    90 03 65     ld A, #0x0365
+02c7:    5c           mov Y, A	 ; DX = name_buffer + 2 - start of entered NAME string, skip over length
+02c8:    90 0a 00     ld A, #0x0a00	 ; AH = 10 - maximum length
 
 L_02cb:
-02cb:    85 61        ld AL, (DX)+	 ; c1 = *entered_name++
+02cb:    85 61        ld AL, (Y)+	 ; c1 = *entered_name++
 02cd:    21 00        dec AH, 1	 ; length--
 02cf:    16 23        blt L_02f4	 ; Proceed if the name matches
-02d1:    c5 81        ld BL, (EX)+	 ; c2 = *name_on_disk
+02d1:    c5 81        ld BL, (Z)+	 ; c2 = *name_on_disk
 02d3:    49           sub! BL, AL
 02d4:    14 f5        bz L_02cb	 ; If matches, go chech the next char
 02d6:    45 01        mov AL, AH	 ; Mismatch
 02d8:    22 00        clr AH, 0
-02da:    50 08        add EX, AX	 ; name_on_disk += length (remaining) - this skips past the string
-02dc:    50 98 00 06  add EX, EX, #0x0006	 ; EX = EX + 6 - this skips over to the next entry
-02e0:    d1 04 a0     ld BX, (0x04a0)	 ; BX = LoadBuffer0 - sector address
-02e3:    50 32 01 90  add BX, BX, #0x0190	 ; This makes sense as add BX, BX, 400 - point at the end of sector
-02e7:    51 82        sub BX, EX
+02da:    50 08        add Z, A	 ; name_on_disk += length (remaining) - this skips past the string
+02dc:    50 98 00 06  add Z, Z, #0x0006	 ; EX = EX + 6 - this skips over to the next entry
+02e0:    d1 04 a0     ld B, (0x04a0)	 ; BX = LoadBuffer0 - sector address
+02e3:    50 32 01 90  add B, B, #0x0190	 ; This makes sense as add BX, BX, 400 - point at the end of sector
+02e7:    51 82        sub B, Z
 02e9:    15 cf        bnz L_02ba	 ; Check the next entry if not reached the end
-02eb:    3e           inc RT	 ; Go to the next sector
-02ec:    90 ff a9     ld AX, #0xffa9
+02eb:    3e           inc X	 ; Go to the next sector
+02ec:    90 ff a9     ld A, #0xffa9
 02ef:    7b 4b        call (PC+0x4b) CallHighMem	 ; Call (end_of_ram - 87) = LoadSector
 02f1:    00           HALT
 02f2:    73 c6        jump (PC-0x3a) L_02ba	 ; Restart the search from the beginning.
@@ -341,56 +341,56 @@ L_02f4:
     ; NAME found. EX points right after the string in the loaded sector.
     ; Since length of the name is exactly 10 bytes, we have three words,
     ; specifying something. The code below reads them.
-02f4:    3a           clr! AX
-02f5:    85 81        ld AL, (EX)+
-02f7:    5d           mov BX, AX
-02f8:    3d           sll! AX
-02f9:    58           add! BX, AX
-02fa:    91 04 a2     ld AX, (0x04a2)
-02fd:    58           add! BX, AX
-02fe:    f5 a2        st BX, -(SP)
-0300:    95 81        ld AX, (EX)+
-0302:    61 04 8a     ld RT, (0x048a)
-0305:    50 04        add RT, AX
-0307:    85 81        ld AL, (EX)+
-0309:    b5 a2        st AX, -(SP)
-030b:    90 ff a9     ld AX, #0xffa9
+02f4:    3a           clr! A
+02f5:    85 81        ld AL, (Z)+
+02f7:    5d           mov B, A
+02f8:    3d           sll! A
+02f9:    58           add! B, A
+02fa:    91 04 a2     ld A, (0x04a2)
+02fd:    58           add! B, A
+02fe:    f5 a2        st B, -(S)
+0300:    95 81        ld A, (Z)+
+0302:    61 04 8a     ld X, (0x048a)
+0305:    50 04        add X, A
+0307:    85 81        ld AL, (Z)+
+0309:    b5 a2        st A, -(S)
+030b:    90 ff a9     ld A, #0xffa9
 030e:    7b 2c        call (PC+0x2c) CallHighMem	 ; Call (end_of_ram - 87) = LoadSector
 0310:    01           nop
-0311:    d5 a8 02     ld BX, +0x2(SP)
-0314:    3a           clr! AX
-0315:    85 28 04     ld AL, +0x4(BX)
+0311:    d5 a8 02     ld B, +0x2(S)
+0314:    3a           clr! A
+0315:    85 28 04     ld AL, +0x4(B)
 0318:    5b           mov RT, AX
-0319:    3a           clr! AX
-031a:    38           inc! AX
+0319:    3a           clr! A
+031a:    38           inc! A
 
 L_031b:
-031b:    3f           dec RT
+031b:    3f           dec X
 031c:    16 03        blt L_0321
-031e:    3d           sll! AX
+031e:    3d           sll! A
 031f:    73 fa        jump (PC-0x06) L_031b
 
 L_0321:
-0321:    dd           ld BX, (SP)
-0322:    bd           st AX, (SP)
+0321:    dd           ld B, (S)
+0322:    bd           st A, (S)
 0323:    80 0f        ld AL, #0x0f
 0325:    4a           and! BL, AL
 0326:    80 04        ld AL, #0x04
 0328:    49           sub! BL, AL	 ; Here we check something else.
 0329:    15 0e        bnz L_0339	 ; If the check fails, we will jump back to the IPL prompt
-032b:    90 ff ff     ld AX, #0xffff
-032e:    d3 0d        ld BX, (PC+0xd)
-0330:    58           add! BX, AX
-0331:    f1 00 fe     st BX, (0x00fe)
-0334:    90 fe e5     ld AX, #0xfee5
+032b:    90 ff ff     ld A, #0xffff
+032e:    d3 0d        ld B, (PC+0xd)
+0330:    58           add! B, A
+0331:    f1 00 fe     st B, (0x00fe)
+0334:    90 fe e5     ld A, #0xfee5
 0337:    7b 03        call (PC+0x03) CallHighMem	 ; Call (end_of_ram - 283) - boot the file ???
 
 L_0339:
 0339:    71 01 bb     jump #0x01bb BackToPrompt
 
 CallHighMem:
-033c:    d0 80 00     ld BX, #0x8000	 ; BX = end of RAM, patched in the beginning
-033f:    58           add! BX, AX
+033c:    d0 80 00     ld B, #0x8000	 ; BX = end of RAM, patched in the beginning
+033f:    58           add! B, A
 0340:    75 20        jump (A + 0x20)
 0342:    10, "\nHDIPL 6.2"
 034e:    4, "NAME"
@@ -398,7 +398,7 @@ CallHighMem:
 035a:    4, "CODE"
 0360:    00           HALT
 0361:    01           nop
-0362:    8c           ld AL, (EX)
+0362:    8c           ld AL, (Z)
 0363:    00           HALT	 ; name_buffer
 0364:    05           di
 0365:    a0 a0        st AL, #0xa0
@@ -437,60 +437,60 @@ L_03c5:
 StrToNum:
     ; Parses a numeric string, pointed to by EX, and returns the
     ; parsed value in AX. EX is updated to point at the first non-digit character
-03c9:    8c           ld AL, (EX)	 ; Check the first character
+03c9:    8c           ld AL, (Z)	 ; Check the first character
 03ca:    7b f1        call (PC-0x0f) AsciiToHex
 03cc:    17 03        bp L_03d1
 03ce:    71 01 bb     jump #0x01bb BackToPrompt	 ; The character is invalid
 
 L_03d1:
     ; A correcr digit has been entered
-03d1:    3a           clr! AX
-03d2:    b5 a2        st AX, -(SP)	 ; value = 0
+03d1:    3a           clr! A
+03d2:    b5 a2        st A, -(S)	 ; value = 0
 
 L_03d4:
-03d4:    85 81        ld AL, (EX)+	 ; Do the conversion again, increment pointer this time
+03d4:    85 81        ld AL, (Z)+	 ; Do the conversion again, increment pointer this time
 03d6:    7b e5        call (PC-0x1b) AsciiToHex
 03d8:    17 05        bp L_03df
-03da:    31 80        dec EX, 1	 ; Invalid character, restore the pointer
-                               	 ; It now points behind our number
-03dc:    95 a1        ld AX, (SP)+	 ; return value
+03da:    31 80        dec Z, 1	 ; Invalid character, restore the pointer
+                              	 ; It now points behind our number
+03dc:    95 a1        ld A, (S)+	 ; return value
 03de:    09           ret
 
 L_03df:
-03df:    9d           ld AX, (SP)	 ; AX = value
-03e0:    ed           st BL, (SP)	 ; (SP) = digit
-03e1:    3d           sll! AX
-03e2:    5d           mov BX, AX	 ; BX = value << 1
-03e3:    35 01        sll AX, 2	 ; should be sll AX, 2
-03e5:    58           add! BX, AX	 ; BX = (value << 1) + (value << 3) = value * 10
-03e6:    3a           clr! AX	 ; AX = digit
-03e7:    8d           ld AL, (SP)
-03e8:    58           add! BX, AX	 ; BX += digit
-03e9:    fd           st BX, (SP)	 ; value = value * 10 + digit
+03df:    9d           ld A, (S)	 ; AX = value
+03e0:    ed           st BL, (S)	 ; (SP) = digit
+03e1:    3d           sll! A
+03e2:    5d           mov B, A	 ; BX = value << 1
+03e3:    35 01        sll A, 2	 ; should be sll AX, 2
+03e5:    58           add! B, A	 ; BX = (value << 1) + (value << 3) = value * 10
+03e6:    3a           clr! A	 ; AX = digit
+03e7:    8d           ld AL, (S)
+03e8:    58           add! B, A	 ; BX += digit
+03e9:    fd           st B, (S)	 ; value = value * 10 + digit
 03ea:    73 e8        jump (PC-0x18) L_03d4
 
 RelocatablePart:
     ; This code is copied to high RAM (top - 283) and operates from there
     ; Note that it includes Hawk disk driver. The code is apparently fully relocatable
-03ec:    95 a1        ld AX, (SP)+
-03ee:    95 a1        ld AX, (SP)+
-03f0:    b3 36        st AX, (PC+0x36)
-03f2:    95 a1        ld AX, (SP)+
-03f4:    30 05        inc AX, 6
-03f6:    b3 5c        st AX, (PC+0x5c)
-03f8:    3a           clr! AX
-03f9:    39           dec! AX
-03fa:    b3 5e        st AX, (PC+0x5e)
+03ec:    95 a1        ld A, (S)+
+03ee:    95 a1        ld A, (S)+
+03f0:    b3 36        st A, (PC+0x36)
+03f2:    95 a1        ld A, (S)+
+03f4:    30 05        inc A, 6
+03f6:    b3 5c        st A, (PC+0x5c)
+03f8:    3a           clr! A
+03f9:    39           dec! A
+03fa:    b3 5e        st A, (PC+0x5e)
 03fc:    7b 53        call (PC+0x53) L_0451
-03fe:    d0 00 4c     ld BX, #0x004c
-0401:    59           sub! BX, AX
+03fe:    d0 00 4c     ld B, #0x004c
+0401:    59           sub! B, A
 0402:    15 26        bnz L_042a
-0404:    95 88 1b     ld AX, +0x1b(EX)
-0407:    b3 40        st AX, (PC+0x40)
-0409:    50 48        add EX, RT
-040b:    30 80        inc EX, 1
+0404:    95 88 1b     ld A, +0x1b(Z)
+0407:    b3 40        st A, (PC+0x40)
+0409:    50 48        add Z, X
+040b:    30 80        inc Z, 1
 040d:    7b 31        call (PC+0x31) L_0440
-040f:    30 80        inc EX, 1
+040f:    30 80        inc Z, 1
 
 L_0411:
 0411:    7b 2d        call (PC+0x2d) L_0440
@@ -498,93 +498,93 @@ L_0411:
 0415:    14 13        bz L_042a
 
 L_0417:
-0417:    d5 81        ld BX, (EX)+
-0419:    93 2e        ld AX, (PC+0x2e)
-041b:    58           add! BX, AX
-041c:    99           ld AX, (BX)
-041d:    50 60        add AX, DX
-041f:    b9           st AX, (BX)
-0420:    31 41        dec RT, 2
+0417:    d5 81        ld B, (Z)+
+0419:    93 2e        ld A, (PC+0x2e)
+041b:    58           add! B, A
+041c:    99           ld A, (B)
+041d:    50 60        add A, Y
+041f:    b9           st A, (B)
+0420:    31 41        dec X, 2
 0422:    18 f3        bgt L_0417
 
 L_0424:
-0424:    85 81        ld AL, (EX)+
+0424:    85 81        ld AL, (Z)+
 0426:    73 e9        jump (PC-0x17) L_0411
 0428:    00
 0429:    00
 
 L_042a:
-042a:    55 44        mov RT, RT
+042a:    55 44        mov X, X
 042c:    14 0c        bz L_043a
-042e:    55 40        mov AX, RT
-0430:    39           dec! AX
-0431:    67 4a        ld RT, unknown
+042e:    55 40        mov A, X
+0430:    39           dec! A
+0431:    67 4a        ld X, unknown
 0433:    86 50        ld AL, unknown
-0435:    46 50        unk6 AH, RL
+0435:    46 50        unk6 AH, XL
 0437:    48           add! BL, AL
 0438:    73 ea        jump (PC-0x16) L_0424
 
 L_043a:
-043a:    32 80        clr EX, 0
+043a:    32 80        clr Z, 0
 043c:    80 c5        ld AL, #0xc5
 043e:    75 60        jump (A + 0x60)
 
 L_0440:
-0440:    c5 81        ld BL, (EX)+
+0440:    c5 81        ld BL, (Z)+
 0442:    16 0d        blt L_0451
-0444:    3a           clr! AX
-0445:    85 81        ld AL, (EX)+
-0447:    bd           st AX, (SP)
-0448:    90 00 00     ld AX, #0x0000
-044b:    5c           mov DX, AX
-044c:    95 81        ld AX, (EX)+
-044e:    50 06        add DX, AX
+0444:    3a           clr! A
+0445:    85 81        ld AL, (Z)+
+0447:    bd           st A, (S)
+0448:    90 00 00     ld A, #0x0000
+044b:    5c           mov Y, A
+044c:    95 81        ld A, (Z)+
+044e:    50 06        add Y, A
 0450:    09           ret
 
 L_0451:
-0451:    6d a2        st RT, -(SP)
-0453:    90 00 00     ld AX, #0x0000
-0456:    65 08 01     ld RT, +0x1(AX)
-0459:    90 00 00     ld AX, #0x0000
-045c:    38           inc! AX
-045d:    b3 fb        st AX, (PC-0x5)
-045f:    50 04        add RT, AX
-0461:    d3 c5        ld BX, (PC-0x3b)
-0463:    59           sub! BX, AX
+0451:    6d a2        st X, -(S)
+0453:    90 00 00     ld A, #0x0000
+0456:    65 08 01     ld X, +0x1(A)
+0459:    90 00 00     ld A, #0x0000
+045c:    38           inc! A
+045d:    b3 fb        st A, (PC-0x5)
+045f:    50 04        add X, A
+0461:    d3 c5        ld B, (PC-0x3b)
+0463:    59           sub! B, A
 0464:    11 30        bnc L_0496
-0466:    3a           clr! AX
-0467:    b3 f1        st AX, (PC-0xf)
-0469:    93 e9        ld AX, (PC-0x17)
-046b:    30 02        inc AX, 3
-046d:    b3 e5        st AX, (PC-0x1b)
-046f:    65 08 01     ld RT, +0x1(AX)
-0472:    5d           mov BX, AX
-0473:    98           ld AX, (AX)
+0466:    3a           clr! A
+0467:    b3 f1        st A, (PC-0xf)
+0469:    93 e9        ld A, (PC-0x17)
+046b:    30 02        inc A, 3
+046d:    b3 e5        st A, (PC-0x1b)
+046f:    65 08 01     ld X, +0x1(A)
+0472:    5d           mov B, A
+0473:    98           ld A, (A)
 0474:    17 20        bp L_0496
-0476:    3a           clr! AX
-0477:    85 28 02     ld AL, +0x2(BX)
+0476:    3a           clr! A
+0477:    85 28 02     ld AL, +0x2(B)
 047a:    28           inc! AL
 047b:    14 20        bz Stop
 047d:    29           dec! AL
-047e:    5d           mov BX, AX
-047f:    3d           sll! AX
-0480:    58           add! BX, AX
-0481:    93 1f        ld AX, (PC+0x1f)
-0483:    58           add! BX, AX
-0484:    94 ce        ld AX, @(PC-0x32)
-0486:    f3 cc        st BX, (PC-0x34)
-0488:    3b           not! AX
-0489:    60 57 79     ld RT, #0x5779
-048c:    50 04        add RT, AX
+047e:    5d           mov B, A
+047f:    3d           sll! A
+0480:    58           add! B, A
+0481:    93 1f        ld A, (PC+0x1f)
+0483:    58           add! B, A
+0484:    94 ce        ld A, @(PC-0x32)
+0486:    f3 cc        st B, (PC-0x34)
+0488:    3b           not! A
+0489:    60 57 79     ld X, #0x5779
+048c:    50 04        add X, A
 048e:    7b 20        call (PC+0x20) LoadSector
 0490:    01           nop
-0491:    63 c1        ld RT, (PC-0x3f)
-0493:    65 48 01     ld RT, +0x1(RT)
+0491:    63 c1        ld X, (PC-0x3f)
+0493:    65 48 01     ld X, +0x1(X)
 
 L_0496:
 0496:    7b 18        call (PC+0x18) LoadSector
 0498:    00           HALT
-0499:    65 a1        ld RT, (SP)+
+0499:    65 a1        ld X, (S)+
 049b:    73 a3        jump (PC-0x5d) L_0440
 
 Stop:
@@ -598,9 +598,9 @@ LoadBuffer1:
 04a2:    7b c5        (0x7bc5)
 
 SetDmaForSectorLoad:
-04a4:    2f 00        dma_load_addr WX
-04a6:    90 fe 6f     ld AX, #0xfe6f	 ; 400 bytes == 1 sector
-04a9:    2f 02        dma_load_count WX
+04a4:    2f 00        dma_load_addr A
+04a6:    90 fe 6f     ld A, #0xfe6f	 ; 400 bytes == 1 sector
+04a9:    2f 02        dma_load_count A
 04ab:    2f 04        dma_set_mode 0
 04ad:    2f 06        dma_enable
 04af:    09           ret
@@ -612,57 +612,57 @@ LoadSector:
     ; This routine uses two buffers, whose addresses are stored in two
     ; variables above. The buffer to use is chosen by the literal byte
     ; argument: 0 or 1. Address of the buffer is returned in EX.
-04b0:    90 f1 40     ld AX, #0xf140
-04b3:    5e           mov EX, AX	 ; EX = DSK_BASE
-04b4:    93 ea        ld AX, (PC-0x16)	 ; AX = LoadBuffer0
-04b6:    c5 41        ld BL, (RT)+
+04b0:    90 f1 40     ld A, #0xf140
+04b3:    5e           mov Z, A	 ; EX = DSK_BASE
+04b4:    93 ea        ld A, (PC-0x16)	 ; AX = LoadBuffer0
+04b6:    c5 41        ld BL, (X)+
 04b8:    14 02        bz L_04bc	 ; If literal argument is not 0...
-04ba:    93 e6        ld AX, (PC-0x1a)	 ; .. then AX = LoadBuffer1
+04ba:    93 e6        ld A, (PC-0x1a)	 ; .. then AX = LoadBuffer1
 
 L_04bc:
-04bc:    b3 10        st AX, (PC+0x10)	 ; Preserve loading address (patch instruction at 04cd)
+04bc:    b3 10        st A, (PC+0x10)	 ; Preserve loading address (patch instruction at 04cd)
 04be:    7b e4        call (PC-0x1c) SetDmaForSectorLoad	 ; Setup DMA to read
 04c0:    7b 1f        call (PC+0x1f) SeekToTrack
 04c2:    80 00        ld AL, #0x00
-04c4:    a5 88 08     st AL, +0x8(EX)	 ; READ command
+04c4:    a5 88 08     st AL, +0x8(Z)	 ; READ command
 04c7:    7b 2c        call (PC+0x2c) WaitForDataReady
     ; Upon completion status register value will be in AX
 04c9:    24 00        srl AH, 1	 ; Check HAWK_STATUS & 0x0100
 04cb:    15 05        bnz L_04d2	 ; If bit set, recalibrate, seek and retry (read error)
-04cd:    90 7d 55     ld AX, #0x7d55	 ; AX = loading address (this insn is patched)
-04d0:    5e           mov EX, AX
+04cd:    90 7d 55     ld A, #0x7d55	 ; AX = loading address (this insn is patched)
+04d0:    5e           mov Z, A
 04d1:    09           ret
 
 L_04d2:
 04d2:    80 03        ld AL, #0x03
-04d4:    a5 88 08     st AL, +0x8(EX)	 ; RTZ command
+04d4:    a5 88 08     st AL, +0x8(Z)	 ; RTZ command
 04d7:    7b 22        call (PC+0x22) WaitForHawkCmdCompletion
-04d9:    8c           ld AL, (EX)
-04da:    a5 88 0b     st AL, +0xb(EX)
-04dd:    93 ef        ld AX, (PC-0x11)	 ; AX = loading address (from the patched insn)
+04d9:    8c           ld AL, (Z)
+04da:    a5 88 0b     st AL, +0xb(Z)
+04dd:    93 ef        ld A, (PC-0x11)	 ; AX = loading address (from the patched insn)
 04df:    73 db        jump (PC-0x25) L_04bc	 ; Retry
 
 SeekToTrack:
 04e1:    7b 18        call (PC+0x18) WaitForHawkCmdCompletion
-04e3:    95 a8 02     ld AX, +0x2(SP)
-04e6:    d0 3f ff     ld BX, #0x3fff
-04e9:    5a           and! BX, AX
-04ea:    f5 88 01     st BX, +0x1(EX)	 ; Write sector address register
+04e3:    95 a8 02     ld A, +0x2(S)
+04e6:    d0 3f ff     ld B, #0x3fff
+04e9:    5a           and! B, A
+04ea:    f5 88 01     st B, +0x1(Z)	 ; Write sector address register
 04ed:    80 02        ld AL, #0x02	 ; SEEK command
-04ef:    a5 88 08     st AL, +0x8(EX)
+04ef:    a5 88 08     st AL, +0x8(Z)
 04f2:    7b 07        call (PC+0x07) WaitForHawkCmdCompletion
 04f4:    09           ret
 
 WaitForDataReady:
     ; This location is only called when READ operation is initiated.
     ; I suggest it waits for data transfer to end.
-04f5:    85 88 04     ld AL, +0x4(EX)	 ; HAWK status
+04f5:    85 88 04     ld AL, +0x4(Z)	 ; HAWK status
 04f8:    2c           srl! AL	 ; Wait for STATUS & 0x01 == 0
 04f9:    10 fa        bc WaitForDataReady
 
 WaitForHawkCmdCompletion:
     ; And this waits for a generic operation completion
-04fb:    95 88 04     ld AX, +0x4(EX)	 ; HAWK status
+04fb:    95 88 04     ld A, +0x4(Z)	 ; HAWK status
 04fe:    c0 30        ld BL, #0x30	 ; Wait for STATUS & 0x30 == 0x30
 0500:    42 31        and AL, BL
 0502:    49           sub! BL, AL
@@ -673,58 +673,58 @@ WaitForHawkCmdCompletion:
 memcpy:
     ; This is the end of a fragment, which gets copied to top of RAM.
     ; This function preserves DX and EX
-0507:    95 41        ld AX, (RT)+	 ; length = arg[0, 1]
-                                  	 ; I completely fail to understand these two instructions. I mean - i understand what they mean,
-                                  	 ; but what's the real purpose of this fragment here ? In pristine on-disk WIPL it looks the same.
-                                  	 ; Is this patched during installation ?
-0509:    5d           mov BX, AX
+0507:    95 41        ld A, (X)+	 ; length = arg[0, 1]
+                                	 ; I completely fail to understand these two instructions. I mean - i understand what they mean,
+                                	 ; but what's the real purpose of this fragment here ? In pristine on-disk WIPL it looks the same.
+                                	 ; Is this patched during installation ?
+0509:    5d           mov B, A
 050a:    71 05 0d     jump #0x050d 0x50d
-050d:    f5 a2        st BX, -(SP)	 ; push length
-050f:    59           sub! BX, AX	 ; length = min(AX, BX)
+050d:    f5 a2        st B, -(S)	 ; push length
+050f:    59           sub! B, A	 ; length = min(AX, BX)
 0510:    19 21        ble L_0533
-0512:    da           ld BX, (RT)	 ; arg[2, 3]
+0512:    da           ld B, (X)	 ; arg[2, 3]
 0513:    79 06 9a     call #0x069a L_069a
 0516:    a0
 
 L_0517:
-0517:    dd           ld BX, (SP)	 ; BX = length
-0518:    55 60        mov AX, DX	 ; Preserve DX
-051a:    bd           st AX, (SP)
-051b:    95 41        ld AX, (RT)+	 ; dest
-051d:    5c           mov DX, AX
-051e:    95 41        ld AX, (RT)+	 ; src
-0520:    6d a2        st RT, -(SP)	 ; push RT, will use as back counter
-0522:    55 24        mov RT, BX	 ; RT = length
+0517:    dd           ld B, (S)	 ; BX = length
+0518:    55 60        mov A, Y	 ; Preserve DX
+051a:    bd           st A, (S)
+051b:    95 41        ld A, (X)+	 ; dest
+051d:    5c           mov Y, A
+051e:    95 41        ld A, (X)+	 ; src
+0520:    6d a2        st X, -(S)	 ; push RT, will use as back counter
+0522:    55 24        mov X, B	 ; RT = length
 
 L_0524:
     ; Copy RT bytes from (AX) to (DX)
-0524:    3f           dec RT
+0524:    3f           dec X
 0525:    17 06        bp L_052d
-0527:    65 a1        ld RT, (SP)+	 ; pop RT
-0529:    95 a1        ld AX, (SP)+	 ; pop DX
-052b:    5c           mov DX, AX
+0527:    65 a1        ld X, (S)+	 ; pop RT
+0529:    95 a1        ld A, (S)+	 ; pop DX
+052b:    5c           mov Y, A
 052c:    09           ret
 
 L_052d:
-052d:    c5 01        ld BL, (AX)+
-052f:    e5 61        st BL, (DX)+
+052d:    c5 01        ld BL, (A)+
+052f:    e5 61        st BL, (Y)+
 0531:    73 f1        jump (PC-0x0f) L_0524
 
 L_0533:
-0533:    bd           st AX, (SP)
+0533:    bd           st A, (S)
 0534:    73 e1        jump (PC-0x1f) L_0517
 
 PrintString:
 0536:    7b 22        call (PC+0x22) L_055a
 0538:    7e 45        long_call
-053a:    9a           ld AX, (RT)
-053b:    5c           mov DX, AX
-053c:    55 98 f2 00  mov EX, #0xf200
-0540:    65 61        ld RT, (DX)+
+053a:    9a           ld A, (X)
+053b:    5c           mov Y, A
+053c:    55 98 f2 00  mov Z, #0xf200
+0540:    65 61        ld X, (Y)+
 0542:    19 11        ble L_0555
 
 L_0544:
-0544:    85 61        ld AL, (DX)+
+0544:    85 61        ld AL, (Y)+
 0546:    c0 e0        ld BL, #0xe0
 0548:    49           sub! BL, AL
 0549:    16 05        blt L_0550
@@ -734,12 +734,12 @@ L_0544:
 
 L_0550:
 0550:    7b 12        call (PC+0x12) PrintChar
-0552:    3f           dec RT
+0552:    3f           dec X
 0553:    18 ef        bgt L_0544
 
 L_0555:
 0555:    7f 45        clear_data_bank??
-0557:    30 41        inc RT, 2
+0557:    30 41        inc X, 2
 0559:    09           ret
 
 L_055a:
@@ -754,10 +754,10 @@ L_0563:
 
 PrintChar:
 0564:    7e 81        long_call
-0566:    55 98 f2 00  mov EX, #0xf200	 ; Serisl port 0 base address
-056a:    f6 19 0d     st AL, +0xd(EX)
+0566:    55 98 f2 00  mov Z, #0xf200	 ; Serisl port 0 base address
+056a:    f6 19 0d     st AL, +0xd(Z)
 056d:    c0 c5        ld BL, #0xc5	 ; Set up baud rate ?
-056f:    f6 39 00     st BL, +0x0(EX)
+056f:    f6 39 00     st BL, +0x0(Z)
 0572:    c0 8c        ld BL, #0x8c
 0574:    49           sub! BL, AL	 ; If character is 0x0c (form feed)...
 0575:    14 13        bz L_058a	 ; Print with a delay
@@ -769,13 +769,13 @@ PrintChar:
 0580:    7b 13        call (PC+0x13) RawPrintChar
 0582:    80 8d        ld AL, #0x8d
 0584:    a3 1a        st AL, (PC+0x1a)	 ; (0x5a0) - preserve the original character ???
-0586:    0e           delay 4.5ms
+0586:    0e           dly
 0587:    7f 81        clear_data_bank??
 0589:    09           ret
 
 L_058a:
 058a:    7b 09        call (PC+0x09) RawPrintChar
-058c:    0e           delay 4.5ms
+058c:    0e           dly
 058d:    7f 81        clear_data_bank??
 058f:    09           ret
 
@@ -785,10 +785,10 @@ L_0590:
 0594:    09           ret
 
 RawPrintChar:
-0595:    f6 38 00     ld BL, +0x0(EX)
+0595:    f6 38 00     ld BL, +0x0(Z)
 0598:    24 31        srl BL, 2
 059a:    11 f9        bnc RawPrintChar
-059c:    f6 19 01     st AL, +0x1(EX)
+059c:    f6 19 01     st AL, +0x1(Z)
 059f:    a0 bd        st AL, #0xbd	 ; Shouldn't this be ld ?
 05a1:    09           ret
 05a2:    f6
@@ -828,16 +828,16 @@ RawPrintChar:
 
 L_05c4:
 05c4:    7e 81        long_call
-05c6:    55 98 f2 00  mov EX, #0xf200
+05c6:    55 98 f2 00  mov Z, #0xf200
 05ca:    83 a2        ld AL, (PC-0x5e)
-05cc:    f6 19 00     st AL, +0x0(EX)
-05cf:    90 05 a6     ld AX, #0x05a6
-05d2:    d7 6e        ld BX, unknown
-05d4:    3a           clr! AX
-05d5:    d7 60        ld BX, unknown
+05cc:    f6 19 00     st AL, +0x0(Z)
+05cf:    90 05 a6     ld A, #0x05a6
+05d2:    d7 6e        ld B, unknown
+05d4:    3a           clr! A
+05d5:    d7 60        ld B, unknown
 05d7:    80 06        ld AL, #0x06
-05d9:    f6 19 0a     st AL, +0xa(EX)
-05dc:    f6 19 0e     st AL, +0xe(EX)
+05d9:    f6 19 0a     st AL, +0xa(Z)
+05dc:    f6 19 0e     st AL, +0xe(Z)
 
 L_05df:
 05df:    e6 60        st BL, unknown
@@ -861,9 +861,9 @@ L_05fa:
 05fa:    c0 8a        ld BL, #0x8a
 05fc:    49           sub! BL, AL
 05fd:    15 07        bnz L_0606
-05ff:    d0 06 6f     ld BX, #0x066f
+05ff:    d0 06 6f     ld B, #0x066f
 0602:    14 02        bz L_0606
-0604:    55 24        mov RT, BX
+0604:    55 24        mov X, B
 
 L_0606:
 0606:    7f 81        clear_data_bank??
@@ -876,13 +876,13 @@ ReadLine:
     ; It is also supposed to be padded with spaces (0xA0) up to a certain
     ; fixed length of at least 10 chars. NAME comparison wouldn't work without
     ; it as it compares exactly 10 characters.
-0609:    93 f5        ld AX, (PC-0xb)
-060b:    b3 58        st AX, (PC+0x58)
-060d:    90 06 6f     ld AX, #0x066f
-0610:    b3 ee        st AX, (PC-0x12)
-0612:    9a           ld AX, (RT)
-0613:    6d a2        st RT, -(SP)
-0615:    38           inc! AX
+0609:    93 f5        ld A, (PC-0xb)
+060b:    b3 58        st A, (PC+0x58)
+060d:    90 06 6f     ld A, #0x066f
+0610:    b3 ee        st A, (PC-0x12)
+0612:    9a           ld A, (X)
+0613:    6d a2        st X, -(S)
+0615:    38           inc! A
 0616:    5b           mov RT, AX
 0617:    80 bd        ld AL, #0xbd
 0619:    79 05 64     call #0x0564 PrintChar
@@ -897,16 +897,16 @@ L_061c:
 0626:    15 1c        bnz L_0644
 
 L_0628:
-0628:    d5 a4        ld BX, unknown_indexed
+0628:    d5 a4        ld B, unknown_indexed
 062a:    a3 0c        st AL, (PC+0xc)
-062c:    30 20        inc BX, 1
-062e:    51 42        sub BX, RT
+062c:    30 20        inc B, 1
+062e:    51 42        sub B, X
 0630:    14 0c        bz L_063e
 0632:    80 a0        ld AL, #0xa0
 0634:    79 05 64     call #0x0564 PrintChar
 0637:    80 95        ld AL, #0x95
 0639:    7c fa        call @(PC-0x06) @0x635
-063b:    3f           dec RT
+063b:    3f           dec X
 063c:    73 de        jump (PC-0x22) L_061c
 
 L_063e:
@@ -919,24 +919,24 @@ L_0644:
 0646:    49           sub! BL, AL
 0647:    14 12        bz L_065b
 0649:    a3 0c        st AL, (PC+0xc)
-064b:    95 a4        ld AX, unknown_indexed
-064d:    d0 00 85     ld BX, #0x0085
-0650:    58           add! BX, AX
-0651:    51 42        sub BX, RT
+064b:    95 a4        ld A, unknown_indexed
+064d:    d0 00 85     ld B, #0x0085
+0650:    58           add! B, A
+0651:    51 42        sub B, X
 0653:    17 06        bp L_065b
-0655:    3e           inc RT
+0655:    3e           inc X
 0656:    80 b0        ld AL, #0xb0
-0658:    aa           st AL, (RT)
+0658:    aa           st AL, (X)
 0659:    73 c1        jump (PC-0x3f) L_061c
 
 L_065b:
-065b:    95 a4        ld AX, unknown_indexed
-065d:    38           inc! AX
-065e:    51 40        sub AX, RT
-0660:    65 a1        ld RT, (SP)+
-0662:    b5 45        st AX, unknown_indexed
-0664:    d0 01 bb     ld BX, #0x01bb
-0667:    f3 97        st BX, (PC-0x69)
+065b:    95 a4        ld A, unknown_indexed
+065d:    38           inc! A
+065e:    51 40        sub A, X
+0660:    65 a1        ld X, (S)+
+0662:    b5 45        st A, unknown_indexed
+0664:    d0 01 bb     ld B, #0x01bb
+0667:    f3 97        st B, (PC-0x69)
 0669:    22 30        clr BL, 0
 066b:    e1 05 ea     st BL, (0x05ea)
 066e:    09           ret
@@ -951,17 +951,17 @@ L_065b:
 0677:    ec
 
 L_0678:
-0678:    95 41        ld AX, (RT)+
-067a:    6d a2        st RT, -(SP)
-067c:    55 64        mov RT, DX
-067e:    6d a2        st RT, -(SP)
-0680:    65 01        ld RT, (AX)+
-0682:    5c           mov DX, AX
+0678:    95 41        ld A, (X)+
+067a:    6d a2        st X, -(S)
+067c:    55 64        mov X, Y
+067e:    6d a2        st X, -(S)
+0680:    65 01        ld X, (A)+
+0682:    5c           mov Y, A
 
 L_0683:
-0683:    3f           dec RT
+0683:    3f           dec X
 0684:    16 0e        blt L_0694
-0686:    8b           ld AL, (DX)
+0686:    8b           ld AL, (Y)
 0687:    c0 e1        ld BL, #0xe1
 0689:    49           sub! BL, AL
 068a:    16 04        blt L_0690
@@ -969,29 +969,29 @@ L_0683:
 068e:    40 31        add AL, BL
 
 L_0690:
-0690:    a5 61        st AL, (DX)+
+0690:    a5 61        st AL, (Y)+
 0692:    73 ef        jump (PC-0x11) L_0683
 
 L_0694:
-0694:    95 a1        ld AX, (SP)+
-0696:    5c           mov DX, AX
-0697:    65 a1        ld RT, (SP)+
+0694:    95 a1        ld A, (S)+
+0696:    5c           mov Y, A
+0697:    65 a1        ld X, (S)+
 0699:    09           ret
 
 L_069a:
-069a:    6d a2        st RT, -(SP)
+069a:    6d a2        st X, -(S)
 069c:    5b           mov RT, AX
 069d:    85 a4        ld AL, unknown_indexed
 
 L_069f:
-069f:    3f           dec RT
+069f:    3f           dec X
 06a0:    17 04        bp L_06a6
-06a2:    65 a1        ld RT, (SP)+
-06a4:    3e           inc RT
+06a2:    65 a1        ld X, (S)+
+06a4:    3e           inc X
 06a5:    09           ret
 
 L_06a6:
-06a6:    a5 21        st AL, (BX)+
+06a6:    a5 21        st AL, (B)+
 06a8:    73 f5        jump (PC-0x0b) L_069f
 06aa:    00
 06ab:    00

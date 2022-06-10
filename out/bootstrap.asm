@@ -13,8 +13,8 @@ fc0c:    80 8c        ld AL, #0x8c
 fc0e:    a1 f2 01     st AL, (0xf201)	 ; Write control code FF aka Form Feed to serial
                                      	 ; Should cause a printer to move to the next page, and
                                      	 ; cause a CRT terminal to clear the screen
-fc11:    0e           delay 4.5ms
-fc12:    0e           delay 4.5ms
+fc11:    0e           dly
+fc12:    0e           dly
 
 Prompt:
 fc13:    90 10 00     ld A, #0x1000
@@ -228,12 +228,12 @@ fd54:    80 08        ld AL, #0x08
 fd56:    7b 4e        call (PC+0x4e) CMDWait
 fd58:    80 41        ld AL, #0x41
 fd5a:    a1 f8 08     st AL, (0xf808)
-fd5d:    0e           delay 4.5ms
+fd5d:    0e           dly
 fd5e:    2a           clr! AL
 fd5f:    a1 f8 08     st AL, (0xf808)
-fd62:    0e           delay 4.5ms
+fd62:    0e           dly
 fd63:    a1 f8 08     st AL, (0xf808)
-fd66:    0e           delay 4.5ms
+fd66:    0e           dly
 fd67:    90 1f 40     ld A, #0x1f40
 fd6a:    2f 00        dma_load_addr A
 fd6c:    51 80        sub A, Z
@@ -243,8 +243,8 @@ fd71:    2f 34        dma_set_mode 3
 fd73:    2f 06        dma_enable
 fd75:    80 43        ld AL, #0x43
 fd77:    a1 f8 08     st AL, (0xf808)
-fd7a:    0e           delay 4.5ms
-fd7b:    0e           delay 4.5ms
+fd7a:    0e           dly
+fd7b:    0e           dly
 fd7c:    7b 20        call (PC+0x20) CMDErrorCheck
 fd7e:    73 02        jump (PC+0x02) L_fd82
 

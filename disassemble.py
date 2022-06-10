@@ -140,7 +140,7 @@ class Memory():
 
             reg = (bytetwo >> 4) & 0xf
             index = bytetwo & 0xf
-                        
+
             size = 3
 
             reg_name = RegNames8[reg]
@@ -157,7 +157,7 @@ class Memory():
                 "addr": addr,
                 "offset": offset,
             })
-            
+
         elif inst & 0x80 == 0x80:
             # Instructions that operate on A & B
             # bit 6: Accumulator select - 0 for "A", 1 for "B"
@@ -484,8 +484,10 @@ instructions = [
 
     B("00001001", "ret", kill_branch),
     I("00001010", "reti"), #, kill_branch),
+    B("00001011", "rim", kill_branch),
 
-    I("00001110", "delay 4.5ms"),
+    I("00001110", "dly"),
+    B("00001111", "rsys", kill_branch),
 
 # 10
 
@@ -758,7 +760,7 @@ def read_annotations(name, memory):
                else:
                    memory_addr_info[last_comment].comment += text
                continue
-           
+
            address = int(addr_str, 0)
            if len(items) < 2:
                type = ""

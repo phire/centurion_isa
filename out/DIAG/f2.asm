@@ -935,7 +935,7 @@ L_8bc0:
 8bc0:    90 aa aa     ld A, #0xaaaa
 8bc3:    d0 55 55     ld B, #0x5555
 8bc6:    5e           mov Z, A
-8bc7:    5b           or! B, A
+8bc7:    5b           mov RT, AX
 8bc8:    5a           and! B, A
 8bc9:    14 01        bz L_8bcc
 8bcb:    00           HALT
@@ -1397,10 +1397,17 @@ L_8eb3:
 8eba:    a5 a2        st AL, -(S)
 8ebc:    60 06 c2     ld X, #0x06c2
 8ebf:    50 84        add X, Z
-8ec1:    0f           unknown
-8ec2:    7b 15        call (PC+0x15) WriteAllPages
-8ec4:    47 40 ff 01 00 02 00 disable_parity_halt
-8ecb:    09           ret
+8ec1:    0f           rsys
+8ec2:    7b
+8ec3:    15
+8ec4:    47
+8ec5:    40
+8ec6:    ff
+8ec7:    01
+8ec8:    00
+8ec9:    02
+8eca:    00
+8ecb:    09
 
 L_8ecc:
 8ecc:    2e 1c        aaa

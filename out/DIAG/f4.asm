@@ -222,7 +222,7 @@ L_99f6:
 99f9:    c0 08        ld BL, #0x08
 99fb:    4a           and! BL, AL	 ; BUSY = STATUS_REG & 0x08
 99fc:    14 2b        bz L_9a29
-99fe:    0e           delay 4.5ms
+99fe:    0e           dly
 99ff:    3f           dec X
 9a00:    15 f4        bnz L_99f6
 9a02:    7a 01 12     call @(0x0112)
@@ -240,7 +240,7 @@ L_9a2c:
     ; Presumably it signals availability of the result code
 9a2c:    2c           srl! AL	 ; FOUT = STATUS_REG & 0x01
 9a2d:    10 2b        bc L_9a5a
-9a2f:    0e           delay 4.5ms
+9a2f:    0e           dly
 9a30:    3f           dec X
 9a31:    15 f9        bnz L_9a2c	 ; This looks like a bug. We're re-testing AL by shifting
                                 	 ; it right, but we don't actually re-read it from the controller.
@@ -277,7 +277,7 @@ L_9a63:
 
 WaitNotFIn:
 9a91:    6d a2        st X, -(S)
-9a93:    0e           delay 4.5ms
+9a93:    0e           dly
 9a94:    60 03 e8     ld X, #0x03e8
 
 L_9a97:
@@ -285,7 +285,7 @@ L_9a97:
 9a9a:    2c           srl! AL
 9a9b:    2c           srl! AL	 ; FIN = STATUS_REG & 0x02
 9a9c:    11 2d        bnc L_9acb
-9a9e:    0e           delay 4.5ms
+9a9e:    0e           dly
 9a9f:    3f           dec X
 9aa0:    15 f5        bnz L_9a97
 9aa2:    7a 01 12     call @(0x0112)

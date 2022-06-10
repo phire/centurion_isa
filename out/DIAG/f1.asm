@@ -4,7 +4,7 @@ DiagEntryPoint:
 8001:    3a           clr! A
 8002:    b1 b8 00     st A, (0xb800)	 ; This is the first word in Diag's 1KB of RAM
 8005:    05           di
-8006:    0e           delay 4.5ms
+8006:    0e           dly
 8007:    a1 f1 4f     st AL, (0xf14f)
 800a:    a1 f2 0d     st AL, (0xf20d)
 800d:    a1 f2 0f     st AL, (0xf20f)
@@ -184,14 +184,14 @@ FlashFail:
 80f5:    90 00 64     ld A, #0x0064
 
 L_80f8:
-80f8:    0e           delay 4.5ms
+80f8:    0e           dly
 80f9:    39           dec! A
 80fa:    15 fc        bnz L_80f8
 80fc:    a1 f1 06     st AL, (0xf106)
 80ff:    90 00 64     ld A, #0x0064
 
 L_8102:
-8102:    0e           delay 4.5ms
+8102:    0e           dly
 8103:    39           dec! A
 8104:    15 fc        bnz L_8102
 8106:    90 0f 00     ld A, #0x0f00
@@ -601,7 +601,7 @@ L_835c:
 835f:    c1 f1 45     ld BL, (0xf145)
 8362:    42 23        and BL, BH
 8364:    15 08        bnz L_836e
-8366:    0e           delay 4.5ms
+8366:    0e           dly
 8367:    39           dec! A
 8368:    15 f2        bnz L_835c
 836a:    80 09        ld AL, #0x09
@@ -746,7 +746,7 @@ L_843d:
 843f:    80 19        ld AL, #0x19
 
 L_8441:
-8441:    0e           delay 4.5ms
+8441:    0e           dly
 8442:    29           dec! AL
 8443:    15 fc        bnz L_8441
 8445:    90 40 00     ld A, #0x4000
@@ -762,7 +762,7 @@ L_8455:
 8455:    c1 f1 44     ld BL, (0xf144)
 8458:    24 30        srl BL, 1
 845a:    11 07        bnc L_8463
-845c:    0e           delay 4.5ms
+845c:    0e           dly
 845d:    39           dec! A
 845e:    15 f5        bnz L_8455
 8460:    80 09        ld AL, #0x09
@@ -1003,8 +1003,8 @@ Bootstrap_test:
 85a8:    a4 7a        st AL, @(PC+0x7a)
 85aa:    80 8c        ld AL, #0x8c
 85ac:    a1 f2 01     st AL, (0xf201)
-85af:    0e           delay 4.5ms
-85b0:    0e           delay 4.5ms
+85af:    0e           dly
+85b0:    0e           dly
 
 L_85b1:
 85b1:    7b 70        call (PC+0x70) WriteString
@@ -1196,7 +1196,7 @@ L_86c4:
 86d0:    41 01        sub AL, AH
 86d2:    15 49        bnz L_871d
 86d4:    90 b8 00     ld A, #0xb800
-86d7:    5b           or! B, A
+86d7:    5b           mov RT, AX
 86d8:    5c           mov Y, A
 86d9:    d0 04 00     ld B, #0x0400
 
@@ -1256,7 +1256,7 @@ AuxiliaryTestMenu:
 8728:    a1 f1 08     st AL, (0xf108)
 872b:    80 c5        ld AL, #0xc5
 872d:    a1 f2 00     st AL, (0xf200)
-8730:    0e           delay 4.5ms
+8730:    0e           dly
 8731:    79 86 23     call #0x8623 WriteString
 8734:    "\x0c\x1b\x1cAUXILIARY TESTS\r\n\n\0"
 874a:    60 88 00     ld X, #0x8800

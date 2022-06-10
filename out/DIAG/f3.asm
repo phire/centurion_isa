@@ -190,7 +190,7 @@ L_91eb:
 91ee:    c0 08        ld BL, #0x08
 91f0:    4a           and! BL, AL
 91f1:    14 2b        bz L_921e
-91f3:    0e           delay 4.5ms
+91f3:    0e           dly
 91f4:    3f           dec X
 91f5:    15 f4        bnz L_91eb
 91f7:    7a 01 12     call @(0x0112)
@@ -205,7 +205,7 @@ L_921e:
 L_9221:
 9221:    2c           srl! AL
 9222:    10 2b        bc L_924f
-9224:    0e           delay 4.5ms
+9224:    0e           dly
 9225:    3f           dec X
 9226:    15 f9        bnz L_9221
 9228:    7a 01 12     call @(0x0112)
@@ -239,7 +239,7 @@ L_9258:
 
 Fn_286:
 9286:    6d a2        st X, -(S)
-9288:    0e           delay 4.5ms
+9288:    0e           dly
 9289:    60 03 e8     ld X, #0x03e8
 
 L_928c:
@@ -247,7 +247,7 @@ L_928c:
 928f:    2c           srl! AL
 9290:    2c           srl! AL
 9291:    11 2d        bnc L_92c0
-9293:    0e           delay 4.5ms
+9293:    0e           dly
 9294:    3f           dec X
 9295:    15 f5        bnz L_928c
 9297:    7a 01 12     call @(0x0112)
