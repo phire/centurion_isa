@@ -796,10 +796,11 @@ def read_annotations(name, memory):
                    entry_points.append(address + 2)
                elif type == "cstring":
                    while c := memory[address] & 0x7f:
-                       i += 1
+                       address += 1
                    entry_points.append(address + 1)
                elif type == "pstring16":
-                   entry_points.append(address + 2 + get_pstring16_length(memory, address))
+                   pass
+                   #entry_points.append(address + 2 + get_pstring16_length(memory, address))
 
            if comment is not None:
                memory_addr_info[address].comment = comment
@@ -807,31 +808,52 @@ def read_annotations(name, memory):
                pre_comment = False
 
 if __name__ == "__main__":
-    # print(disassemble_instruction( b"\x1510", 0).next_pc)]
-    # exit()
-
     import argparse
+    import sys
 
     all_args = argparse.ArgumentParser()
 
     all_args.add_argument("-i", "--input", required=True, help="input file")
-    all_args.add_argument("-s", "--start", required=True, help="starting address of this file")
+    all_args.add_argument("-s", "--start", required=False, help="starting address of this file")
+    all_args.add_argument("-t", "--type", required=False, help="type of file", default="binary")
     all_args.add_argument("-a", "--annotations", action='append', help="annotations file")
     args = vars(all_args.parse_args())
 
     filename = args["input"]
-    base_address = int(args["start"], 16)
+    if args["type"] == "binary":
+        if args["start"] is None:
+            print("Start must be specified for binary files")
+            sys.exit(1)
+        base_address = int(args["start"], 16)
 
-    entry_points.append(base_address)
-    memory_addr_info[base_address].label = "Start"
+        entry_points.append(base_address)
+        memory_addr_info[base_address].label = "Start"
 
     with open(filename, "rb") as f:
         bytes = f.read()
 
-    memory = b"\0" * (base_address) + bytes + b"\0" * (0x10000 - (len(bytes) + base_address))
+    if args["type"] == "binary":
+        memory = b"\0" * (base_address) + bytes + b"\0" * (0x10000 - (len(bytes) + base_address))
+    if args["type"] == "wecb":
+        memory = b"\0" * 0x10000
+        from wecb import WecbLoader
 
-    for ann_filename in args["annotations"]:
-        read_annotations(ann_filename, memory)
+        wecb = WecbLoader(bytes)
+
+        for type, addr, data in wecb.sections():
+            if type == 0:
+                memory = memory[:addr] + data + memory[addr + len(data):]
+            elif type == 1:
+                fixup_data = struct.pack(">H", addr)
+                while len(data) > 1:
+                    fixup = struct.unpack_from(">H", data)[0]
+                    memory = memory[:fixup] + fixup_data + memory[fixup + 2:]
+                    data = data[2:]
+                entry_points.append(addr)
+
+    if args["annotations"]:
+        for ann_filename in args["annotations"]:
+            read_annotations(ann_filename, memory)
 
     disassemble(memory)
 

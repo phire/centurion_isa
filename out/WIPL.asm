@@ -396,18 +396,25 @@ CallHighMem:
 034e:    4, "NAME"
 0354:    4, "DISK"
 035a:    4, "CODE"
-0360:    00           HALT
-0361:    01           nop
-0362:    8c           ld AL, (Z)
-0363:    00           HALT	 ; name_buffer
-0364:    05           di
-0365:    a0 a0        st AL, #0xa0
-0367:    a0 a0        st AL, #0xa0
-0369:    a0 a0        st AL, #0xa0
-036b:    a0 a0        st AL, #0xa0
-036d:    a0 a0        st AL, #0xa0
-036f:    a0 a0        st AL, #0xa0
-0371:    a0 a0        st AL, #0xa0
+0360:    00
+0361:    01
+0362:    8c
+0363:    00	 ; name_buffer
+0364:    05
+0365:    a0
+0366:    a0
+0367:    a0
+0368:    a0
+0369:    a0
+036a:    a0
+036b:    a0
+036c:    a0
+036d:    a0
+036e:    a0
+036f:    a0
+0370:    a0
+0371:    a0
+0372:    a0
 0373:    a0           (0xa0)
 0374:    00           HALT	 ; disk_buffer
 0375:    01           nop
