@@ -39,13 +39,13 @@ def bitstring_to_int(bitstring, signed=False):
     return num
 
 
-
 RegNames16 = [
-    "AX", "BX", "RT", "DX", "EX", "SP", "GX", "HX",
+    "A", "B", "X", "Y", "Z", "S", "C", "P",
 ]
 
+# P and H are likely illegal for byte access, but let's have them in the table just in case
 RegNames8 = [
-    "AH", "AL", "BH", "BL", "RH", "RL", "DH", "DL", "EH", "EL", "SH", "SL", "GH", "GL", "HL", "HH",
+    "AH", "AL", "BH", "BL", "XH", "XL", "YH", "YL", "ZH", "ZL", "SH", "SL", "CH", "CL", "PH", "PL",
 ]
 
 
@@ -466,30 +466,30 @@ instructions = [
     # Special cases that don't match the general ALU pattern
     I("00101110 ssssdddd", "?? r{d}, r{s}"),
     # ugly, but indexing dynamic indexing into RegNames16 isn't supported :(
-    I("00101111 00000000", "dma_load_addr WX"),
-    I("00101111 00100000", "dma_load_addr YZ"),
-    I("00101111 01000000", "dma_load_addr RT"),
-    I("00101111 01100000", "dma_load_addr KL"),
-    I("00101111 10000000", "dma_load_addr MN"),
-    I("00101111 10100000", "dma_load_addr SP"),
-    I("00101111 00000010", "dma_load_count WX"),
-    I("00101111 00100010", "dma_load_count YZ"),
-    I("00101111 01000010", "dma_load_count RT"),
-    I("00101111 01100010", "dma_load_count KL"),
-    I("00101111 10000010", "dma_load_count MN"),
-    I("00101111 10100010", "dma_load_count SP"),
-    I("00101111 00000001", "dma_store_addr WX"),
-    I("00101111 00100001", "dma_store_addr YZ"),
-    I("00101111 01000001", "dma_store_addr RT"),
-    I("00101111 01100001", "dma_store_addr KL"),
-    I("00101111 10000001", "dma_store_addr MN"),
-    I("00101111 10100001", "dma_store_addr SP"),
-    I("00101111 00000011", "dma_store_count WX"),
-    I("00101111 00100011", "dma_store_count YZ"),
-    I("00101111 01000011", "dma_store_count RT"),
-    I("00101111 01100011", "dma_store_count KL"),
-    I("00101111 10000011", "dma_store_count MN"),
-    I("00101111 10100011", "dma_store_count SP"),
+    I("00101111 00000000", "dma_load_addr {RegNames16[0]}"),
+    I("00101111 00100000", "dma_load_addr {RegNames16[1]}"),
+    I("00101111 01000000", "dma_load_addr {RegNames16[2]}"),
+    I("00101111 01100000", "dma_load_addr {RegNames16[3]}"),
+    I("00101111 10000000", "dma_load_addr {RegNames16[4]}"),
+    I("00101111 10100000", "dma_load_addr {RegNames16[5]}"),
+    I("00101111 00000010", "dma_load_count {RegNames16[0]}"),
+    I("00101111 00100010", "dma_load_count {RegNames16[1]}"),
+    I("00101111 01000010", "dma_load_count {RegNames16[2]}"),
+    I("00101111 01100010", "dma_load_count {RegNames16[3]}"),
+    I("00101111 10000010", "dma_load_count {RegNames16[4]}"),
+    I("00101111 10100010", "dma_load_count {RegNames16[5]}"),
+    I("00101111 00000001", "dma_store_addr {RegNames16[0]}"),
+    I("00101111 00100001", "dma_store_addr {RegNames16[1]}"),
+    I("00101111 01000001", "dma_store_addr {RegNames16[2]}"),
+    I("00101111 01100001", "dma_store_addr {RegNames16[3]}"),
+    I("00101111 10000001", "dma_store_addr {RegNames16[4]}"),
+    I("00101111 10100001", "dma_store_addr {RegNames16[5]}"),
+    I("00101111 00000011", "dma_store_count {RegNames16[0]}"),
+    I("00101111 00100011", "dma_store_count {RegNames16[1]}"),
+    I("00101111 01000011", "dma_store_count {RegNames16[2]}"),
+    I("00101111 01100011", "dma_store_count {RegNames16[3]}"),
+    I("00101111 10000011", "dma_store_count {RegNames16[4]}"),
+    I("00101111 10100011", "dma_store_count {RegNames16[5]}"),
 
     I("00101111 dddd0100", "dma_set_mode {d}"),
     I("00101111 00000110", "dma_enable"),
