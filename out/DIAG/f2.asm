@@ -1311,7 +1311,12 @@ MappingRamTestLoop:
 8e2f:    90 06 d9     ld A, #0x06d9
 8e32:    50 80        add A, Z
 8e34:    7d 00        call (A + 0x00)	 ; Call MappingInit
-8e36:    47 40 ff 01 00 02 00 disable_parity_halt
+8e36:    47 40        unk7 AH, XH
+8e38:    ff           st B, (P)
+8e39:    01           nop
+8e3a:    00           HALT
+8e3b:    02           sf
+8e3c:    00           HALT
 8e3d:    7b 36        call (PC+0x36) L_8e75
 8e3f:    01           nop
 8e40:    7b 33        call (PC+0x33) L_8e75
@@ -1349,9 +1354,9 @@ ReturnAddress:
 L_8e75:
 8e75:    3a           clr! A
 8e76:    85 41        ld AL, (X)+
-8e78:    35 04        set_data_bank AL
+8e78:    35 04        sll A, 5
 8e7a:    20 00        inc AH, 1
-8e7c:    7e 45        long_call
+8e7c:    7e 45        push
 8e7e:    5c           mov Y, A
 8e7f:    5e           mov Z, A
 8e80:    20 80        inc ZH, 1
@@ -1367,7 +1372,12 @@ nextByteValue:
 8e8b:    ac           st AL, (Z)	 ; HL is EF+0x100
 8e8c:    7b 76        call (PC+0x76) ReadAllPages
 8e8e:    7b 49        call (PC+0x49) WriteAllPages
-8e90:    47 80 ff 01 00 02 00 check_parity_error
+8e90:    47 80        unk7 AH, ZH
+8e92:    ff           st B, (P)
+8e93:    01           nop
+8e94:    00           HALT
+8e95:    02           sf
+8e96:    00           HALT
 8e97:    15 69        bnz L_8f02	 ; Branch if parity Error
 8e99:    31 20        dec B, 1	 ; Test every single byte pattern
 8e9b:    15 eb        bnz nextByteValue
@@ -1375,15 +1385,15 @@ nextByteValue:
 8e9f:    30 80        inc Z, 1
 8ea1:    3f           dec X
 8ea2:    15 e1        bnz nextMemoryLcation
-8ea4:    7f 45        clear_data_bank??
+8ea4:    7f 45        pop
 8ea6:    09           ret
 
 L_8ea7:
-8ea7:    2e 1c        aaa
+8ea7:    2e 1c        ?? r12, r1
 8ea9:    f8           st B, (A)
 8eaa:    03           rf
 8eab:    00           HALT
-8eac:    2e 0c        bbb
+8eac:    2e 0c        ?? r12, r0
 8eae:    f9           st B, (B)
 8eaf:    03           rf
 8eb0:    00           HALT
@@ -1410,11 +1420,11 @@ L_8eb3:
 8ecb:    09
 
 L_8ecc:
-8ecc:    2e 1c        aaa
+8ecc:    2e 1c        ?? r12, r1
 8ece:    f9           st B, (B)
 8ecf:    03           rf
 8ed0:    00           HALT
-8ed1:    2e 0c        bbb
+8ed1:    2e 0c        ?? r12, r0
 8ed3:    f8           st B, (A)
 8ed4:    03           rf
 8ed5:    00           HALT
@@ -1422,11 +1432,11 @@ L_8ecc:
 8ed7:    73 da        jump (PC-0x26) L_8eb3
 
 WriteAllPages:
-8ed9:    2e 1c        aaa
+8ed9:    2e 1c        ?? r12, r1
 8edb:    f8           st B, (A)
 8edc:    01           nop
 8edd:    00           HALT
-8ede:    2e 1c        aaa
+8ede:    2e 1c        ?? r12, r1
 
 L_8ee0:
 8ee0:    f9           st B, (B)
@@ -1459,11 +1469,11 @@ L_8f02:
 8f02:    73 29        jump (PC+0x29) L_8f2d
 
 ReadAllPages:
-8f04:    2e 0c        bbb
+8f04:    2e 0c        ?? r12, r0
 8f06:    f8           st B, (A)
 8f07:    01           nop
 8f08:    00           HALT
-8f09:    2e 0c        bbb
+8f09:    2e 0c        ?? r12, r0
 8f0b:    f9           st B, (B)
 8f0c:    01           nop
 8f0d:    20 2e        inc BH, 15
@@ -1492,7 +1502,7 @@ ReadAllPages:
 8f2b:    e0 09        st BL, #0x09
 
 L_8f2d:
-8f2d:    7f 45        clear_data_bank??
+8f2d:    7f 45        pop
 8f2f:    65 a1        ld X, (S)+
 8f31:    90 07 cc     ld A, #0x07cc
 8f34:    50 80        add A, Z

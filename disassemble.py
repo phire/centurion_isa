@@ -63,6 +63,17 @@ class QuickInstuction:
     def to_string(self, dict):
         return self.format.format(**dict)
 
+class BasicCpu6Inst:
+    newpc = None
+    def __init__(self, mnonomic, dst, src):
+        self.mnemonic = mnonomic
+        self.dst = dst
+        self.src = src
+
+    def to_string(self, dict):
+        if self.src == None:
+            return f"{self.mnemonic} {self.dst}"
+        return f"{self.mnemonic} {self.dst}, {self.src}"
 
 class InstructionMatch:
     def __init__(self, pc, instruction, bytes, dict={}):
@@ -96,7 +107,7 @@ class I:
         self.format = format
         self.newpc = None
 
-    def match(self, pc, bitstring, bytes):
+    def match(self, pc, bitstring, bytes, memory):
         bitstring = bitstring[0:len(self.pattern)]
 
         wildcard_bitstrings = defaultdict(str)
@@ -127,8 +138,7 @@ class Memory():
     # Implements all opcodes 0x80 and above
     # Memory and load immediate
 
-
-    def match(self, pc, bitstring, bytes):
+    def match(self, pc, bitstring, bytes, memory):
         inst = bytes[0]
 
         if inst == 0xf6:
@@ -276,6 +286,9 @@ ImplcitTable = [
 def get_be16(memory, addr):
     return memory[addr] * 256 + memory[addr + 1]
 
+def get_signed_8(memory, addr):
+    return struct.unpack_from('b', memory[addr:addr+1])[0]
+
 class Alu():
     # Implements most opcodes between 0x20 and 0x5b
 
@@ -327,7 +340,7 @@ class Alu():
                 return f"{op} {RegNames8[self.reg]}, {self.imm}"
 
 
-    def match(self, pc, bitstring, bytes):
+    def match(self, pc, bitstring, bytes, memory):
 
         inst = bytes[0]
         if inst < 0x20 or inst >= 0x5f:
@@ -394,6 +407,111 @@ class Alu():
 
         return InstructionMatch(pc, self.AluInstance(op, word, src, dest, postfix, literal), bytes, {})
 
+class AddrRef:
+    pass
+
+class Reg16Ref():
+    def __init__(self, reg):
+        self.reg = reg
+
+    def __str__(self):
+        return RegNames16[self.reg]
+
+class DirectRef(AddrRef):
+    def __init__(self, addr):
+        self.addr = addr
+
+    def __str__(self):
+        return f"[{self.addr:#06x}]"
+
+class IndexedRef(AddrRef):
+    def __init__(self, base, disp):
+        self.base = base
+        self.disp = disp
+
+    def __str__(self):
+        if self.disp == 0:
+            return f"[{self.base}]"
+        return f"[{self.base} + {self.disp:#06x}]"
+
+class ComplexRef(AddrRef):
+    def __init__(self, base, index, disp):
+        self.base = base
+        self.index = index
+        self.disp = disp
+
+    def __str__(self):
+        if self.disp == 0:
+            return f"[{self.base} + {self.index}]"
+        return f"[{self.base} + {self.index} + {self.disp:#06x}]"
+
+class LiteralRef(AddrRef):
+    def __init__(self, val):
+        self.val = val
+
+    def __str__(self):
+        return f"#{self.val:#06x}"
+
+# A short 2bit address mode, which will consume more bytes from PC
+def Cpu6AddrMode(mode, pc, prev=None):
+    match mode:
+        case 0: # direct
+            addr = get_be16(memory, pc)
+            pc += 2
+            return DirectRef(addr), pc
+        case 1: # complex
+            imm8 = get_signed_8(memory, pc)
+            regs = memory[pc + 1]
+            reg_a = regs >> 4
+            reg_b = regs & 0xf
+            pc += 2
+
+            if reg_b == 0:
+                return IndexedRef(reg_a, imm8), pc
+            # todo: This mode also does PC-relative addressing?
+            return ComplexRef(reg_a, reg_b, imm8), pc
+        case 2: # indexed
+            if getattr(prev, 'only_upper', False):
+                # Not confirmed
+                # There is a special case which packs two indexed references into one byte
+                reg = memory[pc-1] & 0xf
+                upper = False
+            else:
+                reg = memory[pc] >> 4
+                pc += 1
+                upper = True
+            ref = IndexedRef(reg, 0)
+            ref.only_upper = upper
+            return ref, pc
+        case 3: # literalByte
+            return LiteralRef(memory[pc]), pc + 1
+
+class BigNumOp():
+    # Implements the 46 "bignum" instructions
+    def match(self, pc, bitstring, bytes, memory):
+        if bytes[0] != 0x46:
+            return None
+
+        orig_pc = pc
+
+        a_size = bytes[1] >> 4
+        b_size = bytes[1] & 0x0f
+        a_mode = (bytes[2] >> 2) & 0x3
+        b_mode = bytes[2] & 0x3
+
+        op = bytes[2] >> 4
+        ops = [
+            "addbig", "subbig", "unkbig2", "unkbig3", "unkbig4", "unkbig5",
+            "unkbig6", "unkbig7", "unkbig8", "unkbig9", "unkbigA", "unkbigB",
+            "unkbigC", "unkbigD", "unkbigE", "unkbigF"
+        ]
+
+        pc += 3
+        a_ref, pc = Cpu6AddrMode(a_mode, pc)
+        b_ref, pc = Cpu6AddrMode(b_mode, pc, a_ref)
+
+        bytes = bytes[:pc - orig_pc]
+        return InstructionMatch(orig_pc, BasicCpu6Inst(f"{ops[op]}({b_size:x}, {a_size:x})", b_ref, a_ref), bytes, {})
 
 
 def relative_branch(next_pc, S, **kwargs):
@@ -458,7 +576,7 @@ instructions = [
 
     Memory(), # Implements 80-FF
 
-
+    BigNumOp(), # Implements 46
     Alu(), # Implements (most of) 0x20-0x5f
 
 # Sorted by opcode from here on
@@ -585,7 +703,7 @@ def disassemble_instruction(memory, pc):
         bitstring += format(byte, '08b')
 
     for instruction in instructions:
-        match = instruction.match(pc, bitstring, bytes)
+        match = instruction.match(pc, bitstring, bytes, memory)
         if match:
             return match
 

@@ -513,8 +513,6 @@ L_0417:
 041f:    b9           st A, (B)
 0420:    31 41        dec X, 2
 0422:    18 f3        bgt L_0417
-
-L_0424:
 0424:    85 81        ld AL, (Z)+
 0426:    73 e9        jump (PC-0x17) L_0411
 0428:    00
@@ -527,9 +525,11 @@ L_042a:
 0430:    39           dec! A
 0431:    67 4a        ld X, unknown
 0433:    86 50        ld AL, unknown
-0435:    46 50        unk6 AH, XL
-0437:    48           add! BL, AL
-0438:    73 ea        jump (PC-0x16) L_0424
+0435:    46
+0436:    50
+0437:    48
+0438:    73
+0439:    ea
 
 L_043a:
 043a:    32 80        clr Z, 0
@@ -723,7 +723,7 @@ L_0533:
 
 PrintString:
 0536:    7b 22        call (PC+0x22) L_055a
-0538:    7e 45        long_call
+0538:    7e 45        push
 053a:    9a           ld A, (X)
 053b:    5c           mov Y, A
 053c:    55 98 f2 00  mov Z, #0xf200
@@ -745,7 +745,7 @@ L_0550:
 0553:    18 ef        bgt L_0544
 
 L_0555:
-0555:    7f 45        clear_data_bank??
+0555:    7f 45        pop
 0557:    30 41        inc X, 2
 0559:    09           ret
 
@@ -760,7 +760,7 @@ L_0563:
 0563:    09           ret
 
 PrintChar:
-0564:    7e 81        long_call
+0564:    7e 81        push
 0566:    55 98 f2 00  mov Z, #0xf200	 ; Serisl port 0 base address
 056a:    f6 19 0d     st AL, +0xd(Z)
 056d:    c0 c5        ld BL, #0xc5	 ; Set up baud rate ?
@@ -777,18 +777,18 @@ PrintChar:
 0582:    80 8d        ld AL, #0x8d
 0584:    a3 1a        st AL, (PC+0x1a)	 ; (0x5a0) - preserve the original character ???
 0586:    0e           dly
-0587:    7f 81        clear_data_bank??
+0587:    7f 81        pop
 0589:    09           ret
 
 L_058a:
 058a:    7b 09        call (PC+0x09) RawPrintChar
 058c:    0e           dly
-058d:    7f 81        clear_data_bank??
+058d:    7f 81        pop
 058f:    09           ret
 
 L_0590:
 0590:    7b 03        call (PC+0x03) RawPrintChar
-0592:    7f 81        clear_data_bank??
+0592:    7f 81        pop
 0594:    09           ret
 
 RawPrintChar:
@@ -834,7 +834,7 @@ RawPrintChar:
 05c3:    de
 
 L_05c4:
-05c4:    7e 81        long_call
+05c4:    7e 81        push
 05c6:    55 98 f2 00  mov Z, #0xf200
 05ca:    83 a2        ld AL, (PC-0x5e)
 05cc:    f6 19 00     st AL, +0x0(Z)
@@ -873,7 +873,7 @@ L_05fa:
 0604:    55 24        mov X, B
 
 L_0606:
-0606:    7f 81        clear_data_bank??
+0606:    7f 81        pop
 0608:    09           ret
 
 ReadLine:
