@@ -105,7 +105,7 @@ def disassemble(memory):
             str = ""
             for b in bytes:
                 str += f"{b:02x} "
-            str += " " * (13 - len(str))
+            str += " " * (23 - len(str))
             return str
 
         if info.type == "cstring":
