@@ -935,7 +935,7 @@ L_8bc0:
 8bc0:    90 aa aa     ld A, #0xaaaa
 8bc3:    d0 55 55     ld B, #0x5555
 8bc6:    5e           mov Z, A
-8bc7:    5b           mov RT, AX
+8bc7:    5b           mov X, A
 8bc8:    5a           and! B, A
 8bc9:    14 01        bz L_8bcc
 8bcb:    00           HALT
@@ -1311,8 +1311,8 @@ MappingRamTestLoop:
 8e2f:    90 06 d9     ld A, #0x06d9
 8e32:    50 80        add A, Z
 8e34:    7d 00        call (A + 0x00)	 ; Call MappingInit
-8e36:    47 40        unk7 AH, XH
-8e38:    ff           st B, (P)
+8e36:    47           unknown
+8e37:    40 ff        add PL, PL
 8e39:    01           nop
 8e3a:    00           HALT
 8e3b:    02           sf
@@ -1372,8 +1372,8 @@ nextByteValue:
 8e8b:    ac           st AL, (Z)	 ; HL is EF+0x100
 8e8c:    7b 76        call (PC+0x76) ReadAllPages
 8e8e:    7b 49        call (PC+0x49) WriteAllPages
-8e90:    47 80        unk7 AH, ZH
-8e92:    ff           st B, (P)
+8e90:    47           unknown
+8e91:    80 ff        ld AL, #0xff
 8e93:    01           nop
 8e94:    00           HALT
 8e95:    02           sf

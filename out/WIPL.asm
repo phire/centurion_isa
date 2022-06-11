@@ -75,7 +75,7 @@ L_016b:
 L_016f:
     ; Continuation of boot process
 016f:    90 10 00     ld A, #0x1000
-0172:    5b           mov RT, AX
+0172:    5b           mov X, A
 0173:    5c           mov Y, A	 ; DX = 4096
 
 L_0174:
@@ -126,11 +126,13 @@ BackToPrompt:
     ; location contains zero; while in this one, which has been extracted by dumping
     ; from the TOS after it hit the "Stop" loop and the machine has been restarted,
     ; we see a 0xff. So, apparently, this sequence stores an 0xFF at 0x0265
-01bc:    47 4c        unk7 CH, XH	 ; fill
+01bc:    47           unknown	 ; fill
+01bd:    4c           xor! BL, AL
 01be:    00           (0x0)	 ; 1 byte
 01bf:    ff           (0xff)	 ; with this value
 01c0:    02 65        (0x265)	 ; starting at 0x265
-01c2:    47 9c        unk7 CH, ZL	 ; fill (0x365), 0xa0, 10
+01c2:    47           unknown	 ; fill (0x365), 0xa0, 10
+01c3:    9c           ld A, (Z)
 01c4:    09           (0x9)
 01c5:    a0           (0xa0)
 01c6:    03 65        (0x365)
@@ -271,7 +273,7 @@ L_0293:
 029d:    91 01 05     ld A, (0x0105)	 ; entered_disk_code, which we now know is correct
 02a0:    50 20        add A, B	 ; AX = track number here
 02a2:    35 03        sll A, 4
-02a4:    5b           mov RT, AX	 ; sector = track * 16 (sectors per track)
+02a4:    5b           mov X, A	 ; sector = track * 16 (sectors per track)
 02a5:    79 04 b0     call #0x04b0 LoadSector
 02a8:    00           (0x0)
 02a9:    95 88 0e     ld A, +0xe(Z)	 ; EX is still sector address
@@ -360,7 +362,7 @@ L_02f4:
 0311:    d5 a8 02     ld B, +0x2(S)
 0314:    3a           clr! A
 0315:    85 28 04     ld AL, +0x4(B)
-0318:    5b           mov RT, AX
+0318:    5b           mov X, A
 0319:    3a           clr! A
 031a:    38           inc! A
 
@@ -890,7 +892,7 @@ ReadLine:
 0612:    9a           ld A, (X)
 0613:    6d a2        st X, -(S)
 0615:    38           inc! A
-0616:    5b           mov RT, AX
+0616:    5b           mov X, A
 0617:    80 bd        ld AL, #0xbd
 0619:    79 05 64     call #0x0564 PrintChar
 
@@ -987,7 +989,7 @@ L_0694:
 
 L_069a:
 069a:    6d a2        st X, -(S)
-069c:    5b           mov RT, AX
+069c:    5b           mov X, A
 069d:    85 a4        ld AL, unknown_indexed
 
 L_069f:

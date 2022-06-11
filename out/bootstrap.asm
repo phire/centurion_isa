@@ -289,7 +289,8 @@ fdb3:    b3 03        st A, (PC+0x3)
 
 L_fdb5:
 fdb5:    79 4c 93     call #0x4c93 L_4c93
-fdb8:    47 be        unk7 PH, SL
+fdb8:    47           unknown
+fdb9:    be           st A, (C)
 fdba:    6d a2        st X, -(S)
 fdbc:    32 40        clr X, 0
 

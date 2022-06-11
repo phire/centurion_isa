@@ -1196,7 +1196,7 @@ L_86c4:
 86d0:    41 01        sub AL, AH
 86d2:    15 49        bnz L_871d
 86d4:    90 b8 00     ld A, #0xb800
-86d7:    5b           mov RT, AX
+86d7:    5b           mov X, A
 86d8:    5c           mov Y, A
 86d9:    d0 04 00     ld B, #0x0400
 

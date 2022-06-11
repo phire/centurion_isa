@@ -52,7 +52,7 @@ L_efce:
 efce:    7b 1f        call (PC+0x1f) L_efef
 efd0:    4d           mov! BL, AL
 efd1:    7b 1c        call (PC+0x1c) L_efef
-efd3:    5b           mov RT, AX
+efd3:    5b           mov X, A
 efd4:    4e           unknown
 efd5:    7b 18        call (PC+0x18) L_efef
 efd7:    45 16        mov YH, AL

@@ -4,7 +4,7 @@
 all: out/* out/DIAG/*
 
 # All dependencies of disassemble.py
-out/disassemble.stamp: disassemble.py wecb.py
+out/disassemble.stamp: disassemble.py wecb.py cpu6.py cpu6_addr.py cpu6_regs.py generic.py
 	@touch $@
 
 out/DIAG/f1.asm: out/disassemble.stamp disassemble_f1.py diag_common.py
