@@ -24,5 +24,5 @@ out/autoload.asm: disassemble.py disassemble_autoload.py
 out/WIPL.asm: disassemble.py WIPL/WIPL.bin WIPL/WIPL.annotations WIPL/WIPL.comments
 	python3 disassemble.py -i WIPL/WIPL.bin -s 0x100 -a WIPL/WIPL.annotations -a WIPL/WIPL.comments > out/WIPL.asm
 
-out/load.asm: disassemble.py LOAD/@LOAD.bin LOAD/load.annotations LOAD/load.comments
+out/load.asm: disassemble.py LOAD/@LOAD.bin LOAD/load.annotations
 	python3 disassemble.py -i LOAD/@LOAD.bin -t wecb > out/load.asm -a LOAD/load.annotations

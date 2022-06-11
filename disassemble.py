@@ -448,15 +448,10 @@ instructions = [
     # Um, this array is partially sorted for optimal decoding speed
 
     # these are instructions only used by the CPU6 ram mapping test
-    I("00101110 00011100", "aaa"),
-    I("00101110 00001100", "bbb"),
-    I("01000111 10000000 11111111 00000001 00000000 00000010 00000000", "check_parity_error"),
-    I("01000111 01000000 11111111 00000001 00000000 00000010 00000000", "disable_parity_halt"),
 
-
-    I("00110101 00000100", "set_data_bank {RegNames8[1]}"),
-    I("01111110 NNNNNNNN", "long_call"),
-    I("01111111 NNNNNNNN", "clear_data_bank??"),
+    I("01111110 NNNNNNNN", "push"),
+    I("01111111 NNNNNNNN", "pop"),
+    I("01100110 NNNNNNNN", "jsys"),
 
     # This is caught and incorrectly parsed by Alu(), so place it here to override
     I("01011011", "mov RT, AX"),
