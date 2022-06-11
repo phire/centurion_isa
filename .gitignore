@@ -3,3 +3,4 @@ __pycache__/
 c_mon/.deps
 c_mon/.objs
 c_mon/mon
+*.stamp
