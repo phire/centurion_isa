@@ -1,0 +1,5 @@
+0x839c ,	comment	; Calculate syscall table offset
+0x839d ,	comment	; read function ptr
+0x83a0 ,	comment	; modify jump instruction below
+0x83a2 ,	comment	; restore registers
+0x83a4 ,	comment	; jump to syscall

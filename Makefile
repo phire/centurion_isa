@@ -28,5 +28,6 @@ out/autoload.asm: out/disassemble.stamp disassemble_autoload.py
 out/WIPL.asm: out/disassemble.stamp WIPL/WIPL.bin WIPL/WIPL.annotations WIPL/WIPL.comments
 	python3 disassemble.py -i WIPL/WIPL.bin -s 0x100 -a WIPL/WIPL.annotations -a WIPL/WIPL.comments > out/WIPL.asm
 
-out/load.asm: out/disassemble.stamp LOAD/@LOAD.bin LOAD/load.annotations
-	python3 disassemble.py -i LOAD/@LOAD.bin -t wecb > out/load.asm -a LOAD/load.annotations
+out/load.asm: out/disassemble.stamp LOAD/@LOAD.bin LOAD/load.annotations LOAD/load.comments LOAD/script.py
+	python3 disassemble.py -i LOAD/@LOAD.bin -t wecb -a LOAD/load.annotations -a LOAD/load.comments \
+	--script LOAD/script.py > out/load.asm

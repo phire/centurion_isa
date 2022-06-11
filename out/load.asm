@@ -1465,12 +1465,12 @@ L_838b:
 8395:    3d           sll! A
 8396:    d0 88 cc     ld B, #0x88cc
 8399:    f1 01 0f     st B, (0x010f)
-839c:    58           add! B, A
-839d:    99           ld A, (B)
+839c:    58           add! B, A	 ; Calculate syscall table offset
+839d:    99           ld A, (B)	 ; read function ptr
 839e:    14 1a        bz L_83ba
-83a0:    b3 03        st A, (PC+0x3)
-83a2:    7f 03        pop
-83a4:    71 80 00     jump #0x8000 R_8000
+83a0:    b3 03        st A, (PC+0x3)	 ; modify jump instruction below
+83a2:    7f 03        pop	 ; restore registers
+83a4:    71 80 00     jump #0x8000 R_8000	 ; jump to syscall
 
 R_83a7:
 83a7:    7e 03        push
@@ -1489,10 +1489,10 @@ L_83b4:
 L_83ba:
 83ba:    90 00 00     ld A, #0x0000
 83bd:    55 42        mov B, X
-83bf:    79 84 e4     call #0x84e4 R_84e4
+83bf:    79 84 e4     call #0x84e4 Syscall_09
 83c2:    09           ret
 
-R_83c3:
+Syscall_68:
 83c3:    90 9c 32     ld A, #0x9c32
 83c6:    59           sub! B, A
 83c7:    15 f1        bnz L_83ba
@@ -1501,7 +1501,7 @@ R_83c3:
 83cb:    a5 a8 04     st AL, +0x4(S)
 83ce:    0f           rsys
 
-R_83cf:
+Syscall_56:
 83cf:    b3 13        st A, (PC+0x13)
 83d1:    95 a8 05     ld A, +0x5(S)
 83d4:    65 a8 03     ld X, +0x3(S)
@@ -1513,7 +1513,7 @@ R_83cf:
 83e3:    90 00 00     ld A, #0x0000
 83e6:    71 83 3f     jump #0x833f R_833f
 
-R_83e9:
+Syscall_1a:
 83e9:    b3 f9        st A, (PC-0x7)
 83eb:    55 22        mov B, B
 83ed:    15 07        bnz L_83f6
@@ -1533,7 +1533,7 @@ L_83fa:
 83fd:    93 e5        ld A, (PC-0x1b)
 83ff:    0f           rsys
 
-R_8400:
+Syscall_0d:
 8400:    b3 e2        st A, (PC-0x1e)
 8402:    7e 21        push
 8404:    7b a1        call (PC-0x5f) R_83a7
@@ -1541,7 +1541,7 @@ R_8400:
 8408:    80 05        ld AL, #0x05
 840a:    73 ee        jump (PC-0x12) L_83fa
 
-R_840c:
+Syscall_6a:
 840c:    b3 d6        st A, (PC-0x2a)
 840e:    91 01 39     ld A, (0x0139)
 8411:    14 05        bz L_8418
@@ -1550,10 +1550,10 @@ R_840c:
 8416:    73 e2        jump (PC-0x1e) L_83fa
 
 L_8418:
-8418:    79 84 e4     call #0x84e4 R_84e4
+8418:    79 84 e4     call #0x84e4 Syscall_09
 841b:    1f           unknown
 
-R_841c:
+Syscall_6e:
 841c:    b3 c6        st A, (PC-0x3a)
 841e:    95 a8 01     ld A, +0x1(S)
 8421:    d1 01 03     ld B, (0x0103)
@@ -1561,7 +1561,7 @@ R_841c:
 8427:    91 01 5a     ld A, (0x015a)
 842a:    2e 4d        ?? r13, r4
 842c:    87 20        ld AL, unknown
-842e:    46 2e 0e 7f 00 addbig(e, 2) [0], #0x007f
+842e:    46 2e 0e 7f 00 addbig(e, 2) [A], #0x007f
 8433:    6d a8 01     st X, +0x1(S)
 8436:    91 01 58     ld A, (0x0158)
 8439:    14 dd        bz L_8418
@@ -1569,7 +1569,7 @@ R_841c:
 843c:    80 07        ld AL, #0x07
 843e:    73 ba        jump (PC-0x46) L_83fa
 
-R_8440:
+Syscall_6f:
 8440:    95 a8 04     ld A, +0x4(S)
 8443:    b3 13        st A, (PC+0x13)
 8445:    6e 84        st X, unknown
@@ -1674,12 +1674,12 @@ L_84d6:
 84da:    79 ad 88     call #0xad88 R_ad88
 84dd:    09           ret
 
-R_84de:
+Syscall_6b:
 84de:    7e 09        push
 84e0:    45 31        mov AL, BL
 84e2:    73 03        jump (PC+0x03) L_84e7
 
-R_84e4:
+Syscall_09:
 84e4:    7e 09        push
 84e6:    8a           ld AL, (X)
 
@@ -1751,7 +1751,7 @@ L_8563:
 8565:    7b 0d        call (PC+0x0d) L_8574
 8567:    ff           st B, (P)
 
-R_8568:
+Syscall_6c:
 8568:    32 20        clr B, 0
 856a:    55 89        mov Z, Z
 856c:    01           nop
@@ -1759,7 +1759,7 @@ R_8568:
 856e:    45 11        mov AL, AL
 8570:    73 07        jump (PC+0x07) L_8579
 
-R_8572:
+Syscall_0a:
 8572:    c0 00        ld BL, #0x00
 
 L_8574:
@@ -1838,10 +1838,10 @@ L_85d2:
 85de:    a9           st AL, (B)
 85df:    09           ret
 
-R_85e0:
+Syscall_06:
 85e0:    85 41        ld AL, (X)+
 
-R_85e2:
+Syscall_12:
 85e2:    a3 0d        st AL, (PC+0xd)
 85e4:    55 40        mov A, X
 85e6:    51 10 7f ff  sub A, A, #0x7fff
@@ -1853,7 +1853,7 @@ L_85ef:
 85f2:    7b c8        call (PC-0x38) L_85bc
 85f4:    0f           rsys
 
-R_85f5:
+Syscall_08:
 85f5:    95 41        ld A, (X)+
 85f7:    7b 03        call (PC+0x03) L_85fc
 85f9:    0f           rsys
@@ -1900,11 +1900,11 @@ R_8612:
 L_8629:
 8629:    09           ret
 
-R_862a:
+Syscall_07:
 862a:    7b e6        call (PC-0x1a) R_8612
 862c:    0f           rsys
 
-R_862d:
+Syscall_0b:
 862d:    90 00 00     ld A, #0x0000
 8630:    0f           rsys
 
@@ -2024,7 +2024,7 @@ L_86d0:
 86ee:    b5 88 32     st A, +0x32(Z)
 
 L_86f1:
-86f1:    79 85 72     call #0x8572 R_8572
+86f1:    79 85 72     call #0x8572 Syscall_0a
 86f4:    ff           st B, (P)
 
 R_86f5:
@@ -2351,212 +2351,132 @@ L_885e:
 88ca:    00           HALT
 88cb:    00           HALT
 
-R_88cc:
-88cc:    8a           ld AL, (X)
-88cd:    3b           not! A
-88ce:    ab           st AL, (Y)
-88cf:    1b 8d        bs2 L_885e
-88d1:    21 8d        dec ZH, 14
-88d3:    9a           ld A, (X)
-88d4:    8c           ld AL, (Z)
-88d5:    e1 aa 17     st BL, (0xaa17)
-88d8:    85 e0        ld AL, (P)
-88da:    86 2a        ld AL, unknown
-88dc:    85 f5        ld AL, unknown_indexed
-88de:    84 e4        ld AL, @(PC-0x1c)
-88e0:    85 72        ld AL, -(Y)
-88e2:    86 2d        ld AL, unknown
-88e4:    8a           ld AL, (X)
-88e5:    9a           ld A, (X)
-88e6:    84 00        ld AL, @(PC+0x0)
-88e8:    8f           ld AL, (P)
-88e9:    8f           ld AL, (P)
-88ea:    8a           ld AL, (X)
-88eb:    fa           st B, (X)
-88ec:    8b           ld AL, (Y)
-88ed:    26 ab        rrc SH, 12
-88ef:    87 85        ld AL, unknown
-88f1:    e2 ab f3     st BL, @(0xabf3)
-88f4:    b5 c4        st A, unknown_indexed
-88f6:    b3 ba        st A, (PC-0x46)
-88f8:    ab           st AL, (Y)
-88f9:    92 ab fc     ld A, @(0xabfc)
-88fc:    9b           ld A, (Y)
-88fd:    8b           ld AL, (Y)
-88fe:    89           ld AL, (B)
-88ff:    ad           st AL, (S)
-8900:    83 e9        ld AL, (PC-0x17)
-8902:    b3 a2        st A, (PC-0x5e)
-8904:    b3 f0        st A, (PC-0x10)
-8906:    b4 18        st A, @(PC+0x18)
-8908:    95 e1        ld A, (P)+
-890a:    96 05        ld A, unknown
-890c:    95 62        ld A, -(Y)
-890e:    aa           st AL, (X)
-890f:    1e           unknown
-8910:    95 87        ld A, unknown_indexed
-8912:    b5 db 95     st A, unknown_indexed
-8915:    09           ret
-8916:    95
-8917:    3a
-8918:    96
-8919:    35
-891a:    96
-891b:    74
-891c:    96
-891d:    9d
-891e:    96
-891f:    bf
-8920:    98
-8921:    12
-8922:    b5
-8923:    3f
-8924:    b5
-8925:    45
-8926:    b5
-8927:    4b
-8928:    b5
-8929:    4b
-892a:    98
-892b:    4c
-892c:    98
-892d:    48
-892e:    99
-892f:    6f
-8930:    96
-8931:    d5
-8932:    99
-8933:    5e
-8934:    96
-8935:    dd
-8936:    99
-8937:    84
-8938:    99
-8939:    6b
-893a:    98
-893b:    d3
-893c:    98
-893d:    e1
-893e:    98
-893f:    a2
-8940:    98
-8941:    bc
-8942:    95
-8943:    d4
-8944:    95
-8945:    f7
-8946:    95
-8947:    57
-8948:    00
-8949:    00
-894a:    95
-894b:    7c
-894c:    00
-894d:    00
-894e:    94
-894f:    fd
-8950:    95
-8951:    28
-8952:    96
-8953:    10
-8954:    96
-8955:    97
-8956:    95
-8957:    cb
-8958:    95
-8959:    ee
-895a:    95
-895b:    4c
-895c:    95
-895d:    71
-895e:    94
-895f:    f1
-8960:    95
-8961:    15
-8962:    b4
-8963:    34
-8964:    b5
-8965:    9b
-8966:    94
-8967:    56
-8968:    94
-8969:    d5
-896a:    8f
-896b:    ec
-896c:    90
-896d:    40
-896e:    8f
-896f:    e1
-8970:    8c
-8971:    a3
-8972:    b5
-8973:    df
-8974:    8f
-8975:    a0
-8976:    b5
-8977:    c8
-8978:    83
-8979:    cf
-897a:    8c
-897b:    f8
-897c:    00
-897d:    00
-897e:    af
-897f:    96
-8980:    b0
-8981:    26
-8982:    8d
-8983:    cf
-8984:    b1
-8985:    91
-8986:    b2
-8987:    14
-8988:    af
-8989:    d4
-898a:    b3
-898b:    45
-898c:    b3
-898d:    52
-898e:    00
-898f:    00
-8990:    8d
-8991:    6f
-8992:    b0
-8993:    12
-8994:    90
-8995:    00
-8996:    90
-8997:    0e
-8998:    89
-8999:    b9
-899a:    92
-899b:    e0
-899c:    83
-899d:    c3
-899e:    b2
-899f:    f3
-89a0:    84
-89a1:    0c
-89a2:    84
-89a3:    de
-89a4:    85
-89a5:    68
-89a6:    8e
-89a7:    d8
-89a8:    84
-89a9:    1c
-89aa:    84
-89ab:    40
+SyscallTable:
+88cc:    8a 3b        Syscall_00
+88ce:    ab 1b        Syscall_01
+88d0:    8d 21        Syscall_02
+88d2:    8d 9a        Syscall_03
+88d4:    8c e1        Syscall_04
+88d6:    aa 17        Syscall_05
+88d8:    85 e0        Syscall_06
+88da:    86 2a        Syscall_07
+88dc:    85 f5        Syscall_08
+88de:    84 e4        Syscall_09
+88e0:    85 72        Syscall_0a
+88e2:    86 2d        Syscall_0b
+88e4:    8a 9a        Syscall_0c
+88e6:    84 00        Syscall_0d
+88e8:    8f 8f        Syscall_0e
+88ea:    8a fa        Syscall_0f
+88ec:    8b 26        Syscall_10
+88ee:    ab 87        Syscall_11
+88f0:    85 e2        Syscall_12
+88f2:    ab f3        Syscall_13
+88f4:    b5 c4        Syscall_14
+88f6:    b3 ba        Syscall_15
+88f8:    ab 92        Syscall_16
+88fa:    ab fc        Syscall_17
+88fc:    9b 8b        Syscall_18
+88fe:    89 ad        Syscall_19
+8900:    83 e9        Syscall_1a
+8902:    b3 a2        Syscall_1b
+8904:    b3 f0        Syscall_1c
+8906:    b4 18        Syscall_1d
+8908:    95 e1        Syscall_1e
+890a:    96 05        Syscall_1f
+890c:    95 62        Syscall_20
+890e:    aa 1e        Syscall_21
+8910:    95 87        Syscall_22
+8912:    b5 db        Syscall_23
+8914:    95 09        Syscall_24
+8916:    95 3a        Syscall_25
+8918:    96 35        Syscall_26
+891a:    96 74        Syscall_27
+891c:    96 9d        Syscall_28
+891e:    96 bf        Syscall_29
+8920:    98 12        Syscall_2a
+8922:    b5 3f        Syscall_2b
+8924:    b5 45        Syscall_2c
+8926:    b5 4b        Syscall_2e
+8928:    b5 4b        Syscall_2e
+892a:    98 4c        Syscall_2f
+892c:    98 48        Syscall_30
+892e:    99 6f        Syscall_31
+8930:    96 d5        Syscall_32
+8932:    99 5e        Syscall_33
+8934:    96 dd        Syscall_34
+8936:    99 84        Syscall_35
+8938:    99 6b        Syscall_36
+893a:    98 d3        Syscall_37
+893c:    98 e1        Syscall_38
+893e:    98 a2        Syscall_39
+8940:    98 bc        Syscall_3a
+8942:    95 d4        Syscall_3b
+8944:    95 f7        Syscall_3c
+8946:    95 57        Syscall_3d
+8948:    00 00        (0x0)
+894a:    95 7c        Syscall_3f
+894c:    00 00        (0x0)
+894e:    94 fd        Syscall_41
+8950:    95 28        Syscall_42
+8952:    96 10        Syscall_43
+8954:    96 97        Syscall_44
+8956:    95 cb        Syscall_45
+8958:    95 ee        Syscall_46
+895a:    95 4c        Syscall_47
+895c:    95 71        Syscall_48
+895e:    94 f1        Syscall_49
+8960:    95 15        Syscall_4a
+8962:    b4 34        Syscall_4b
+8964:    b5 9b        Syscall_4c
+8966:    94 56        Syscall_4d
+8968:    94 d5        Syscall_4e
+896a:    8f ec        Syscall_4f
+896c:    90 40        Syscall_50
+896e:    8f e1        Syscall_51
+8970:    8c a3        Syscall_52
+8972:    b5 df        Syscall_53
+8974:    8f a0        Syscall_54
+8976:    b5 c8        Syscall_55
+8978:    83 cf        Syscall_56
+897a:    8c f8        Syscall_57
+897c:    00 00        (0x0)
+897e:    af 96        Syscall_59
+8980:    b0 26        Syscall_5a
+8982:    8d cf        Syscall_5b
+8984:    b1 91        Syscall_5c
+8986:    b2 14        Syscall_5d
+8988:    af d4        Syscall_5e
+898a:    b3 45        Syscall_5f
+898c:    b3 52        Syscall_60
+898e:    00 00        (0x0)
+8990:    8d 6f        Syscall_62
+8992:    b0 12        Syscall_63
+8994:    90 00        Syscall_64
+8996:    90 0e        Syscall_65
+8998:    89 b9        Syscall_66
+899a:    92 e0        Syscall_67
+899c:    83 c3        Syscall_68
+899e:    b2 f3        Syscall_69
+89a0:    84 0c        Syscall_6a
+89a2:    84 de        Syscall_6b
+89a4:    85 68        Syscall_6c
+89a6:    8e d8        Syscall_6d
+89a8:    84 1c        Syscall_6e
+89aa:    84 40        Syscall_6f
 
-R_89ac:
-89ac:    6f 3a        st X, unknown
+NumSyscalls:
+89ac:    6f           (0x6f)
+
+Syscall_19:
+89ad:    3a           clr! A
 89ae:    39           dec! A
 89af:    7e 03        push
 89b1:    79 85 b9     call #0x85b9 R_85b9
 89b4:    1c 3a        bs3 L_89f0
 89b6:    71 aa 25     jump #0xaa25 R_aa25
 
-R_89b9:
+Syscall_66:
 89b9:    7b 01        call (PC+0x01) R_89bc
 89bb:    0f           rsys
 
@@ -2590,7 +2510,7 @@ L_89db:
 89dd:    95 a1        ld A, (S)+
 89df:    98           ld A, (A)
 89e0:    d0 ff ff     ld B, #0xffff
-89e3:    79 84 e4     call #0x84e4 R_84e4
+89e3:    79 84 e4     call #0x84e4 Syscall_09
 89e6:    0a           reti
 
 L_89e7:
@@ -2656,7 +2576,7 @@ L_8a36:
 8a39:    39           dec! A
 8a3a:    09           ret
 
-R_8a3b:
+Syscall_00:
 8a3b:    55 20        mov A, B
 8a3d:    79 b2 d1     call #0xb2d1 R_b2d1
 8a40:    95
@@ -2676,7 +2596,7 @@ R_8a48:
 8a4f:    55 26        mov Y, B
 8a51:    95 48 05     ld A, +0x5(X)
 8a54:    15 04        bnz L_8a5a
-8a56:    79 84 e4     call #0x84e4 R_84e4
+8a56:    79 84 e4     call #0x84e4 Syscall_09
 8a59:    14
 
 L_8a5a:
@@ -2712,7 +2632,7 @@ L_8a69:
 L_8a92:
 8a92:    9c           ld A, (Z)
 8a93:    d0 00 00     ld B, #0x0000
-8a96:    79 84 e4     call #0x84e4 R_84e4
+8a96:    79 84 e4     call #0x84e4 Syscall_09
 8a99:    23 51        not XL, 1
 8a9b:    50 7f ff 10  add P, Y, #0xff10
 8a9f:    03           rf
@@ -2737,7 +2657,7 @@ R_8aa6:
 L_8abc:
 8abc:    90 00 00     ld A, #0x0000
 8abf:    d0 ff ff     ld B, #0xffff
-8ac2:    79 84 e4     call #0x84e4 R_84e4
+8ac2:    79 84 e4     call #0x84e4 Syscall_09
 8ac5:    0a           reti
 
 L_8ac6:
@@ -2779,7 +2699,7 @@ L_8af5:
 8af7:    65 a1        ld X, (S)+
 8af9:    09           ret
 
-R_8afa:
+Syscall_0f:
 8afa:    79 83 a7     call #0x83a7 R_83a7
 8afd:    7b 01        call (PC+0x01) R_8b00
 8aff:    0f           rsys
@@ -2794,7 +2714,7 @@ R_8b00:
 8b09:    15 09        bnz L_8b14
 8b0b:    55 40        mov A, X
 8b0d:    d0 ff ff     ld B, #0xffff
-8b10:    79 84 e4     call #0x84e4 R_84e4
+8b10:    79 84 e4     call #0x84e4 Syscall_09
 8b13:    0b           rim
 
 L_8b14:
@@ -2808,7 +2728,7 @@ L_8b14:
 L_8b23:
 8b23:    71 8a 5a     jump #0x8a5a L_8a5a
 
-R_8b26:
+Syscall_10:
 8b26:    55 20        mov A, B
 8b28:    79 b2 d1     call #0xb2d1 R_b2d1
 8b2b:    95 28 06     ld A, +0x6(B)
@@ -2870,7 +2790,7 @@ L_8b5d:
 L_8b93:
 8b93:    9c           ld A, (Z)
 8b94:    d0 00 00     ld B, #0x0000
-8b97:    79 84 e4     call #0x84e4 R_84e4
+8b97:    79 84 e4     call #0x84e4 Syscall_09
 8b9a:    0c           unknown
 
 L_8b9b:
@@ -3039,7 +2959,7 @@ L_8c94:
 8c9e:    f1 8c 0f     st B, (0x8c0f)
 8ca1:    73 94        jump (PC-0x6c) L_8c37
 
-R_8ca3:
+Syscall_52:
 8ca3:    79 8a a6     call #0x8aa6 R_8aa6
 8ca6:    b5 a2        st A, -(S)
 8ca8:    55 60        mov A, Y
@@ -3060,7 +2980,7 @@ L_8cb4:
 8cc0:    17 09        bp L_8ccb
 8cc2:    55 40        mov A, X
 8cc4:    d0 ff ff     ld B, #0xffff
-8cc7:    79 84 e4     call #0x84e4 R_84e4
+8cc7:    79 84 e4     call #0x84e4 Syscall_09
 8cca:    64
 
 L_8ccb:
@@ -3081,7 +3001,7 @@ L_8cdb:
 8cde:    95 a1        ld A, (S)+
 8ce0:    0f           rsys
 
-R_8ce1:
+Syscall_04:
 8ce1:    b3 0c        st A, (PC+0xc)
 8ce3:    93 6f        ld A, (PC+0x6f)
 8ce5:    15 03        bnz L_8cea
@@ -3094,10 +3014,10 @@ L_8cea:
 L_8cee:
 8cee:    90 00 00     ld A, #0x0000
 8cf1:    d0 ff ff     ld B, #0xffff
-8cf4:    79 84 e4     call #0x84e4 R_84e4
+8cf4:    79 84 e4     call #0x84e4 Syscall_09
 8cf7:    07           rl
 
-R_8cf8:
+Syscall_57:
 8cf8:    d1 01 1a     ld B, (0x011a)
 8cfb:    f5 a2        st B, -(S)
 8cfd:    d0 01 00     ld B, #0x0100
@@ -3121,7 +3041,7 @@ L_8d18:
 8d1b:    79 8d e4     call #0x8de4 R_8de4
 8d1e:    71 8d a1     jump #0x8da1 L_8da1
 
-R_8d21:
+Syscall_02:
 8d21:    93 31        ld A, (PC+0x31)
 8d23:    15 02        bnz L_8d27
 8d25:    7b 5d        call (PC+0x5d) L_8d84
@@ -3172,7 +3092,7 @@ L_8d61:
 8d6b:    c0 00        ld BL, #0x00
 8d6d:    73 35        jump (PC+0x35) L_8da4
 
-R_8d6f:
+Syscall_62:
 8d6f:    7b 73        call (PC+0x73) R_8de4
 8d71:    b5 a2        st A, -(S)
 8d73:    22 20        clr BH, 0
@@ -3196,7 +3116,7 @@ L_8d84:
 8d96:    b1 8f 2f     st A, (0x8f2f)
 8d99:    09           ret
 
-R_8d9a:
+Syscall_03:
 8d9a:    22 20        clr BH, 0
 8d9c:    7b 46        call (PC+0x46) R_8de4
 
@@ -3229,7 +3149,7 @@ L_8dc1:
 8dc9:    55 ba 83 10  mov S, #0x8310
 8dcd:    73 25        jump (PC+0x25) L_8df4
 
-R_8dcf:
+Syscall_5b:
 8dcf:    7b 13        call (PC+0x13) R_8de4
 8dd1:    85 41        ld AL, (X)+
 8dd3:    a5 a2        st AL, -(S)
@@ -3253,7 +3173,7 @@ L_8ded:
 8ded:    3a           clr! A
 8dee:    39           dec! A
 8def:    5d           mov B, A
-8df0:    79 84 e4     call #0x84e4 R_84e4
+8df0:    79 84 e4     call #0x84e4 Syscall_09
 8df3:    03           rf
 
 L_8df4:
@@ -3267,7 +3187,7 @@ L_8dfc:
 8dfe:    14 08        bz L_8e08
 8e00:    59           sub! B, A
 8e01:    10 04        bc L_8e07
-8e03:    79 84 e4     call #0x84e4 R_84e4
+8e03:    79 84 e4     call #0x84e4 Syscall_09
 8e06:    04           ei
 
 L_8e07:
@@ -3408,7 +3328,7 @@ L_8ed1:
 8ed6:    00           HALT
 8ed7:    00           HALT
 
-R_8ed8:
+Syscall_6d:
 8ed8:    79 8d e4     call #0x8de4 R_8de4
 8edb:    7e 45        push
 8edd:    3a           clr! A
@@ -3519,7 +3439,7 @@ L_8f84:
 8f8d:    3a           clr! A
 8f8e:    0f           rsys
 
-R_8f8f:
+Syscall_0e:
 8f8f:    f5 a2        st B, -(S)
 8f91:    a5 a2        st AL, -(S)
 8f93:    7c 7e        call @(PC+0x7e) @0x9013
@@ -3530,7 +3450,7 @@ R_8f8f:
 8f9c:    5d           mov B, A
 8f9d:    71 90 65     jump #0x9065 L_9065
 
-R_8fa0:
+Syscall_54:
 8fa0:    f5 a2        st B, -(S)
 8fa2:    a5 a2        st AL, -(S)
 8fa4:    7c 6d        call @(PC+0x6d) @0x9013
@@ -3569,7 +3489,7 @@ L_8fc8:
 8fdd:    a8           st AL, (A)
 8fde:    71 90 bd     jump #0x90bd L_90bd
 
-R_8fe1:
+Syscall_51:
 8fe1:    f5 a2        st B, -(S)
 8fe3:    a5 a2        st AL, -(S)
 8fe5:    7c 2c        call @(PC+0x2c) @0x9013
@@ -3577,7 +3497,7 @@ R_8fe1:
 8fe8:    95 41        ld A, (X)+
 8fea:    73 08        jump (PC+0x08) L_8ff4
 
-R_8fec:
+Syscall_4f:
 8fec:    f5 a2        st B, -(S)
 8fee:    a5 a2        st AL, -(S)
 8ff0:    7c 21        call @(PC+0x21) @0x9013
@@ -3592,7 +3512,7 @@ L_8ff4:
 8ffc:    95 41        ld A, (X)+
 8ffe:    73 68        jump (PC+0x68) L_9068
 
-R_9000:
+Syscall_64:
 9000:    f5 a2        st B, -(S)
 9002:    a5 a2        st AL, -(S)
 9004:    7c 0d        call @(PC+0x0d) @0x9013
@@ -3602,7 +3522,7 @@ R_9000:
 900a:    a4 0d        st AL, @(PC+0xd)
 900c:    73 22        jump (PC+0x22) L_9030
 
-R_900e:
+Syscall_65:
 900e:    f5 a2        st B, -(S)
 9010:    a5 a2        st AL, -(S)
 9012:    79 85 b9     call #0x85b9 R_85b9
@@ -3628,7 +3548,7 @@ L_9030:
 903b:    79 b2 d1     call #0xb2d1 R_b2d1
 903e:    73 0e        jump (PC+0x0e) L_904e
 
-R_9040:
+Syscall_50:
 9040:    f5 a2        st B, -(S)
 9042:    a5 a2        st AL, -(S)
 9044:    7c cd        call @(PC-0x33) @0x9013
@@ -3760,7 +3680,7 @@ L_910c:
 9118:    85 68 08     ld AL, +0x8(Y)
 911b:    28           inc! AL
 911c:    14 04        bz L_9122
-911e:    79 84 e4     call #0x84e4 R_84e4
+911e:    79 84 e4     call #0x84e4 Syscall_09
 9121:    2f
 
 L_9122:
@@ -3782,7 +3702,7 @@ L_912f:
 913b:    3a           clr! A
 913c:    39           dec! A
 913d:    5d           mov B, A
-913e:    79 84 e4     call #0x84e4 R_84e4
+913e:    79 84 e4     call #0x84e4 Syscall_09
 9141:    30
 
 L_9142:
@@ -3906,7 +3826,7 @@ L_91f0:
 91f9:    14 04        bz L_91ff
 
 L_91fb:
-91fb:    79 84 e4     call #0x84e4 R_84e4
+91fb:    79 84 e4     call #0x84e4 Syscall_09
 91fe:    12
 
 L_91ff:
@@ -4054,7 +3974,7 @@ L_92cf:
 92dc:    91 93 a5     ld A, (0x93a5)
 92df:    0f           rsys
 
-R_92e0:
+Syscall_67:
 92e0:    7e 45        push
 92e2:    55 20        mov A, B
 92e4:    79 b2 d1     call #0xb2d1 R_b2d1
@@ -4360,7 +4280,7 @@ L_936b:
 9454:    00
 9455:    00
 
-R_9456:
+Syscall_4d:
 9456:    7b 48        call (PC+0x48) L_94a0
 9458:    14 16        bz L_9470
 945a:    d4 26        ld B, @(PC+0x26)
@@ -4446,7 +4366,7 @@ L_94ba:
 94d3:    00
 94d4:    00
 
-R_94d5:
+Syscall_4e:
 94d5:    7b c9        call (PC-0x37) L_94a0
 94d7:    14 be        bz L_9497
 94d9:    b5 a2        st A, -(S)
@@ -4461,68 +4381,68 @@ R_94d5:
 94ef:    2a           clr! AL
 94f0:    0f           rsys
 
-R_94f1:
+Syscall_49:
 94f1:    79 95 92     call #0x9592 L_9592
-94f4:    46 77 59 20 00 29 unkbig5(7, 7) [2 + 9], [2]
+94f4:    46 77 59 20 00 29 unkbig5(7, 7) [B + Z], [B]
 94fa:    12 70        bn L_956c
 94fc:    0f           rsys
 
-R_94fd:
+Syscall_41:
 94fd:    79 95 92     call #0x9592 L_9592
-9500:    46 57 59 20 00 29 unkbig5(7, 5) [2 + 9], [2]
+9500:    46 57 59 20 00 29 unkbig5(7, 5) [B + Z], [B]
 9506:    12 64        bn L_956c
 9508:    0f           rsys
 
-R_9509:
+Syscall_24:
 9509:    79 95 a0     call #0x95a0 L_95a0
-950c:    46 37 59 20 00 29 unkbig5(7, 3) [2 + 9], [2]
+950c:    46 37 59 20 00 29 unkbig5(7, 3) [B + Z], [B]
 9512:    12 58        bn L_956c
 9514:    0f           rsys
 
-R_9515:
+Syscall_4a:
 9515:    7b 7b        call (PC+0x7b) L_9592
 9517:    5c           mov Y, A
 9518:    90 95 c3     ld A, #0x95c3
-951b:    46 77 79 20 60 29 unkbig7(7, 7) [2 + 9 + 0x0060], [2]
+951b:    46 77 79 20 60 29 unkbig7(7, 7) [B + Z + 0x0060], [B]
 9521:    12 49        bn L_956c
 9523:    55 67        mov Y, Y
 9525:    95 c9 0f     ld A, +0xf(C)+
 
-R_9528:
+Syscall_42:
 9528:    7b 68        call (PC+0x68) L_9592
 952a:    5c           mov Y, A
 952b:    93 ec        ld A, (PC-0x14)
-952d:    46 57 79 20 60 29 unkbig7(7, 5) [2 + 9 + 0x0060], [2]
+952d:    46 57 79 20 60 29 unkbig7(7, 5) [B + Z + 0x0060], [B]
 9533:    12 37        bn L_956c
 9535:    55 67        mov Y, Y
 9537:    95 c7        ld A, unknown_indexed
 9539:    0f           rsys
 
-R_953a:
+Syscall_25:
 953a:    7b 64        call (PC+0x64) L_95a0
 953c:    5c           mov Y, A
 953d:    93 da        ld A, (PC-0x26)
-953f:    46 37 79 20 60 29 unkbig7(7, 3) [2 + 9 + 0x0060], [2]
+953f:    46 37 79 20 60 29 unkbig7(7, 3) [B + Z + 0x0060], [B]
 9545:    12 25        bn L_956c
 9547:    55 67        mov Y, Y
 9549:    95 c5        ld A, unknown_indexed
 954b:    0f           rsys
 
-R_954c:
+Syscall_47:
 954c:    7b 44        call (PC+0x44) L_9592
-954e:    46 77 09 20 00 29 addbig(7, 7) [2 + 9], [2]
+954e:    46 77 09 20 00 29 addbig(7, 7) [B + Z], [B]
 9554:    12 16        bn L_956c
 9556:    0f           rsys
 
-R_9557:
+Syscall_3d:
 9557:    7b 39        call (PC+0x39) L_9592
-9559:    46 57 09 20 00 29 addbig(7, 5) [2 + 9], [2]
+9559:    46 57 09 20 00 29 addbig(7, 5) [B + Z], [B]
 955f:    12 0b        bn L_956c
 9561:    0f           rsys
 
-R_9562:
+Syscall_20:
 9562:    7b 3c        call (PC+0x3c) L_95a0
-9564:    46 37 09 20 00 29 addbig(7, 3) [2 + 9], [2]
+9564:    46 37 09 20 00 29 addbig(7, 3) [B + Z], [B]
 956a:    13 04        bnn L_9570
 
 L_956c:
@@ -4532,21 +4452,21 @@ L_956c:
 L_9570:
 9570:    0f           rsys
 
-R_9571:
+Syscall_48:
 9571:    7b 1f        call (PC+0x1f) L_9592
-9573:    46 77 19 20 00 29 subbig(7, 7) [2 + 9], [2]
+9573:    46 77 19 20 00 29 subbig(7, 7) [B + Z], [B]
 9579:    12 f1        bn L_956c
 957b:    0f           rsys
 
-R_957c:
+Syscall_3f:
 957c:    7b 14        call (PC+0x14) L_9592
-957e:    46 57 19 20 00 29 subbig(7, 5) [2 + 9], [2]
+957e:    46 57 19 20 00 29 subbig(7, 5) [B + Z], [B]
 9584:    12 e6        bn L_956c
 9586:    0f           rsys
 
-R_9587:
+Syscall_22:
 9587:    7b 17        call (PC+0x17) L_95a0
-9589:    46 37 19 20 00 29 subbig(7, 3) [2 + 9], [2]
+9589:    46 37 19 20 00 29 subbig(7, 3) [B + Z], [B]
 958f:    12 db        bn L_956c
 9591:    0f           rsys
 
@@ -4569,7 +4489,7 @@ L_95a0:
 95ac:    15 0d        bnz L_95bb
 
 L_95ae:
-95ae:    46 13 38 40 95 c3 unkbig3(3, 1) [0x95c3], [4]
+95ae:    46 13 38 40 95 c3 unkbig3(3, 1) [0x95c3], [X]
 95b4:    d0 95 c3     ld B, #0x95c3
 95b7:    30 41        inc X, 2
 95b9:    73 02        jump (PC+0x02) L_95bd
@@ -4589,33 +4509,33 @@ L_95bd:
 95c9:    00
 95ca:    00
 
-R_95cb:
+Syscall_45:
 95cb:    7b c5        call (PC-0x3b) L_9592
-95cd:    46 77 39 20 00 29 unkbig3(7, 7) [2 + 9], [2]
+95cd:    46 77 39 20 00 29 unkbig3(7, 7) [B + Z], [B]
 95d3:    0f           rsys
 
-R_95d4:
+Syscall_3b:
 95d4:    79 99 21     call #0x9921 R_9921
 95d7:    00           HALT
 95d8:    7b b8        call (PC-0x48) L_9592
-95da:    46 57 39 20 00 29 unkbig3(7, 5) [2 + 9], [2]
+95da:    46 57 39 20 00 29 unkbig3(7, 5) [B + Z], [B]
 95e0:    0f           rsys
 
-R_95e1:
+Syscall_1e:
 95e1:    79 99 21     call #0x9921 R_9921
 95e4:    00           HALT
 95e5:    7b b9        call (PC-0x47) L_95a0
-95e7:    46 37 39 20 00 29 unkbig3(7, 3) [2 + 9], [2]
+95e7:    46 37 39 20 00 29 unkbig3(7, 3) [B + Z], [B]
 95ed:    0f           rsys
 
-R_95ee:
+Syscall_46:
 95ee:    7b a2        call (PC-0x5e) L_9592
-95f0:    46 77 36 00 29 02 unkbig3(7, 7) [0], [2 + 9]
+95f0:    46 77 36 00 29 02 unkbig3(7, 7) [A], [B + Z]
 95f6:    0f           rsys
 
-R_95f7:
+Syscall_3c:
 95f7:    7b 99        call (PC-0x67) L_9592
-95f9:    46 75 36 00 29 02 unkbig3(5, 7) [0], [2 + 9]
+95f9:    46 75 36 00 29 02 unkbig3(5, 7) [A], [B + Z]
 95ff:    13 03        bnn L_9604
 
 L_9601:
@@ -4624,13 +4544,13 @@ L_9601:
 L_9604:
 9604:    0f           rsys
 
-R_9605:
+Syscall_1f:
 9605:    7b 8b        call (PC-0x75) L_9592
-9607:    46 73 36 00 29 02 unkbig3(3, 7) [0], [2 + 9]
+9607:    46 73 36 00 29 02 unkbig3(3, 7) [A], [B + Z]
 960d:    12 f2        bn L_9601
 960f:    0f           rsys
 
-R_9610:
+Syscall_43:
 9610:    7e 81        push
 9612:    7c 6a        call @(PC+0x6a) @0x967e
 9614:    5d           mov B, A
@@ -4642,7 +4562,7 @@ R_9610:
 961d:    15 0e        bnz L_962d
 
 L_961f:
-961f:    46 15 38 40 95 c3 unkbig3(5, 1) [0x95c3], [4]
+961f:    46 15 38 40 95 c3 unkbig3(5, 1) [0x95c3], [X]
 9625:    90 95 c3     ld A, #0x95c3
 9628:    5c           mov Y, A
 9629:    30 41        inc X, 2
@@ -4652,10 +4572,10 @@ L_962d:
 962d:    7c 4f        call @(PC+0x4f) @0x967e
 
 L_962f:
-962f:    46 55 2a 26  unkbig2(5, 5) [6], [2]
+962f:    46 55 2a 26  unkbig2(5, 5) [Y], [B]
 9633:    73 23        jump (PC+0x23) L_9658
 
-R_9635:
+Syscall_26:
 9635:    7e 81        push
 9637:    7c 45        call @(PC+0x45) @0x967e
 9639:    5d           mov B, A
@@ -4667,7 +4587,7 @@ R_9635:
 9642:    15 0e        bnz L_9652
 
 L_9644:
-9644:    46 13 38 40 95 c3 unkbig3(3, 1) [0x95c3], [4]
+9644:    46 13 38 40 95 c3 unkbig3(3, 1) [0x95c3], [X]
 964a:    90 95 c3     ld A, #0x95c3
 964d:    5c           mov Y, A
 964e:    30 41        inc X, 2
@@ -4677,7 +4597,7 @@ L_9652:
 9652:    7c 2a        call @(PC+0x2a) @0x967e
 
 L_9654:
-9654:    46 33 2a 26  unkbig2(3, 3) [6], [2]
+9654:    46 33 2a 26  unkbig2(3, 3) [Y], [B]
 
 L_9658:
 9658:    14 06        bz L_9660
@@ -4706,7 +4626,7 @@ L_9671:
 9671:    7f 81        pop
 9673:    0f           rsys
 
-R_9674:
+Syscall_27:
 9674:    79 99 21     call #0x9921 R_9921
 9677:    00           HALT
 9678:    7e 81        push
@@ -4728,12 +4648,12 @@ R_9674:
 9694:    73 ce        jump (PC-0x32) L_9664
 9696:    00
 
-R_9697:
+Syscall_44:
 9697:    80 04        ld AL, #0x04
 9699:    a3 14        st AL, (PC+0x14)
 969b:    73 04        jump (PC+0x04) L_96a1
 
-R_969d:
+Syscall_28:
 969d:    80 02        ld AL, #0x02
 969f:    a3 0e        st AL, (PC+0xe)
 
@@ -4759,7 +4679,7 @@ L_96bc:
 96bc:    7f 81        pop
 96be:    0f           rsys
 
-R_96bf:
+Syscall_29:
 96bf:    7e 81        push
 96c1:    7c bb        call @(PC-0x45) @0x967e
 96c3:    5e           mov Z, A
@@ -4778,13 +4698,13 @@ L_96cb:
 96d2:    08           cl
 96d3:    73 ef        jump (PC-0x11) L_96c4
 
-R_96d5:
+Syscall_32:
 96d5:    95 41        ld A, (X)+
 96d7:    31 03        dec A, 4
 96d9:    32 20        clr B, 0
 96db:    73 07        jump (PC+0x07) L_96e4
 
-R_96dd:
+Syscall_34:
 96dd:    79 b2 cb     call #0xb2cb R_b2cb
 96e0:    5d           mov B, A
 96e1:    79 99 2f     call #0x992f L_992f
@@ -5056,7 +4976,7 @@ L_9714:
 9810:    97
 9811:    3d
 
-R_9812:
+Syscall_2a:
 9812:    7e 63        push
 9814:    79 99 2f     call #0x992f L_992f
 9817:    b5 a2        st A, -(S)
@@ -5087,11 +5007,11 @@ L_983e:
 9844:    02           sf
 9845:    71 98 f4     jump #0x98f4 L_98f4
 
-R_9848:
+Syscall_30:
 9848:    80 01        ld AL, #0x01
 984a:    73 01        jump (PC+0x01) L_984d
 
-R_984c:
+Syscall_2f:
 984c:    2a           clr! AL
 
 L_984d:
@@ -5156,7 +5076,7 @@ L_9897:
 98a0:    02           sf
 98a1:    09           ret
 
-R_98a2:
+Syscall_39:
 98a2:    85 41        ld AL, (X)+
 98a4:    14 15        bz L_98bb
 98a6:    a5 a2        st AL, -(S)
@@ -5167,12 +5087,12 @@ R_98a2:
 98b1:    80 09        ld AL, #0x09
 98b3:    a5 28 03     st AL, +0x3(B)
 98b6:    79 9b 8e     call #0x9b8e R_9b8e
-98b9:    73 e7        jump (PC-0x19) R_98a2
+98b9:    73 e7        jump (PC-0x19) Syscall_39
 
 L_98bb:
 98bb:    0f           rsys
 
-R_98bc:
+Syscall_3a:
 98bc:    85 41        ld AL, (X)+
 98be:    a5 a2        st AL, -(S)
 98c0:    9a           ld A, (X)
@@ -5186,7 +5106,7 @@ R_98bc:
 98d0:    7b 51        call (PC+0x51) L_9923
 98d2:    0f           rsys
 
-R_98d3:
+Syscall_37:
 98d3:    7e 63        push
 98d5:    79 b2 cb     call #0xb2cb R_b2cb
 98d8:    5d           mov B, A
@@ -5195,7 +5115,7 @@ R_98d3:
 98de:    01           nop
 98df:    73 13        jump (PC+0x13) L_98f4
 
-R_98e1:
+Syscall_38:
 98e1:    7e 63        push
 98e3:    79 b2 cb     call #0xb2cb R_b2cb
 98e6:    b5 a2        st A, -(S)
@@ -5268,7 +5188,7 @@ L_992f:
 L_994b:
 994b:    95 a1        ld A, (S)+
 994d:    95 a1        ld A, (S)+
-994f:    79 84 e4     call #0x84e4 R_84e4
+994f:    79 84 e4     call #0x84e4 Syscall_09
 9952:    17
 
 L_9953:
@@ -5278,7 +5198,7 @@ L_9953:
 995a:    b1 9b 6a     st A, (0x9b6a)
 995d:    09           ret
 
-R_995e:
+Syscall_33:
 995e:    7e 63        push
 9960:    3a           clr! A
 9961:    a5 a2        st AL, -(S)
@@ -5287,11 +5207,11 @@ R_995e:
 9968:    5c           mov Y, A
 9969:    73 37        jump (PC+0x37) L_99a2
 
-R_996b:
+Syscall_36:
 996b:    80 03        ld AL, #0x03
 996d:    73 1b        jump (PC+0x1b) L_998a
 
-R_996f:
+Syscall_31:
 996f:    9a           ld A, (X)
 9970:    79 b2 d1     call #0xb2d1 R_b2d1
 9973:    5d           mov B, A
@@ -5299,12 +5219,12 @@ R_996f:
 9977:    c5 08 01     ld BL, +0x1(A)
 997a:    80 03        ld AL, #0x03
 997c:    49           sub! BL, AL
-997d:    16 05        blt R_9984
+997d:    16 05        blt Syscall_35
 997f:    2a           clr! AL
 9980:    a3 5a        st AL, (PC+0x5a)
 9982:    73 04        jump (PC+0x04) L_9988
 
-R_9984:
+Syscall_35:
 9984:    80 01        ld AL, #0x01
 9986:    a3 54        st AL, (PC+0x54)
 
@@ -5400,7 +5320,7 @@ L_99fd:
 L_9a06:
 9a06:    03           rf
 9a07:    9a           ld A, (X)
-9a08:    46 04 9a 44  unkbig9(4, 0) [4], [4]
+9a08:    46 04 9a 44  unkbig9(4, 0) [X], [X]
 9a0c:    05           di
 9a0d:    9a           ld A, (X)
 9a0e:    40 08        add ZH, AH
@@ -5691,7 +5611,7 @@ L_9b37:
 L_9b58:
 9b58:    d0 ff ff     ld B, #0xffff
 9b5b:    55 80        mov A, Z
-9b5d:    79 84 e4     call #0x84e4 R_84e4
+9b5d:    79 84 e4     call #0x84e4 Syscall_09
 9b60:    17
 
 L_9b61:
@@ -5723,7 +5643,7 @@ L_9b7e:
 9b89:    02
 9b8a:    02
 
-R_9b8b:
+Syscall_18:
 9b8b:    7b 01        call (PC+0x01) R_9b8e
 9b8d:    0f           rsys
 
@@ -5752,7 +5672,7 @@ L_9bae:
 L_9bb6:
 9bb6:    9c           ld A, (Z)
 9bb7:    d1 9c 65     ld B, (0x9c65)
-9bba:    79 84 e4     call #0x84e4 R_84e4
+9bba:    79 84 e4     call #0x84e4 Syscall_09
 9bbd:    0f           rsys
 
 L_9bbe:
@@ -5937,7 +5857,7 @@ L_9cb4:
 L_9cbe:
 9cbe:    9c           ld A, (Z)
 9cbf:    d3 a4        ld B, (PC-0x5c)
-9cc1:    79 84 e4     call #0x84e4 R_84e4
+9cc1:    79 84 e4     call #0x84e4 Syscall_09
 9cc4:    11 80        bnc L_9d46
 9cc6:    09           ret
 9cc7:    41
@@ -6095,7 +6015,7 @@ L_9d4d:
 9d79:    49           sub! BL, AL
 9d7a:    45 12        mov BH, AL
 9d7c:    9c           ld A, (Z)
-9d7d:    79 84 e4     call #0x84e4 R_84e4
+9d7d:    79 84 e4     call #0x84e4 Syscall_09
 9d80:    12
 
 L_9d81:
@@ -7456,7 +7376,7 @@ a2e9:    21 11        dec AL, 2
 a2eb:    14 09        bz L_a2f6
 a2ed:    d3 08        ld B, (PC+0x8)
 a2ef:    95 a8 02     ld A, +0x2(S)
-a2f2:    79 84 e4     call #0x84e4 R_84e4
+a2f2:    79 84 e4     call #0x84e4 Syscall_09
 a2f5:    17
 
 L_a2f6:
@@ -9176,13 +9096,13 @@ aa14:    a6
 aa15:    a9
 aa16:    00
 
-R_aa17:
+Syscall_05:
 aa17:    7e 03        push
 aa19:    3a           clr! A
 aa1a:    85 41        ld AL, (X)+
 aa1c:    73 07        jump (PC+0x07) R_aa25
 
-R_aa1e:
+Syscall_21:
 aa1e:    7e 03        push
 aa20:    45 03        mov BL, AH
 aa22:    3a           clr! A
@@ -9209,7 +9129,7 @@ L_aa45:
 aa45:    c1 b6 b4     ld BL, (0xb6b4)
 aa48:    49           sub! BL, AL
 aa49:    11 04        bnc L_aa4f
-aa4b:    79 84 e4     call #0x84e4 R_84e4
+aa4b:    79 84 e4     call #0x84e4 Syscall_09
 aa4e:    1e           unknown
 
 L_aa4f:
@@ -9339,7 +9259,7 @@ L_ab16:
 ab16:    79 86 12     call #0x8612 R_8612
 ab19:    73 f6        jump (PC-0x0a) L_ab11
 
-R_ab1b:
+Syscall_01:
 ab1b:    7e 03        push
 ab1d:    85 a8 08     ld AL, +0x8(S)
 ab20:    c0 07        ld BL, #0x07
@@ -9350,7 +9270,7 @@ ab27:    3a           clr! A
 ab28:    5d           mov B, A
 ab29:    38           inc! A
 ab2a:    31 20        dec B, 1
-ab2c:    79 84 e4     call #0x84e4 R_84e4
+ab2c:    79 84 e4     call #0x84e4 Syscall_09
 ab2f:    09           ret
 
 L_ab30:
@@ -9403,7 +9323,7 @@ ab7f:    79 86 12     call #0x8612 R_8612
 ab82:    55 40        mov A, X
 ab84:    71 aa 45     jump #0xaa45 L_aa45
 
-R_ab87:
+Syscall_11:
 ab87:    f3 02        st B, (PC+0x2)
 ab89:    66 16        jsys
 ab8b:    00           HALT
@@ -9413,7 +9333,7 @@ ab8e:    00           HALT
 ab8f:    93 fc        ld A, (PC-0x4)
 ab91:    0f           rsys
 
-R_ab92:
+Syscall_16:
 ab92:    79 ab 11     call #0xab11 L_ab11
 ab95:    3a           clr! A
 ab96:    b3 2c        st A, (PC+0x2c)
@@ -9456,7 +9376,7 @@ abc8:    79 ac 83     call #0xac83 L_ac83
 abcb:    14 cd        bz L_ab9a
 abcd:    65 a1        ld X, (S)+
 abcf:    79 86 12     call #0x8612 R_8612
-abd2:    73 be        jump (PC-0x42) R_ab92
+abd2:    73 be        jump (PC-0x42) Syscall_16
 
 L_abd4:
 abd4:    5d           mov B, A
@@ -9475,13 +9395,13 @@ abee:    30 41        inc X, 2
 abf0:    b5 41        st A, (X)+
 abf2:    0f           rsys
 
-R_abf3:
+Syscall_13:
 abf3:    7e 01        push
 abf5:    79 ab 11     call #0xab11 L_ab11
 abf8:    7f 01        pop
 abfa:    73 05        jump (PC+0x05) L_ac01
 
-R_abfc:
+Syscall_17:
 abfc:    79 ab 11     call #0xab11 L_ab11
 abff:    95 41        ld A, (X)+
 
@@ -9604,7 +9524,7 @@ ac7d:    20
 ac7e:    09
 
 L_ac7f:
-ac7f:    79 84 e4     call #0x84e4 R_84e4
+ac7f:    79 84 e4     call #0x84e4 Syscall_09
 ac82:    20
 
 L_ac83:
@@ -10139,7 +10059,7 @@ af93:    00
 af94:    00
 af95:    00
 
-R_af96:
+Syscall_59:
 af96:    80 01        ld AL, #0x01
 
 L_af98:
@@ -10167,7 +10087,7 @@ afb3:    b0
 afb4:    a2
 
 L_afb5:
-afb5:    79 84 e4     call #0x84e4 R_84e4
+afb5:    79 84 e4     call #0x84e4 Syscall_09
 afb8:    2c           srl! AL
 afb9:    ac           st AL, (Z)
 afba:    90 00 00     ld A, #0x0000
@@ -10175,7 +10095,7 @@ afbd:    d0 df ff     ld B, #0xdfff
 afc0:    c8           ld BL, (A)
 afc1:    42 23        and BL, BH
 afc3:    e8           st BL, (A)
-afc4:    46 11 0d 08 00 00 addbig(1, 1) [0], #0x0008
+afc4:    46 11 0d 08 00 00 addbig(1, 1) [A], #0x0008
 afca:    0c           unknown
 afcb:    5e           mov Z, A
 afcc:    79 86 f5     call #0x86f5 R_86f5
@@ -10186,7 +10106,7 @@ afd0:    7f 63        pop
 afd2:    5d           mov B, A
 afd3:    09           ret
 
-R_afd4:
+Syscall_5e:
 afd4:    2a           clr! AL
 afd5:    73 c1        jump (PC-0x3f) L_af98
 
@@ -10236,7 +10156,7 @@ b00e:    7f 63        pop
 b010:    5d           mov B, A
 b011:    09           ret
 
-R_b012:
+Syscall_63:
 b012:    7e 45        push
 b014:    d6 89        ld B, unknown
 b016:    b0 50 b3     st A, #0x50b3
@@ -10245,10 +10165,10 @@ b01a:    79 88 05     call #0x8805 R_8805
 b01d:    89           ld AL, (B)
 b01e:    21 11        dec AL, 2
 b020:    14 0d        bz L_b02f
-b022:    79 84 e4     call #0x84e4 R_84e4
+b022:    79 84 e4     call #0x84e4 Syscall_09
 b025:    09           ret
 
-R_b026:
+Syscall_5a:
 b026:    7e 45        push
 b028:    b3 0e        st A, (PC+0xe)
 b02a:    91 01 03     ld A, (0x0103)
@@ -10378,7 +10298,7 @@ b0cc:    c0 10        ld BL, #0x10
 b0ce:    4a           and! BL, AL
 b0cf:    15 06        bnz L_b0d7
 b0d1:    55 42        mov B, X
-b0d3:    79 84 e4     call #0x84e4 R_84e4
+b0d3:    79 84 e4     call #0x84e4 Syscall_09
 b0d6:    2e
 
 L_b0d7:
@@ -10443,7 +10363,7 @@ b130:    73 b9        jump (PC-0x47) L_b0eb
 L_b132:
 b132:    80 ff        ld AL, #0xff
 b134:    14 04        bz L_b13a
-b136:    79 84 e4     call #0x84e4 R_84e4
+b136:    79 84 e4     call #0x84e4 Syscall_09
 b139:    31
 
 L_b13a:
@@ -10507,7 +10427,7 @@ b18e:    ff
 b18f:    ff
 b190:    00
 
-R_b191:
+Syscall_5c:
 b191:    7e 43        push
 b193:    3a           clr! A
 b194:    85 41        ld AL, (X)+
@@ -10581,7 +10501,7 @@ L_b209:
 b209:    7f 43        pop
 b20b:    d5 48 01     ld B, +0x1(X)
 b20e:    55 40        mov A, X
-b210:    79 84 e4     call #0x84e4 R_84e4
+b210:    79 84 e4     call #0x84e4 Syscall_09
 b213:    15 7e        bnz L_b293
 b215:    43 3a        or SH, BL
 b217:    85 41        ld AL, (X)+
@@ -10724,7 +10644,7 @@ b2da:    51 32 7f ff  sub B, B, #0x7fff
 b2de:    17 06        bp L_b2e6
 b2e0:    5d           mov B, A
 b2e1:    9d           ld A, (S)
-b2e2:    79 84 e4     call #0x84e4 R_84e4
+b2e2:    79 84 e4     call #0x84e4 Syscall_09
 b2e5:    17
 
 L_b2e6:
@@ -10735,7 +10655,7 @@ b2ed:    10 ea        bc L_b2d9
 b2ef:    d0 00 00     ld B, #0x0000
 b2f2:    09           ret
 
-R_b2f3:
+Syscall_69:
 b2f3:    7e 23        push
 b2f5:    5d           mov B, A
 b2f6:    14 12        bz L_b30a
@@ -10807,7 +10727,7 @@ b342:    ff
 b343:    fe
 b344:    bf
 
-R_b345:
+Syscall_5f:
 b345:    7e 43        push
 b347:    7b 13        call (PC+0x13) L_b35c
 b349:    47 4a        unk7 SH, XH
@@ -10819,7 +10739,7 @@ b34f:    30
 b350:    42
 b351:    0f
 
-R_b352:
+Syscall_60:
 b352:    7e 43        push
 b354:    7b 06        call (PC+0x06) L_b35c
 b356:    47 4a        unk7 SH, XH
@@ -10867,10 +10787,10 @@ b397:    7f 43        pop
 b399:    32 20        clr B, 0
 b39b:    ca           ld BL, (X)
 b39c:    55 40        mov A, X
-b39e:    79 84 e4     call #0x84e4 R_84e4
+b39e:    79 84 e4     call #0x84e4 Syscall_09
 b3a1:    2d           sll! AL
 
-R_b3a2:
+Syscall_1b:
 b3a2:    7b 20        call (PC+0x20) L_b3c4
 b3a4:    79 88 05     call #0x8805 R_8805
 b3a7:    89           ld AL, (B)
@@ -10889,7 +10809,7 @@ b3b6:    b4 12        st A, @(PC+0x12)
 b3b8:    00           HALT
 b3b9:    0f           rsys
 
-R_b3ba:
+Syscall_15:
 b3ba:    79 b3 c4     call #0xb3c4 L_b3c4
 b3bd:    91 b4 12     ld A, (0xb412)
 b3c0:    d1 b4 14     ld B, (0xb414)
@@ -10913,7 +10833,7 @@ b3e2:    46 01 6c 06 b4 16 unkbig6(1, 0) [0xb416], #0x0006
 b3e8:    46 13 00 b4 16 b4 12 addbig(3, 1) [0xb412], [0xb416]
 b3ef:    09           ret
 
-R_b3f0:
+Syscall_1c:
 b3f0:    55 60        mov A, Y
 b3f2:    b5 a2        st A, -(S)
 b3f4:    95 41        ld A, (X)+
@@ -10942,7 +10862,7 @@ b415:    00
 b416:    00
 b417:    00
 
-R_b418:
+Syscall_1d:
 b418:    85 41        ld AL, (X)+
 b41a:    a5 a2        st AL, -(S)
 b41c:    95 41        ld A, (X)+
@@ -10960,7 +10880,7 @@ b42f:    e8           st BL, (A)
 b430:    79 86 12     call #0x8612 R_8612
 b433:    0f           rsys
 
-R_b434:
+Syscall_4b:
 b434:    79 b4 3f     call #0xb43f R_b43f
 b437:    0f           rsys
 
@@ -11187,19 +11107,19 @@ L_b53c:
 b53c:    7f 45        pop
 b53e:    09           ret
 
-R_b53f:
+Syscall_2b:
 b53f:    77           unknown
 b540:    20 0f        inc AH, 16
 b542:    77           unknown
 b543:    20 09        inc AH, 10
 
-R_b545:
+Syscall_2c:
 b545:    78           unknown
 b546:    20 0f        inc AH, 16
 b548:    78           unknown
 b549:    20 09        inc AH, 10
 
-R_b54b:
+Syscall_2e:
 b54b:    95 41        ld A, (X)+
 b54d:    d5 41        ld B, (X)+
 b54f:    7b 05        call (PC+0x05) L_b556
@@ -11253,7 +11173,7 @@ b598:    00
 b599:    00
 b59a:    00
 
-R_b59b:
+Syscall_4c:
 b59b:    55 40        mov A, X
 b59d:    51 10 7f ff  sub A, A, #0x7fff
 b5a1:    17 03        bp L_b5a6
@@ -11282,11 +11202,11 @@ b5c1:    00           HALT
 b5c2:    00           HALT
 b5c3:    0f           rsys
 
-R_b5c4:
+Syscall_14:
 b5c4:    79 b6 41     call #0xb641 R_b641
 b5c7:    0f           rsys
 
-R_b5c8:
+Syscall_55:
 b5c8:    7e 63        push
 b5ca:    55 00        mov A, A
 b5cc:    15 03        bnz L_b5d1
@@ -11299,11 +11219,11 @@ b5d5:    79 b6 3c     call #0xb63c R_b63c
 b5d8:    7f 63        pop
 b5da:    0f           rsys
 
-R_b5db:
+Syscall_23:
 b5db:    79 cd a8     call #0xcda8 R_cda8
 b5de:    0f           rsys
 
-R_b5df:
+Syscall_53:
 b5df:    79 83 a7     call #0x83a7 R_83a7
 b5e2:    79 85 b9     call #0x85b9 R_85b9
 b5e5:    1f           unknown
@@ -13028,7 +12948,7 @@ bffd:    b1 c1 9c     st A, (0xc19c)
 c000:    90 c0 c0     ld A, #0xc0c0
 c003:    b1 c1 9f     st A, (0xc19f)
 c006:    80 02        ld AL, #0x02
-c008:    46 80 91 c1 9f 60 02 unkbig9(0, 8) [0 + 2 + 0x0060], [0xc19f]
+c008:    46 80 91 c1 9f 60 02 unkbig9(0, 8) [A + B + 0x0060], [0xc19f]
 c00f:    79 c1 42     call #0xc142 L_c142
 c012:    c1 99 60     ld BL, (0x9960)
 c015:    13 88        bnn L_bf9f
@@ -14838,7 +14758,7 @@ c975:    b1 cb 3a     st A, (0xcb3a)
 c978:    90 c0 c0     ld A, #0xc0c0
 c97b:    b1 cb 3d     st A, (0xcb3d)
 c97e:    80 02        ld AL, #0x02
-c980:    46 80 91 cb 3d 60 02 unkbig9(0, 8) [0 + 2 + 0x0060], [0xcb3d]
+c980:    46 80 91 cb 3d 60 02 unkbig9(0, 8) [A + B + 0x0060], [0xcb3d]
 c987:    79 b4 f8     call #0xb4f8 R_b4f8
 c98a:    cb           ld BL, (Y)
 c98b:    37 60        rlc Y, 1
@@ -14869,7 +14789,7 @@ c9a7:    a5 a2        st AL, -(S)
 c9a9:    90 c0 c0     ld A, #0xc0c0
 c9ac:    b1 cb 7a     st A, (0xcb7a)
 c9af:    80 02        ld AL, #0x02
-c9b1:    46 e0 92 cb 7a 0a unkbig9(0, e) [0], [0xcb7a]
+c9b1:    46 e0 92 cb 7a 0a unkbig9(0, e) [A], [0xcb7a]
 c9b7:    85 a1        ld AL, (S)+
 c9b9:    c0 00        ld BL, #0x00
 c9bb:    21 30        dec BL, 1
@@ -15576,7 +15496,7 @@ cd53:    47 9e        unk7 PH, ZL
 cd55:    03           rf
 cd56:    c0 04        ld BL, #0x04
 cd58:    80 04        ld AL, #0x04
-cd5a:    46 e1 98 40 cd 65 unkbig9(1, e) [0xcd65], [4]
+cd5a:    46 e1 98 40 cd 65 unkbig9(1, e) [0xcd65], [X]
 cd60:    7f 05        pop
 cd62:    30 41        inc X, 2
 cd64:    09           ret
@@ -15650,7 +15570,7 @@ cdbc:    09           ret
 L_cdbd:
 cdbd:    cb           ld BL, (Y)
 cdbe:    14 f3        bz L_cdb3
-cdc0:    46 00 2d 04 60 01 unkbig2(0, 0) [0 + 1 + 0x0060], #0x0004
+cdc0:    46 00 2d 04 60 01 unkbig2(0, 0) [A + A + 0x0060], #0x0004
 cdc6:    15 eb        bnz L_cdb3
 cdc8:    c5 68 02     ld BL, +0x2(Y)
 cdcb:    49           sub! BL, AL
