@@ -426,24 +426,24 @@ class DirectRef(AddrRef):
 
 class IndexedRef(AddrRef):
     def __init__(self, base, disp):
-        self.base = base
+        self.base = base >> 1
         self.disp = disp
 
     def __str__(self):
         if self.disp == 0:
-            return f"[{self.base}]"
-        return f"[{self.base} + {self.disp:#06x}]"
+            return f"[{RegNames16[self.base]}]"
+        return f"[{RegNames16[self.base]} + {self.disp:#06x}]"
 
 class ComplexRef(AddrRef):
     def __init__(self, base, index, disp):
-        self.base = base
-        self.index = index
+        self.base = base >> 1
+        self.index = index >> 1
         self.disp = disp
 
     def __str__(self):
         if self.disp == 0:
-            return f"[{self.base} + {self.index}]"
-        return f"[{self.base} + {self.index} + {self.disp:#06x}]"
+            return f"[{RegNames16[self.base]} + {RegNames16[self.index]}]"
+        return f"[{RegNames16[self.base]} + {RegNames16[self.index]} + {self.disp:#06x}]"
 
 class LiteralRef(AddrRef):
     def __init__(self, val):
