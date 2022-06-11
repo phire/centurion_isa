@@ -786,6 +786,13 @@ def disassemble(memory):
 
         str = ""
 
+        def print_bytes(bytes):
+            str = ""
+            for b in bytes:
+                str += f"{b:02x} "
+            str += " " * (13 - len(str))
+            return str
+
         if info.type == "cstring":
             str += f"{i:04x}:    \""
 
@@ -810,25 +817,31 @@ def disassemble(memory):
 
             i += l
 
+        elif info.type == "fnptr":
+            # 16 bit absolute function pointer
+            addr = get_be16(memory, i)
+            entry_points.append(addr)
+            label = memory_addr_info[addr].label
+            if label == None:
+                label = memory_addr_info[addr].label = f"L_{addr:04x}"
+            str += f"{i:04x}:    "
+            str += print_bytes(memory[i:i+2])
+            str += f"{label}"
+            i += 2
+
         elif info.type != None:
             value = struct.unpack_from(info.type, memory[i:i+4])[0]
             bytes = struct.pack(info.type, value)
 
-            str = f"{i:04x}:    "
-            for b in bytes:
-                str += f"{b:02x} "
+            str += f"{i:04x}:    "
+            str += print_bytes(bytes)
             i += len(bytes)
-            while len(str) < 22:
-                str += " "
             str += f"({value:#x})"
 
         elif info.instruction:
             inst = info.instruction
             str = f"{i:04x}:    "
-            for b in inst.bytes:
-                str += f"{b:02x} "
-            while len(str) < 22:
-                str += " "
+            str += print_bytes(inst.bytes)
 
             str += inst.__repr__()
 
