@@ -1,6 +1,6 @@
 from generic import *
-from cpu6_regs import RegNames16, RegNames8
-from cpu6_addr import Cpu6AddrMode
+from cpu6_regs import RegNames16, RegNames8, Reg16Ref, Reg8Ref
+from cpu6_addr import Cpu6AddrMode, Cpu4AddrMode
 import struct
 
 class BasicCpu6Inst:
@@ -212,7 +212,7 @@ def MemoryMatch(pc, memory):
 
         address_mode = inst & 0xf
     elif inst & 0xf0 == 0x60:
-        # Instructions that operate on RT
+        # Instructions that operate on X
         reg = 4
         word = True
 
@@ -221,89 +221,16 @@ def MemoryMatch(pc, memory):
     else:
         return None
 
+    operand, pc = Cpu4AddrMode(address_mode, word, pc, memory)
+    if operand is None:
+        return None
 
-    index_name = None
-    if address_mode == 0b101:
-        index = memory[pc] >> 4
-        index_name = RegNames16[index >> 1]
-    elif address_mode & 0b1000:
-        index = (address_mode & 0x7) << 1
-        index_name = RegNames16[index >> 1]
-
-    if word:
-        reg_name = RegNames16[reg >> 1]
-    else:
-        reg_name = RegNames8[reg]
-
-
-    address_modes = [
-        (1 + word, "#{addr}"),               # 000 = immediate
-        (2, "({addr})"),        # 001 = direct
-        (2, "@({addr})"),
-        (1, "(PC{offset})"),
-        (1, "@(PC{offset})"), # 100 = PC relative
-        (1, "indexed_modes"), # 101 = indexed with increment
-        (1, "unknown"),
-        (1, "unknown"),
-        (0, "({index})"),     # indexed
-        (0, "({index})"),
-        (0, "({index})"),
-        (0, "({index})"),
-        (0, "({index})"),
-        (0, "({index})"),
-        (0, "({index})"),
-        (0, "({index})"),
-    ]
-
-    indexed_modes = [
-        "({index})", # guess
-        "({index})+",
-        "-({index})",
-        "unknown_indexed",
-        "unknown_indexed",
-        "unknown_indexed",
-        "unknown_indexed",
-        "unknown_indexed",
-        "{offset}({index})", # guess
-        "{offset}({index})+",
-        "{offset}-({index})",
-        "unknown_indexed",
-        "unknown_indexed",
-        "unknown_indexed",
-        "unknown_indexed",
-        "unknown_indexed",
-    ]
-
-    offset_byte = memory[pc]
-    addr = f"{struct.unpack_from('>H', memory[pc:])[0]:#06x}"
-
-    if address_mode == 0 and not word:
-        addr = addr[:4]
+    reg = Reg16Ref(reg) if word else Reg8Ref(reg)
 
     format = ["st", "ld"][load]
 
-    size, addr_format = address_modes[address_mode]
-    if address_mode == 5:
-        indexed_mode = memory[pc] & 0x0f
-        addr_format = indexed_modes[indexed_mode]
-        if indexed_mode & 8 != 0:
-            offset_byte = memory[pc+1]
-            size += 1
-
-    offset = f"{struct.unpack_from('b', struct.pack('B', offset_byte))[0]:+#04x}"
-
-    format = f"{format} {reg_name}, {addr_format}"
-    pc += size
-
     bytes = memory[orig_pc:pc]
-    return InstructionMatch(orig_pc, QuickInstuction(format), bytes, {
-        "reg": reg_name,
-        "index": index_name,
-        "addr": addr,
-        "offset": offset,
-    })
-
-
+    return InstructionMatch(orig_pc, BasicCpu6Inst(format, reg, operand), bytes)
 
 # 00
 control_instructions = [
