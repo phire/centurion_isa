@@ -103,7 +103,8 @@ if __name__ == "__main__":
                 while len(data) > 1:
                     fixup = struct.unpack_from(">H", data)[0]
                     data = data[2:]
-                    print(f"  {fixup:#06x} = {addr:#06x}")
+                    # fixups add addr to the value currently at the given fixup address
+                    print(f"  {fixup:#06x} += {addr:#06x}")
             else:
                 raise Exception(f"Unknown section type {type}")
     if sys.argv[1] == "verify":

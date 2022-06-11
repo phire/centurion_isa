@@ -839,12 +839,14 @@ if __name__ == "__main__":
             if type == 0:
                 memory = memory[:addr] + data + memory[addr + len(data):]
             elif type == 1:
-                fixup_data = struct.pack(">H", addr)
                 while len(data) > 1:
                     fixup = struct.unpack_from(">H", data)[0]
-                    memory = memory[:fixup] + fixup_data + memory[fixup + 2:]
+                    old_value = struct.unpack(">H", memory[fixup:fixup+2])[0]
+                    new_value = struct.pack(">H", (old_value + addr) & 0xffff)
+                    memory = memory[:fixup] + new_value + memory[fixup + 2:]
                     data = data[2:]
                 entry_points.append(addr)
+                memory_addr_info[addr].label = f"R_{addr:04x}"
 
     if args["annotations"]:
         for ann_filename in args["annotations"]:
