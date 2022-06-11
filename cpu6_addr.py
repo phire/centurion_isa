@@ -11,6 +11,9 @@ class DirectRef(AddrRef):
     def __str__(self):
         return f"[{self.addr:#06x}]"
 
+    def getValue(self):
+        return self.addr
+
 class IndexedRef(AddrRef):
     def __init__(self, base, disp=0):
         self.base = base
@@ -50,6 +53,9 @@ class PcDisplacementRef(AddrRef):
 
     def __str__(self):
         return f"[pc + {self.disp:#04x}]"
+
+    def getValue(self):
+        return self.pc + self.disp
 
 class IndirectRef(AddrRef):
     def __init__(self, ref):

@@ -1,6 +1,6 @@
 from generic import *
 from cpu6_regs import RegNames16, RegNames8, Reg16Ref, Reg8Ref
-from cpu6_addr import Cpu6AddrMode, Cpu4AddrMode
+from cpu6_addr import Cpu6AddrMode, Cpu4AddrMode, LiteralRef
 import struct
 
 class BasicCpu6Inst:
@@ -14,6 +14,21 @@ class BasicCpu6Inst:
         if self.src == None:
             return f"{self.mnemonic} {self.dst}"
         return f"{self.mnemonic} {self.dst}, {self.src}"
+
+class ControlFlowInst:
+    def __init__(self, mnemonic, src):
+        self.mnemonic = mnemonic
+        self.src = src
+
+    @staticmethod
+    def newpc(next_pc, instruction, **kwargs):
+        ret = [next_pc] if instruction.mnemonic == "call" else []
+        try: ret += [instruction.src.getValue()]
+        except AttributeError: pass
+        return ret
+
+    def to_string(self, dict):
+        return f"{self.mnemonic} {self.src}"
 
 OPs = [
     "inc", "dec", "clr", "not", "srl", "sll", "rrc", "rlc",
@@ -173,9 +188,6 @@ def MemoryMatch(pc, memory):
     pc += 1
 
     if inst == 0xf6:
-        load = True
-        word = False
-
         bytetwo = memory[pc]
         offset_byte = memory[pc+1]
         pc += 2
@@ -204,7 +216,8 @@ def MemoryMatch(pc, memory):
         # bit 6: Accumulator select - 0 for "A", 1 for "B"
         reg = 0 if inst & 0x40 == 0 else 2
         # bit 5: Direction - 0 for read, 1 for write
-        load = inst & 0x20 == 0
+        mode = 'ld' if inst & 0x20 == 0 else 'st'
+
         # bit 4: Length - 0 for byte, 1 for word
         word = inst & 0x10 != 0
         if not word:
@@ -215,8 +228,11 @@ def MemoryMatch(pc, memory):
         # Instructions that operate on X
         reg = 4
         word = True
-
-        load = inst & 0x08 == 0
+        mode = 'ld' if inst & 0x08 == 0 else 'st'
+        address_mode = inst & 0x07
+    elif inst & 0xf0 == 0x70:
+        word = True
+        mode = 'jmp' if inst & 0x08 == 0 else 'call'
         address_mode = inst & 0x07
     else:
         return None
@@ -225,12 +241,14 @@ def MemoryMatch(pc, memory):
     if operand is None:
         return None
 
-    reg = Reg16Ref(reg) if word else Reg8Ref(reg)
-
-    format = ["st", "ld"][load]
-
     bytes = memory[orig_pc:pc]
-    return InstructionMatch(orig_pc, BasicCpu6Inst(format, reg, operand), bytes)
+    if mode in ['ld', 'st']:
+        reg = Reg16Ref(reg) if word else Reg8Ref(reg)
+        return InstructionMatch(orig_pc, BasicCpu6Inst(mode, reg, operand), bytes)
+
+    if isinstance(operand, LiteralRef):
+        return None
+    return InstructionMatch(orig_pc, ControlFlowInst(mode, operand), bytes)
 
 # 00
 control_instructions = [
@@ -327,25 +345,6 @@ instructions  = [
     I("01011110", "mov {RegNames16[4]}, {RegNames16[0]}"),
     I("01011111", "mov {RegNames16[5]}, {RegNames16[0]}"),
 
-# 60
-    # ld.w RT, .... instruction are here. Handled by Memory()
-
-# 70
-
-    B("01110001 NNNNNNNN NNNNNNNN", "jump #{N:#06x}", abolsute_branch_uncondtionional),
-    B("01110010 NNNNNNNN NNNNNNNN", "jump @({N:#06x})", kill_branch),
-    B("01110011 SSSSSSSS", "jump (PC{S:+#05x})", relative_branch_unconditional),
-    B("01110101 NNNNNNNN", "jump (A + {N:#04x})", kill_branch),
-    B("01110110", "syscall", kill_branch), # "Return to interrupt level 15"
-
-# 78
-
-    B("01111001 NNNNNNNN NNNNNNNN", "call #{N:#06x}", absolute_call),
-    I("01111010 NNNNNNNN NNNNNNNN", "call @({N:#06x})"),
-    B("01111100 SSSSSSSS", "call @(PC{S:+#05x})", indirect_relative_call),
-    B("01111011 SSSSSSSS", "call (PC{S:+#05x})", relative_call),
-    I("01111101 NNNNNNNN", "call (A + {N:#04x})"),
-
     I("xxxxxxxx"),
 ]
 
@@ -376,8 +375,6 @@ def disassemble_instruction(memory, pc):
                 case _:
                     if alu := AluMatch(pc, memory):
                         return alu
-        case 7:
-            pass
         case _:
             if mem := MemoryMatch(pc, memory):
                 return mem

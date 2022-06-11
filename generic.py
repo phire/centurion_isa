@@ -136,6 +136,7 @@ class InstructionMatch:
             "next_pc": self.next_pc[0],
             "RegNames8": RegNames8,
             "RegNames16": RegNames16,
+            "instruction": instruction,
         }
 
         if self.instruction.newpc is not None:

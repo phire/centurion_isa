@@ -27,7 +27,6 @@ def recursive_disassemble(memory, entry):
         if len(info.next_pc) == 0:
             return
 
-
         for next_pc in info.next_pc[1:]:
             if memory_addr_info[next_pc].label == None:
                 memory_addr_info[next_pc].label = f"L_{next_pc:04x}"
