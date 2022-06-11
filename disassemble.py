@@ -943,6 +943,7 @@ if __name__ == "__main__":
     all_args.add_argument("-s", "--start", required=False, help="starting address of this file")
     all_args.add_argument("-t", "--type", required=False, help="type of file", default="binary")
     all_args.add_argument("-a", "--annotations", action='append', help="annotations file")
+    all_args.add_argument("--script", action='append', help="script file")
     args = vars(all_args.parse_args())
 
     filename = args["input"]
@@ -976,12 +977,23 @@ if __name__ == "__main__":
                     new_value = struct.pack(">H", (old_value + addr) & 0xffff)
                     memory = memory[:fixup] + new_value + memory[fixup + 2:]
                     data = data[2:]
+                    #memory_addr_info[fixup].label = f"F_{fixup:04x}"
                 entry_points.append(addr)
                 memory_addr_info[addr].label = f"R_{addr:04x}"
 
     if args["annotations"]:
         for ann_filename in args["annotations"]:
             read_annotations(ann_filename, memory)
+
+    if args["script"]:
+        for script_filename in args["script"]:
+            with open(script_filename, "r") as f:
+                ast = compile(f.read(), script_filename, 'exec')
+            script_globals = {
+                'memory': memory,
+                'memory_addr_info': memory_addr_info,
+                'entry_points': entry_points}
+            exec(ast, script_globals, {})
 
     disassemble(memory)
 
