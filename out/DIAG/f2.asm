@@ -164,7 +164,7 @@ L_88f6:
 88f8:    00           HALT
 
 L_88f9:
-88f9:    2a           clr! AL
+88f9:    2a           clr! AL, #0
 88fa:    11 01        bnc L_88fd
 88fc:    00           HALT
 
@@ -185,7 +185,7 @@ L_8906:
 8908:    00           HALT
 
 L_8909:
-8909:    2b           not! AL
+8909:    2b           not! AL, #0
 890a:    13 01        bnn L_890d
 890c:    00           HALT
 
@@ -204,7 +204,7 @@ L_8913:
 L_8916:
 8916:    06           sl
 8917:    02           sf
-8918:    22 70        clr YL, 0
+8918:    22 70        clr YL, #0
 891a:    11 01        bnc L_891d
 891c:    00           HALT
 
@@ -217,7 +217,7 @@ L_8920:
 8922:    00           HALT
 
 L_8923:
-8923:    20 70        inc YL, 1
+8923:    20 70        inc YL, #1
 8925:    11 01        bnc L_8928
 8927:    00           HALT
 
@@ -230,7 +230,7 @@ L_892b:
 892d:    00           HALT
 
 L_892e:
-892e:    21 70        dec YL, 1
+892e:    21 70        dec YL, #1
 8930:    13 01        bnn L_8933
 8932:    00           HALT
 
@@ -243,7 +243,7 @@ L_8936:
 8938:    00           HALT
 
 L_8939:
-8939:    21 70        dec YL, 1
+8939:    21 70        dec YL, #1
 893b:    13 01        bnn L_893e
 893d:    00           HALT
 
@@ -256,7 +256,7 @@ L_8941:
 8943:    00           HALT
 
 L_8944:
-8944:    20 70        inc YL, 1
+8944:    20 70        inc YL, #1
 8946:    13 01        bnn L_8949
 8948:    00           HALT
 
@@ -271,8 +271,8 @@ L_894c:
 L_894f:
 894f:    06           sl
 8950:    02           sf
-8951:    22 60        clr YH, 0	 ; Using 60 in the operand means the following branch will be skipped
-                               	 ; if 22 doesn't consume it's operand
+8951:    22 60        clr YH, #0	 ; Using 60 in the operand means the following branch will be skipped
+                                	 ; if 22 doesn't consume it's operand
 8953:    11 01        bnc L_8956
 8955:    00           HALT
 
@@ -285,7 +285,7 @@ L_8959:
 895b:    00           HALT
 
 L_895c:
-895c:    20 60        inc YH, 1
+895c:    20 60        inc YH, #1
 895e:    11 01        bnc L_8961
 8960:    00           HALT
 
@@ -298,7 +298,7 @@ L_8964:
 8966:    00           HALT
 
 L_8967:
-8967:    21 60        dec YH, 1
+8967:    21 60        dec YH, #1
 8969:    13 01        bnn L_896c
 896b:    00           HALT
 
@@ -311,7 +311,7 @@ L_896f:
 8971:    00           HALT
 
 L_8972:
-8972:    21 60        dec YH, 1
+8972:    21 60        dec YH, #1
 8974:    13 01        bnn L_8977
 8976:    00           HALT
 
@@ -324,7 +324,7 @@ L_897a:
 897c:    00           HALT
 
 L_897d:
-897d:    20 60        inc YH, 1
+897d:    20 60        inc YH, #1
 897f:    13 01        bnn L_8982
 8981:    00           HALT
 
@@ -339,7 +339,7 @@ L_8985:
 L_8988:
 8988:    06           sl
 8989:    02           sf
-898a:    32 20        clr B, 0
+898a:    32 20        clr B, #0
 898c:    11 01        bnc L_898f
 898e:    00           HALT
 
@@ -352,7 +352,7 @@ L_8992:
 8994:    00           HALT
 
 L_8995:
-8995:    30 20        inc B, 1
+8995:    30 20        inc B, #1
 8997:    11 01        bnc L_899a
 8999:    00           HALT
 
@@ -365,7 +365,7 @@ L_899d:
 899f:    00           HALT
 
 L_89a0:
-89a0:    21 30        dec BL, 1
+89a0:    21 30        dec BL, #1
 89a2:    13 01        bnn L_89a5
 89a4:    00           HALT
 
@@ -378,7 +378,7 @@ L_89a8:
 89aa:    00           HALT
 
 L_89ab:
-89ab:    31 20        dec B, 1
+89ab:    31 20        dec B, #1
 89ad:    13 01        bnn L_89b0
 89af:    00           HALT
 
@@ -391,7 +391,7 @@ L_89b3:
 89b5:    00           HALT
 
 L_89b6:
-89b6:    30 20        inc B, 1
+89b6:    30 20        inc B, #1
 89b8:    13 01        bnn L_89bb
 89ba:    00           HALT
 
@@ -404,8 +404,8 @@ L_89be:
 89c0:    00           HALT
 
 L_89c1:
-89c1:    22 b0        clr SL, 0
-89c3:    23 b0        not SL, 0
+89c1:    22 b0        clr SL, #0
+89c3:    23 b0        not SL, #0
 89c5:    11 01        bnc L_89c8
 89c7:    00           HALT
 
@@ -418,7 +418,7 @@ L_89cb:
 89cd:    00           HALT
 
 L_89ce:
-89ce:    26 b0        rrc SL, 1
+89ce:    26 b0        rrc SL, #1
 89d0:    10 01        bc L_89d3
 89d2:    00           HALT
 
@@ -431,7 +431,7 @@ L_89d6:
 89d8:    00           HALT
 
 L_89d9:
-89d9:    25 b0        sll SL, 1
+89d9:    25 b0        sll SL, #1
 89db:    12 01        bn L_89de
 89dd:    00           HALT
 
@@ -444,12 +444,12 @@ L_89e1:
 89e3:    00           HALT
 
 L_89e4:
-89e4:    20 b0        inc SL, 1
+89e4:    20 b0        inc SL, #1
 89e6:    13 01        bnn L_89e9
 89e8:    00           HALT
 
 L_89e9:
-89e9:    23 b0        not SL, 0
+89e9:    23 b0        not SL, #0
 89eb:    13 01        bnn L_89ee
 89ed:    00           HALT
 
@@ -462,8 +462,8 @@ L_89f1:
 89f3:    00           HALT
 
 L_89f4:
-89f4:    23 b0        not SL, 0
-89f6:    24 b0        srl SL, 1
+89f4:    23 b0        not SL, #0
+89f6:    24 b0        srl SL, #1
 89f8:    10 01        bc L_89fb
 89fa:    00           HALT
 
@@ -476,7 +476,7 @@ L_89fe:
 8a00:    00           HALT
 
 L_8a01:
-8a01:    27 b0        rlc SL, 1
+8a01:    27 b0        rlc SL, #1
 8a03:    13 01        bnn L_8a06
 8a05:    00           HALT
 
@@ -489,7 +489,7 @@ L_8a09:
 8a0b:    00           HALT
 
 L_8a0c:
-8a0c:    23 b0        not SL, 0
+8a0c:    23 b0        not SL, #0
 8a0e:    14 01        bz L_8a11
 8a10:    00           HALT
 
@@ -498,8 +498,8 @@ L_8a11:
 8a13:    00           HALT
 
 L_8a14:
-8a14:    32 60        clr Y, 0
-8a16:    33 60        not Y, 0
+8a14:    32 60        clr Y, #0
+8a16:    33 60        not Y, #0
 8a18:    13 01        bnn L_8a1b
 8a1a:    00           HALT
 
@@ -512,7 +512,7 @@ L_8a1e:
 8a20:    00           HALT
 
 L_8a21:
-8a21:    36 60        rrc Y, 1
+8a21:    36 60        rrc Y, #1
 8a23:    10 01        bc L_8a26
 8a25:    00           HALT
 
@@ -525,7 +525,7 @@ L_8a29:
 8a2b:    00           HALT
 
 L_8a2c:
-8a2c:    35 60        sll Y, 1
+8a2c:    35 60        sll Y, #1
 8a2e:    12 01        bn L_8a31
 8a30:    00           HALT
 
@@ -538,12 +538,12 @@ L_8a34:
 8a36:    00           HALT
 
 L_8a37:
-8a37:    30 60        inc Y, 1
+8a37:    30 60        inc Y, #1
 8a39:    13 01        bnn L_8a3c
 8a3b:    00           HALT
 
 L_8a3c:
-8a3c:    33 60        not Y, 0
+8a3c:    33 60        not Y, #0
 8a3e:    13 01        bnn L_8a41
 8a40:    00           HALT
 
@@ -556,8 +556,8 @@ L_8a44:
 8a46:    00           HALT
 
 L_8a47:
-8a47:    33 60        not Y, 0
-8a49:    34 60        srl Y, 1
+8a47:    33 60        not Y, #0
+8a49:    34 60        srl Y, #1
 8a4b:    10 01        bc L_8a4e
 8a4d:    00           HALT
 
@@ -570,7 +570,7 @@ L_8a51:
 8a53:    00           HALT
 
 L_8a54:
-8a54:    37 60        rlc Y, 1
+8a54:    37 60        rlc Y, #1
 8a56:    13 01        bnn L_8a59
 8a58:    00           HALT
 
@@ -583,7 +583,7 @@ L_8a5c:
 8a5e:    00           HALT
 
 L_8a5f:
-8a5f:    33 60        not Y, 0
+8a5f:    33 60        not Y, #0
 8a61:    14 01        bz L_8a64
 8a63:    00           HALT
 
@@ -592,7 +592,7 @@ L_8a64:
 8a66:    00           HALT
 
 L_8a67:
-8a67:    32 40        clr X, 0
+8a67:    32 40        clr X, #0
 8a69:    14 01        bz L_8a6c
 8a6b:    00           HALT
 
@@ -617,15 +617,15 @@ L_8a78:
 8a7b:    00           HALT
 
 L_8a7c:
-8a7c:    3a           clr! A
-8a7d:    3b           not! A
-8a7e:    3c           srl! A
-8a7f:    39           dec! A
-8a80:    3d           sll! A
-8a81:    38           inc! A
-8a82:    38           inc! A
-8a83:    38           inc! A
-8a84:    38           inc! A
+8a7c:    3a           clr! A, #0
+8a7d:    3b           not! A, #0
+8a7e:    3c           srl! A, #1
+8a7f:    39           dec! A, #1
+8a80:    3d           sll! A, #1
+8a81:    38           inc! A, #1
+8a82:    38           inc! A, #1
+8a83:    38           inc! A, #1
+8a84:    38           inc! A, #1
 8a85:    14 01        bz L_8a88
 8a87:    00           HALT
 
@@ -638,7 +638,7 @@ L_8a8b:
 8a8d:    00           HALT
 
 L_8a8e:
-8a8e:    3a           clr! A
+8a8e:    3a           clr! A, #0
 8a8f:    80 aa        ld AL, #0xaa
 8a91:    11 01        bnc L_8a94
 8a93:    00           HALT
@@ -652,7 +652,7 @@ L_8a97:
 8a99:    00           HALT
 
 L_8a9a:
-8a9a:    25 10        sll AL, 1
+8a9a:    25 10        sll AL, #1
 8a9c:    10 01        bc L_8a9f
 8a9e:    00           HALT
 
@@ -683,12 +683,12 @@ L_8ab2:
 8ab4:    00           HALT
 
 L_8ab5:
-8ab5:    25 30        sll BL, 1
+8ab5:    25 30        sll BL, #1
 8ab7:    14 01        bz L_8aba
 8ab9:    00           HALT
 
 L_8aba:
-8aba:    3a           clr! A
+8aba:    3a           clr! A, #0
 8abb:    90 aa aa     ld A, #0xaaaa
 8abe:    11 01        bnc L_8ac1
 8ac0:    00           HALT
@@ -702,7 +702,7 @@ L_8ac4:
 8ac6:    00           HALT
 
 L_8ac7:
-8ac7:    35 00        sll A, 1
+8ac7:    35 00        sll A, #1
 8ac9:    10 01        bc L_8acc
 8acb:    00           HALT
 
@@ -733,14 +733,14 @@ L_8ae1:
 8ae3:    00           HALT
 
 L_8ae4:
-8ae4:    35 40        sll X, 1
+8ae4:    35 40        sll X, #1
 8ae6:    14 01        bz L_8ae9
 8ae8:    00           HALT
 
 L_8ae9:
 8ae9:    80 aa        ld AL, #0xaa
 8aeb:    c0 aa        ld BL, #0xaa
-8aed:    41 13        sub* BL, AL
+8aed:    41 13        sub BL, AL
 8aef:    14 01        bz L_8af2
 8af1:    00           HALT
 
@@ -763,7 +763,7 @@ L_8aff:
 8b01:    00           HALT
 
 L_8b02:
-8b02:    2b           not! AL
+8b02:    2b           not! AL, #0
 8b03:    14 01        bz L_8b06
 8b05:    00           HALT
 
@@ -778,7 +778,7 @@ L_8b0d:
 8b0f:    00           HALT
 
 L_8b10:
-8b10:    2b           not! AL
+8b10:    2b           not! AL, #0
 8b11:    14 01        bz L_8b14
 8b13:    00           HALT
 
@@ -828,7 +828,7 @@ L_8b3f:
 8b41:    00           HALT
 
 L_8b42:
-8b42:    3b           not! A
+8b42:    3b           not! A, #0
 8b43:    14 01        bz L_8b46
 8b45:    00           HALT
 
@@ -843,7 +843,7 @@ L_8b4e:
 8b50:    00           HALT
 
 L_8b51:
-8b51:    3b           not! A
+8b51:    3b           not! A, #0
 8b52:    14 01        bz L_8b55
 8b54:    00           HALT
 
@@ -927,7 +927,7 @@ L_8bb8:
 8bba:    00           HALT
 
 L_8bbb:
-8bbb:    33 20        not B, 0
+8bbb:    33 20        not B, #0
 8bbd:    14 01        bz L_8bc0
 8bbf:    00           HALT
 
@@ -991,7 +991,7 @@ L_8c08:
 8c08:    61 00 2c     ld X, [0x002c]
 8c0b:    54 42        xor B, X
 8c0d:    58           add! B, A
-8c0e:    33 20        not B, 0
+8c0e:    33 20        not B, #0
 8c10:    14 01        bz L_8c13
 8c12:    00           HALT
 
@@ -1024,7 +1024,7 @@ L_8c45:
 
 L_8c4b:
 8c4b:    54 20        xor A, B
-8c4d:    3b           not! A
+8c4d:    3b           not! A, #0
 8c4e:    14 01        bz L_8c51
 8c50:    00           HALT
 
@@ -1040,7 +1040,7 @@ L_8c56:
 
 L_8c5b:
 8c5b:    54 20        xor A, B
-8c5d:    3b           not! A
+8c5d:    3b           not! A, #0
 8c5e:    14 01        bz L_8c61
 8c60:    00           HALT
 
@@ -1070,7 +1070,7 @@ L_8c73:
 
 L_8c7e:
 8c7e:    95 41        ld A, [X++]
-8c80:    3b           not! A
+8c80:    3b           not! A, #0
 8c81:    14 01        bz L_8c84
 8c83:    00           HALT
 
@@ -1078,7 +1078,7 @@ L_8c84:
 8c84:    95 41        ld A, [X++]
 8c86:    d5 41        ld B, [X++]
 8c88:    54 20        xor A, B
-8c8a:    3b           not! A
+8c8a:    3b           not! A, #0
 8c8b:    14 01        bz L_8c8e
 8c8d:    00           HALT
 
@@ -1091,7 +1091,7 @@ L_8c92:
 8c92:    95 42        ld A, [--X]
 8c94:    d5 42        ld B, [--X]
 8c96:    54 20        xor A, B
-8c98:    3b           not! A
+8c98:    3b           not! A, #0
 8c99:    14 01        bz L_8c9c
 8c9b:    00           HALT
 
@@ -1107,7 +1107,7 @@ L_8ca8:
 8ca8:    95 28 fc     ld A, [B + -0x004]
 8cab:    65 29 02     ld X, [B++ + 0x0002]
 8cae:    50 40        add A, X
-8cb0:    3b           not! A
+8cb0:    3b           not! A, #0
 8cb1:    14 01        bz L_8cb4
 8cb3:    00           HALT
 
@@ -1115,7 +1115,7 @@ L_8cb4:
 8cb4:    99           ld A, [B]
 8cb5:    65 2a fc     ld X, [--B + -0x004]
 8cb8:    54 40        xor A, X
-8cba:    3b           not! A
+8cba:    3b           not! A, #0
 8cbb:    14 01        bz L_8cbe
 8cbd:    00           HALT
 
@@ -1129,7 +1129,7 @@ L_8cbe:
 
 L_8cca:
 8cca:    95 45        ld A, @[X++]
-8ccc:    3b           not! A
+8ccc:    3b           not! A, #0
 8ccd:    14 01        bz L_8cd0
 8ccf:    00           HALT
 
@@ -1137,7 +1137,7 @@ L_8cd0:
 8cd0:    95 45        ld A, @[X++]
 8cd2:    d5 45        ld B, @[X++]
 8cd4:    54 20        xor A, B
-8cd6:    3b           not! A
+8cd6:    3b           not! A, #0
 8cd7:    14 01        bz L_8cda
 8cd9:    00           HALT
 
@@ -1145,7 +1145,7 @@ L_8cda:
 8cda:    95 46        ld A, @[--X]
 8cdc:    d5 46        ld B, @[--X]
 8cde:    54 20        xor A, B
-8ce0:    3b           not! A
+8ce0:    3b           not! A, #0
 8ce1:    14 01        bz L_8ce4
 8ce3:    00           HALT
 
@@ -1154,7 +1154,7 @@ L_8ce4:
 8ce7:    95 44        ld A, @[X]
 8ce9:    d5 4c fe     ld B, @[X + -0x002]
 8cec:    54 20        xor A, B
-8cee:    3b           not! A
+8cee:    3b           not! A, #0
 8cef:    14 01        bz L_8cf2
 8cf1:    00           HALT
 
@@ -1162,7 +1162,7 @@ L_8cf2:
 8cf2:    95 4c fc     ld A, @[X + -0x004]
 8cf5:    d5 4d 02     ld B, @[X++ + 0x0002]
 8cf8:    50 20        add A, B
-8cfa:    3b           not! A
+8cfa:    3b           not! A, #0
 8cfb:    14 01        bz L_8cfe
 8cfd:    00           HALT
 
@@ -1170,7 +1170,7 @@ L_8cfe:
 8cfe:    95 44        ld A, @[X]
 8d00:    d5 4e fc     ld B, @[--X + -0x004]
 8d03:    54 20        xor A, B
-8d05:    3b           not! A
+8d05:    3b           not! A, #0
 8d06:    14 01        bz L_8d09
 8d08:    00           HALT
 
@@ -1252,7 +1252,7 @@ L_8d65:
 
 L_8d70:
 8d70:    81 f2 00     ld AL, [0xf200]
-8d73:    2c           srl! AL
+8d73:    2c           srl! AL, #1
 8d74:    11 18        bnc L_8d8e
 8d76:    81 f2 01     ld AL, [0xf201]
 8d79:    c0 80        ld BL, #0x80
@@ -1297,7 +1297,7 @@ Entry_CPU6_MAPPING_RAM_TEST:
 8dbe:    50 80        add A, Z
 8dc0:    7d 00        call [A]
 8dc2:    "\x1b\x1c\x0cCPU-6 MAPPING RAM TEST, CONTROL-C TO EXIT\r\n\0"
-8df1:    22 32        clr BL, 2	 ; 0 for CPU5, non-zero for CPU6
+8df1:    22 32        clr BL, #2	 ; 0 for CPU5, non-zero for CPU6
 8df3:    15 3a        bnz MappingRamTestLoop
 8df5:    90 07 cc     ld A, #0x07cc
 8df8:    50 80        add A, Z
@@ -1337,7 +1337,7 @@ MappingRamTestLoop:
 8e57:    7b 73        call [L_8ecc:+0x73]
 8e59:    a1 f1 0a     st AL, [0xf10a]
 8e5c:    81 f2 00     ld AL, [0xf200]
-8e5f:    2c           srl! AL
+8e5f:    2c           srl! AL, #1
 8e60:    11 cd        bnc MappingRamTestLoop
 
 ReturnAddress:
@@ -1352,14 +1352,14 @@ ReturnAddress:
 8e73:    75 00        jmp [A]
 
 L_8e75:
-8e75:    3a           clr! A
+8e75:    3a           clr! A, #0
 8e76:    85 41        ld AL, [X++]
-8e78:    35 04        sll A, 5
-8e7a:    20 00        inc AH, 1
+8e78:    35 04        sll A, #1
+8e7a:    20 00        inc AH, #1
 8e7c:    7e 45        push
 8e7e:    5c           mov Y, A
 8e7f:    5e           mov Z, A
-8e80:    20 80        inc ZH, 1
+8e80:    20 80        inc ZH, #1
 8e82:    60 00 20     ld X, #0x0020
 
 nextMemoryLcation:
@@ -1367,7 +1367,7 @@ nextMemoryLcation:
 
 nextByteValue:
 8e88:    8b           ld AL, [Y]	 ; EF = 0x120 or 0x140 etc
-8e89:    28           inc! AL
+8e89:    28           inc! AL, #1
 8e8a:    ab           st AL, [Y]
 8e8b:    ac           st AL, [Z]	 ; HL is EF+0x100
 8e8c:    7b 76        call [ReadAllPages:+0x76]
@@ -1379,10 +1379,10 @@ nextByteValue:
 8e95:    02           sf
 8e96:    00           HALT
 8e97:    15 69        bnz L_8f02	 ; Branch if parity Error
-8e99:    31 20        dec B, 1	 ; Test every single byte pattern
+8e99:    31 20        dec B, #1	 ; Test every single byte pattern
 8e9b:    15 eb        bnz nextByteValue
-8e9d:    30 60        inc Y, 1
-8e9f:    30 80        inc Z, 1
+8e9d:    30 60        inc Y, #1
+8e9f:    30 80        inc Z, #1
 8ea1:    3f           dec X
 8ea2:    15 e1        bnz nextMemoryLcation
 8ea4:    7f 45        pop
@@ -1401,7 +1401,7 @@ L_8ea7:
 
 L_8eb3:
 8eb3:    a5 a2        st AL, [--S]
-8eb5:    2a           clr! AL
+8eb5:    2a           clr! AL, #0
 8eb6:    a5 a2        st AL, [--S]
 8eb8:    6d a2        st X, [--S]
 8eba:    a5 a2        st AL, [--S]
@@ -1428,7 +1428,7 @@ L_8ecc:
 8ed3:    f8           st B, [A]
 8ed4:    03           rf
 8ed5:    00           HALT
-8ed6:    2a           clr! AL
+8ed6:    2a           clr! AL, #0
 8ed7:    73 da        jmp [L_8eb3:-0x26]
 
 WriteAllPages:
@@ -1441,7 +1441,7 @@ WriteAllPages:
 L_8ee0:
 8ee0:    f9           st B, [B]
 8ee1:    01           nop
-8ee2:    20 2e        inc BH, 15
+8ee2:    20 2e        inc BH, #1
 8ee4:    1c fa        bs3 L_8ee0
 
 L_8ee6:
@@ -1476,7 +1476,7 @@ ReadAllPages:
 8f09:    2e 0c        ?? r12, r0
 8f0b:    f9           st B, [B]
 8f0c:    01           nop
-8f0d:    20 2e        inc BH, 15
+8f0d:    20 2e        inc BH, #1
 8f0f:    0c           unknown
 8f10:    fa           st B, [X]
 8f11:    01           nop
@@ -1516,7 +1516,7 @@ L_8f2d:
 
 Entry_ROM_SELF_TEST:
 8f5f:    55 86        mov Y, Z
-8f61:    3a           clr! A
+8f61:    3a           clr! A, #0
 
 ChecksumLoop:
 8f62:    85 61        ld AL, [Y++]	 ; Load Byte via base+index, post-increment index
@@ -1540,7 +1540,7 @@ L_8f8a:
 
 WaitForKey:
 8f9b:    81 f2 00     ld AL, [0xf200]
-8f9e:    2c           srl! AL
+8f9e:    2c           srl! AL, #1
 8f9f:    11 fa        bnc WaitForKey
 8fa1:    81 f2 01     ld AL, [0xf201]
 8fa4:    75 40        jmp [X]
@@ -1554,8 +1554,8 @@ ChecksumFail:
 
 WriteString:
 8fcc:    81 f2 00     ld AL, [0xf200]
-8fcf:    2c           srl! AL
-8fd0:    2c           srl! AL
+8fcf:    2c           srl! AL, #1
+8fd0:    2c           srl! AL, #1
 8fd1:    11 f9        bnc WriteString
 8fd3:    85 41        ld AL, [X++]
 8fd5:    15 01        bnz L_8fd8

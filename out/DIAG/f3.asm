@@ -41,15 +41,15 @@ L_909f:
 
 WriteByte:
 90a3:    c1 f2 00     ld BL, [0xf200]
-90a6:    24 30        srl BL, 1
-90a8:    24 30        srl BL, 1
+90a6:    24 30        srl BL, #1
+90a8:    24 30        srl BL, #1
 90aa:    11 f7        bnc WriteByte
 90ac:    a1 f2 01     st AL, [0xf201]
 90af:    09           ret
 
 ReadChar:
 90b0:    81 f2 00     ld AL, [0xf200]
-90b3:    2c           srl! AL
+90b3:    2c           srl! AL, #1
 90b4:    11 fa        bnc ReadChar
 90b6:    81 f2 01     ld AL, [0xf201]
 90b9:    09           ret
@@ -67,10 +67,10 @@ WriteHexByte:
 90c7:    c0 f0        ld BL, #0xf0
 90c9:    42 31        and AL, BL
 90cb:    07           rl
-90cc:    26 10        rrc AL, 1
-90ce:    2c           srl! AL
-90cf:    2c           srl! AL
-90d0:    2c           srl! AL
+90cc:    26 10        rrc AL, #1
+90ce:    2c           srl! AL, #1
+90cf:    2c           srl! AL, #1
+90d0:    2c           srl! AL, #1
 90d1:    c0 b0        ld BL, #0xb0
 90d3:    40 31        add AL, BL
 90d5:    c0 b9        ld BL, #0xb9
@@ -99,7 +99,7 @@ L_90f3:
 FinishTest:
 90f6:    a1 f1 0a     st AL, [0xf10a]
 90f9:    81 f2 00     ld AL, [0xf200]
-90fc:    2c           srl! AL
+90fc:    2c           srl! AL, #1
 90fd:    11 57        bnc L_9156
 90ff:    81 f2 01     ld AL, [0xf201]
 9102:    c0 80        ld BL, #0x80
@@ -140,7 +140,7 @@ PrintCtrlCToExit:
 917f:    09           ret
 
 Init:
-9180:    3a           clr! A
+9180:    3a           clr! A, #0
 9181:    b1 01 08     st A, [0x0108]
 9184:    90 01 e3     ld A, #0x01e3
 9187:    50 80        add A, Z
@@ -173,7 +173,7 @@ Init:
 91ce:    b1 01 1a     st A, [0x011a]
 91d1:    95 41        ld A, [X++]
 91d3:    b1 01 14     st A, [0x0114]
-91d6:    38           inc! A
+91d6:    38           inc! A, #1
 91d7:    b1 01 16     st A, [0x0116]
 91da:    55 40        mov A, X
 91dc:    65 a1        ld X, [S++]
@@ -203,7 +203,7 @@ L_921e:
 921e:    60 03 e8     ld X, #0x03e8
 
 L_9221:
-9221:    2c           srl! AL
+9221:    2c           srl! AL, #1
 9222:    10 2b        bc L_924f
 9224:    0e           dly
 9225:    3f           dec X
@@ -244,8 +244,8 @@ Fn_286:
 
 L_928c:
 928c:    82 01 16     ld AL, @[0x0116]
-928f:    2c           srl! AL
-9290:    2c           srl! AL
+928f:    2c           srl! AL, #1
+9290:    2c           srl! AL, #1
 9291:    11 2d        bnc L_92c0
 9293:    0e           dly
 9294:    3f           dec X
@@ -277,16 +277,16 @@ Entry_FLOPPY_COMMAND_BUFFER_TEST:
 
 L_92d7:
 92d7:    7a 01 06     call @[PrintCtrlCToExit:0x0106]
-92da:    32 60        clr Y, 0
+92da:    32 60        clr Y, #0
 92dc:    60 00 c8     ld X, #0x00c8
 92df:    55 60        mov A, Y
 92e1:    d0 01 1c     ld B, #0x011c
 
 L_92e4:
 92e4:    a5 21        st AL, [B++]
-92e6:    28           inc! AL
-92e7:    28           inc! AL
-92e8:    28           inc! AL
+92e6:    28           inc! AL, #1
+92e7:    28           inc! AL, #1
+92e8:    28           inc! AL, #1
 92e9:    3f           dec X
 92ea:    15 f8        bnz L_92e4
 92ec:    90 ff 37     ld A, #0xff37
@@ -299,7 +299,7 @@ L_92e4:
 92fc:    a2 01 14     st AL, @[0x0114]
 92ff:    7a 01 18     call @[Fn_1e3:0x0118]
 9302:    60 00 e6     ld X, #0x00e6
-9305:    3a           clr! A
+9305:    3a           clr! A, #0
 9306:    d0 01 1c     ld B, #0x011c
 
 L_9309:
@@ -324,12 +324,12 @@ L_932e:
 932e:    85 21        ld AL, [B++]
 9330:    41 01        sub AL, AH
 9332:    15 10        bnz L_9344
-9334:    20 00        inc AH, 1
-9336:    20 00        inc AH, 1
-9338:    20 00        inc AH, 1
+9334:    20 00        inc AH, #1
+9336:    20 00        inc AH, #1
+9338:    20 00        inc AH, #1
 933a:    3f           dec X
 933b:    15 f1        bnz L_932e
-933d:    20 70        inc YL, 1
+933d:    20 70        inc YL, #1
 933f:    7a 01 04     call @[FinishTest:0x0104]
 9342:    02 da        (0x2da)
 
@@ -346,16 +346,16 @@ Entry_CMD_AUX_MEMORY_TEST:
 9372:    7d 00        call [A]
 9374:    f8 08        (0xf808)
 9376:    7a 01 06     call @[PrintCtrlCToExit:0x0106]
-9379:    32 60        clr Y, 0
+9379:    32 60        clr Y, #0
 937b:    60 3f ff     ld X, #0x3fff
 937e:    55 60        mov A, Y
 9380:    d0 01 1c     ld B, #0x011c
 
 L_9383:
 9383:    a5 21        st AL, [B++]
-9385:    28           inc! AL
-9386:    28           inc! AL
-9387:    28           inc! AL
+9385:    28           inc! AL, #1
+9386:    28           inc! AL, #1
+9387:    28           inc! AL, #1
 9388:    3f           dec X
 9389:    15 f8        bnz L_9383
 938b:    90 c0 00     ld A, #0xc000
@@ -367,10 +367,10 @@ L_9383:
 9399:    80 46        ld AL, #0x46
 939b:    a2 01 14     st AL, @[0x0114]
 939e:    7a 01 0c     call @[Fn_286:0x010c]
-93a1:    2a           clr! AL
+93a1:    2a           clr! AL, #0
 93a2:    a2 01 14     st AL, @[0x0114]
 93a5:    7a 01 0c     call @[Fn_286:0x010c]
-93a8:    2a           clr! AL
+93a8:    2a           clr! AL, #0
 93a9:    a2 01 14     st AL, @[0x0114]
 93ac:    7a 01 0c     call @[Fn_286:0x010c]
 93af:    80 3f        ld AL, #0x3f
@@ -380,7 +380,7 @@ L_9383:
 93b9:    a2 01 14     st AL, @[0x0114]
 93bc:    7a 01 18     call @[Fn_1e3:0x0118]
 93bf:    60 3f ff     ld X, #0x3fff
-93c2:    3a           clr! A
+93c2:    3a           clr! A, #0
 93c3:    d0 01 1c     ld B, #0x011c
 
 L_93c6:
@@ -396,10 +396,10 @@ L_93c6:
 93d9:    80 47        ld AL, #0x47
 93db:    a2 01 14     st AL, @[0x0114]
 93de:    7a 01 0c     call @[Fn_286:0x010c]
-93e1:    2a           clr! AL
+93e1:    2a           clr! AL, #0
 93e2:    a2 01 14     st AL, @[0x0114]
 93e5:    7a 01 0c     call @[Fn_286:0x010c]
-93e8:    2a           clr! AL
+93e8:    2a           clr! AL, #0
 93e9:    a2 01 14     st AL, @[0x0114]
 93ec:    7a 01 0c     call @[Fn_286:0x010c]
 93ef:    80 3f        ld AL, #0x3f
@@ -419,13 +419,13 @@ L_940b:
 940d:    bd           st A, [S]
 940e:    41 01        sub AL, AH
 9410:    15 12        bnz L_9424
-9412:    20 00        inc AH, 1
-9414:    20 00        inc AH, 1
-9416:    20 00        inc AH, 1
+9412:    20 00        inc AH, #1
+9414:    20 00        inc AH, #1
+9416:    20 00        inc AH, #1
 9418:    3f           dec X
 9419:    15 f0        bnz L_940b
 941b:    95 a1        ld A, [S++]
-941d:    20 70        inc YL, 1
+941d:    20 70        inc YL, #1
 941f:    7a 01 04     call @[FinishTest:0x0104]
 9422:    03 79        (0x379)
 
@@ -436,7 +436,7 @@ L_9424:
 942c:    7a 01 12     call @[WriteString:0x0112]
 942f:    "*** ERROR, ADDR=\0"
 9440:    95 a1        ld A, [S++]
-9442:    39           dec! A
+9442:    39           dec! A, #1
 9443:    7a 01 10     call @[WriteHexWord:0x0110]
 9446:    7a 01 12     call @[WriteString:0x0112]
 9449:    " EXP=\0"
@@ -487,12 +487,12 @@ L_94a6:
 94b6:    b5 21        st A, [B++]
 94b8:    80 83        ld AL, #0x83
 94ba:    a5 21        st AL, [B++]
-94bc:    3a           clr! A
+94bc:    3a           clr! A, #0
 94bd:    b5 21        st A, [B++]
-94bf:    39           dec! A
+94bf:    39           dec! A, #1
 94c0:    a9           st AL, [B]
-94c1:    38           inc! A
-94c2:    38           inc! A
+94c1:    38           inc! A, #1
+94c2:    38           inc! A, #1
 94c3:    b1 41 b1     st A, [0x41b1]
 
 L_94c6:
@@ -528,8 +528,8 @@ L_9504:
 9511:    d0 03 36     ld B, #0x0336
 9514:    59           sub! B, A
 9515:    15 af        bnz L_94c6
-9517:    3a           clr! A
-9518:    39           dec! A
+9517:    3a           clr! A, #0
+9518:    39           dec! A, #1
 9519:    b1 41 b1     st A, [0x41b1]
 951c:    80 10        ld AL, #0x10
 951e:    a1 41 50     st AL, [0x4150]
@@ -537,7 +537,7 @@ L_9504:
 
 L_9523:
 9523:    91 41 52     ld A, [0x4152]
-9526:    39           dec! A
+9526:    39           dec! A, #1
 9527:    b1 41 52     st A, [0x4152]
 952a:    17 9a        bp L_94c6
 952c:    7a 01 04     call @[FinishTest:0x0104]
@@ -552,10 +552,10 @@ Entry_CMD_READ_TEST:
 953d:    80 41        ld AL, #0x41
 953f:    a2 01 14     st AL, @[0x0114]
 9542:    7a 01 0c     call @[Fn_286:0x010c]
-9545:    2a           clr! AL
+9545:    2a           clr! AL, #0
 9546:    a2 01 14     st AL, @[0x0114]
 9549:    7a 01 0c     call @[Fn_286:0x010c]
-954c:    2a           clr! AL
+954c:    2a           clr! AL, #0
 954d:    a2 01 14     st AL, @[0x0114]
 9550:    7a 01 18     call @[Fn_1e3:0x0118]
 9553:    12 44        bn L_9599
@@ -567,7 +567,7 @@ Entry_CMD_READ_TEST:
 9561:    b5 61        st A, [Y++]
 9563:    80 83        ld AL, #0x83
 9565:    a5 61        st AL, [Y++]
-9567:    3a           clr! A
+9567:    3a           clr! A, #0
 9568:    b5 61        st A, [Y++]
 956a:    80 85        ld AL, #0x85
 956c:    a5 61        st AL, [Y++]
@@ -577,8 +577,8 @@ L_9571:
 9571:    e5 61        st BL, [Y++]
 9573:    90 01 90     ld A, #0x0190
 9576:    b5 61        st A, [Y++]
-9578:    20 30        inc BL, 1
-957a:    21 20        dec BH, 1
+9578:    20 30        inc BL, #1
+957a:    21 20        dec BH, #1
 957c:    15 f3        bnz L_9571
 957e:    80 ff        ld AL, #0xff
 9580:    ab           st AL, [Y]
@@ -621,10 +621,10 @@ L_95a2:
 L_95d0:
 95d0:    91 41 52     ld A, [0x4152]
 95d3:    15 01        bnz L_95d6
-95d5:    38           inc! A
+95d5:    38           inc! A, #1
 
 L_95d6:
-95d6:    3d           sll! A
+95d6:    3d           sll! A, #1
 95d7:    b1 41 52     st A, [0x4152]
 95da:    d0 03 36     ld B, #0x0336
 95dd:    59           sub! B, A
@@ -714,7 +714,7 @@ L_9674:
 
 L_968d:
 968d:    81 41 50     ld AL, [0x4150]
-9690:    29           dec! AL
+9690:    29           dec! AL, #1
 9691:    a1 41 50     st AL, [0x4150]
 9694:    17 a0        bp L_9636
 9696:    7a 01 04     call @[FinishTest:0x0104]
@@ -732,10 +732,10 @@ Entry_FLOPPY_READ_TEST:
 96a7:    80 41        ld AL, #0x41
 96a9:    a2 01 14     st AL, @[0x0114]
 96ac:    7a 01 0c     call @[Fn_286:0x010c]
-96af:    2a           clr! AL
+96af:    2a           clr! AL, #0
 96b0:    a2 01 14     st AL, @[0x0114]
 96b3:    7a 01 0c     call @[Fn_286:0x010c]
-96b6:    2a           clr! AL
+96b6:    2a           clr! AL, #0
 96b7:    a2 01 14     st AL, @[0x0114]
 96ba:    7a 01 18     call @[Fn_1e3:0x0118]
 96bd:    12 3d        bn L_96fc
@@ -751,12 +751,12 @@ L_96d0:
 96d0:    80 88        ld AL, #0x88
 96d2:    a5 61        st AL, [Y++]	 ; 0x88
 96d4:    e5 61        st BL, [Y++]	 ; Sector number
-96d6:    2a           clr! AL	 ; 0
+96d6:    2a           clr! AL, #0	 ; 0
 96d7:    a5 61        st AL, [Y++]
 96d9:    90 01 90     ld A, #0x0190	 ; sector length = 400 bytes
 96dc:    b5 61        st A, [Y++]
-96de:    20 30        inc BL, 1
-96e0:    21 20        dec BH, 1
+96de:    20 30        inc BL, #1
+96e0:    21 20        dec BH, #1
 96e2:    15 ec        bnz L_96d0
 
 L_96e4:
@@ -796,7 +796,7 @@ L_9705:
 
 L_9733:
 9733:    81 41 50     ld AL, [0x4150]	 ; track *= 2
-9736:    2d           sll! AL
+9736:    2d           sll! AL, #1
 9737:    a1 41 50     st AL, [0x4150]
 973a:    c0 4b        ld BL, #0x4b	 ; 75 tracks ???
 973c:    49           sub! BL, AL
@@ -812,7 +812,7 @@ Entry_ROM_SELF_TEST:
 974c:    7d 00        call [A]
 974e:    00 00        (0x0)	 ; Controller base address - not used
 9750:    55 86        mov Y, Z
-9752:    3a           clr! A
+9752:    3a           clr! A, #0
 
 L_9753:
 9753:    85 61        ld AL, [Y++]

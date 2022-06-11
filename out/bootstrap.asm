@@ -46,7 +46,7 @@ fc3f:    49           sub! BL, AL
 fc40:    18 3d        bgt PrintError
 fc42:    d0 0f 00     ld B, #0x0f00
 fc45:    f5 a2        st B, [--S]
-fc47:    32 20        clr B, 0
+fc47:    32 20        clr B, #0
 fc49:    f5 a2        st B, [--S]
 fc4b:    c0 88        ld BL, #0x88
 fc4d:    e5 a2        st BL, [--S]
@@ -56,8 +56,8 @@ fc54:    d0 81 00     ld B, #0x8100
 fc57:    06           sl
 
 LoadFromFFC:
-fc58:    27 30        rlc BL, 1
-fc5a:    29           dec! AL
+fc58:    27 30        rlc BL, #1
+fc5a:    29           dec! AL, #1
 fc5b:    17 fb        bp LoadFromFFC
 fc5d:    f5 a2        st B, [--S]
 fc5f:    2f 14        dma_set_mode 1
@@ -90,8 +90,8 @@ fc90:    73 11        jmp [ReadChar:+0x11]
 
 WriteString:
 fc92:    81 f2 00     ld AL, [0xf200]
-fc95:    2c           srl! AL
-fc96:    2c           srl! AL
+fc95:    2c           srl! AL, #1
+fc96:    2c           srl! AL, #1
 fc97:    11 f9        bnc WriteString
 fc99:    85 41        ld AL, [X++]
 fc9b:    15 01        bnz L_fc9e
@@ -103,7 +103,7 @@ fca1:    73 ef        jmp [WriteString:-0x11]
 
 ReadChar:
 fca3:    84 ee        ld AL, @[pc + -0x12]
-fca5:    2c           srl! AL
+fca5:    2c           srl! AL, #1
 fca6:    11 fb        bnc ReadChar
 fca8:    84 f5        ld AL, @[pc + -0xb]
 fcaa:    c0 80        ld BL, #0x80
@@ -136,7 +136,7 @@ fcc8:    94 2d        ld A, @[pc + 0x2d]
 fcca:    d0 00 10     ld B, #0x0010
 fccd:    5a           and! B, A
 fcce:    14 af        bz PrintError
-fcd0:    3a           clr! A
+fcd0:    3a           clr! A, #0
 fcd1:    b1 f1 41     st A, [0xf141]	 ; HawkSectorAddressReg = (0, 0, 0)
 fcd4:    7b 3b        call [HawkCommand:+0x3b]	 ; HawkCommand(3) - ReturnTrackZero
 fcd6:    03           (0x3)
@@ -171,7 +171,7 @@ fd05:    a1 f8 00     st AL, [0xf800]
 
 L_fd08:
 fd08:    81 f8 01     ld AL, [0xf801]
-fd0b:    29           dec! AL
+fd0b:    29           dec! AL, #1
 fd0c:    15 fa        bnz L_fd08
 fd0e:    84 f6        ld AL, @[pc + -0xa]
 fd10:    09           ret
@@ -182,7 +182,7 @@ fd13:    a1 f1 48     st AL, [0xf148]
 
 WaitForHawkCommand:
 fd16:    84 df        ld AL, @[pc + -0x21]	 ; 0xf144
-fd18:    2c           srl! AL
+fd18:    2c           srl! AL, #1
 fd19:    10 fb        bc WaitForHawkCommand
 fd1b:    09           ret
 
@@ -208,17 +208,17 @@ L_fd35:
 fd35:    a5 81        st AL, [Z++]
 fd37:    80 83        ld AL, #0x83
 fd39:    a5 81        st AL, [Z++]
-fd3b:    3a           clr! A
+fd3b:    3a           clr! A, #0
 fd3c:    b5 81        st A, [Z++]
 fd3e:    80 85        ld AL, #0x85
 fd40:    a5 81        st AL, [Z++]
-fd42:    2a           clr! AL
+fd42:    2a           clr! AL, #0
 
 L_fd43:
 fd43:    a5 81        st AL, [Z++]
 fd45:    d0 01 90     ld B, #0x0190
 fd48:    f5 81        st B, [Z++]
-fd4a:    28           inc! AL
+fd4a:    28           inc! AL, #1
 fd4b:    c0 0e        ld BL, #0x0e
 fd4d:    49           sub! BL, AL
 fd4e:    15 f3        bnz L_fd43
@@ -229,7 +229,7 @@ fd56:    7b 4e        call [CMDWait:+0x4e]
 fd58:    80 41        ld AL, #0x41
 fd5a:    a1 f8 08     st AL, [0xf808]
 fd5d:    0e           dly
-fd5e:    2a           clr! AL
+fd5e:    2a           clr! AL, #0
 fd5f:    a1 f8 08     st AL, [0xf808]
 fd62:    0e           dly
 fd63:    a1 f8 08     st AL, [0xf808]
@@ -237,7 +237,7 @@ fd66:    0e           dly
 fd67:    90 1f 40     ld A, #0x1f40
 fd6a:    2f 00        dma_load_addr A
 fd6c:    51 80        sub A, Z
-fd6e:    3b           not! A
+fd6e:    3b           not! A, #0
 fd6f:    2f 02        dma_load_count A
 fd71:    2f 34        dma_set_mode 3
 fd73:    2f 06        dma_enable
@@ -292,7 +292,7 @@ fdb5:    79 4c 93     call [L_4c93:0x4c93]
 fdb8:    47           unknown
 fdb9:    be           st A, [C]
 fdba:    6d a2        st X, [--S]
-fdbc:    32 40        clr X, 0
+fdbc:    32 40        clr X, #0
 
 L_fdbe:
 fdbe:    79 4c e7     call [L_4ce7:0x4ce7]
@@ -321,8 +321,8 @@ fde2:    80 04        ld AL, #0x04
 
 L_fde4:
 fde4:    07           rl
-fde5:    37 40        rlc X, 1
-fde7:    29           dec! AL
+fde5:    37 40        rlc X, #1
+fde7:    29           dec! AL, #1
 fde8:    18 fa        bgt L_fde4
 fdea:    40 35        add XL, BL
 fdec:    73 d0        jmp [L_fdbe:-0x30]

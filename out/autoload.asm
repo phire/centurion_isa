@@ -6,7 +6,7 @@ ef02:    71 ef c0     jmp [L_efc0:0xefc0]
 L_ef05:
 ef05:    80 01        ld AL, #0x01
 ef07:    1d 01        bs4 L_ef0a
-ef09:    2a           clr! AL
+ef09:    2a           clr! AL, #0
 
 L_ef0a:
 ef0a:    a1 f1 4b     st AL, [0xf14b]
@@ -28,7 +28,7 @@ ef2a:    a1 f1 48     st AL, [0xf148]
 
 L_ef2d:
 ef2d:    81 f1 44     ld AL, [0xf144]
-ef30:    2c           srl! AL
+ef30:    2c           srl! AL, #1
 ef31:    15 cd        bnz L_ef00
 ef33:    10 f8        bc L_ef2d
 ef35:    81 f1 45     ld AL, [0xf145]
@@ -76,12 +76,12 @@ efed:    75 60        jmp [Y]
 L_efef:
 efef:    85 c8 01     ld AL, [C + 0x0001]
 eff2:    16 d7        blt L_efcb
-eff4:    2c           srl! AL
+eff4:    2c           srl! AL, #1
 eff5:    11 03        bnc L_effa
 eff7:    a5 c8 03     st AL, [C + 0x0003]
 
 L_effa:
-effa:    2c           srl! AL
+effa:    2c           srl! AL, #1
 effb:    11 f2        bnc L_efef
 effd:    8e           ld AL, [C]
 effe:    48           add! BL, AL

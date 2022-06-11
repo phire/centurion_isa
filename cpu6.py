@@ -1,19 +1,23 @@
 from generic import *
 from cpu6_regs import RegNames16, RegNames8, Reg16Ref, Reg8Ref
-from cpu6_addr import Cpu6AddrMode, Cpu4AddrMode, LiteralRef
+from cpu6_addr import Cpu6AddrMode, Cpu4AddrMode, LiteralRef, SmallLiteralRef, AluAddrMode
 import struct
 
 class BasicCpu6Inst:
     newpc = None
-    def __init__(self, mnonomic, dst, src):
+    def __init__(self, mnonomic, dst, src=None, src2=None):
         self.mnemonic = mnonomic
         self.dst = dst
         self.src = src
+        self.src2 = src2
 
     def to_string(self, dict, memory):
-        if self.src == None:
-            return f"{self.mnemonic} {self.dst.to_string(memory)}"
-        return f"{self.mnemonic} {self.dst.to_string(memory)}, {self.src.to_string(memory)}"
+        str = f"{self.mnemonic} {self.dst.to_string(memory)}"
+        if self.src:
+            str += f", {self.src.to_string(memory)}"
+        if self.src2:
+            str += f", {self.src2.to_string(memory)}"
+        return str
 
 class ControlFlowInst:
     def __init__(self, mnemonic, src):
@@ -30,131 +34,55 @@ class ControlFlowInst:
     def to_string(self, dict, memory):
         return f"{self.mnemonic} {self.src.to_string(memory)}"
 
-OPs = [
-    "inc", "dec", "clr", "not", "srl", "sll", "rrc", "rlc",
-    "add", "sub", "and", "or", "xor", "mov", "unk6", "unk7"
-]
-
-ImplcitTable = [
-    (0x10, 6),
-    (0x00, 6),
-    (0x13, 14),
-    (0x02, 12)
-]
-
-class AluInstance():
-    def __init__(self, op, word, src, dest, postfix, literal):
-        self.newpc = None
-        self.op = op
-        self.word = word
-        self.src = src
-        self.dest = dest
-        self.postfix = postfix
-        self.literal = literal
-
-    def to_string(self, dict, **kwargs):
-        op = OPs[self.op]
-        op += self.postfix
-
-        # mov with a literal ignores the second operand
-        if self.op < 8 or (self.op == 13 and self.literal is not None):
-            if self.word:
-                str = f"{op} {RegNames16[self.src >> 1]}"
-            else:
-                str = f"{op} {RegNames8[self.src]}"
-        else:
-            if self.word:
-                str = f"{op} {RegNames16[self.dest >> 1]}, {RegNames16[self.src >> 1]}"
-            else:
-                str = f"{op} {RegNames8[self.dest]}, {RegNames8[self.src]}"
-
-        if self.literal is not None:
-            str += f", #{self.literal:#06x}"
-
-        return str
-
-class AluWithImmInstance():
-    def __init__(self, op, word, reg, imm):
-        self.newpc = None
-        self.op = op
-        self.word = word
-        self.reg = reg
-        self.imm = imm
-
-    def to_string(self, dict, **kwargs):
-        op = OPs[self.op]
-
-        if self.word:
-            return f"{op} {RegNames16[self.reg >> 1]}, {self.imm}"
-        else:
-            return f"{op} {RegNames8[self.reg]}, {self.imm}"
-
 
 def AluMatch(pc, memory):
     orig_pc = pc
     inst = memory[pc]
     pc += 1
-    if inst < 0x20 or inst >= 0x5f:
-        return None
 
-    word = inst & 0x10 != 0
-    fast = inst & 0x08 != 0
+    implicit = inst & 0x08 != 0
     op = inst & 0x07
 
     if inst >= 0x40:
         op += 8
 
+    OPs = [
+        "inc", "dec", "clr", "not", "srl", "sll", "rrc", "rlc",
+        "add", "sub", "and", "or", "xor", "mov"]
+
     # These don't fit the pattern
-    if inst & 0x0e == 0x0e or inst > 0x5b:
+    if inst & 0x0e == 0x0e or inst > 0x5b or op >= len(OPs):
         return None
 
-    postfix = ""
-    literal = None
+    mnemonic = OPs[op]
 
-    if fast:
-        if inst > 0x40:
-            src = 0
-            dest = 2
-        else:
-            src = 0
-            dest = 0
-        if not word:
-            src += 1
-            dest += 1
+    if implicit:
+        # Shifts, rotates and increments effectively add 1 to 'imm' value
+        imm = 0 if inst in [0x2a, 0x2b, 0x3a, 0x3b] else 1
 
-        postfix = '!'
+        match inst & 0x70:
+            case 0x20:
+                dst = Reg8Ref(1)
+                src = SmallLiteralRef(imm)
+            case 0x30:
+                dst = Reg16Ref(0)
+                src = SmallLiteralRef(imm)
+            case 0x40:
+                dst = Reg8Ref(3)
+                src = Reg8Ref(1)
+            case 0x50:
+                dst = Reg16Ref(2)
+                src = Reg16Ref(0)
+
+        mnemonic += '!'
+        src2 = None
     else:
-        bytetwo = memory[pc]
+        mode = memory[pc]
         pc += 1
-        dest = bytetwo & 0xf
-        src = (bytetwo >> 4) & 0xf
-
-        if inst & 0xe0 == 0x20:
-            # This covers 20...27 and 30...37
-            # These operations operate between a register and immediate,
-            # which is encoded in low nibble ("dest")
-            sub_op = inst & 0xef
-            if sub_op != 0x22 and sub_op != 0x23:
-                # Shifts and rotates effectively add 1 to 'imm' value
-                dest += 1
-
-            bytes = memory[orig_pc:pc]
-            return InstructionMatch(orig_pc, AluWithImmInstance(op, word, src, dest), bytes, {})
-
-        if inst < 0x40 and dest != 0:
-            # these encoding make little sense, and there seems to be other instructions here
-            return None
-
-        expected, limit = ImplcitTable[op >> 4 - 2]
-        if bytetwo == expected and op < limit:
-            postfix = '*'
-
-        if word and (src & 1 != 0):
-            literal = get_be16(memory, pc)
-            pc += 2
+        dst, src, src2, pc = AluAddrMode(mode, inst, pc, memory)
 
     bytes = memory[orig_pc:pc]
-    return InstructionMatch(orig_pc, AluInstance(op, word, src, dest, postfix, literal), bytes, {})
+    return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, dst, src, src2), bytes, {})
 
 
 # Implements the 46 "bignum" instructions

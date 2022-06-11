@@ -49,15 +49,15 @@ L_98aa:
 
 WriteChar:
 98ae:    c1 f2 00     ld BL, [0xf200]
-98b1:    24 30        srl BL, 1
-98b3:    24 30        srl BL, 1
+98b1:    24 30        srl BL, #1
+98b3:    24 30        srl BL, #1
 98b5:    11 f7        bnc WriteChar
 98b7:    a1 f2 01     st AL, [0xf201]
 98ba:    09           ret
 
 ReadChar:
 98bb:    81 f2 00     ld AL, [0xf200]
-98be:    2c           srl! AL
+98be:    2c           srl! AL, #1
 98bf:    11 fa        bnc ReadChar
 98c1:    81 f2 01     ld AL, [0xf201]
 98c4:    09           ret
@@ -77,10 +77,10 @@ WriteHex:
 98d2:    c0 f0        ld BL, #0xf0
 98d4:    42 31        and AL, BL
 98d6:    07           rl
-98d7:    26 10        rrc AL, 1
-98d9:    2c           srl! AL
-98da:    2c           srl! AL
-98db:    2c           srl! AL
+98d7:    26 10        rrc AL, #1
+98d9:    2c           srl! AL, #1
+98da:    2c           srl! AL, #1
+98db:    2c           srl! AL, #1
 98dc:    c0 b0        ld BL, #0xb0
 98de:    40 31        add AL, BL
 98e0:    c0 b9        ld BL, #0xb9
@@ -111,7 +111,7 @@ FinishTest:
     ; restarts the code from an offset, defined by two bytes, following the call
 9901:    a1 f1 0a     st AL, [0xf10a]
 9904:    81 f2 00     ld AL, [0xf200]	 ; Check if we have a character from the MUX0
-9907:    2c           srl! AL
+9907:    2c           srl! AL, #1
 9908:    11 57        bnc L_9961
 990a:    81 f2 01     ld AL, [0xf201]	 ; Read byte from the terminal
 990d:    c0 80        ld BL, #0x80	 ; The byte is expected to be 0x03 or 0x83
@@ -167,7 +167,7 @@ Init:
     ; RT = a pointer to a table of two 16-bit words:
     ; table + 0 - address of a HW controller
     ; table + 2 - address of a test code to execute
-998b:    3a           clr! A
+998b:    3a           clr! A, #0
 998c:    b1 01 08     st A, [0x0108]	 ; Initialize exit status to 0
 998f:    90 01 ee     ld A, #0x01ee
 9992:    50 80        add A, Z	 ; WaitForReady
@@ -200,7 +200,7 @@ Init:
 99d9:    b1 01 1a     st A, [0x011a]	 ; ROMBase
 99dc:    95 41        ld A, [X++]	 ; AX = controller base address ?
 99de:    b1 01 14     st A, [0x0114]
-99e1:    38           inc! A
+99e1:    38           inc! A, #1
 99e2:    b1 01 16     st A, [0x0116]
 99e5:    55 40        mov A, X
 99e7:    65 a1        ld X, [S++]	 ; RT = return address (pop)
@@ -238,7 +238,7 @@ L_9a29:
 L_9a2c:
     ; Now check that FOUT is set
     ; Presumably it signals availability of the result code
-9a2c:    2c           srl! AL	 ; FOUT = STATUS_REG & 0x01
+9a2c:    2c           srl! AL, #1	 ; FOUT = STATUS_REG & 0x01
 9a2d:    10 2b        bc L_9a5a
 9a2f:    0e           dly
 9a30:    3f           dec X
@@ -282,8 +282,8 @@ WaitNotFIn:
 
 L_9a97:
 9a97:    82 01 16     ld AL, @[0x0116]	 ; STATUS_REG
-9a9a:    2c           srl! AL
-9a9b:    2c           srl! AL	 ; FIN = STATUS_REG & 0x02
+9a9a:    2c           srl! AL, #1
+9a9b:    2c           srl! AL, #1	 ; FIN = STATUS_REG & 0x02
 9a9c:    11 2d        bnc L_9acb
 9a9e:    0e           dly
 9a9f:    3f           dec X
@@ -322,16 +322,16 @@ L_9ae2:
 9ae2:    7a 01 06     call @[PrintCtrlCToExit:0x0106]
     ; PrintCtrlCToExit
     ; The test restarts from here
-9ae5:    32 60        clr Y, 0
+9ae5:    32 60        clr Y, #0
 9ae7:    60 0f 00     ld X, #0x0f00	 ; Test pattern length is 3840 bytes
 9aea:    55 60        mov A, Y
 9aec:    d0 01 1c     ld B, #0x011c	 ; Start of our test patterm
 
 L_9aef:
 9aef:    a5 21        st AL, [B++]	 ; Fill in the test pattern
-9af1:    28           inc! AL
-9af2:    28           inc! AL
-9af3:    28           inc! AL
+9af1:    28           inc! AL, #1
+9af2:    28           inc! AL, #1
+9af3:    28           inc! AL, #1
 9af4:    3f           dec X
 9af5:    15 f8        bnz L_9aef
 9af7:    90 f0 ff     ld A, #0xf0ff	 ; -3841, does the DMA count up to 0 ?
@@ -352,17 +352,17 @@ L_9aef:
 9b0d:    80 01        ld AL, #0x01
 9b0f:    a2 01 14     st AL, @[0x0114]	 ; COMMAND_REG
 9b12:    7a 01 0c     call @[WaitNotFIn:0x010c]	 ; WaitNotFIn
-9b15:    2a           clr! AL
+9b15:    2a           clr! AL, #0
 9b16:    a2 01 14     st AL, @[0x0114]	 ; COMMAND_REG
 9b19:    7a 01 0c     call @[WaitNotFIn:0x010c]	 ; WaitNotFIn
 9b1c:    80 0f        ld AL, #0x0f
 9b1e:    a2 01 14     st AL, @[0x0114]	 ; COMMAND_REG
 9b21:    7a 01 0c     call @[WaitNotFIn:0x010c]	 ; WaitNotFIn
-9b24:    2a           clr! AL
+9b24:    2a           clr! AL, #0
 9b25:    a2 01 14     st AL, @[0x0114]	 ; COMMAND_REG
 9b28:    7a 01 18     call @[WaitForReady:0x0118]	 ; WaitForReady
 9b2b:    60 0f 00     ld X, #0x0f00	 ; Clear 3840 bytes...
-9b2e:    3a           clr! A
+9b2e:    3a           clr! A, #0
 9b2f:    d0 01 1c     ld B, #0x011c	 ; Starting at 0x011c
 
 L_9b32:
@@ -381,13 +381,13 @@ L_9b32:
 9b4d:    80 01        ld AL, #0x01	 ; 0x0100 - could be memory start address (from FFC pov) ?
 9b4f:    a2 01 14     st AL, @[0x0114]	 ; COMMAND_REG
 9b52:    7a 01 0c     call @[WaitNotFIn:0x010c]	 ; WaitNotFIn
-9b55:    2a           clr! AL
+9b55:    2a           clr! AL, #0
 9b56:    a2 01 14     st AL, @[0x0114]	 ; COMMAND_REG
 9b59:    7a 01 0c     call @[WaitNotFIn:0x010c]	 ; WaitNotFIn
 9b5c:    80 0f        ld AL, #0x0f	 ; 0x0f00 - data size
 9b5e:    a2 01 14     st AL, @[0x0114]	 ; COMMAND_REG
 9b61:    7a 01 0c     call @[WaitNotFIn:0x010c]	 ; WaitNotFIn
-9b64:    2a           clr! AL
+9b64:    2a           clr! AL, #0
 9b65:    a2 01 14     st AL, @[0x0114]	 ; COMMAND_REG
 9b68:    7a 01 18     call @[WaitForReady:0x0118]	 ; WaitForReady
 9b6b:    b5 a2        st A, [--S]
@@ -401,13 +401,13 @@ L_9b77:
 9b79:    bd           st A, [S]
 9b7a:    41 01        sub AL, AH
 9b7c:    15 12        bnz L_9b90
-9b7e:    20 00        inc AH, 1
-9b80:    20 00        inc AH, 1
-9b82:    20 00        inc AH, 1
+9b7e:    20 00        inc AH, #1
+9b80:    20 00        inc AH, #1
+9b82:    20 00        inc AH, #1
 9b84:    3f           dec X
 9b85:    15 f0        bnz L_9b77
 9b87:    95 a1        ld A, [S++]
-9b89:    20 70        inc YL, 1
+9b89:    20 70        inc YL, #1
 9b8b:    7a 01 04     call @[FinishTest:0x0104]	 ; FinishTest
 9b8e:    02 e5        (0x2e5)	 ; Restart point = 0x9ae5
 
@@ -418,7 +418,7 @@ L_9b90:
 9b98:    7a 01 12     call @[WriteString:0x0112]
 9b9b:    "*** ERROR, ADDR=\0"
 9bac:    95 a1        ld A, [S++]
-9bae:    39           dec! A
+9bae:    39           dec! A, #1
 9baf:    7a 01 10     call @[WriteHex16:0x0110]	 ; WriteHex16
 9bb2:    7a 01 12     call @[WriteString:0x0112]
 9bb5:    " EXP=\0"
@@ -483,12 +483,12 @@ L_9c12:
 9c22:    b5 21        st A, [B++]	 ; packet[2,3] = 0x8400
 9c24:    80 83        ld AL, #0x83
 9c26:    a5 21        st AL, [B++]	 ; packet[4] = 0x83
-9c28:    3a           clr! A	 ; 0x0000
+9c28:    3a           clr! A, #0	 ; 0x0000
 9c29:    b5 21        st A, [B++]	 ; packet[5,6] = 0 - initial track number
-9c2b:    39           dec! A
+9c2b:    39           dec! A, #1
 9c2c:    a9           st AL, [B]	 ; packet[7] = 0xFF
-9c2d:    38           inc! A
-9c2e:    38           inc! A	 ; 0x01
+9c2d:    38           inc! A, #1
+9c2e:    38           inc! A, #1	 ; 0x01
 9c2f:    b1 41 b1     st A, [0x41b1]	 ; Tracks per step
 
 L_9c32:
@@ -526,8 +526,8 @@ L_9c70:
 9c7d:    d0 03 36     ld B, #0x0336	 ; 822 tracks total
 9c80:    59           sub! B, A
 9c81:    15 af        bnz L_9c32
-9c83:    3a           clr! A
-9c84:    39           dec! A
+9c83:    3a           clr! A, #0
+9c84:    39           dec! A, #1
 9c85:    b1 41 b1     st A, [0x41b1]	 ; tracks_per_step = -1
 9c88:    80 10        ld AL, #0x10
 9c8a:    a1 41 50     st AL, [0x4150]
@@ -535,7 +535,7 @@ L_9c70:
 
 L_9c8f:
 9c8f:    91 41 52     ld A, [0x4152]	 ; Track -= 1
-9c92:    39           dec! A
+9c92:    39           dec! A, #1
 9c93:    b1 41 52     st A, [0x4152]
 9c96:    17 9a        bp L_9c32
 9c98:    7a 01 04     call @[FinishTest:0x0104]	 ; FinishTest
@@ -555,7 +555,7 @@ Entry_01133_CMD_READ_TEST:
 9cb5:    b5 61        st A, [Y++]
 9cb7:    80 83        ld AL, #0x83
 9cb9:    a5 61        st AL, [Y++]
-9cbb:    3a           clr! A
+9cbb:    3a           clr! A, #0
 9cbc:    b5 61        st A, [Y++]
 9cbe:    80 85        ld AL, #0x85
 9cc0:    a5 61        st AL, [Y++]
@@ -565,8 +565,8 @@ L_9cc5:
 9cc5:    e5 61        st BL, [Y++]
 9cc7:    90 01 90     ld A, #0x0190	 ; Sector length 400 bytes
 9cca:    b5 61        st A, [Y++]
-9ccc:    20 30        inc BL, 1
-9cce:    21 20        dec BH, 1
+9ccc:    20 30        inc BL, #1
+9cce:    21 20        dec BH, #1
 9cd0:    15 f3        bnz L_9cc5
 9cd2:    80 ff        ld AL, #0xff
 9cd4:    ab           st AL, [Y]
@@ -607,10 +607,10 @@ L_9cf6:
 L_9d24:
 9d24:    91 41 52     ld A, [0x4152]
 9d27:    15 01        bnz L_9d2a
-9d29:    38           inc! A
+9d29:    38           inc! A, #1
 
 L_9d2a:
-9d2a:    3d           sll! A
+9d2a:    3d           sll! A, #1
 9d2b:    b1 41 52     st A, [0x4152]
 9d2e:    d0 03 36     ld B, #0x0336
 9d31:    59           sub! B, A
@@ -663,12 +663,12 @@ L_9d7a:
 9d8a:    b5 21        st A, [B++]	 ; packet[2,3] = 0x8400
 9d8c:    80 83        ld AL, #0x83
 9d8e:    a5 21        st AL, [B++]	 ; packet[4] = 0x83
-9d90:    3a           clr! A
+9d90:    3a           clr! A, #0
 9d91:    b5 21        st A, [B++]	 ; packet[5,6] = 0 - track number
-9d93:    39           dec! A
+9d93:    39           dec! A, #1
 9d94:    a9           st AL, [B]	 ; packet[7,8] = -1
-9d95:    38           inc! A
-9d96:    38           inc! A
+9d95:    38           inc! A, #1
+9d96:    38           inc! A, #1
 9d97:    b1 41 b1     st A, [0x41b1]	 ; tracks_per_step = 1
 
 L_9d9a:
@@ -700,20 +700,20 @@ L_9dd8:
 9dd8:    91 41 b1     ld A, [0x41b1]	 ; track_per_step
 9ddb:    16 14        blt L_9df1
 9ddd:    91 41 52     ld A, [0x4152]	 ; track++
-9de0:    38           inc! A
+9de0:    38           inc! A, #1
 9de1:    b1 41 52     st A, [0x4152]
 9de4:    d0 02 5c     ld B, #0x025c	 ; 604 tracks total
 9de7:    59           sub! B, A
 9de8:    15 b0        bnz L_9d9a
-9dea:    3a           clr! A
-9deb:    39           dec! A
+9dea:    3a           clr! A, #0
+9deb:    39           dec! A, #1
 9dec:    b1 41 b1     st A, [0x41b1]	 ; tracks_per_step = -1
 9def:    73 a9        jmp [L_9d9a:-0x57]
 
 L_9df1:
     ; track_per_step < 0
 9df1:    91 41 52     ld A, [0x4152]
-9df4:    39           dec! A
+9df4:    39           dec! A, #1
 9df5:    b1 41 52     st A, [0x4152]
 9df8:    17 a0        bp L_9d9a
 9dfa:    7a 01 04     call @[FinishTest:0x0104]	 ; FinishTest
@@ -741,7 +741,7 @@ Entry_FINCH_READ_TEST:
 9e17:    b5 61        st A, [Y++]	 ; packet[2, 3] = 0x8400
 9e19:    80 83        ld AL, #0x83
 9e1b:    a5 61        st AL, [Y++]	 ; packet[4] = 0x83
-9e1d:    3a           clr! A
+9e1d:    3a           clr! A, #0
 9e1e:    b5 61        st A, [Y++]	 ; packet[5,6] = 0 - track number
 9e20:    80 8a        ld AL, #0x8a
 9e22:    a5 61        st AL, [Y++]	 ; packet[7] = 0x8a
@@ -758,8 +758,8 @@ L_9e27:
 9e27:    e5 61        st BL, [Y++]	 ; Is it sector numbers ?
 9e29:    90 01 90     ld A, #0x0190
 9e2c:    b5 61        st A, [Y++]	 ; packet[9,10] = 400
-9e2e:    20 30        inc BL, 1
-9e30:    21 20        dec BH, 1
+9e2e:    20 30        inc BL, #1
+9e30:    21 20        dec BH, #1
 9e32:    15 f3        bnz L_9e27
 9e34:    80 ff        ld AL, #0xff	 ; This sequence terminates with 0xff.
 9e36:    ab           st AL, [Y]	 ; It it some list ? Sectors ?
@@ -808,10 +808,10 @@ L_9e58:
 L_9e86:
 9e86:    91 41 52     ld A, [0x4152]	 ; Update track number
 9e89:    15 01        bnz L_9e8c
-9e8b:    38           inc! A	 ; From track 0 we go to track 1
+9e8b:    38           inc! A, #1	 ; From track 0 we go to track 1
 
 L_9e8c:
-9e8c:    3d           sll! A	 ; And then track number becomes next power of 2
+9e8c:    3d           sll! A, #1	 ; And then track number becomes next power of 2
 9e8d:    b1 41 52     st A, [0x4152]
 9e90:    d0 02 5d     ld B, #0x025d	 ; 604 tracks total
 9e93:    59           sub! B, A
@@ -826,7 +826,7 @@ Entry_ROM_SELF_TEST:
 9ea3:    7d 00        call [A]	 ; Init
 9ea5:    00 00        (0x0)	 ; No hardware base address
 9ea7:    55 86        mov Y, Z
-9ea9:    3a           clr! A
+9ea9:    3a           clr! A, #0
 
 L_9eaa:
     ; Simply calculate 8-bit sum of all bytes in this ROM...

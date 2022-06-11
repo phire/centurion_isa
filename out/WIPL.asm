@@ -10,7 +10,7 @@ Start:
 
 L_0108:
     ; Entry point
-0108:    3a           clr! A
+0108:    3a           clr! A, #0
 0109:    b1 00 6c     st A, [0x006c]	 ; Initialize some vars
 010c:    b1 00 fc     st A, [0x00fc]
 010f:    b1 00 ae     st A, [0x00ae]
@@ -68,7 +68,7 @@ L_0162:
 0169:    15 f7        bnz L_0162
 
 L_016b:
-016b:    29           dec! AL	 ; Next unit, down to 0
+016b:    29           dec! AL, #1	 ; Next unit, down to 0
 016c:    17 dd        bp L_014b
 016e:    09           ret
 
@@ -109,7 +109,7 @@ L_0185:
 01ae:    b1 06 00     st A, [0x0600]
 01b1:    80 b1        ld AL, #0xb1
 01b3:    1d 01        bs4 L_01b6
-01b5:    29           dec! AL
+01b5:    29           dec! AL, #1
 
 L_01b6:
 01b6:    a1 03 77     st AL, [0x0377]
@@ -165,7 +165,7 @@ L_01fd:
 0202:    90 03 74     ld A, #0x0374	 ; disk_buffer
 0205:    5e           mov Z, A
 0206:    d5 81        ld B, [Z++]	 ; String length
-0208:    31 20        dec B, 1
+0208:    31 20        dec B, #1
 020a:    14 10        bz L_021c	 ; Just one char means board offset 0
 020c:    80 a0        ld AL, #0xa0	 ; ' ' (space)
 020e:    c5 88 01     ld BL, [Z + 0x0001]	 ; Check character[1]
@@ -179,11 +179,11 @@ L_01fd:
 
 L_021c:
 021c:    45 31        mov AL, BL	 ; magic_value
-021e:    25 11        sll AL, 2
+021e:    25 11        sll AL, #1
 0220:    d0 f1 40     ld B, #0xf140
 0223:    43 12        or BH, AL	 ; DSK0_BASE | (magic_value << 2)
 0225:    f1 04 b1     st B, [0x04b1]	 ; Set DSK board address
-0228:    25 11        sll AL, 2
+0228:    25 11        sll AL, #1
 022a:    c0 04        ld BL, #0x04
 022c:    48           add! BL, AL	 ; dma_mode_byte = magic_value << 4
 022d:    e1 04 ac     st BL, [0x04ac]	 ; Patch dma_set_mode insn
@@ -214,7 +214,7 @@ L_0250:
 0256:    00           (0x0)
     ; EX is an address of the loaded sector
 0257:    85 88 08     ld AL, [Z + 0x0008]	 ; Disk format flag
-025a:    28           inc! AL	 ; Must be equal to 0xff
+025a:    28           inc! AL, #1	 ; Must be equal to 0xff
 025b:    14 09        bz L_0266	 ; Proceed to disk code checking
 025d:    04           ei
 025e:    79 05 36     call [PrintString:0x0536]
@@ -236,10 +236,10 @@ L_0250:
 
 L_0266:
 0266:    95 88 06     ld A, [Z + 0x0006]	 ; Disk code is derived from this value
-0269:    3b           not! A
+0269:    3b           not! A, #0
 026a:    c0 80        ld BL, #0x80	 ; This whole thing rotates AX right WITHOUT carry
 026c:    07           rl
-026d:    36 00        rrc A, 1
+026d:    36 00        rrc A, #1
 026f:    11 02        bnc L_0273
 0271:    43 30        or AH, BL
 
@@ -272,7 +272,7 @@ L_0293:
 029b:    54 02        xor B, A
 029d:    91 01 05     ld A, [0x0105]	 ; entered_disk_code, which we now know is correct
 02a0:    50 20        add A, B	 ; AX = track number here
-02a2:    35 03        sll A, 4
+02a2:    35 03        sll A, #1
 02a4:    5b           mov X, A	 ; sector = track * 16 (sectors per track)
 02a5:    79 04 b0     call [LoadSector:0x04b0]
 02a8:    00           (0x0)
@@ -289,7 +289,7 @@ L_0293:
     ; The search goes on to next sector(s), until we hit an entry, starting with
     ; 0x84 0x8d bytes. In the disk image we have we see these bytes prefixing
     ; what we think is a data file name.
-02af:    30 8f        inc Z, 16	 ; name_on_disk = sector_base + 16, this skips the first entry.
+02af:    30 8f        inc Z, #1	 ; name_on_disk = sector_base + 16, this skips the first entry.
                                	 ; That first entry looks like a volume name on the image we have.
 02b1:    79 05 07     call [memcpy:0x0507]	 ; Before proceeding, we copy part of ourselves to the top of RAM.
                                           	 ; I guess we're preparing to load the boot file into low memory, which would
@@ -319,13 +319,13 @@ L_02c4:
 
 L_02cb:
 02cb:    85 61        ld AL, [Y++]	 ; c1 = *entered_name++
-02cd:    21 00        dec AH, 1	 ; length--
+02cd:    21 00        dec AH, #1	 ; length--
 02cf:    16 23        blt L_02f4	 ; Proceed if the name matches
 02d1:    c5 81        ld BL, [Z++]	 ; c2 = *name_on_disk
 02d3:    49           sub! BL, AL
 02d4:    14 f5        bz L_02cb	 ; If matches, go chech the next char
 02d6:    45 01        mov AL, AH	 ; Mismatch
-02d8:    22 00        clr AH, 0
+02d8:    22 00        clr AH, #0
 02da:    50 08        add Z, A	 ; name_on_disk += length (remaining) - this skips past the string
 02dc:    50 98 00 06  add Z, Z, #0x0006	 ; EX = EX + 6 - this skips over to the next entry
 02e0:    d1 04 a0     ld B, [LoadBuffer0:0x04a0]	 ; BX = LoadBuffer0 - sector address
@@ -343,10 +343,10 @@ L_02f4:
     ; NAME found. EX points right after the string in the loaded sector.
     ; Since length of the name is exactly 10 bytes, we have three words,
     ; specifying something. The code below reads them.
-02f4:    3a           clr! A
+02f4:    3a           clr! A, #0
 02f5:    85 81        ld AL, [Z++]
 02f7:    5d           mov B, A
-02f8:    3d           sll! A
+02f8:    3d           sll! A, #1
 02f9:    58           add! B, A
 02fa:    91 04 a2     ld A, [LoadBuffer1:0x04a2]
 02fd:    58           add! B, A
@@ -360,16 +360,16 @@ L_02f4:
 030e:    7b 2c        call [CallHighMem:+0x2c]	 ; Call (end_of_ram - 87) = LoadSector
 0310:    01           nop
 0311:    d5 a8 02     ld B, [S + 0x0002]
-0314:    3a           clr! A
+0314:    3a           clr! A, #0
 0315:    85 28 04     ld AL, [B + 0x0004]
 0318:    5b           mov X, A
-0319:    3a           clr! A
-031a:    38           inc! A
+0319:    3a           clr! A, #0
+031a:    38           inc! A, #1
 
 L_031b:
 031b:    3f           dec X
 031c:    16 03        blt L_0321
-031e:    3d           sll! A
+031e:    3d           sll! A, #1
 031f:    73 fa        jmp [L_031b:-0x6]
 
 L_0321:
@@ -453,26 +453,26 @@ StrToNum:
 
 L_03d1:
     ; A correcr digit has been entered
-03d1:    3a           clr! A
+03d1:    3a           clr! A, #0
 03d2:    b5 a2        st A, [--S]	 ; value = 0
 
 L_03d4:
 03d4:    85 81        ld AL, [Z++]	 ; Do the conversion again, increment pointer this time
 03d6:    7b e5        call [AsciiToHex:-0x1b]
 03d8:    17 05        bp L_03df
-03da:    31 80        dec Z, 1	 ; Invalid character, restore the pointer
-                              	 ; It now points behind our number
+03da:    31 80        dec Z, #1	 ; Invalid character, restore the pointer
+                               	 ; It now points behind our number
 03dc:    95 a1        ld A, [S++]	 ; return value
 03de:    09           ret
 
 L_03df:
 03df:    9d           ld A, [S]	 ; AX = value
 03e0:    ed           st BL, [S]	 ; (SP) = digit
-03e1:    3d           sll! A
+03e1:    3d           sll! A, #1
 03e2:    5d           mov B, A	 ; BX = value << 1
-03e3:    35 01        sll A, 2	 ; should be sll AX, 2
+03e3:    35 01        sll A, #1	 ; should be sll AX, 2
 03e5:    58           add! B, A	 ; BX = (value << 1) + (value << 3) = value * 10
-03e6:    3a           clr! A	 ; AX = digit
+03e6:    3a           clr! A, #0	 ; AX = digit
 03e7:    8d           ld AL, [S]
 03e8:    58           add! B, A	 ; BX += digit
 03e9:    fd           st B, [S]	 ; value = value * 10 + digit
@@ -485,10 +485,10 @@ RelocatablePart:
 03ee:    95 a1        ld A, [S++]
 03f0:    b3 36        st A, [pc + 0x36]
 03f2:    95 a1        ld A, [S++]
-03f4:    30 05        inc A, 6
+03f4:    30 05        inc A, #1
 03f6:    b3 5c        st A, [pc + 0x5c]
-03f8:    3a           clr! A
-03f9:    39           dec! A
+03f8:    3a           clr! A, #0
+03f9:    39           dec! A, #1
 03fa:    b3 5e        st A, [pc + 0x5e]
 03fc:    7b 53        call [L_0451:+0x53]
 03fe:    d0 00 4c     ld B, #0x004c
@@ -497,9 +497,9 @@ RelocatablePart:
 0404:    95 88 1b     ld A, [Z + 0x001b]
 0407:    b3 40        st A, [pc + 0x40]
 0409:    50 48        add Z, X
-040b:    30 80        inc Z, 1
+040b:    30 80        inc Z, #1
 040d:    7b 31        call [L_0440:+0x31]
-040f:    30 80        inc Z, 1
+040f:    30 80        inc Z, #1
 
 L_0411:
 0411:    7b 2d        call [L_0440:+0x2d]
@@ -513,7 +513,7 @@ L_0417:
 041c:    99           ld A, [B]
 041d:    50 60        add A, Y
 041f:    b9           st A, [B]
-0420:    31 41        dec X, 2
+0420:    31 41        dec X, #1
 0422:    18 f3        bgt L_0417
 
 L_0424:
@@ -526,7 +526,7 @@ L_042a:
 042a:    55 44        mov X, X
 042c:    14 0c        bz L_043a
 042e:    55 40        mov A, X
-0430:    39           dec! A
+0430:    39           dec! A, #1
 0431:    67           unknown
 0432:    4a           and! BL, AL
 0433:    86           unknown
@@ -535,14 +535,14 @@ L_042a:
 0438:    73 ea        jmp [L_0424:-0x16]
 
 L_043a:
-043a:    32 80        clr Z, 0
+043a:    32 80        clr Z, #0
 043c:    80 c5        ld AL, #0xc5
 043e:    75 60        jmp [Y]
 
 L_0440:
 0440:    c5 81        ld BL, [Z++]
 0442:    16 0d        blt L_0451
-0444:    3a           clr! A
+0444:    3a           clr! A, #0
 0445:    85 81        ld AL, [Z++]
 0447:    bd           st A, [S]
 0448:    90 00 00     ld A, #0x0000
@@ -556,34 +556,34 @@ L_0451:
 0453:    90 00 00     ld A, #0x0000
 0456:    65 08 01     ld X, [A + 0x0001]
 0459:    90 00 00     ld A, #0x0000
-045c:    38           inc! A
+045c:    38           inc! A, #1
 045d:    b3 fb        st A, [pc + -0x5]
 045f:    50 04        add X, A
 0461:    d3 c5        ld B, [pc + -0x3b]
 0463:    59           sub! B, A
 0464:    11 30        bnc L_0496
-0466:    3a           clr! A
+0466:    3a           clr! A, #0
 0467:    b3 f1        st A, [pc + -0xf]
 0469:    93 e9        ld A, [pc + -0x17]
-046b:    30 02        inc A, 3
+046b:    30 02        inc A, #1
 046d:    b3 e5        st A, [pc + -0x1b]
 046f:    65 08 01     ld X, [A + 0x0001]
 0472:    5d           mov B, A
 0473:    98           ld A, [A]
 0474:    17 20        bp L_0496
-0476:    3a           clr! A
+0476:    3a           clr! A, #0
 0477:    85 28 02     ld AL, [B + 0x0002]
-047a:    28           inc! AL
+047a:    28           inc! AL, #1
 047b:    14 20        bz Stop
-047d:    29           dec! AL
+047d:    29           dec! AL, #1
 047e:    5d           mov B, A
-047f:    3d           sll! A
+047f:    3d           sll! A, #1
 0480:    58           add! B, A
 0481:    93 1f        ld A, [LoadBuffer1:+0x1f]
 0483:    58           add! B, A
 0484:    94 ce        ld A, @[pc + -0x32]
 0486:    f3 cc        st B, [pc + -0x34]
-0488:    3b           not! A
+0488:    3b           not! A, #0
 0489:    60 57 79     ld X, #0x5779
 048c:    50 04        add X, A
 048e:    7b 20        call [LoadSector:+0x20]
@@ -637,7 +637,7 @@ L_04bc:
 04c4:    a5 88 08     st AL, [Z + 0x0008]	 ; READ command
 04c7:    7b 2c        call [WaitForDataReady:+0x2c]
     ; Upon completion status register value will be in AX
-04c9:    24 00        srl AH, 1	 ; Check HAWK_STATUS & 0x0100
+04c9:    24 00        srl AH, #1	 ; Check HAWK_STATUS & 0x0100
 04cb:    15 05        bnz L_04d2	 ; If bit set, recalibrate, seek and retry (read error)
 04cd:    90 7d 55     ld A, #0x7d55	 ; AX = loading address (this insn is patched)
 04d0:    5e           mov Z, A
@@ -667,7 +667,7 @@ WaitForDataReady:
     ; This location is only called when READ operation is initiated.
     ; I suggest it waits for data transfer to end.
 04f5:    85 88 04     ld AL, [Z + 0x0004]	 ; HAWK status
-04f8:    2c           srl! AL	 ; Wait for STATUS & 0x01 == 0
+04f8:    2c           srl! AL, #1	 ; Wait for STATUS & 0x01 == 0
 04f9:    10 fa        bc WaitForDataReady
 
 WaitForHawkCmdCompletion:
@@ -729,7 +729,7 @@ PrintString:
 0538:    7e 45        push
 053a:    9a           ld A, [X]
 053b:    5c           mov Y, A
-053c:    55 98 f2 00  mov Z, #0xf200
+053c:    55 98 f2 00  mov Z, Z, #0xf200
 0540:    65 61        ld X, [Y++]
 0542:    19 11        ble L_0555
 
@@ -749,7 +749,7 @@ L_0550:
 
 L_0555:
 0555:    7f 45        pop
-0557:    30 41        inc X, 2
+0557:    30 41        inc X, #1
 0559:    09           ret
 
 L_055a:
@@ -764,7 +764,7 @@ L_0563:
 
 PrintChar:
 0564:    7e 81        push
-0566:    55 98 f2 00  mov Z, #0xf200	 ; Serisl port 0 base address
+0566:    55 98 f2 00  mov Z, Z, #0xf200	 ; Serisl port 0 base address
 056a:    f6 19 0d     st AL, +0xd(Z)
 056d:    c0 c5        ld BL, #0xc5	 ; Set up baud rate ?
 056f:    f6 39 00     st BL, +0x0(Z)
@@ -796,7 +796,7 @@ L_0590:
 
 RawPrintChar:
 0595:    f6 38 00     ld BL, +0x0(Z)
-0598:    24 31        srl BL, 2
+0598:    24 31        srl BL, #1
 059a:    11 f9        bnc RawPrintChar
 059c:    f6 19 01     st AL, +0x1(Z)
 059f:    a0 bd        st AL, #0xbd	 ; Shouldn't this be ld ?
@@ -838,13 +838,13 @@ RawPrintChar:
 
 L_05c4:
 05c4:    7e 81        push
-05c6:    55 98 f2 00  mov Z, #0xf200
+05c6:    55 98 f2 00  mov Z, Z, #0xf200
 05ca:    83 a2        ld AL, [pc + -0x5e]
 05cc:    f6 19 00     st AL, +0x0(Z)
 05cf:    90 05 a6     ld A, #0x05a6
 05d2:    d7           unknown
 05d3:    6e           unknown
-05d4:    3a           clr! A
+05d4:    3a           clr! A, #0
 05d5:    d7           unknown
 05d6:    60 80 06     ld X, #0x8006
 05d9:    f6 19 0a     st AL, +0xa(Z)
@@ -893,7 +893,7 @@ ReadLine:
 0610:    b3 ee        st A, [pc + -0x12]
 0612:    9a           ld A, [X]
 0613:    6d a2        st X, [--S]
-0615:    38           inc! A
+0615:    38           inc! A, #1
 0616:    5b           mov X, A
 0617:    80 bd        ld AL, #0xbd
 0619:    79 05 64     call [PrintChar:0x0564]
@@ -910,7 +910,7 @@ L_061c:
 L_0628:
 0628:    d5 a4        ld B, @[S]
 062a:    a3 0c        st AL, [pc + 0x0c]
-062c:    30 20        inc B, 1
+062c:    30 20        inc B, #1
 062e:    51 42        sub B, X
 0630:    14 0c        bz L_063e
 0632:    80 a0        ld AL, #0xa0
@@ -942,13 +942,13 @@ L_0644:
 
 L_065b:
 065b:    95 a4        ld A, @[S]
-065d:    38           inc! A
+065d:    38           inc! A, #1
 065e:    51 40        sub A, X
 0660:    65 a1        ld X, [S++]
 0662:    b5 45        st A, @[X++]
 0664:    d0 01 bb     ld B, #0x01bb
 0667:    f3 97        st B, [pc + -0x69]
-0669:    22 30        clr BL, 0
+0669:    22 30        clr BL, #0
 066b:    e1 05 ea     st BL, [0x05ea]
 066e:    09           ret
 066f:    65
