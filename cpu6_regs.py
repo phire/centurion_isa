@@ -9,28 +9,32 @@ RegNames8 = [
     "AH", "AL", "BH", "BL", "XH", "XL", "YH", "YL", "ZH", "ZL", "SH", "SL", "CH", "CL", "PH", "PL",
 ]
 
-class Reg16Ref():
+class Ref:
+    def to_string(self, memory, **kwargs):
+        return str(self)
+
+class Reg16Ref(Ref):
     def __init__(self, reg):
         self.reg = reg >> 1
 
     def __str__(self):
         return RegNames16[self.reg]
 
-class Reg8Ref():
+class Reg8Ref(Ref):
     def __init__(self, reg):
         self.reg = reg
 
     def __str__(self):
         return RegNames8[self.reg]
 
-class PostIncRef:
+class PostIncRef(Ref):
     def __init__(self, reg):
         self.reg = reg
 
     def __str__(self):
         return f"{self.reg}++"
 
-class PreDecRef:
+class PreDecRef(Ref):
     def __init__(self, reg):
         self.reg = reg
 

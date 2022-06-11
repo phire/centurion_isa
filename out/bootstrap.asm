@@ -1,10 +1,10 @@
 
 EntryPoint:
 fc00:    1a 02        bs1 L_fc04	 ; Check the Sense switch to see if we should jump straight to DIAG
-fc02:    73 03        jump (PC+0x03) L_fc07
+fc02:    73 03        jmp [L_fc07:+0x3]
 
 L_fc04:
-fc04:    71 80 01     jump #0x8001 L_8001
+fc04:    71 80 01     jmp [L_8001:0x8001]
 
 L_fc07:
 fc07:    80 c5        ld AL, #0xc5
@@ -19,9 +19,9 @@ fc12:    0e           dly
 Prompt:
 fc13:    90 10 00     ld A, #0x1000
 fc16:    5f           mov S, A	 ; Setup stack at 0x1000 (probally)
-fc17:    7b 79        call (PC+0x79) WriteString
+fc17:    7b 79        call [WriteString:+0x79]
 fc19:    "D=\0"
-fc1c:    7b 72        call (PC+0x72) ReadCharTramp
+fc1c:    7b 72        call [ReadCharTramp:+0x72]
 fc1e:    c0 c6        ld BL, #0xc6	 ; B == 'F'
 fc20:    49           sub! BL, AL
 fc21:    e5 a2        st BL, [--S]
@@ -34,7 +34,7 @@ fc2c:    49           sub! BL, AL
 fc2d:    15 50        bnz PrintError
 
 GetNextChar:
-fc2f:    7b 72        call (PC+0x72) ReadChar
+fc2f:    7b 72        call [ReadChar:+0x72]
 fc31:    c0 50        ld BL, #0x50
 fc33:    40 31        add AL, BL
 fc35:    16 48        blt PrintError	 ; Reject anything below ASCI 0x30 aka '0'
@@ -65,28 +65,28 @@ fc61:    2f 06        dma_enable
 fc63:    2f a0        dma_load_addr S
 fc65:    90 ff f6     ld A, #0xfff6
 fc68:    2f 02        dma_load_count A
-fc6a:    7b 22        call (PC+0x22) FFC_CommandTramp
+fc6a:    7b 22        call [FFC_CommandTramp:+0x22]
 fc6c:    43           (0x43)
 fc6d:    90 01 00     ld A, #0x0100
 fc70:    2f 00        dma_load_addr A
 fc72:    90 f0 ff     ld A, #0xf0ff
 fc75:    2f 02        dma_load_count A
-fc77:    7b 15        call (PC+0x15) FFC_CommandTramp
+fc77:    7b 15        call [FFC_CommandTramp:+0x15]
 fc79:    45           (0x45)
 fc7a:    15 03        bnz PrintError
-fc7c:    71 01 03     jump #0x0103 IPL_Entry_point
+fc7c:    71 01 03     jmp [IPL_Entry_point:0x0103]
 
 PrintError:
-fc7f:    7b 11        call (PC+0x11) WriteString
+fc7f:    7b 11        call [WriteString:+0x11]
 fc81:    "\r\nERROR\r\n\0"
 fc8b:    07           rl
-fc8c:    73 85        jump (PC-0x7b) Prompt
+fc8c:    73 85        jmp [Prompt:-0x7b]
 
 FFC_CommandTramp:
-fc8e:    73 73        jump (PC+0x73) FFC_Command
+fc8e:    73 73        jmp [FFC_Command:+0x73]
 
 ReadCharTramp:
-fc90:    73 11        jump (PC+0x11) ReadChar
+fc90:    73 11        jmp [ReadChar:+0x11]
 
 WriteString:
 fc92:    81 f2 00     ld AL, [0xf200]
@@ -99,7 +99,7 @@ fc9d:    09           ret
 
 L_fc9e:
 fc9e:    a1 f2 01     st AL, [0xf201]
-fca1:    73 ef        jump (PC-0x11) WriteString
+fca1:    73 ef        jmp [WriteString:-0x11]
 
 ReadChar:
 fca3:    84 ee        ld AL, @[pc + -0x12]
@@ -119,13 +119,13 @@ fcb7:    a4 e6        st AL, @[pc + -0x1a]
 fcb9:    09           ret
 
 LoadFromCMDTramp:
-fcba:    73 62        jump (PC+0x62) LoadFromCMD
+fcba:    73 62        jmp [LoadFromCMD:+0x62]
 
 LoadFromHawkTramp:
-fcbc:    73 02        jump (PC+0x02) LoadFromHawk
+fcbc:    73 02        jmp [LoadFromHawk:+0x2]
 
 PrintErrorTramp:
-fcbe:    73 bf        jump (PC-0x41) PrintError
+fcbe:    73 bf        jmp [PrintError:-0x41]
 
 LoadFromHawk:
 fcc0:    c0 07        ld BL, #0x07
@@ -138,7 +138,7 @@ fccd:    5a           and! B, A
 fcce:    14 af        bz PrintError
 fcd0:    3a           clr! A
 fcd1:    b1 f1 41     st A, [0xf141]	 ; HawkSectorAddressReg = (0, 0, 0)
-fcd4:    7b 3b        call (PC+0x3b) HawkCommand	 ; HawkCommand(3) - ReturnTrackZero
+fcd4:    7b 3b        call [HawkCommand:+0x3b]	 ; HawkCommand(3) - ReturnTrackZero
 fcd6:    03           (0x3)
 
 L_fcd7:
@@ -155,15 +155,15 @@ fce9:    90 01 00     ld A, #0x0100	 ; DMA transfer destination address
 fcec:    2f 00        dma_load_addr A
 fcee:    90 ea 1f     ld A, #0xea1f	 ; DMA transfer size, 0xffff - (14 sectors at 400 bytes each)
 fcf1:    2f 02        dma_load_count A
-fcf3:    7b 1c        call (PC+0x1c) HawkCommand	 ; HawkCommand(0) - Read
+fcf3:    7b 1c        call [HawkCommand:+0x1c]	 ; HawkCommand(0) - Read
 fcf5:    00           (0x0)
 fcf6:    81 f1 44     ld AL, [0xf144]	 ; Check Command Status (0 == success?)
 fcf9:    15 84        bnz PrintError
-fcfb:    71 01 03     jump #0x0103 IPL_Entry_point	 ; Transfer control to the IPL that was loaded off disk
-fcfe:    7b 2f        call (PC+0x2f) L_fd2f
+fcfb:    71 01 03     jmp [IPL_Entry_point:0x0103]	 ; Transfer control to the IPL that was loaded off disk
+fcfe:    7b 2f        call [L_fd2f:+0x2f]
 
 AlternativeEntryPoint:
-fd00:    71 fc 00     jump #0xfc00 EntryPoint
+fd00:    71 fc 00     jmp [EntryPoint:0xfc00]
 
 FFC_Command:
 fd03:    85 41        ld AL, [X++]
@@ -187,7 +187,7 @@ fd19:    10 fb        bc WaitForHawkCommand
 fd1b:    09           ret
 
 PrintErrorTramp2:
-fd1c:    73 a0        jump (PC-0x60) PrintErrorTramp
+fd1c:    73 a0        jmp [PrintErrorTramp:-0x60]
 
 LoadFromCMD:
 fd1e:    a5 a2        st AL, [--S]
@@ -225,7 +225,7 @@ fd4e:    15 f3        bnz L_fd43
 fd50:    80 ff        ld AL, #0xff
 fd52:    a5 81        st AL, [Z++]
 fd54:    80 08        ld AL, #0x08
-fd56:    7b 4e        call (PC+0x4e) CMDWait
+fd56:    7b 4e        call [CMDWait:+0x4e]
 fd58:    80 41        ld AL, #0x41
 fd5a:    a1 f8 08     st AL, [0xf808]
 fd5d:    0e           dly
@@ -245,11 +245,11 @@ fd75:    80 43        ld AL, #0x43
 fd77:    a1 f8 08     st AL, [0xf808]
 fd7a:    0e           dly
 fd7b:    0e           dly
-fd7c:    7b 20        call (PC+0x20) CMDErrorCheck
-fd7e:    73 02        jump (PC+0x02) L_fd82
+fd7c:    7b 20        call [CMDErrorCheck:+0x20]
+fd7e:    73 02        jmp [L_fd82:+0x2]
 
 PrintErrorTramp3:
-fd80:    73 9a        jump (PC-0x66) PrintErrorTramp2
+fd80:    73 9a        jmp [PrintErrorTramp2:-0x66]
 
 L_fd82:
 fd82:    90 01 00     ld A, #0x0100
@@ -261,9 +261,9 @@ fd8e:    2f 06        dma_enable
 fd90:    80 45        ld AL, #0x45
 fd92:    a1 f8 08     st AL, [0xf808]
 fd95:    80 08        ld AL, #0x08
-fd97:    7b 0d        call (PC+0x0d) CMDWait
-fd99:    7b 03        call (PC+0x03) CMDErrorCheck
-fd9b:    71 01 03     jump #0x0103 IPL_Entry_point
+fd97:    7b 0d        call [CMDWait:+0xd]
+fd99:    7b 03        call [CMDErrorCheck:+0x3]
+fd9b:    71 01 03     jmp [IPL_Entry_point:0x0103]
 
 CMDErrorCheck:
     ; Returns if no error
@@ -272,7 +272,7 @@ fda1:    15 01        bnz CMDError
 fda3:    09           ret
 
 CMDError:
-fda4:    73 da        jump (PC-0x26) PrintErrorTramp3
+fda4:    73 da        jmp [PrintErrorTramp3:-0x26]
 
 CMDWait:
     ; Spins until command is done
@@ -288,14 +288,14 @@ fdb1:    95 41        ld A, [X++]
 fdb3:    b3 03        st A, [pc + 0x03]
 
 L_fdb5:
-fdb5:    79 4c 93     call #0x4c93 L_4c93
+fdb5:    79 4c 93     call [L_4c93:0x4c93]
 fdb8:    47           unknown
 fdb9:    be           st A, [C]
 fdba:    6d a2        st X, [--S]
 fdbc:    32 40        clr X, 0
 
 L_fdbe:
-fdbe:    79 4c e7     call #0x4ce7 L_4ce7
+fdbe:    79 4c e7     call [L_4ce7:0x4ce7]
 fdc1:    4d           mov! BL, AL
 fdc2:    14 2a        bz L_fdee
 fdc4:    c0 8d        ld BL, #0x8d
@@ -325,7 +325,7 @@ fde5:    37 40        rlc X, 1
 fde7:    29           dec! AL
 fde8:    18 fa        bgt L_fde4
 fdea:    40 35        add XL, BL
-fdec:    73 d0        jump (PC-0x30) L_fdbe
+fdec:    73 d0        jmp [L_fdbe:-0x30]
 
 L_fdee:
 fdee:    55 40        mov A, X
@@ -334,9 +334,9 @@ fdf2:    09           ret
 
 L_fdf3:
 fdf3:    65 a1        ld X, [S++]
-fdf5:    73 be        jump (PC-0x42) L_fdb5
+fdf5:    73 be        jmp [L_fdb5:-0x42]
 fdf7:    d5 41        ld B, [X++]
-fdf9:    7d 80        call (A + 0x80)
+fdf9:    7d 80        call [Z]
 fdfb:    0c           unknown
 fdfc:    d0 4b 65     ld B, #0x4b65
 fdff:    f5 00        st B, [A]

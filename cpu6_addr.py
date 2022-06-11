@@ -1,10 +1,8 @@
-from cpu6_regs import Reg16Ref, PostIncRef, PreDecRef
+from cpu6_regs import Reg16Ref, PostIncRef, PreDecRef, Ref
 from generic import get_be16, get_signed_8
 
-class AddrRef:
-    pass
 
-class DirectRef(AddrRef):
+class DirectRef(Ref):
     def __init__(self, addr):
         self.addr = addr
 
@@ -14,7 +12,12 @@ class DirectRef(AddrRef):
     def getValue(self):
         return self.addr
 
-class IndexedRef(AddrRef):
+    def to_string(self, memory, **kwargs):
+        if label := memory.get_label(self.addr):
+            return f"[{label}:{self.addr:#06x}]"
+        return str(self)
+
+class IndexedRef(Ref):
     def __init__(self, base, disp=0):
         self.base = base
         self.disp = disp
@@ -24,7 +27,8 @@ class IndexedRef(AddrRef):
             return f"[{self.base}]"
         return f"[{self.base} + {self.disp:#06x}]"
 
-class ComplexRef(AddrRef):
+
+class ComplexRef(Ref):
     def __init__(self, base, index, disp):
         self.base = base
         self.index = index
@@ -35,7 +39,7 @@ class ComplexRef(AddrRef):
             return f"[{self.base} + {self.index}]"
         return f"[{self.base} + {self.index} + {self.disp:#06x}]"
 
-class LiteralRef(AddrRef):
+class LiteralRef(Ref):
     def __init__(self, val, size, pc=None):
         self.val = val
         self.size = size
@@ -46,7 +50,7 @@ class LiteralRef(AddrRef):
             return f"#{self.val:#04x}"
         return f"#{self.val:#06x}"
 
-class PcDisplacementRef(AddrRef):
+class PcDisplacementRef(Ref):
     def __init__(self, pc, disp):
         self.pc = pc
         self.disp = disp
@@ -57,13 +61,20 @@ class PcDisplacementRef(AddrRef):
     def getValue(self):
         return self.pc + self.disp
 
-class IndirectRef(AddrRef):
+    def to_string(self, memory, **kwargs):
+        if label := memory.get_label(self.pc + self.disp):
+            return f"[{label}:{self.disp:+#04x}]"
+        return str(self)
+
+class IndirectRef(Ref):
     def __init__(self, ref):
         self.ref = ref
 
     def __str__(self):
         return f"@{self.ref}"
 
+    def to_string(self, memory, **kwargs):
+        return f"@{self.ref.to_string(memory, **kwargs)}"
 
 # A short 2bit address mode, which will consume more bytes from PC
 def Cpu6AddrMode(mode, pc, memory, prev=None):

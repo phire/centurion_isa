@@ -3,7 +3,7 @@ Start:
 0100:    01           nop
 0101:    01           nop
 0102:    01           nop
-0103:    73 03        jump (PC+0x03) L_0108
+0103:    73 03        jmp [L_0108:+0x3]
 0105:    00
 0106:    64
 0107:    c5
@@ -22,21 +22,21 @@ L_0108:
 0120:    90 00 f0     ld A, #0x00f0	 ; Initialize stack
 0123:    5f           mov S, A
 0124:    80 f1        ld AL, #0xf1	 ; This sends RTZ command to our disks.
-0126:    7b 19        call (PC+0x19) L_0141
+0126:    7b 19        call [L_0141:+0x19]
 0128:    80 f5        ld AL, #0xf5
-012a:    7b 15        call (PC+0x15) L_0141
+012a:    7b 15        call [L_0141:+0x15]
 012c:    80 f9        ld AL, #0xf9
-012e:    7b 11        call (PC+0x11) L_0141
+012e:    7b 11        call [L_0141:+0x11]
 0130:    80 fd        ld AL, #0xfd
-0132:    7b 0d        call (PC+0x0d) L_0141
+0132:    7b 0d        call [L_0141:+0xd]
 0134:    1a 02        bs1 L_0138
-0136:    73 37        jump (PC+0x37) L_016f
+0136:    73 37        jmp [L_016f:+0x37]
 
 L_0138:
     ; We go here if sense1 switch is set (DIAG board is present)
 0138:    61 00 1a     ld X, [0x001a]	 ; RT = (0x001a) - 20
 013b:    50 54 ff ec  add X, X, #0xffec	 ; Looks like DIAG overrides our mem test and tells us
-013f:    73 44        jump (PC+0x44) L_0185	 ; size of RAM to use
+013f:    73 44        jmp [L_0185:+0x44]	 ; size of RAM to use
 
 L_0141:
     ; Self-modifying code ahead!!!
@@ -95,9 +95,9 @@ L_0185:
 0185:    69 03 3d     st X, [0x033d]	 ; Store final address of our RAM
 0188:    55 42        mov B, X
 018a:    50 32 fd 55  add B, B, #0xfd55
-018e:    f1 04 a0     st B, [0x04a0]
+018e:    f1 04 a0     st B, [LoadBuffer0:0x04a0]
 0191:    50 32 fe 70  add B, B, #0xfe70
-0195:    f1 04 a2     st B, [0x04a2]
+0195:    f1 04 a2     st B, [LoadBuffer1:0x04a2]
 0198:    50 32 fe 70  add B, B, #0xfe70
 019c:    55 2a        mov S, B
 019e:    d0 fe e5     ld B, #0xfee5
@@ -113,7 +113,7 @@ L_0185:
 
 L_01b6:
 01b6:    a1 03 77     st AL, [0x0377]
-01b9:    73 42        jump (PC+0x42) L_01fd
+01b9:    73 42        jmp [L_01fd:+0x42]
 
 BackToPrompt:
     ; The code jumps here when for instance empty string was entered on CODE prompt
@@ -136,31 +136,31 @@ BackToPrompt:
 01c4:    09           (0x9)
 01c5:    a0           (0xa0)
 01c6:    03 65        (0x365)
-01c8:    79 05 5a     call #0x055a L_055a
-01cb:    79 05 36     call #0x0536 PrintString
+01c8:    79 05 5a     call [L_055a:0x055a]
+01cb:    79 05 36     call [PrintString:0x0536]
 01ce:    03 42        (0x342)	 ; WIPL version string
 01d0:    80 8a        ld AL, #0x8a
 01d2:    a1 03 44     st AL, [0x0344]
-01d5:    7c f5        call @(PC-0x0b) @0x1cc
+01d5:    7c f5        call @[pc + -0xb]
 01d7:    03 4e        (0x34e)	 ; "NAME"
-01d9:    79 06 09     call #0x0609 ReadLine
+01d9:    79 06 09     call [ReadLine:0x0609]
 01dc:    03 63        (0x363)	 ; name_buffer
-01de:    79 05 36     call #0x0536 PrintString
+01de:    79 05 36     call [PrintString:0x0536]
 01e1:    03 54        (0x354)	 ; "DISK"
-01e3:    79 06 09     call #0x0609 ReadLine
+01e3:    79 06 09     call [ReadLine:0x0609]
 01e6:    03 74        (0x374)	 ; disk_buffer
-01e8:    79 05 36     call #0x0536 PrintString
+01e8:    79 05 36     call [PrintString:0x0536]
 01eb:    03 5a        (0x35a)	 ; "CODE"
 01ed:    80 01        ld AL, #0x01
 01ef:    a1 05 ea     st AL, [0x05ea]
-01f2:    79 06 09     call #0x0609 ReadLine
+01f2:    79 06 09     call [ReadLine:0x0609]
 01f5:    03 78        (0x378)	 ; code_buffer
-01f7:    79 05 36     call #0x0536 PrintString
+01f7:    79 05 36     call [PrintString:0x0536]
 01fa:    03 60        (0x360)
 01fc:    05           di
 
 L_01fd:
-01fd:    79 06 78     call #0x0678 L_0678
+01fd:    79 06 78     call [L_0678:0x0678]
 0200:    03 63        (0x363)	 ; name_buffer
 0202:    90 03 74     ld A, #0x0374	 ; disk_buffer
 0205:    5e           mov Z, A
@@ -196,7 +196,7 @@ L_021c:
 023a:    19 03        ble L_023f
 
 BackToPrompt_tramp:
-023c:    71 01 bb     jump #0x01bb BackToPrompt
+023c:    71 01 bb     jmp [BackToPrompt:0x01bb]
 
 L_023f:
 023f:    e2 04 b1     st BL, @[0x04b1]	 ; This writes Hawk unit select register
@@ -204,22 +204,22 @@ L_023f:
 0245:    5e           mov Z, A
 0246:    95 81        ld A, [Z++]	 ; Check string length
 0248:    14 06        bz L_0250
-024a:    79 03 c9     call #0x03c9 StrToNum
+024a:    79 03 c9     call [StrToNum:0x03c9]
     ; EX points at the first non-numeric character after the code
 024d:    b1 01 05     st A, [0x0105]	 ; Store entered_disk_code
 
 L_0250:
 0250:    60 00 0e     ld X, #0x000e	 ; Track 0 side 0 sector 15
-0253:    79 04 b0     call #0x04b0 LoadSector
+0253:    79 04 b0     call [LoadSector:0x04b0]
 0256:    00           (0x0)
     ; EX is an address of the loaded sector
 0257:    85 88 08     ld AL, [Z + 0x0008]	 ; Disk format flag
 025a:    28           inc! AL	 ; Must be equal to 0xff
 025b:    14 09        bz L_0266	 ; Proceed to disk code checking
 025d:    04           ei
-025e:    79 05 36     call #0x0536 PrintString
+025e:    79 05 36     call [PrintString:0x0536]
 0261:    03 7f        (0x37f)	 ; Incorrect disk format
-0263:    73 d7        jump (PC-0x29) BackToPrompt_tramp
+0263:    73 d7        jmp [BackToPrompt_tramp:-0x29]
 0265:    ff	 ; This is a "check disk code" flag. If zero, the check will be bypassed.
            	 ; In pristine bootloader, read from the disk image, there's a 00 at this location.
            	 ; So, it is patched at runtime. This means there should be a way to bypass the check,
@@ -250,7 +250,7 @@ L_0273:
 027a:    81 02 65     ld AL, [0x0265]	 ; This is "request check" flag. We don't know how/where it's set.
 027d:    15 05        bnz L_0284	 ; If not zero, the check is required
 027f:    f1 01 05     st B, [0x0105]	 ; entered_disk_code = expected_entered_disk_code
-0282:    73 0f        jump (PC+0x0f) L_0293	 ; Bypass
+0282:    73 0f        jmp [L_0293:+0xf]	 ; Bypass
 
 L_0284:
     ; Check the disk code
@@ -258,9 +258,9 @@ L_0284:
 0287:    59           sub! B, A	 ; BX = expected_disk_code
 0288:    14 09        bz L_0293	 ; Proceed if there's a match
 028a:    04           ei
-028b:    79 05 36     call #0x0536 PrintString
+028b:    79 05 36     call [PrintString:0x0536]
 028e:    03 9f        (0x39f)	 ; Incorrect disk code
-0290:    71 04 9d     jump #0x049d Stop
+0290:    71 04 9d     jmp [Stop:0x049d]
 
 L_0293:
     ; Disk code is correct. Now we read what we'll call a "boot directory".
@@ -274,7 +274,7 @@ L_0293:
 02a0:    50 20        add A, B	 ; AX = track number here
 02a2:    35 03        sll A, 4
 02a4:    5b           mov X, A	 ; sector = track * 16 (sectors per track)
-02a5:    79 04 b0     call #0x04b0 LoadSector
+02a5:    79 04 b0     call [LoadSector:0x04b0]
 02a8:    00           (0x0)
 02a9:    95 88 0e     ld A, [Z + 0x000e]	 ; EX is still sector address
 02ac:    b1 04 8a     st A, [0x048a]
@@ -291,10 +291,10 @@ L_0293:
     ; what we think is a data file name.
 02af:    30 8f        inc Z, 16	 ; name_on_disk = sector_base + 16, this skips the first entry.
                                	 ; That first entry looks like a volume name on the image we have.
-02b1:    79 05 07     call #0x0507 memcpy	 ; Before proceeding, we copy part of ourselves to the top of RAM.
-                                         	 ; I guess we're preparing to load the boot file into low memory, which would
-                                         	 ; overwrite us.
-                                         	 ; Calls to the relocated fragment are done via CallHighMem routine
+02b1:    79 05 07     call [memcpy:0x0507]	 ; Before proceeding, we copy part of ourselves to the top of RAM.
+                                          	 ; I guess we're preparing to load the boot file into low memory, which would
+                                          	 ; overwrite us.
+                                          	 ; Calls to the relocated fragment are done via CallHighMem routine
 02b4:    01 1b        (0x11b)	 ; length = 283 bytes
 02b6:    7e e5        (0x7ee5)	 ; destination, set to top_of_ram - 283
 02b8:    03 ec        (0x3ec)	 ; source
@@ -310,7 +310,7 @@ L_02ba:
 02bb:    d0 84 8d     ld B, #0x848d
 02be:    59           sub! B, A
 02bf:    15 03        bnz L_02c4	 ; Go back to the prompt if so
-02c1:    71 02 3c     jump #0x023c BackToPrompt_tramp
+02c1:    71 02 3c     jmp [BackToPrompt_tramp:0x023c]
 
 L_02c4:
 02c4:    90 03 65     ld A, #0x0365
@@ -328,16 +328,16 @@ L_02cb:
 02d8:    22 00        clr AH, 0
 02da:    50 08        add Z, A	 ; name_on_disk += length (remaining) - this skips past the string
 02dc:    50 98 00 06  add Z, Z, #0x0006	 ; EX = EX + 6 - this skips over to the next entry
-02e0:    d1 04 a0     ld B, [0x04a0]	 ; BX = LoadBuffer0 - sector address
+02e0:    d1 04 a0     ld B, [LoadBuffer0:0x04a0]	 ; BX = LoadBuffer0 - sector address
 02e3:    50 32 01 90  add B, B, #0x0190	 ; This makes sense as add BX, BX, 400 - point at the end of sector
 02e7:    51 82        sub B, Z
 02e9:    15 cf        bnz L_02ba	 ; Check the next entry if not reached the end
 02eb:    3e           inc X	 ; Go to the next sector
 02ec:    90 ff a9     ld A, #0xffa9
-02ef:    7b 4b        call (PC+0x4b) CallHighMem	 ; Call (end_of_ram - 87) = LoadSector
+02ef:    7b 4b        call [CallHighMem:+0x4b]	 ; Call (end_of_ram - 87) = LoadSector
 02f1:    00           HALT
-02f2:    73 c6        jump (PC-0x3a) L_02ba	 ; Restart the search from the beginning.
-                                           	 ; EX will point at the beginning of the sector this time!!!
+02f2:    73 c6        jmp [L_02ba:-0x3a]	 ; Restart the search from the beginning.
+                                        	 ; EX will point at the beginning of the sector this time!!!
 
 L_02f4:
     ; NAME found. EX points right after the string in the loaded sector.
@@ -348,7 +348,7 @@ L_02f4:
 02f7:    5d           mov B, A
 02f8:    3d           sll! A
 02f9:    58           add! B, A
-02fa:    91 04 a2     ld A, [0x04a2]
+02fa:    91 04 a2     ld A, [LoadBuffer1:0x04a2]
 02fd:    58           add! B, A
 02fe:    f5 a2        st B, [--S]
 0300:    95 81        ld A, [Z++]
@@ -357,7 +357,7 @@ L_02f4:
 0307:    85 81        ld AL, [Z++]
 0309:    b5 a2        st A, [--S]
 030b:    90 ff a9     ld A, #0xffa9
-030e:    7b 2c        call (PC+0x2c) CallHighMem	 ; Call (end_of_ram - 87) = LoadSector
+030e:    7b 2c        call [CallHighMem:+0x2c]	 ; Call (end_of_ram - 87) = LoadSector
 0310:    01           nop
 0311:    d5 a8 02     ld B, [S + 0x0002]
 0314:    3a           clr! A
@@ -370,7 +370,7 @@ L_031b:
 031b:    3f           dec X
 031c:    16 03        blt L_0321
 031e:    3d           sll! A
-031f:    73 fa        jump (PC-0x06) L_031b
+031f:    73 fa        jmp [L_031b:-0x6]
 
 L_0321:
 0321:    dd           ld B, [S]
@@ -385,15 +385,15 @@ L_0321:
 0330:    58           add! B, A
 0331:    f1 00 fe     st B, [0x00fe]
 0334:    90 fe e5     ld A, #0xfee5
-0337:    7b 03        call (PC+0x03) CallHighMem	 ; Call (end_of_ram - 283) - boot the file ???
+0337:    7b 03        call [CallHighMem:+0x3]	 ; Call (end_of_ram - 283) - boot the file ???
 
 L_0339:
-0339:    71 01 bb     jump #0x01bb BackToPrompt
+0339:    71 01 bb     jmp [BackToPrompt:0x01bb]
 
 CallHighMem:
 033c:    d0 80 00     ld B, #0x8000	 ; BX = end of RAM, patched in the beginning
 033f:    58           add! B, A
-0340:    75 20        jump (A + 0x20)
+0340:    75 20        jmp [B]
 0342:    10, "\nHDIPL 6.2"
 034e:    4, "NAME"
 0354:    4, "DISK"
@@ -447,9 +447,9 @@ StrToNum:
     ; Parses a numeric string, pointed to by EX, and returns the
     ; parsed value in AX. EX is updated to point at the first non-digit character
 03c9:    8c           ld AL, [Z]	 ; Check the first character
-03ca:    7b f1        call (PC-0x0f) AsciiToHex
+03ca:    7b f1        call [AsciiToHex:-0xf]
 03cc:    17 03        bp L_03d1
-03ce:    71 01 bb     jump #0x01bb BackToPrompt	 ; The character is invalid
+03ce:    71 01 bb     jmp [BackToPrompt:0x01bb]	 ; The character is invalid
 
 L_03d1:
     ; A correcr digit has been entered
@@ -458,7 +458,7 @@ L_03d1:
 
 L_03d4:
 03d4:    85 81        ld AL, [Z++]	 ; Do the conversion again, increment pointer this time
-03d6:    7b e5        call (PC-0x1b) AsciiToHex
+03d6:    7b e5        call [AsciiToHex:-0x1b]
 03d8:    17 05        bp L_03df
 03da:    31 80        dec Z, 1	 ; Invalid character, restore the pointer
                               	 ; It now points behind our number
@@ -476,7 +476,7 @@ L_03df:
 03e7:    8d           ld AL, [S]
 03e8:    58           add! B, A	 ; BX += digit
 03e9:    fd           st B, [S]	 ; value = value * 10 + digit
-03ea:    73 e8        jump (PC-0x18) L_03d4
+03ea:    73 e8        jmp [L_03d4:-0x18]
 
 RelocatablePart:
     ; This code is copied to high RAM (top - 283) and operates from there
@@ -490,7 +490,7 @@ RelocatablePart:
 03f8:    3a           clr! A
 03f9:    39           dec! A
 03fa:    b3 5e        st A, [pc + 0x5e]
-03fc:    7b 53        call (PC+0x53) L_0451
+03fc:    7b 53        call [L_0451:+0x53]
 03fe:    d0 00 4c     ld B, #0x004c
 0401:    59           sub! B, A
 0402:    15 26        bnz L_042a
@@ -498,11 +498,11 @@ RelocatablePart:
 0407:    b3 40        st A, [pc + 0x40]
 0409:    50 48        add Z, X
 040b:    30 80        inc Z, 1
-040d:    7b 31        call (PC+0x31) L_0440
+040d:    7b 31        call [L_0440:+0x31]
 040f:    30 80        inc Z, 1
 
 L_0411:
-0411:    7b 2d        call (PC+0x2d) L_0440
+0411:    7b 2d        call [L_0440:+0x2d]
 0413:    45 33        mov BL, BL
 0415:    14 13        bz L_042a
 
@@ -518,7 +518,7 @@ L_0417:
 
 L_0424:
 0424:    85 81        ld AL, [Z++]
-0426:    73 e9        jump (PC-0x17) L_0411
+0426:    73 e9        jmp [L_0411:-0x17]
 0428:    00
 0429:    00
 
@@ -532,12 +532,12 @@ L_042a:
 0433:    86           unknown
 0434:    50 46        add Y, X
 0436:    50 48        add Z, X
-0438:    73 ea        jump (PC-0x16) L_0424
+0438:    73 ea        jmp [L_0424:-0x16]
 
 L_043a:
 043a:    32 80        clr Z, 0
 043c:    80 c5        ld AL, #0xc5
-043e:    75 60        jump (A + 0x60)
+043e:    75 60        jmp [Y]
 
 L_0440:
 0440:    c5 81        ld BL, [Z++]
@@ -579,27 +579,27 @@ L_0451:
 047e:    5d           mov B, A
 047f:    3d           sll! A
 0480:    58           add! B, A
-0481:    93 1f        ld A, [pc + 0x1f]
+0481:    93 1f        ld A, [LoadBuffer1:+0x1f]
 0483:    58           add! B, A
 0484:    94 ce        ld A, @[pc + -0x32]
 0486:    f3 cc        st B, [pc + -0x34]
 0488:    3b           not! A
 0489:    60 57 79     ld X, #0x5779
 048c:    50 04        add X, A
-048e:    7b 20        call (PC+0x20) LoadSector
+048e:    7b 20        call [LoadSector:+0x20]
 0490:    01           nop
 0491:    63 c1        ld X, [pc + -0x3f]
 0493:    65 48 01     ld X, [X + 0x0001]
 
 L_0496:
-0496:    7b 18        call (PC+0x18) LoadSector
+0496:    7b 18        call [LoadSector:+0x18]
 0498:    00           HALT
 0499:    65 a1        ld X, [S++]
-049b:    73 a3        jump (PC-0x5d) L_0440
+049b:    73 a3        jmp [L_0440:-0x5d]
 
 Stop:
 049d:    00           HALT
-049e:    73 fd        jump (PC-0x03) Stop
+049e:    73 fd        jmp [Stop:-0x3]
 
 LoadBuffer0:
 04a0:    7d 55        (0x7d55)
@@ -624,18 +624,18 @@ LoadSector:
     ; argument: 0 or 1. Address of the buffer is returned in EX.
 04b0:    90 f1 40     ld A, #0xf140
 04b3:    5e           mov Z, A	 ; EX = DSK_BASE
-04b4:    93 ea        ld A, [pc + -0x16]	 ; AX = LoadBuffer0
+04b4:    93 ea        ld A, [LoadBuffer0:-0x16]	 ; AX = LoadBuffer0
 04b6:    c5 41        ld BL, [X++]
 04b8:    14 02        bz L_04bc	 ; If literal argument is not 0...
-04ba:    93 e6        ld A, [pc + -0x1a]	 ; .. then AX = LoadBuffer1
+04ba:    93 e6        ld A, [LoadBuffer1:-0x1a]	 ; .. then AX = LoadBuffer1
 
 L_04bc:
 04bc:    b3 10        st A, [pc + 0x10]	 ; Preserve loading address (patch instruction at 04cd)
-04be:    7b e4        call (PC-0x1c) SetDmaForSectorLoad	 ; Setup DMA to read
-04c0:    7b 1f        call (PC+0x1f) SeekToTrack
+04be:    7b e4        call [SetDmaForSectorLoad:-0x1c]	 ; Setup DMA to read
+04c0:    7b 1f        call [SeekToTrack:+0x1f]
 04c2:    80 00        ld AL, #0x00
 04c4:    a5 88 08     st AL, [Z + 0x0008]	 ; READ command
-04c7:    7b 2c        call (PC+0x2c) WaitForDataReady
+04c7:    7b 2c        call [WaitForDataReady:+0x2c]
     ; Upon completion status register value will be in AX
 04c9:    24 00        srl AH, 1	 ; Check HAWK_STATUS & 0x0100
 04cb:    15 05        bnz L_04d2	 ; If bit set, recalibrate, seek and retry (read error)
@@ -646,21 +646,21 @@ L_04bc:
 L_04d2:
 04d2:    80 03        ld AL, #0x03
 04d4:    a5 88 08     st AL, [Z + 0x0008]	 ; RTZ command
-04d7:    7b 22        call (PC+0x22) WaitForHawkCmdCompletion
+04d7:    7b 22        call [WaitForHawkCmdCompletion:+0x22]
 04d9:    8c           ld AL, [Z]
 04da:    a5 88 0b     st AL, [Z + 0x000b]
 04dd:    93 ef        ld A, [pc + -0x11]	 ; AX = loading address (from the patched insn)
-04df:    73 db        jump (PC-0x25) L_04bc	 ; Retry
+04df:    73 db        jmp [L_04bc:-0x25]	 ; Retry
 
 SeekToTrack:
-04e1:    7b 18        call (PC+0x18) WaitForHawkCmdCompletion
+04e1:    7b 18        call [WaitForHawkCmdCompletion:+0x18]
 04e3:    95 a8 02     ld A, [S + 0x0002]
 04e6:    d0 3f ff     ld B, #0x3fff
 04e9:    5a           and! B, A
 04ea:    f5 88 01     st B, [Z + 0x0001]	 ; Write sector address register
 04ed:    80 02        ld AL, #0x02	 ; SEEK command
 04ef:    a5 88 08     st AL, [Z + 0x0008]
-04f2:    7b 07        call (PC+0x07) WaitForHawkCmdCompletion
+04f2:    7b 07        call [WaitForHawkCmdCompletion:+0x7]
 04f4:    09           ret
 
 WaitForDataReady:
@@ -688,12 +688,12 @@ memcpy:
                                  	 ; but what's the real purpose of this fragment here ? In pristine on-disk WIPL it looks the same.
                                  	 ; Is this patched during installation ?
 0509:    5d           mov B, A
-050a:    71 05 0d     jump #0x050d 0x50d
+050a:    71 05 0d     jmp [0x050d]
 050d:    f5 a2        st B, [--S]	 ; push length
 050f:    59           sub! B, A	 ; length = min(AX, BX)
 0510:    19 21        ble L_0533
 0512:    da           ld B, [X]	 ; arg[2, 3]
-0513:    79 06 9a     call #0x069a L_069a
+0513:    79 06 9a     call [L_069a:0x069a]
 0516:    a0
 
 L_0517:
@@ -718,14 +718,14 @@ L_0524:
 L_052d:
 052d:    c5 01        ld BL, [A++]
 052f:    e5 61        st BL, [Y++]
-0531:    73 f1        jump (PC-0x0f) L_0524
+0531:    73 f1        jmp [L_0524:-0xf]
 
 L_0533:
 0533:    bd           st A, [S]
-0534:    73 e1        jump (PC-0x1f) L_0517
+0534:    73 e1        jmp [L_0517:-0x1f]
 
 PrintString:
-0536:    7b 22        call (PC+0x22) L_055a
+0536:    7b 22        call [L_055a:+0x22]
 0538:    7e 45        push
 053a:    9a           ld A, [X]
 053b:    5c           mov Y, A
@@ -743,7 +743,7 @@ L_0544:
 054e:    45 31        mov AL, BL
 
 L_0550:
-0550:    7b 12        call (PC+0x12) PrintChar
+0550:    7b 12        call [PrintChar:+0x12]
 0552:    3f           dec X
 0553:    18 ef        bgt L_0544
 
@@ -757,7 +757,7 @@ L_055a:
 055c:    c3 42        ld BL, [pc + 0x42]
 055e:    49           sub! BL, AL
 055f:    14 02        bz L_0563
-0561:    7b 01        call (PC+0x01) PrintChar
+0561:    7b 01        call [PrintChar:+0x1]
 
 L_0563:
 0563:    09           ret
@@ -774,9 +774,9 @@ PrintChar:
 0577:    c0 8d        ld BL, #0x8d
 0579:    49           sub! BL, AL	 ; If character is \r...
 057a:    15 14        bnz L_0590
-057c:    7b 17        call (PC+0x17) RawPrintChar
+057c:    7b 17        call [RawPrintChar:+0x17]
 057e:    80 8a        ld AL, #0x8a	 ; Add \n
-0580:    7b 13        call (PC+0x13) RawPrintChar
+0580:    7b 13        call [RawPrintChar:+0x13]
 0582:    80 8d        ld AL, #0x8d
 0584:    a3 1a        st AL, [pc + 0x1a]	 ; (0x5a0) - preserve the original character ???
 0586:    0e           dly
@@ -784,13 +784,13 @@ PrintChar:
 0589:    09           ret
 
 L_058a:
-058a:    7b 09        call (PC+0x09) RawPrintChar
+058a:    7b 09        call [RawPrintChar:+0x9]
 058c:    0e           dly
 058d:    7f 81        pop
 058f:    09           ret
 
 L_0590:
-0590:    7b 03        call (PC+0x03) RawPrintChar
+0590:    7b 03        call [RawPrintChar:+0x3]
 0592:    7f 81        pop
 0594:    09           ret
 
@@ -858,7 +858,7 @@ L_05df:
 05e7:    43 31        or AL, BL
 05e9:    c0 00        ld BL, #0x00
 05eb:    15 03        bnz L_05f0
-05ed:    79 05 64     call #0x0564 PrintChar
+05ed:    79 05 64     call [PrintChar:0x0564]
 
 L_05f0:
 05f0:    c0 e0        ld BL, #0xe0
@@ -896,10 +896,10 @@ ReadLine:
 0615:    38           inc! A
 0616:    5b           mov X, A
 0617:    80 bd        ld AL, #0xbd
-0619:    79 05 64     call #0x0564 PrintChar
+0619:    79 05 64     call [PrintChar:0x0564]
 
 L_061c:
-061c:    7b a6        call (PC-0x5a) L_05c4
+061c:    7b a6        call [L_05c4:-0x5a]
 061e:    c0 88        ld BL, #0x88
 0620:    49           sub! BL, AL
 0621:    14 05        bz L_0628
@@ -914,16 +914,16 @@ L_0628:
 062e:    51 42        sub B, X
 0630:    14 0c        bz L_063e
 0632:    80 a0        ld AL, #0xa0
-0634:    79 05 64     call #0x0564 PrintChar
+0634:    79 05 64     call [PrintChar:0x0564]
 0637:    80 95        ld AL, #0x95
-0639:    7c fa        call @(PC-0x06) @0x635
+0639:    7c fa        call @[pc + -0x6]
 063b:    3f           dec X
-063c:    73 de        jump (PC-0x22) L_061c
+063c:    73 de        jmp [L_061c:-0x22]
 
 L_063e:
 063e:    80 86        ld AL, #0x86
-0640:    7c f3        call @(PC-0x0d) @0x635
-0642:    73 d8        jump (PC-0x28) L_061c
+0640:    7c f3        call @[pc + -0xd]
+0642:    73 d8        jmp [L_061c:-0x28]
 
 L_0644:
 0644:    c0 8d        ld BL, #0x8d
@@ -938,7 +938,7 @@ L_0644:
 0655:    3e           inc X
 0656:    80 b0        ld AL, #0xb0
 0658:    aa           st AL, [X]
-0659:    73 c1        jump (PC-0x3f) L_061c
+0659:    73 c1        jmp [L_061c:-0x3f]
 
 L_065b:
 065b:    95 a4        ld A, @[S]
@@ -981,7 +981,7 @@ L_0683:
 
 L_0690:
 0690:    a5 61        st AL, [Y++]
-0692:    73 ef        jump (PC-0x11) L_0683
+0692:    73 ef        jmp [L_0683:-0x11]
 
 L_0694:
 0694:    95 a1        ld A, [S++]
@@ -1003,7 +1003,7 @@ L_069f:
 
 L_06a6:
 06a6:    a5 21        st AL, [B++]
-06a8:    73 f5        jump (PC-0x0b) L_069f
+06a8:    73 f5        jmp [L_069f:-0xb]
 06aa:    00
 06ab:    00
 06ac:    00

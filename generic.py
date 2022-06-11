@@ -54,7 +54,7 @@ class I:
 
         return InstructionMatch(pc, self, bytes, dict)
 
-    def to_string(self, dict):
+    def to_string(self, dict, memory):
         return self.format.format(**dict)
 
 
@@ -87,7 +87,7 @@ class B(I):
         self.newpc = newpc
         self.name = name
 
-    def to_string(self, dict):
+    def to_string(self, dict, memory):
         if self.newpc == kill_branch:
             return self.name.format(**dict)
         if self.newpc == indirect_relative_call:
@@ -110,7 +110,7 @@ class B(I):
 class InvalidInstruction():
     newpc = None
 
-    def to_string(self, dict):
+    def to_string(self, dict, **kwargs):
         return dict["bytes"] + " <Invalid>"
 
 class QuickInstuction:
@@ -118,7 +118,7 @@ class QuickInstuction:
     def __init__(self, format):
         self.format = format
 
-    def to_string(self, dict):
+    def to_string(self, dict, **kwargs):
         return self.format.format(**dict)
 
 class InstructionMatch:
@@ -142,8 +142,8 @@ class InstructionMatch:
         if self.instruction.newpc is not None:
             self.next_pc = instruction.newpc(**self.dict)
 
-    def __repr__(self):
-        return self.instruction.to_string(self.dict)
+    def to_string(self, memory=None, **kwargs):
+        return self.instruction.to_string(self.dict, memory=memory, **kwargs)
 
 
 

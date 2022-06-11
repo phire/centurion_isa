@@ -16,7 +16,7 @@ DiagEntryPoint:
 801b:    b1 00 fe     st A, [0x00fe]	 ; This is writing a pointer directly into registers.
 801e:    3a           clr! A
 801f:    b1 00 fc     st A, [0x00fc]	 ; Something really funky is going on here.
-8022:    76           syscall	 ; I assume this is calling or jumpting to that function
+8022:    76           unknown	 ; I assume this is calling or jumpting to that function
 
 L_8023:
 8023:    3a           clr! A
@@ -32,7 +32,7 @@ L_8023:
 803d:    c0 0d        ld BL, #0x0d
 803f:    49           sub! BL, AL	 ; Compare with 0b1011
 8040:    15 03        bnz L_8045
-8042:    71 87 28     jump #0x8728 AuxiliaryTestMenu	 ; If dipswitches == 0xb111: 
+8042:    71 87 28     jmp [AuxiliaryTestMenu:0x8728]	 ; If dipswitches == 0xb111: 
                                                     	 ;     Display Auxiliary Test Menu
 
 L_8045:
@@ -43,7 +43,7 @@ L_8045:
 804e:    58           add! B, A
 804f:    99           ld A, [B]
 8050:    a1 f1 08     st AL, [0xf108]
-8053:    75 00        jump (A + 0x00)
+8053:    75 00        jmp [A]
 
 TestFunctions:
     ; This is the table of test functions
@@ -85,7 +85,7 @@ TestFunctions:
 8073:    80 01        (0x8001)	 ; DiagEntryPoint
 
 L_8075:
-8075:    73 8a        jump (PC-0x76) DiagEntryPoint
+8075:    73 8a        jmp [DiagEntryPoint:-0x76]
 
 Fail:
     ; Takes 4 bit error code, displays ((error code << 4) | 0xf) on hex displays
@@ -102,7 +102,7 @@ L_807e:
 8084:    a1 f1 0b     st AL, [0xf10b]
 8087:    a1 f1 06     st AL, [0xf106]
 808a:    3a           clr! A
-808b:    71 00 00     jump #0x0000 L_0000
+808b:    71 00 00     jmp [L_0000:0x0000]
 
 DmaRegTest:
     ; Test_01: Write every single bit pattern to DMA's address and count
@@ -158,17 +158,17 @@ L_80cf:
 80d4:    42 31        and AL, BL
 80d6:    29           dec! AL
 80d7:    15 9c        bnz L_8075
-80d9:    73 b3        jump (PC-0x4d) DmaRegTest
+80d9:    73 b3        jmp [DmaRegTest:-0x4d]
 
 L_80db:
 80db:    c0 31        ld BL, #0x31
 
 L_80dd:
-80dd:    7b 04        call (PC+0x04) FlashFail
-80df:    73 ee        jump (PC-0x12) L_80cf
+80dd:    7b 04        call [FlashFail:+0x4]
+80df:    73 ee        jmp [L_80cf:-0x12]
 
 L_80e1:
-80e1:    73 92        jump (PC-0x6e) L_8075
+80e1:    73 92        jmp [L_8075:-0x6e]
 
 FlashFail:
     ; Takes a error code, sets the fail decimal places and flashes the error
@@ -198,7 +198,7 @@ L_8102:
 8109:    81 f1 10     ld AL, [0xf110]
 810c:    42 01        and AL, AH
 810e:    15 d3        bnz FlashFail
-8110:    73 cf        jump (PC-0x31) L_80e1
+8110:    73 cf        jmp [L_80e1:-0x31]
 
 L_8112:
 8112:    81 f1 10     ld AL, [0xf110]
@@ -231,10 +231,10 @@ L_8130:
 8130:    5d           mov B, A
 8131:    16 06        blt L_8139
 8133:    f5 01        st B, [A++]
-8135:    73 f9        jump (PC-0x07) L_8130
+8135:    73 f9        jmp [L_8130:-0x7]
 
 L_8137:
-8137:    73 aa        jump (PC-0x56) FlashFail
+8137:    73 aa        jmp [FlashFail:-0x56]
 
 L_8139:
 8139:    90 01 00     ld A, #0x0100
@@ -267,7 +267,7 @@ L_8155:
 815d:    95 61        ld A, [Y++]
 815f:    17 f4        bp L_8155
 8161:    a1 f1 0a     st AL, [0xf10a]
-8164:    73 b5        jump (PC-0x4b) MemoryTest
+8164:    73 b5        jmp [MemoryTest:-0x4b]
 
 L_8166:
 8166:    80 f0        ld AL, #0xf0
@@ -275,14 +275,14 @@ L_8166:
 816a:    28           inc! AL
 816b:    28           inc! AL
 816c:    4d           mov! BL, AL
-816d:    7b c8        call (PC-0x38) L_8137
-816f:    73 aa        jump (PC-0x56) MemoryTest
+816d:    7b c8        call [L_8137:-0x38]
+816f:    73 aa        jmp [MemoryTest:-0x56]
 
 Test02_Vector:
 8171:    c0 04        ld BL, #0x04
 8173:    49           sub! BL, AL
 8174:    14 03        bz L_8179
-8176:    71 80 77     jump #0x8077 Fail
+8176:    71 80 77     jmp [Fail:0x8077]
 
 L_8179:
 8179:    80 f0        ld AL, #0xf0
@@ -290,7 +290,7 @@ L_8179:
 817d:    28           inc! AL
 817e:    28           inc! AL
 817f:    4d           mov! BL, AL
-8180:    71 80 7e     jump #0x807e L_807e
+8180:    71 80 7e     jmp [L_807e:0x807e]
 
 Test_03:
 8183:    60 00 10     ld X, #0x0010
@@ -307,7 +307,7 @@ L_8186:
 819b:    90 10 00     ld A, #0x1000
 819e:    55 0c        mov C, A
 81a0:    0a           reti
-81a1:    73 03        jump (PC+0x03) L_81a6
+81a1:    73 03        jmp [L_81a6:+0x3]
 
 Test03_Vector:
 81a3:    55 c4        mov X, C
@@ -335,7 +335,7 @@ L_81a9:
 81ca:    29           dec! AL
 81cb:    29           dec! AL
 81cc:    14 b5        bz Test_03
-81ce:    71 80 01     jump #0x8001 DiagEntryPoint
+81ce:    71 80 01     jmp [DiagEntryPoint:0x8001]
 
 L_81d1:
 81d1:    45 51        mov AL, XL
@@ -343,8 +343,8 @@ L_81d1:
 81d4:    28           inc! AL
 81d5:    28           inc! AL
 81d6:    4d           mov! BL, AL
-81d7:    79 80 e3     call #0x80e3 FlashFail
-81da:    73 a7        jump (PC-0x59) Test_03
+81d7:    79 80 e3     call [FlashFail:0x80e3]
+81da:    73 a7        jmp [Test_03:-0x59]
 
 MuxSendTest:
     ; Test_04: Continually writes U to mux port 0.
@@ -361,7 +361,7 @@ L_81e1:
 81eb:    29           dec! AL
 81ec:    29           dec! AL
 81ed:    14 03        bz L_81f2
-81ef:    71 80 01     jump #0x8001 DiagEntryPoint
+81ef:    71 80 01     jmp [DiagEntryPoint:0x8001]
 
 L_81f2:
 81f2:    81 f2 00     ld AL, [0xf200]
@@ -370,9 +370,9 @@ L_81f2:
 81f7:    11 e8        bnc L_81e1
 81f9:    80 d5        ld AL, #0xd5
 81fb:    a1 f2 01     st AL, [0xf201]
-81fe:    7b 29        call (PC+0x29) CheckMuxStatus
+81fe:    7b 29        call [CheckMuxStatus:+0x29]
 8200:    04           ei
-8201:    73 de        jump (PC-0x22) L_81e1
+8201:    73 de        jmp [L_81e1:-0x22]
 
 MuxRecvTest:
     ; Test_05: Echos whatever is received on mux port 0 back
@@ -387,7 +387,7 @@ L_8208:
 8210:    c0 05        ld BL, #0x05
 8212:    49           sub! BL, AL
 8213:    14 03        bz L_8218
-8215:    71 80 01     jump #0x8001 DiagEntryPoint
+8215:    71 80 01     jmp [DiagEntryPoint:0x8001]
 
 L_8218:
 8218:    81 f2 00     ld AL, [0xf200]
@@ -395,9 +395,9 @@ L_8218:
 821c:    11 ea        bnc L_8208
 821e:    81 f2 01     ld AL, [0xf201]
 8221:    a1 f2 01     st AL, [0xf201]
-8224:    7b 03        call (PC+0x03) CheckMuxStatus
+8224:    7b 03        call [CheckMuxStatus:+0x3]
 8226:    05           di
-8227:    73 df        jump (PC-0x21) L_8208
+8227:    73 df        jmp [L_8208:-0x21]
 
 CheckMuxStatus:
     ; Check (UART_status & 0x1c == 0); Pass/Fail
@@ -441,7 +441,7 @@ L_825f:
 8267:    c0 06        ld BL, #0x06
 8269:    49           sub! BL, AL
 826a:    14 f3        bz L_825f
-826c:    71 80 01     jump #0x8001 DiagEntryPoint
+826c:    71 80 01     jmp [DiagEntryPoint:0x8001]
 
 Test06_Vector:
 826f:    81 f2 0f     ld AL, [0xf20f]
@@ -450,12 +450,12 @@ Test06_Vector:
 8277:    a1 f2 01     st AL, [0xf201]
 827a:    91 00 0a     ld A, [0x000a]	 ; Copy the stack pointer from Interrupt level 0
 827d:    5f           mov S, A
-827e:    7b a9        call (PC-0x57) CheckMuxStatus
+827e:    7b a9        call [CheckMuxStatus:-0x57]
 8280:    06           sl
 
 L_8281:
 8281:    0a           reti
-8282:    73 eb        jump (PC-0x15) Test06_Vector
+8282:    73 eb        jmp [Test06_Vector:-0x15]
 
 Test_07:
 8284:    32 40        clr X, 0
@@ -497,26 +497,26 @@ L_8286:
 82cb:    80 07        ld AL, #0x07
 82cd:    49           sub! BL, AL
 82ce:    14 03        bz L_82d3
-82d0:    71 80 01     jump #0x8001 DiagEntryPoint
+82d0:    71 80 01     jmp [DiagEntryPoint:0x8001]
 
 L_82d3:
 82d3:    20 50        inc XL, 1
 82d5:    15 af        bnz L_8286
 82d7:    a1 f1 0a     st AL, [0xf10a]
-82da:    73 aa        jump (PC-0x56) L_8286
+82da:    73 aa        jmp [L_8286:-0x56]
 
 L_82dc:
 82dc:    c0 17        ld BL, #0x17
 
 L_82de:
-82de:    79 80 e3     call #0x80e3 FlashFail
-82e1:    73 a3        jump (PC-0x5d) L_8286
+82de:    79 80 e3     call [FlashFail:0x80e3]
+82e1:    73 a3        jmp [L_8286:-0x5d]
 
 Test_08:
 82e3:    a1 f1 4d     st AL, [0xf14d]
 82e6:    32 40        clr X, 0
 82e8:    90 ff ff     ld A, #0xffff
-82eb:    7b 52        call (PC+0x52) L_833f
+82eb:    7b 52        call [L_833f:+0x52]
 82ed:    15 44        bnz L_8333
 
 L_82ef:
@@ -525,7 +525,7 @@ L_82ef:
 82f2:    3d           sll! A
 82f3:    3d           sll! A
 82f4:    3d           sll! A
-82f5:    7b 48        call (PC+0x48) L_833f
+82f5:    7b 48        call [L_833f:+0x48]
 82f7:    15 3a        bnz L_8333
 82f9:    81 f1 10     ld AL, [0xf110]
 82fc:    c0 0f        ld BL, #0x0f
@@ -533,7 +533,7 @@ L_82ef:
 82ff:    80 08        ld AL, #0x08
 8301:    49           sub! BL, AL
 8302:    14 03        bz L_8307
-8304:    71 80 01     jump #0x8001 DiagEntryPoint
+8304:    71 80 01     jmp [DiagEntryPoint:0x8001]
 
 L_8307:
 8307:    3e           inc X
@@ -550,7 +550,7 @@ L_8312:
 8315:    3d           sll! A
 8316:    3d           sll! A
 8317:    3d           sll! A
-8318:    7b 25        call (PC+0x25) L_833f
+8318:    7b 25        call [L_833f:+0x25]
 831a:    15 17        bnz L_8333
 831c:    81 f1 10     ld AL, [0xf110]
 831f:    c0 0f        ld BL, #0x0f
@@ -558,14 +558,14 @@ L_8312:
 8322:    80 08        ld AL, #0x08
 8324:    49           sub! BL, AL
 8325:    14 03        bz L_832a
-8327:    71 80 01     jump #0x8001 DiagEntryPoint
+8327:    71 80 01     jmp [DiagEntryPoint:0x8001]
 
 L_832a:
 832a:    3f           dec X
 832b:    3f           dec X
 832c:    17 e4        bp L_8312
 832e:    a1 f1 0a     st AL, [0xf10a]
-8331:    73 b0        jump (PC-0x50) Test_08
+8331:    73 b0        jmp [Test_08:-0x50]
 
 L_8333:
 8333:    2d           sll! AL
@@ -574,8 +574,8 @@ L_8333:
 8336:    2d           sll! AL
 8337:    c0 08        ld BL, #0x08
 8339:    48           add! BL, AL
-833a:    79 80 e3     call #0x80e3 FlashFail
-833d:    73 a4        jump (PC-0x5c) Test_08
+833a:    79 80 e3     call [FlashFail:0x80e3]
+833d:    73 a4        jmp [Test_08:-0x5c]
 
 L_833f:
 833f:    5d           mov B, A
@@ -584,7 +584,7 @@ L_833f:
 8343:    a1 f1 40     st AL, [0xf140]
 8346:    b1 f1 41     st A, [0xf141]
 8349:    80 03        ld AL, #0x03
-834b:    73 09        jump (PC+0x09) L_8356
+834b:    73 09        jmp [L_8356:+0x9]
 
 L_834d:
 834d:    b1 f1 41     st A, [0xf141]
@@ -605,11 +605,11 @@ L_835c:
 8367:    39           dec! A
 8368:    15 f2        bnz L_835c
 836a:    80 09        ld AL, #0x09
-836c:    73 05        jump (PC+0x05) L_8373
+836c:    73 05        jmp [L_8373:+0x5]
 
 L_836e:
 836e:    81 f1 44     ld AL, [0xf144]
-8371:    7b 01        call (PC+0x01) L_8374
+8371:    7b 01        call [L_8374:+0x1]
 
 L_8373:
 8373:    09           ret
@@ -632,7 +632,7 @@ HawkTest:
     ; Test_09: Tests Hawk and DMA
 837f:    a1 f1 4d     st AL, [0xf14d]
 8382:    90 ff ff     ld A, #0xffff
-8385:    7b b8        call (PC-0x48) L_833f
+8385:    7b b8        call [L_833f:-0x48]
 8387:    15 2a        bnz L_83b3
 8389:    90 32 bf     ld A, #0x32bf
 838c:    b1 f1 41     st A, [0xf141]
@@ -644,17 +644,17 @@ HawkTest:
 839b:    2f 06        dma_enable
 839d:    2a           clr! AL
 839e:    a1 f1 48     st AL, [0xf148]
-83a1:    79 84 52     call #0x8452 L_8452
+83a1:    79 84 52     call [L_8452:0x8452]
 83a4:    c0 20        ld BL, #0x20
 83a6:    4a           and! BL, AL
 83a7:    15 19        bnz L_83c2
 83a9:    4d           mov! BL, AL
 83aa:    15 04        bnz L_83b0
 83ac:    c0 a9        ld BL, #0xa9
-83ae:    73 0d        jump (PC+0x0d) L_83bd
+83ae:    73 0d        jmp [L_83bd:+0xd]
 
 L_83b0:
-83b0:    79 83 74     call #0x8374 L_8374
+83b0:    79 83 74     call [L_8374:0x8374]
 
 L_83b3:
 83b3:    a1 f1 4d     st AL, [0xf14d]
@@ -666,8 +666,8 @@ L_83b3:
 83bc:    48           add! BL, AL
 
 L_83bd:
-83bd:    79 80 e3     call #0x80e3 FlashFail
-83c0:    73 bd        jump (PC-0x43) HawkTest
+83bd:    79 80 e3     call [FlashFail:0x80e3]
+83c0:    73 bd        jmp [HawkTest:-0x43]
 
 L_83c2:
 83c2:    90 84 67     ld A, #0x8467
@@ -685,18 +685,18 @@ L_83d6:
 83dc:    42 21        and AL, BH
 83de:    49           sub! BL, AL
 83df:    14 03        bz L_83e4
-83e1:    71 80 01     jump #0x8001 DiagEntryPoint
+83e1:    71 80 01     jmp [DiagEntryPoint:0x8001]
 
 L_83e4:
 83e4:    2a           clr! AL
 83e5:    a1 00 20     st AL, [0x0020]
 83e8:    55 40        mov A, X
-83ea:    79 83 3f     call #0x833f L_833f
+83ea:    79 83 3f     call [L_833f:0x833f]
 83ed:    15 c4        bnz L_83b3
 83ef:    81 00 20     ld AL, [0x0020]
 83f2:    15 04        bnz L_83f8
 83f4:    c0 b9        ld BL, #0xb9
-83f6:    73 c5        jump (PC-0x3b) L_83bd
+83f6:    73 c5        jmp [L_83bd:-0x3b]
 
 L_83f8:
 83f8:    2a           clr! AL
@@ -708,12 +708,12 @@ L_83f8:
 8406:    2f 06        dma_enable
 8408:    2a           clr! AL
 8409:    a1 f1 48     st AL, [0xf148]
-840c:    7b 44        call (PC+0x44) L_8452
+840c:    7b 44        call [L_8452:+0x44]
 840e:    15 a0        bnz L_83b0
 8410:    81 00 20     ld AL, [0x0020]
 8413:    15 04        bnz L_8419
 8415:    c0 c9        ld BL, #0xc9
-8417:    73 a4        jump (PC-0x5c) L_83bd
+8417:    73 a4        jmp [L_83bd:-0x5c]
 
 L_8419:
 8419:    2f 03        dma_store_count A
@@ -722,7 +722,7 @@ L_8419:
 841e:    c0 d9        ld BL, #0xd9
 
 L_8420:
-8420:    73 9b        jump (PC-0x65) L_83bd
+8420:    73 9b        jmp [L_83bd:-0x65]
 
 L_8422:
 8422:    2f 01        dma_store_addr A
@@ -730,7 +730,7 @@ L_8422:
 8427:    59           sub! B, A
 8428:    14 04        bz L_842e
 842a:    c0 e9        ld BL, #0xe9
-842c:    73 8f        jump (PC-0x71) L_83bd
+842c:    73 8f        jmp [L_83bd:-0x71]
 
 L_842e:
 842e:    90 00 0f     ld A, #0x000f
@@ -739,7 +739,7 @@ L_842e:
 8436:    59           sub! B, A
 8437:    14 04        bz L_843d
 8439:    c0 f9        ld BL, #0xf9
-843b:    73 e3        jump (PC-0x1d) L_8420
+843b:    73 e3        jmp [L_8420:-0x1d]
 
 L_843d:
 843d:    35 40        sll X, 1
@@ -753,7 +753,7 @@ L_8441:
 8448:    51 40        sub A, X
 844a:    15 8a        bnz L_83d6
 844c:    a1 f1 0a     st AL, [0xf10a]
-844f:    71 83 7f     jump #0x837f HawkTest
+844f:    71 83 7f     jmp [HawkTest:0x837f]
 
 L_8452:
 8452:    90 01 90     ld A, #0x0190
@@ -776,7 +776,7 @@ Test09_Vector:
 8467:    20 00        inc AH, 1
 8469:    a1 f1 4f     st AL, [0xf14f]
 846c:    0a           reti
-846d:    73 f8        jump (PC-0x08) Test09_Vector
+846d:    73 f8        jmp [Test09_Vector:-0x8]
 
 TOS_Entry:
     ; TestOS: This is a Monitor that operates over serial console
@@ -801,14 +801,14 @@ TOS_Entry:
 8496:    80 c5        ld AL, #0xc5
 8498:    a1 f2 00     st AL, [0xf200]	 ; Configure UART
 849b:    85 a1        ld AL, [S++]
-849d:    7b 7a        call (PC+0x7a) WriteHexByte
+849d:    7b 7a        call [WriteHexByte:+0x7a]
 849f:    85 a1        ld AL, [S++]
-84a1:    7b 76        call (PC+0x76) WriteHexByte
+84a1:    7b 76        call [WriteHexByte:+0x76]
 
 TOS_PromptLoop:
 84a3:    c0 5c        ld BL, #0x5c	 ; ''
-84a5:    7b 67        call (PC+0x67) WriteByte
-84a7:    7b 57        call (PC+0x57) ReadByteWithEcho
+84a5:    7b 67        call [WriteByte:+0x67]
+84a7:    7b 57        call [ReadByteWithEcho:+0x57]
 84a9:    45 31        mov AL, BL
 84ab:    c0 4d        ld BL, #0x4d	 ; 'M'
 84ad:    49           sub! BL, AL
@@ -820,11 +820,11 @@ TOS_PromptLoop:
 84b7:    49           sub! BL, AL
 84b8:    15 e9        bnz TOS_PromptLoop
 84ba:    90 80 01     ld A, #0x8001	 ; Start of ROM
-84bd:    73 04        jump (PC+0x04) Q_Command
+84bd:    73 04        jmp [Q_Command:+0x4]
 
 G_Command:
     ; Go: Takes a 
-84bf:    7b 79        call (PC+0x79) ReadHexWord
+84bf:    7b 79        call [ReadHexWord:+0x79]
 84c1:    55 80        mov A, Z
 
 Q_Command:
@@ -843,18 +843,18 @@ Q_Command:
 84d9:    65 22        ld X, [--B]
 84db:    d5 22        ld B, [--B]
 84dd:    91 00 10     ld A, [0x0010]
-84e0:    72 00 20     jump @(0x0020)
+84e0:    72 00 20     jmp @[0x0020]
 
 M_Command:
-84e3:    7b 55        call (PC+0x55) ReadHexWord
+84e3:    7b 55        call [ReadHexWord:+0x55]
 84e5:    55 86        mov Y, Z
 
 L_84e7:
 84e7:    8b           ld AL, [Y]
-84e8:    7b 2f        call (PC+0x2f) WriteHexByte
+84e8:    7b 2f        call [WriteHexByte:+0x2f]
 
 L_84ea:
-84ea:    7b 4e        call (PC+0x4e) ReadHexWord
+84ea:    7b 4e        call [ReadHexWord:+0x4e]
 84ec:    45 91        mov AL, ZL
 84ee:    c1 bf 92     ld BL, [0xbf92]
 84f1:    14 01        bz L_84f4
@@ -863,15 +863,15 @@ L_84ea:
 L_84f4:
 84f4:    13 04        bnn L_84fa
 84f6:    30 60        inc Y, 1
-84f8:    73 f0        jump (PC-0x10) L_84ea
+84f8:    73 f0        jmp [L_84ea:-0x10]
 
 L_84fa:
 84fa:    11 a7        bnc TOS_PromptLoop
 84fc:    30 60        inc Y, 1
-84fe:    73 e7        jump (PC-0x19) L_84e7
+84fe:    73 e7        jmp [L_84e7:-0x19]
 
 ReadByteWithEcho:
-8500:    7b 55        call (PC+0x55) CheckForReset	 ; Jumps back to the start of F1 if some condition is met
+8500:    7b 55        call [CheckForReset:+0x55]	 ; Jumps back to the start of F1 if some condition is met
 8502:    81 f2 00     ld AL, [0xf200]
 8505:    2c           srl! AL
 8506:    11 f8        bnc ReadByteWithEcho
@@ -888,9 +888,9 @@ WriteByte:
 8518:    09           ret
 
 WriteHexByte:
-8519:    7b 05        call (PC+0x05) WriteHexNibble
+8519:    7b 05        call [WriteHexNibble:+0x5]
 851b:    45 01        mov AL, AH
-851d:    7b 01        call (PC+0x01) WriteHexNibble
+851d:    7b 01        call [WriteHexNibble:+0x1]
 851f:    09           ret
 
 WriteHexNibble:
@@ -907,11 +907,11 @@ WriteHexNibble:
 
 L_8533:
 8533:    48           add! BL, AL
-8534:    73 d8        jump (PC-0x28) WriteByte
+8534:    73 d8        jmp [WriteByte:-0x28]
 
 L_8536:
 8536:    c0 30        ld BL, #0x30
-8538:    73 f9        jump (PC-0x07) L_8533
+8538:    73 f9        jmp [L_8533:-0x7]
 
 ReadHexWord:
 853a:    3a           clr! A
@@ -919,8 +919,8 @@ ReadHexWord:
 853c:    a1 bf 92     st AL, [0xbf92]	 ; Diag SRAM
 
 L_853f:
-853f:    7b bf        call (PC-0x41) ReadByteWithEcho
-8541:    7b 25        call (PC+0x25) AsciiToHexNibble
+853f:    7b bf        call [ReadByteWithEcho:-0x41]
+8541:    7b 25        call [AsciiToHexNibble:+0x25]
 8543:    17 01        bp L_8546
 8545:    09           ret
 
@@ -932,7 +932,7 @@ L_8546:
 854e:    43 19        or ZL, AL
 8550:    80 01        ld AL, #0x01
 8552:    a1 bf 92     st AL, [0xbf92]
-8555:    73 e8        jump (PC-0x18) L_853f
+8555:    73 e8        jmp [L_853f:-0x18]
 
 CheckForReset:
 8557:    80 0f        ld AL, #0x0f
@@ -944,10 +944,10 @@ CheckForReset:
 8562:    09           ret
 
 L_8563:
-8563:    71 80 01     jump #0x8001 DiagEntryPoint
+8563:    71 80 01     jmp [DiagEntryPoint:0x8001]
 
 WriteByteTramp:
-8566:    73 a6        jump (PC-0x5a) WriteByte
+8566:    73 a6        jmp [WriteByte:-0x5a]
 
 AsciiToHexNibble:
 8568:    45 31        mov AL, BL
@@ -986,9 +986,9 @@ L_8589:
 
 L_8592:
 8592:    c0 0a        ld BL, #0x0a	 ; '\n'
-8594:    7b d0        call (PC-0x30) WriteByteTramp
+8594:    7b d0        call [WriteByteTramp:-0x30]
 8596:    c0 7f        ld BL, #0x7f	 ; This is the ascii DEL charater
-8598:    7b cc        call (PC-0x34) WriteByteTramp
+8598:    7b cc        call [WriteByteTramp:-0x34]
 859a:    2a           clr! AL
 859b:    2b           not! AL
 859c:    09           ret
@@ -1007,9 +1007,9 @@ Bootstrap_test:
 85b0:    0e           dly
 
 L_85b1:
-85b1:    7b 70        call (PC+0x70) WriteString
+85b1:    7b 70        call [WriteString:+0x70]
 85b3:    "D=\0"
-85b6:    7b 7c        call (PC+0x7c) ReadChar
+85b6:    7b 7c        call [ReadChar:+0x7c]
 85b8:    c0 c8        ld BL, #0xc8
 85ba:    49           sub! BL, AL
 85bb:    e5 a2        st BL, [--S]
@@ -1019,7 +1019,7 @@ L_85b1:
 85c2:    15 4e        bnz L_8612
 
 L_85c4:
-85c4:    7b 6e        call (PC+0x6e) ReadChar
+85c4:    7b 6e        call [ReadChar:+0x6e]
 85c6:    c0 50        ld BL, #0x50
 85c8:    40 31        add AL, BL
 85ca:    16 46        blt L_8612
@@ -1049,28 +1049,28 @@ L_85eb:
 85f6:    2f a0        dma_load_addr S
 85f8:    90 ff f6     ld A, #0xfff6
 85fb:    2f 02        dma_load_count A
-85fd:    7b 22        call (PC+0x22) L_8621
+85fd:    7b 22        call [L_8621:+0x22]
 85ff:    43 90        or AH, ZL
 8601:    01           nop
 8602:    00           HALT
 8603:    2f 00        dma_load_addr A
 8605:    90 f0 ff     ld A, #0xf0ff
 8608:    2f 02        dma_load_count A
-860a:    7b 7e        call (PC+0x7e) L_868a
+860a:    7b 7e        call [L_868a:+0x7e]
 860c:    45 15        mov XL, AL
 860e:    03           rf
 
 L_860f:
-860f:    71 01 03     jump #0x0103 L_0103
+860f:    71 01 03     jmp [L_0103:0x0103]
 
 L_8612:
-8612:    7b 0f        call (PC+0x0f) WriteString
+8612:    7b 0f        call [WriteString:+0xf]
 8614:    "\r\nERROR\r\n\0"
 861e:    07           rl
-861f:    73 90        jump (PC-0x70) L_85b1
+861f:    73 90        jmp [L_85b1:-0x70]
 
 L_8621:
-8621:    73 67        jump (PC+0x67) L_868a
+8621:    73 67        jmp [L_868a:+0x67]
 
 WriteString:
 8623:    81 f2 00     ld AL, [0xf200]
@@ -1083,10 +1083,10 @@ WriteString:
 
 L_862f:
 862f:    a1 f2 01     st AL, [0xf201]
-8632:    73 ef        jump (PC-0x11) WriteString
+8632:    73 ef        jmp [WriteString:-0x11]
 
 ReadChar:
-8634:    7b 6d        call (PC+0x6d) L_86a3
+8634:    7b 6d        call [L_86a3:+0x6d]
 8636:    84 ec        ld AL, @[pc + -0x14]
 8638:    2c           srl! AL
 8639:    11 f9        bnc ReadChar
@@ -1114,7 +1114,7 @@ L_864d:
 865b:    14 b5        bz L_8612
 865d:    3a           clr! A
 865e:    b1 f1 41     st A, [0xf141]
-8661:    7b 35        call (PC+0x35) L_8698
+8661:    7b 35        call [L_8698:+0x35]
 8663:    03           rf
 
 L_8664:
@@ -1131,11 +1131,11 @@ L_8664:
 8679:    2f 00        dma_load_addr A
 867b:    90 ea 1f     ld A, #0xea1f
 867e:    2f 02        dma_load_count A
-8680:    7b 16        call (PC+0x16) L_8698
+8680:    7b 16        call [L_8698:+0x16]
 8682:    00           HALT
 8683:    81 f1 44     ld AL, [0xf144]
 8686:    15 8a        bnz L_8612
-8688:    73 85        jump (PC-0x7b) L_860f
+8688:    73 85        jmp [L_860f:-0x7b]
 
 L_868a:
 868a:    85 41        ld AL, [X++]
@@ -1168,7 +1168,7 @@ L_86a3:
 86ae:    09           ret
 
 L_86af:
-86af:    71 80 01     jump #0x8001 DiagEntryPoint
+86af:    71 80 01     jmp [DiagEntryPoint:0x8001]
 
 Diag_self_test:
     ; Test_0c: Checksum's the F1 rom, flashes 1c if fail.
@@ -1180,7 +1180,7 @@ Diag_self_test:
 86b8:    42 21        and AL, BH
 86ba:    49           sub! BL, AL
 86bb:    14 03        bz L_86c0
-86bd:    71 80 01     jump #0x8001 DiagEntryPoint
+86bd:    71 80 01     jmp [DiagEntryPoint:0x8001]
 
 L_86c0:
 86c0:    60 80 00     ld X, #0x8000
@@ -1239,25 +1239,25 @@ L_8702:
 8713:    a1 f1 0e     st AL, [0xf10e]
 8716:    80 88        ld AL, #0x88
 8718:    a1 f1 10     st AL, [0xf110]
-871b:    73 95        jump (PC-0x6b) Diag_self_test
+871b:    73 95        jmp [Diag_self_test:-0x6b]
 
 L_871d:
 871d:    c0 1c        ld BL, #0x1c
 
 L_871f:
-871f:    79 80 e3     call #0x80e3 FlashFail
-8722:    73 8e        jump (PC-0x72) Diag_self_test
+871f:    79 80 e3     call [FlashFail:0x80e3]
+8722:    73 8e        jmp [Diag_self_test:-0x72]
 
 L_8724:
 8724:    c0 2c        ld BL, #0x2c
-8726:    73 f7        jump (PC-0x09) L_871f
+8726:    73 f7        jmp [L_871f:-0x9]
 
 AuxiliaryTestMenu:
 8728:    a1 f1 08     st AL, [0xf108]
 872b:    80 c5        ld AL, #0xc5
 872d:    a1 f2 00     st AL, [0xf200]
 8730:    0e           dly
-8731:    79 86 23     call #0x8623 WriteString
+8731:    79 86 23     call [WriteString:0x8623]
 8734:    "\x0c\x1b\x1cAUXILIARY TESTS\r\n\n\0"
 874a:    60 88 00     ld X, #0x8800
 874d:    3a           clr! A
@@ -1275,14 +1275,14 @@ Aux_ReadTestEntry:
 8760:    50 20        add A, B
 8762:    b5 a2        st A, [--S]
 8764:    55 60        mov A, Y
-8766:    79 85 19     call #0x8519 WriteHexByte	 ; Print the Test Number
+8766:    79 85 19     call [WriteHexByte:0x8519]	 ; Print the Test Number
 8769:    c0 bd        ld BL, #0xbd	 ; '='
 
 Aux_PrintTestName:
-876b:    79 85 0e     call #0x850e WriteByte	 ; Print('=')
+876b:    79 85 0e     call [WriteByte:0x850e]	 ; Print('=')
 876e:    c5 41        ld BL, [X++]
 8770:    15 f9        bnz Aux_PrintTestName	 ; Print the Test Name
-8772:    73 db        jump (PC-0x25) Aux_ReadTestEntry
+8772:    73 db        jmp [Aux_ReadTestEntry:-0x25]
 
 NextRom:
 8774:    d0 f8 00     ld B, #0xf800
@@ -1292,7 +1292,7 @@ NextRom:
 877e:    90 f0 00     ld A, #0xf000
 8781:    51 40        sub A, X
 8783:    15 ca        bnz Aux_ReadTestEntry
-8785:    79 86 23     call #0x8623 WriteString
+8785:    79 86 23     call [WriteString:0x8623]
 8788:    "\r\nENTER TEST NUMBER:\0"
 879d:    32 40        clr X, 0
 
@@ -1305,7 +1305,7 @@ Aux_CheckDIPs:
 87a5:    80 0d        ld AL, #0x0d
 87a7:    49           sub! BL, AL
 87a8:    14 03        bz Aux_CheckSerial
-87aa:    71 80 01     jump #0x8001 DiagEntryPoint
+87aa:    71 80 01     jmp [DiagEntryPoint:0x8001]
 
 Aux_CheckSerial:
 87ad:    81 f2 00     ld AL, [0xf200]
@@ -1320,21 +1320,21 @@ Aux_CheckSerial:
 
 Aux_GotByte:
 87bf:    e1 f2 01     st BL, [0xf201]	 ; Echo Testnum back to terminal
-87c2:    79 85 68     call #0x8568 AsciiToHexNibble	 ; Convert to hex; Since there aren't many tests, this counts as convert to interger
+87c2:    79 85 68     call [AsciiToHexNibble:0x8568]	 ; Convert to hex; Since there aren't many tests, this counts as convert to interger
 87c5:    16 0c        blt L_87d3
 87c7:    35 40        sll X, 1
 87c9:    35 40        sll X, 1
 87cb:    35 40        sll X, 1
 87cd:    35 40        sll X, 1
 87cf:    43 15        or XL, AL
-87d1:    73 cc        jump (PC-0x34) Aux_CheckDIPs
+87d1:    73 cc        jmp [Aux_CheckDIPs:-0x34]
 
 L_87d3:
 87d3:    55 40        mov A, X
 87d5:    18 03        bgt L_87da
 
 L_87d7:
-87d7:    71 87 28     jump #0x8728 AuxiliaryTestMenu
+87d7:    71 87 28     jmp [AuxiliaryTestMenu:0x8728]
 
 L_87da:
 87da:    51 60        sub A, Y
@@ -1352,7 +1352,7 @@ L_87da:
 87f1:    5a           and! B, A
 87f2:    55 28        mov Z, B
 87f4:    a1 f1 0e     st AL, [0xf10e]
-87f7:    75 00        jump (A + 0x00)
+87f7:    75 00        jmp [A]
 87f9:    3e
 87fa:    00
 87fb:    00

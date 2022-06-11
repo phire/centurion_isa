@@ -54,9 +54,31 @@ def get_pstring16_length(memory, addr):
     # Parity is still applied to length bytes
     return get_be16(memory, addr) & 0x7f7f
 
+class MemoryWrapper:
+    def __init__(self, memory):
+        self.memory = memory
+        self.labels = {}
+
+    def get_label(self, addr):
+        if addr in memory_addr_info:
+            return memory_addr_info[addr].label
+        return None
+
+    def get_u8(self, addr):
+        return self.memory[addr]
+
+    def get_be16(self, addr):
+        return get_be16(self.memory, addr)
+
+def _labels(labels):
+    for addr, label in labels.items():
+        memory_addr_info[addr].label = label
+
 def disassemble(memory):
     for entry in entry_points:
         recursive_disassemble(memory, entry)
+
+    mem = MemoryWrapper(memory)
 
     i = 0
     while i < 0xfe00:
@@ -136,7 +158,7 @@ def disassemble(memory):
             str = f"{i:04x}:    "
             str += print_bytes(inst.bytes)
 
-            str += inst.__repr__()
+            str += inst.to_string(mem)
 
             i += len(inst.bytes)
 

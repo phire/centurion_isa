@@ -10,10 +10,10 @@ class BasicCpu6Inst:
         self.dst = dst
         self.src = src
 
-    def to_string(self, dict):
+    def to_string(self, dict, memory):
         if self.src == None:
-            return f"{self.mnemonic} {self.dst}"
-        return f"{self.mnemonic} {self.dst}, {self.src}"
+            return f"{self.mnemonic} {self.dst.to_string(memory)}"
+        return f"{self.mnemonic} {self.dst.to_string(memory)}, {self.src.to_string(memory)}"
 
 class ControlFlowInst:
     def __init__(self, mnemonic, src):
@@ -27,8 +27,8 @@ class ControlFlowInst:
         except AttributeError: pass
         return ret
 
-    def to_string(self, dict):
-        return f"{self.mnemonic} {self.src}"
+    def to_string(self, dict, memory):
+        return f"{self.mnemonic} {self.src.to_string(memory)}"
 
 OPs = [
     "inc", "dec", "clr", "not", "srl", "sll", "rrc", "rlc",
@@ -52,7 +52,7 @@ class AluInstance():
         self.postfix = postfix
         self.literal = literal
 
-    def to_string(self, dict):
+    def to_string(self, dict, **kwargs):
         op = OPs[self.op]
         op += self.postfix
 
@@ -81,7 +81,7 @@ class AluWithImmInstance():
         self.reg = reg
         self.imm = imm
 
-    def to_string(self, dict):
+    def to_string(self, dict, **kwargs):
         op = OPs[self.op]
 
         if self.word:

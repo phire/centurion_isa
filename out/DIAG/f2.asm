@@ -17,7 +17,7 @@ TEST_3:
 Entry_CPU_INSTRUCTION_TEST:
 8849:    90 07 cc     ld A, #0x07cc
 884c:    50 80        add A, Z
-884e:    7d 00        call (A + 0x00)
+884e:    7d 00        call [A]
 8850:    "\x1b\x1c\x0cCPU INSTRUCTION TEST, CONTROL-C TO EXIT\r\n\0"
 887d:    6d a2        st X, [--S]
 887f:    55 80        mov A, Z
@@ -1054,7 +1054,7 @@ L_8c61:
 8c6c:    00           HALT
 
 L_8c6d:
-8c6d:    73 04        jump (PC+0x04) L_8c73
+8c6d:    73 04        jmp [L_8c73:+0x4]
 8c6f:    00
 8c70:    22
 8c71:    00
@@ -1186,11 +1186,11 @@ L_8d14:
 8d14:    90 00 3a     ld A, #0x003a
 8d17:    5f           mov S, A
 8d18:    60 20 20     ld X, #0x2020
-8d1b:    7b 06        call (PC+0x06) L_8d23
+8d1b:    7b 06        call [L_8d23:+0x6]
 8d1d:    01           nop
 8d1e:    01           nop
 8d1f:    00           HALT
-8d20:    73 16        jump (PC+0x16) L_8d38
+8d20:    73 16        jmp [L_8d38:+0x16]
 8d22:    00
 
 L_8d23:
@@ -1264,7 +1264,7 @@ L_8d70:
 8d85:    91 bf fc     ld A, [0xbffc]
 8d88:    d0 07 74     ld B, #0x0774
 8d8b:    58           add! B, A
-8d8c:    75 20        jump (A + 0x20)
+8d8c:    75 20        jmp [B]
 
 L_8d8e:
 8d8e:    a1 f1 0a     st AL, [0xf10a]
@@ -1275,7 +1275,7 @@ L_8d8e:
 8d98:    65 a1        ld X, [S++]
 8d9a:    90 00 7d     ld A, #0x007d
 8d9d:    50 80        add A, Z
-8d9f:    75 00        jump (A + 0x00)
+8d9f:    75 00        jmp [A]
 
 InstructionTestInitialRegisterState:
 8da1:    05 b1        (0x5b1)
@@ -1295,46 +1295,46 @@ InstructionTestInitialRegisterState:
 Entry_CPU6_MAPPING_RAM_TEST:
 8dbb:    90 07 cc     ld A, #0x07cc
 8dbe:    50 80        add A, Z
-8dc0:    7d 00        call (A + 0x00)
+8dc0:    7d 00        call [A]
 8dc2:    "\x1b\x1c\x0cCPU-6 MAPPING RAM TEST, CONTROL-C TO EXIT\r\n\0"
 8df1:    22 32        clr BL, 2	 ; 0 for CPU5, non-zero for CPU6
 8df3:    15 3a        bnz MappingRamTestLoop
 8df5:    90 07 cc     ld A, #0x07cc
 8df8:    50 80        add A, Z
-8dfa:    7d 00        call (A + 0x00)
+8dfa:    7d 00        call [A]
 8dfc:    "\r\n*** THIS TEST WILL NOT RUN ON CPU-5 ***\r\n\0"
 8e28:    90 07 8a     ld A, #0x078a
 8e2b:    50 80        add A, Z
-8e2d:    75 00        jump (A + 0x00)	 ; Press Space to Exit
+8e2d:    75 00        jmp [A]	 ; Press Space to Exit
 
 MappingRamTestLoop:
 8e2f:    90 06 d9     ld A, #0x06d9
 8e32:    50 80        add A, Z
-8e34:    7d 00        call (A + 0x00)	 ; Call MappingInit
+8e34:    7d 00        call [A]	 ; Call MappingInit
 8e36:    47           unknown
 8e37:    40 ff        add PL, PL
 8e39:    01           nop
 8e3a:    00           HALT
 8e3b:    02           sf
 8e3c:    00           HALT
-8e3d:    7b 36        call (PC+0x36) L_8e75
+8e3d:    7b 36        call [L_8e75:+0x36]
 8e3f:    01           nop
-8e40:    7b 33        call (PC+0x33) L_8e75
+8e40:    7b 33        call [L_8e75:+0x33]
 8e42:    02           sf
-8e43:    7b 30        call (PC+0x30) L_8e75
+8e43:    7b 30        call [L_8e75:+0x30]
 8e45:    03           rf
-8e46:    7b 2d        call (PC+0x2d) L_8e75
+8e46:    7b 2d        call [L_8e75:+0x2d]
 8e48:    04           ei
-8e49:    7b 2a        call (PC+0x2a) L_8e75
+8e49:    7b 2a        call [L_8e75:+0x2a]
 8e4b:    05           di
-8e4c:    7b 27        call (PC+0x27) L_8e75
+8e4c:    7b 27        call [L_8e75:+0x27]
 8e4e:    06           sl
-8e4f:    7b 24        call (PC+0x24) L_8e75
+8e4f:    7b 24        call [L_8e75:+0x24]
 8e51:    07           rl
-8e52:    7b 53        call (PC+0x53) L_8ea7
-8e54:    7b 1f        call (PC+0x1f) L_8e75
+8e52:    7b 53        call [L_8ea7:+0x53]
+8e54:    7b 1f        call [L_8e75:+0x1f]
 8e56:    00           HALT
-8e57:    7b 73        call (PC+0x73) L_8ecc
+8e57:    7b 73        call [L_8ecc:+0x73]
 8e59:    a1 f1 0a     st AL, [0xf10a]
 8e5c:    81 f2 00     ld AL, [0xf200]
 8e5f:    2c           srl! AL
@@ -1349,7 +1349,7 @@ ReturnAddress:
 8e6c:    15 c1        bnz MappingRamTestLoop
 8e6e:    90 07 74     ld A, #0x0774
 8e71:    50 80        add A, Z
-8e73:    75 00        jump (A + 0x00)
+8e73:    75 00        jmp [A]
 
 L_8e75:
 8e75:    3a           clr! A
@@ -1370,8 +1370,8 @@ nextByteValue:
 8e89:    28           inc! AL
 8e8a:    ab           st AL, [Y]
 8e8b:    ac           st AL, [Z]	 ; HL is EF+0x100
-8e8c:    7b 76        call (PC+0x76) ReadAllPages
-8e8e:    7b 49        call (PC+0x49) WriteAllPages
+8e8c:    7b 76        call [ReadAllPages:+0x76]
+8e8e:    7b 49        call [WriteAllPages:+0x49]
 8e90:    47           unknown
 8e91:    80 ff        ld AL, #0xff
 8e93:    01           nop
@@ -1429,7 +1429,7 @@ L_8ecc:
 8ed4:    03           rf
 8ed5:    00           HALT
 8ed6:    2a           clr! AL
-8ed7:    73 da        jump (PC-0x26) L_8eb3
+8ed7:    73 da        jmp [L_8eb3:-0x26]
 
 WriteAllPages:
 8ed9:    2e 1c        ?? r12, r1
@@ -1466,7 +1466,7 @@ L_8ef8:
 8f00:    e0 09        st BL, #0x09
 
 L_8f02:
-8f02:    73 29        jump (PC+0x29) L_8f2d
+8f02:    73 29        jmp [L_8f2d:+0x29]
 
 ReadAllPages:
 8f04:    2e 0c        ?? r12, r0
@@ -1506,13 +1506,13 @@ L_8f2d:
 8f2f:    65 a1        ld X, [S++]
 8f31:    90 07 cc     ld A, #0x07cc
 8f34:    50 80        add A, Z
-8f36:    7d 00        call (A + 0x00)
+8f36:    7d 00        call [A]
 8f38:    "\r\n*** MAP RAM ERROR ***\r\n\0"
 8f52:    a1 f1 0b     st AL, [0xf10b]
 8f55:    a1 f1 0c     st AL, [0xf10c]
 8f58:    90 07 8a     ld A, #0x078a
 8f5b:    50 80        add A, Z
-8f5d:    75 00        jump (A + 0x00)
+8f5d:    75 00        jmp [A]
 
 Entry_ROM_SELF_TEST:
 8f5f:    55 86        mov Y, Z
@@ -1530,12 +1530,12 @@ ChecksumLoop:
 8f72:    15 32        bnz ChecksumFail
 
 PrintPassedAndExit:
-8f74:    7b 56        call (PC+0x56) WriteString
+8f74:    7b 56        call [WriteString:+0x56]
 8f76:    "\r\n*** PASS ***\r\n\0"
 8f87:    a1 f1 0a     st AL, [0xf10a]
 
 L_8f8a:
-8f8a:    7b 40        call (PC+0x40) WriteString
+8f8a:    7b 40        call [WriteString:+0x40]
 8f8c:    "PRESS SPACE\x07\r\n\0"
 
 WaitForKey:
@@ -1543,14 +1543,14 @@ WaitForKey:
 8f9e:    2c           srl! AL
 8f9f:    11 fa        bnc WaitForKey
 8fa1:    81 f2 01     ld AL, [0xf201]
-8fa4:    75 40        jump (A + 0x40)
+8fa4:    75 40        jmp [X]
 
 ChecksumFail:
-8fa6:    7b 24        call (PC+0x24) WriteString
+8fa6:    7b 24        call [WriteString:+0x24]
 8fa8:    "\r\n*** CHECK SUM ERROR ***\r\n\0"
 8fc4:    a1 f1 0b     st AL, [0xf10b]
 8fc7:    a1 f1 0c     st AL, [0xf10c]
-8fca:    73 be        jump (PC-0x42) L_8f8a
+8fca:    73 be        jmp [L_8f8a:-0x42]
 
 WriteString:
 8fcc:    81 f2 00     ld AL, [0xf200]
@@ -1563,7 +1563,7 @@ WriteString:
 
 L_8fd8:
 8fd8:    a1 f2 01     st AL, [0xf201]
-8fdb:    73 ef        jump (PC-0x11) WriteString
+8fdb:    73 ef        jmp [WriteString:-0x11]
 8fdd:    82
 8fde:    00
 8fdf:    00
