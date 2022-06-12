@@ -159,11 +159,22 @@ def Match47(pc, memory):
     b_mode = memory[pc+1] & 0x3
     pc += 2
 
-    blk_len = memory[pc]
+    blk_len = memory[pc] + 1
     pc += 1
 
     ops = ["unkblk0", "unkblk1", "unkblk2", "unkblk3", "memcpy", "unkblk5", "unkblk6", "unkblk7",
-           "memcmp", "unkblk9", "unkblkA", "unkblkB", "unkblkC", "unkblkD", "unkblkE", "unkblkF"]
+           "memcmp", "memset", "unkblkA", "unkblkB", "unkblkC", "unkblkD", "unkblkE", "unkblkF"]
+
+    src_len = blk_len
+    if op == 9: # memset
+        src_len = 1
+
+    a_ref, pc = Cpu6AddrMode(a_mode, pc, memory, None, src_len)
+    b_ref, pc = Cpu6AddrMode(b_mode, pc, memory, a_ref, blk_len)
+
+    bytes = memory[orig_pc:pc]
+    return InstructionMatch(orig_pc, BasicCpu6Inst(f"{ops[op]}", LiteralRef(blk_len, 1), a_ref, b_ref), bytes, {})
+
 
     a_ref, pc = Cpu6AddrMode(a_mode, pc, memory)
     b_ref, pc = Cpu6AddrMode(b_mode, pc, memory, a_ref)

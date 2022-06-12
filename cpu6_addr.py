@@ -84,7 +84,7 @@ class IndirectRef(Ref):
         return f"@{self.ref.to_string(memory, **kwargs)}"
 
 # A short 2bit address mode, which will consume more bytes from PC
-def Cpu6AddrMode(mode, pc, memory, prev=None):
+def Cpu6AddrMode(mode, pc, memory, prev=None, size = 1):
     match mode:
         case 0: # direct
             addr = get_be16(memory, pc)
@@ -107,6 +107,10 @@ def Cpu6AddrMode(mode, pc, memory, prev=None):
                 # There is a special case which packs two indexed references into one byte
                 reg = memory[pc-1] & 0xf
                 upper = False
+            elif prev is not None:
+                reg = memory[pc] & 0xf
+                upper = False
+                pc += 1
             else:
                 reg = memory[pc] >> 4
                 pc += 1
@@ -114,8 +118,10 @@ def Cpu6AddrMode(mode, pc, memory, prev=None):
             ref = IndexedRef(Reg16Ref(reg), 0)
             ref.only_upper = upper
             return ref, pc
-        case 3: # literalByte
-            return LiteralRef(memory[pc], 1), pc + 1
+        case 3: # literal
+            ref = LiteralRef(int.from_bytes(memory[pc:pc+size], 'big'), size, pc)
+            pc += size
+            return ref, pc
 
 # The traditional ee200 addressing mode used by most load/store. Plus jmp/call
 def Cpu4AddrMode(mode, word, pc, memory):
