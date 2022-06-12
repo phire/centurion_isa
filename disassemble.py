@@ -144,6 +144,19 @@ def disassemble(memory):
             out += f"{label}"
             i += 2
 
+        elif info.type and info.type.startswith("char["):
+            # fixed length string
+            str_len = int(info.type[5:-1])
+            out += f"{i:04x}:    "
+            data = memory[i:i+str_len]
+            i += str_len
+
+            out += print_bytes(data)
+            data = bytes([c & 0x7f for c in data]) # strip high bit
+            string = data.decode("ascii", errors="replace")
+            out += f"\"{string}\""
+
+
         elif info.type != None:
             value = struct.unpack_from(info.type, memory[i:])[0]
             data = struct.pack(info.type, value)
