@@ -167,7 +167,7 @@ def Cpu4AddrMode(mode, word, pc, memory):
 def AluAddrMode(mode, inst, pc, memory):
     # Small literal used in 20/30 instrutions
     # Shifts, rotates and increments effectively add 1 to 'imm' value
-    imm = SmallLiteralRef((mode & 0xf) + 0 if inst in [0x22, 0x23, 0x32, 0x33] else 1)
+    imm = SmallLiteralRef((mode & 0xf) + (0 if inst in [0x22, 0x23, 0x32, 0x33] else 1))
 
     match inst & 0x70:
         case 0x20:
