@@ -12,6 +12,7 @@ functions = [
     (0x7cc, "WriteString"),
     (0x6d9, "WriteAllPages"),
     (0x704, "ReadAllPages"),
+    (0x7c2, "rsysContinue"),
 ]
 
 labels = [
@@ -23,6 +24,8 @@ labels = [
     (0x8e62, "ReturnAddress"),
     (0x8e85, "nextMemoryLcation"),
     (0x8e88, "nextByteValue"),
+    (0x8ec2, "rsysContinue"),
+
 
 
     (0x8f74, "PrintPassedAndExit"),
@@ -74,9 +77,9 @@ comments = [
 
 if __name__ == "__main__":
     with open(filename, "rb") as f:
-        bytes = f.read()
+        data = f.read()
 
-    memory = b"\0" * (base_address) + bytes + b"\0" * (0x10000 - (len(bytes) + base_address))
+    memory = b"\0" * (base_address) + data + b"\0" * (0x10000 - (len(data) + base_address))
 
    # scan_calls(memory, base_address, base_address)
 
@@ -101,6 +104,7 @@ if __name__ == "__main__":
     # testing of return instruction breaks our disassembly
     entry_points.append(0x8d3a)
     entry_points.append(0x8d4b)
+    entry_points.append(0x8ec2)
 
 
     apply_comments(comments)

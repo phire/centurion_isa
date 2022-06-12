@@ -150,9 +150,9 @@ comments = [
 
 if __name__ == "__main__":
     with open(filename, "rb") as f:
-        bytes = f.read()
+        data = f.read()
 
-    memory = b"\0" * (base_address) + bytes + b"\0" * (0x10000 - (len(bytes) + base_address))
+    memory = b"\0" * (base_address) + data + b"\0" * (0x10000 - (len(data) + base_address))
     entry_points.append(0x8001)
 
 

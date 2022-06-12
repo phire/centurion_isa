@@ -99,22 +99,22 @@ def disassemble(memory):
             for line in lines:
                 print(f"    ; {line}")
 
-        str = ""
+        out = ""
 
-        def print_bytes(bytes):
+        def print_bytes(data):
             str = ""
-            for b in bytes:
+            for b in data:
                 str += f"{b:02x} "
             str += " " * (23 - len(str))
             return str
 
         if info.type == "cstring":
-            str += f"{i:04x}:    \""
+            out += f"{i:04x}:    \""
 
             while c := memory[i] & 0x7f:
-                str += escape_char(c)
+                out += escape_char(c)
                 i += 1
-            str += "\\0\""
+            out += "\\0\""
 
             i += 1
 
@@ -122,13 +122,13 @@ def disassemble(memory):
             # Pascal-style string, prefixed by a WORD of length.
             # Note high bit still needs to be stripped
             l = get_pstring16_length(memory, i)
-            str += f"{i:04x}:    {l:d}, \""
+            out += f"{i:04x}:    {l:d}, \""
             i += 2
 
             for j in range(0, l):
                 c = memory[i + j] & 0x7f
-                str += escape_char(c)
-            str += "\""
+                out += escape_char(c)
+            out += "\""
 
             i += l
 
@@ -139,41 +139,41 @@ def disassemble(memory):
             label = memory_addr_info[addr].label
             if label == None:
                 label = memory_addr_info[addr].label = f"L_{addr:04x}"
-            str += f"{i:04x}:    "
-            str += print_bytes(memory[i:i+2])
-            str += f"{label}"
+            out += f"{i:04x}:    "
+            out += print_bytes(memory[i:i+2])
+            out += f"{label}"
             i += 2
 
         elif info.type != None:
-            value = struct.unpack_from(info.type, memory[i:i+4])[0]
-            bytes = struct.pack(info.type, value)
+            value = struct.unpack_from(info.type, memory[i:])[0]
+            data = struct.pack(info.type, value)
 
-            str += f"{i:04x}:    "
-            str += print_bytes(bytes)
-            i += len(bytes)
-            str += f"({value:#x})"
+            out += f"{i:04x}:    "
+            out += print_bytes(data)
+            i += len(data)
+            out += f"({value:#x})"
 
         elif info.instruction:
             inst = info.instruction
-            str = f"{i:04x}:    "
-            str += print_bytes(inst.bytes)
+            out = f"{i:04x}:    "
+            out += print_bytes(inst.bytes)
 
-            str += inst.to_string(mem)
+            out += inst.to_string(mem)
 
             i += len(inst.bytes)
 
         else:
-            str += (f"{i:04x}:    {memory[i]:02x}")
+            out += (f"{i:04x}:    {memory[i]:02x}")
             i += 1
 
         if info.comment:
-            indent = len(str)
+            indent = len(out)
             lines = info.comment.split("\n")
-            str += f"\t ; {lines[0]}"
+            out += f"\t ; {lines[0]}"
             for line in lines[1:]:
-                str += "\n" + " " * indent + f"\t ; {line}"
+                out += "\n" + " " * indent + f"\t ; {line}"
 
-        print(str)
+        print(out)
 
 def apply_comments(comments):
     for addr, comment in comments:
@@ -272,15 +272,15 @@ if __name__ == "__main__":
         memory_addr_info[base_address].label = "Start"
 
     with open(filename, "rb") as f:
-        bytes = f.read()
+        data = f.read()
 
     if args["type"] == "binary":
-        memory = b"\0" * (base_address) + bytes + b"\0" * (0x10000 - (len(bytes) + base_address))
+        memory = b"\0" * (base_address) + data + b"\0" * (0x10000 - (len(data) + base_address))
     if args["type"] == "wecb":
         memory = b"\0" * 0x10000
         from wecb import WecbLoader
 
-        wecb = WecbLoader(bytes)
+        wecb = WecbLoader(data)
 
         for type, addr, data in wecb.sections():
             if type == 0:
