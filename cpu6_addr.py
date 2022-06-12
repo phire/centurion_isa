@@ -97,7 +97,7 @@ def Cpu6AddrMode(mode, pc, memory, prev=None):
             reg_b = Reg16Ref(regs & 0xf)
             pc += 2
 
-            if reg_b == 0:
+            if reg_b.reg == 0:
                 return IndexedRef(reg_a, imm8), pc
             # todo: This mode also does PC-relative addressing?
             return ComplexRef(reg_a, reg_b, imm8), pc

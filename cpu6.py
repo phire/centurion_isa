@@ -5,14 +5,16 @@ import struct
 
 class BasicCpu6Inst:
     newpc = None
-    def __init__(self, mnonomic, dst, src=None, src2=None):
+    def __init__(self, mnonomic, dst=None, src=None, src2=None):
         self.mnemonic = mnonomic
         self.dst = dst
         self.src = src
         self.src2 = src2
 
     def to_string(self, dict, memory):
-        str = f"{self.mnemonic} {self.dst.to_string(memory)}"
+        str = self.mnemonic
+        if self.dst:
+            str += f" {self.dst.to_string(memory)}"
         if self.src:
             str += f", {self.src.to_string(memory)}"
         if self.src2:
@@ -84,6 +86,46 @@ def AluMatch(pc, memory):
     bytes = memory[orig_pc:pc]
     return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, dst, src, src2), bytes, {})
 
+def Match2e(pc, memory):
+    orig_pc = pc
+
+    op = memory[pc+1] >> 4
+    a_mode = (memory[pc+1] >> 2) & 0x3
+    b_mode = memory[pc+1] & 0x3
+    pc += 2
+
+    ops = ["wpf", "rpf", "wpf1", "rpf1", "wpf32", "rpf32", "illegal6", "illegal7"
+           "unk2e_8", "unk2e_9", "unk2e_A", "unk2e_B", "unk2e_C", "unk2e_D", "unk2e_E", "unk2e_F"]
+    a_ref, pc = Cpu6AddrMode(a_mode, pc, memory)
+    b_ref, pc = Cpu6AddrMode(b_mode, pc, memory, a_ref)
+
+    bytes = memory[orig_pc:pc]
+    return InstructionMatch(orig_pc, BasicCpu6Inst(f"{ops[op]}", a_ref, b_ref), bytes, {})
+
+def Match2f(pc, memory):
+    reg = memory[pc+1] >> 4
+    op = memory[pc+1] & 0x0f
+    bytes = memory[pc:pc+2]
+
+    mnemonic = "ld_" if op & 1 == 0 else "st_"
+
+    match op >> 1:
+        case 0:
+            mnemonic += "dma_addr"
+        case 1:
+            mnemonic += "dma_count"
+        case 2:
+            mnemonic += "dma_mode"
+        case 3:
+            if reg == 0 and op & 1 == 0:
+                mnemonic = "enable_dma" if op & 1 == 0 else "disable_dma"
+                return InstructionMatch(pc, BasicCpu6Inst(mnemonic), bytes, {})
+            if reg != 0: # Illegal if reg != 0
+                return None
+        case 4:
+            mnemonic += "isr"
+
+    return InstructionMatch(pc, BasicCpu6Inst(mnemonic, Reg16Ref(reg)), bytes, {})
 
 # Implements the 46 "bignum" instructions
 def Match46(pc, memory):
@@ -107,6 +149,28 @@ def Match46(pc, memory):
 
     bytes = memory[orig_pc:pc]
     return InstructionMatch(orig_pc, BasicCpu6Inst(f"{ops[op]}({b_size:x}, {a_size:x})", b_ref, a_ref), bytes, {})
+
+# Implements 47 "block" instructions
+def Match47(pc, memory):
+    orig_pc = pc
+
+    op = memory[pc+1] >> 4
+    a_mode = (memory[pc+1] >> 2) & 0x3
+    b_mode = memory[pc+1] & 0x3
+    pc += 2
+
+    blk_len = memory[pc]
+    pc += 1
+
+    ops = ["unkblk0", "unkblk1", "unkblk2", "unkblk3", "memcpy", "unkblk5", "unkblk6", "unkblk7",
+           "memcmp", "unkblk9", "unkblkA", "unkblkB", "unkblkC", "unkblkD", "unkblkE", "unkblkF"]
+
+    a_ref, pc = Cpu6AddrMode(a_mode, pc, memory)
+    b_ref, pc = Cpu6AddrMode(b_mode, pc, memory, a_ref)
+
+
+    bytes = memory[orig_pc:pc]
+    return InstructionMatch(orig_pc, BasicCpu6Inst(f"{ops[op]}", b_ref, a_ref, LiteralRef(blk_len, 1)), bytes, {})
 
 # Implements all opcodes 0x80 and above
 # Memory and load immediate
@@ -273,6 +337,9 @@ instructions  = [
     I("01011110", "mov {RegNames16[4]}, {RegNames16[0]}"),
     I("01011111", "mov {RegNames16[5]}, {RegNames16[0]}"),
 
+    I("11010111 NNNNNNNN", "mov A, {N:x}"),
+    I("11010110 NNNNNNNN", "swap {N:x}"),
+
     I("xxxxxxxx"),
 ]
 
@@ -287,13 +354,14 @@ def disassemble_instruction(memory, pc):
         case 2 | 3 | 4 | 5:
             match byte:
                 case 0x2e:
-                    pass
+                    return Match2e(pc, memory)
                 case 0x2f:
-                    pass
+                    if inst := Match2f(pc, memory):
+                        return inst
                 case 0x46:
                     return Match46(pc, memory)
                 case 0x47:
-                    pass
+                    return Match47(pc, memory)
                 case 0x5b:
                     pass
                 # case 0x55:
