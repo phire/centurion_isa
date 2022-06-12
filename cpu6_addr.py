@@ -192,7 +192,7 @@ def AluAddrMode(mode, inst, pc, memory):
         case 0x40:
             return Reg8Ref(mode & 0xf), Reg8Ref(mode >> 4), None, pc
         #case 0x50 if mode & 0x11 == 0: # neither lower nibble set
-        case 0x50:
+        case 0x50 | 0x70:
             dst_reg = Reg16Ref(mode & 0xe)
             src_reg = Reg16Ref((mode >> 4) & 0xe)
             match mode & 0x11:
@@ -206,4 +206,17 @@ def AluAddrMode(mode, inst, pc, memory):
                     index = src_reg
                     base = DirectRef(get_be16(memory, pc))
                     return Reg16Ref(mode & 0xe), ComplexRef(base, index), None, pc + 2
+
+def D6Mode(mode, pc, memory):
+    a = (mode >> 4) & 0xe
+    b = mode & 0x0e
+    unk = memory[pc+1] & 0x10
+
+    addr = get_be16(memory, pc)
+
+    ref = DirectRef(addr)
+
+    if a != b:
+        ref = ComplexRef(ref, Reg16Ref(b))
+    return Reg16Ref(a), ref, pc + 2
 

@@ -1,6 +1,6 @@
 from generic import *
 from cpu6_regs import RegNames16, RegNames8, Reg16Ref, Reg8Ref
-from cpu6_addr import Cpu6AddrMode, Cpu4AddrMode, LiteralRef, SmallLiteralRef, AluAddrMode
+from cpu6_addr import Cpu6AddrMode, Cpu4AddrMode, LiteralRef, SmallLiteralRef, AluAddrMode, D6Mode, DirectRef
 import struct
 
 class BasicCpu6Inst:
@@ -139,7 +139,7 @@ def Match46(pc, memory):
     op = memory[pc+2] >> 4
     ops = [
         "addbig", "subbig", "unkbig2", "unkbig3", "unkbig4", "unkbig5",
-        "unkbig6", "unkbig7", "unkbig8", "unkbig9", "unkbigA", "unkbigB",
+        "unkbig6", "unkbig7", "unkbig8", "baseconv", "unkbigA", "unkbigB",
         "unkbigC", "unkbigD", "unkbigE", "unkbigF"
     ]
 
@@ -175,13 +175,32 @@ def Match47(pc, memory):
     bytes = memory[orig_pc:pc]
     return InstructionMatch(orig_pc, BasicCpu6Inst(f"{ops[op]}", LiteralRef(blk_len, 1), a_ref, b_ref), bytes, {})
 
+# These might be multiple/divide
+def MatchMul(pc, memory):
+    orig_pc = pc
+    inst = memory[pc]
+    mode = memory[pc+1]
+    pc += 2
 
-    a_ref, pc = Cpu6AddrMode(a_mode, pc, memory)
-    b_ref, pc = Cpu6AddrMode(b_mode, pc, memory, a_ref)
+    dst, src, src2, pc = AluAddrMode(mode, inst, pc, memory)
+    bytes = memory[orig_pc:pc]
 
+    mnemonic = "mul" if inst == 0x78 else "div"
+    return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, dst, src, src2), bytes, {})
+
+def MatchD6(pc, memory):
+    orig_pc = pc
+    mode = memory[pc+1]
+    mnemonic = "st" if (mode & 0x10) == 0 else "ld"
+
+    pc += 2
+    reg, ref, pc = D6Mode(mode, pc, memory)
 
     bytes = memory[orig_pc:pc]
-    return InstructionMatch(orig_pc, BasicCpu6Inst(f"{ops[op]}", b_ref, a_ref, LiteralRef(blk_len, 1)), bytes, {})
+    if mode & 0x1 != 1:
+        return InstructionMatch(orig_pc, BasicCpu6Inst("unknown_d6", reg, ref), bytes, {})
+
+    return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, reg, ref), bytes, {})
 
 # Implements all opcodes 0x80 and above
 # Memory and load immediate
@@ -293,6 +312,8 @@ branch_instructions = [
     B("00011011 SSSSSSSS", "bs2", relative_branch),
     B("00011100 SSSSSSSS", "bs3", relative_branch),
     B("00011101 SSSSSSSS", "bs4", relative_branch),
+    B("00011110 SSSSSSSS", "b?E", relative_branch),
+    B("00011111 SSSSSSSS", "b?F", relative_branch),
     I("xxxxxxxx"),
 ]
 
@@ -302,40 +323,6 @@ instructions  = [
     I("01100110 NNNNNNNN", "jsys {N:x}"),
 
     I("01011011", "mov X, A"),
-
-    # Special cases that don't match the general ALU pattern
-    I("00101110 ssssdddd", "?? r{d}, r{s}"),
-    # ugly, but indexing dynamic indexing into RegNames16 isn't supported :(
-    I("00101111 00000000", "dma_load_addr {RegNames16[0]}"),
-    I("00101111 00100000", "dma_load_addr {RegNames16[1]}"),
-    I("00101111 01000000", "dma_load_addr {RegNames16[2]}"),
-    I("00101111 01100000", "dma_load_addr {RegNames16[3]}"),
-    I("00101111 10000000", "dma_load_addr {RegNames16[4]}"),
-    I("00101111 10100000", "dma_load_addr {RegNames16[5]}"),
-    I("00101111 00000010", "dma_load_count {RegNames16[0]}"),
-    I("00101111 00100010", "dma_load_count {RegNames16[1]}"),
-    I("00101111 01000010", "dma_load_count {RegNames16[2]}"),
-    I("00101111 01100010", "dma_load_count {RegNames16[3]}"),
-    I("00101111 10000010", "dma_load_count {RegNames16[4]}"),
-    I("00101111 10100010", "dma_load_count {RegNames16[5]}"),
-    I("00101111 00000001", "dma_store_addr {RegNames16[0]}"),
-    I("00101111 00100001", "dma_store_addr {RegNames16[1]}"),
-    I("00101111 01000001", "dma_store_addr {RegNames16[2]}"),
-    I("00101111 01100001", "dma_store_addr {RegNames16[3]}"),
-    I("00101111 10000001", "dma_store_addr {RegNames16[4]}"),
-    I("00101111 10100001", "dma_store_addr {RegNames16[5]}"),
-    I("00101111 00000011", "dma_store_count {RegNames16[0]}"),
-    I("00101111 00100011", "dma_store_count {RegNames16[1]}"),
-    I("00101111 01000011", "dma_store_count {RegNames16[2]}"),
-    I("00101111 01100011", "dma_store_count {RegNames16[3]}"),
-    I("00101111 10000011", "dma_store_count {RegNames16[4]}"),
-    I("00101111 10100011", "dma_store_count {RegNames16[5]}"),
-
-    I("00101111 dddd0100", "dma_set_mode {d}"),
-    I("00101111 00000110", "dma_enable"),
-
-
-    I("00101111 xxxxNNNN", "dma? {x}, {N}"),
 
 # 30
     I("00111110", "inc {RegNames16[2]}"),
@@ -348,8 +335,8 @@ instructions  = [
     I("01011110", "mov {RegNames16[4]}, {RegNames16[0]}"),
     I("01011111", "mov {RegNames16[5]}, {RegNames16[0]}"),
 
-    I("11010111 NNNNNNNN", "mov A, {N:x}"),
-    I("11010110 NNNNNNNN", "swap {N:x}"),
+    I("11110111", "?F7?"),
+    I("01101111 NNNNNNNN NNNNNNNN", "stcc [{N:#06x}]"),
 
     I("xxxxxxxx"),
 ]
@@ -386,6 +373,18 @@ def disassemble_instruction(memory, pc):
             if mem := MemoryMatch(pc, memory):
                 return mem
 
-    return scan(instructions, memory, pc, 3)
+    match byte:
+    #    case 0x77 | 0x78:
+    #        return MatchMul(pc, memory)
+        case 0xd6:
+            if inst := MatchD6(pc, memory):
+                return inst
+        case 0xd7:
+            # Store A to [addr] where addr is a single byte (aka, the register file)
+            addr = memory[pc+1]
+            return InstructionMatch(pc, BasicCpu6Inst("st", Reg16Ref(0), DirectRef(addr)), memory[pc:pc+2])
+
+
+    return scan(instructions, memory, pc, 5)
 
 __all__ = ["disassemble_instruction", "entry_points", "memory_addr_info"]
