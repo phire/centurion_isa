@@ -134,10 +134,9 @@ def disassemble(memory):
 
             i += l
 
-        elif info.type == "fnptr":
-            # 16 bit absolute function pointer
+        elif info.type in ["fnptr", "ptr"]:
+            # 16 bit absolute pointer
             addr = get_be16(memory, i)
-            entry_points.append(addr)
             label = memory_addr_info[addr].label
             if label == None:
                 label = memory_addr_info[addr].label = f"L_{addr:04x}"
@@ -244,6 +243,12 @@ def read_annotations(name, memory):
                else:
                    label = f"Entry_{hex(address)}"
                memory_addr_info[address].label = label
+           elif type == "fnptr":
+                # 16 bit absolute function pointer
+                memory_addr_info[address].type = "fnptr"
+                ptr_addr = get_be16(memory, address)
+                entry_points.append(ptr_addr)
+
            elif type == "label":
                memory_addr_info[address].label = items[2].strip()
            elif type != "":
