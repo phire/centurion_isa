@@ -200,6 +200,8 @@ def apply_comments(comments):
 def read_annotations(name, memory):
     with open(name, "r") as f:
         for line in f.readlines():
+           if len(line) == 0 or line[0] == "#":
+               continue
            comment_pos = line.find(';')
            if comment_pos == -1:
                comment = None
