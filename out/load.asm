@@ -189,35 +189,28 @@ R_01b6:
 01b9:    00                     HALT
 
 R_01ba:
-01ba:    02                     sf
-01bb:    46 02 71 02 8a 02 a3   unkbig7(2, 0) [S + B + 0x0002], [R_028a:0x028a]
-01c2:    02                     sf
-01c3:    bc                     st A, [Z]
-01c4:    02                     sf
-01c5:    d5 02                  ld B, [--A]
-01c7:    ee                     st BL, [C]
-01c8:    03                     rf
-01c9:    07                     rl
-01ca:    03                     rf
-01cb:    20 03                  inc AH, #4
-01cd:    39                     dec! A, #1
-01ce:    03                     rf
-01cf:    52 03 6b 03            and B, A, [0x6b03]
-01d3:    84 03                  ld AL, @[pc + 0x03]
-01d5:    9d                     ld A, [S]
-01d6:    03                     rf
-01d7:    b6                     unknown
-01d8:    03                     rf
-01d9:    cf                     ld BL, [P]
-01da:    03                     rf
-01db:    e8                     st BL, [A]
-01dc:    04                     ei
-01dd:    01                     nop
-01de:    04                     ei
-01df:    1a 00                  bs1 L_01e1
+01ba:    02 46                  Device_CRT0
+01bc:    02 71                  Device_DISK0
+01be:    02 8a                  Device_DISK1
+01c0:    02 a3                  Device_DISK2
+01c2:    02 bc                  Device_DISK3
+01c4:    02 d5                  Device_DISK4
+01c6:    02 ee                  Device_DISK5
+01c8:    03 07                  Device_DISK6
+01ca:    03 20                  Device_DISK7
+01cc:    03 39                  Device_DISK10
+01ce:    03 52                  Device_DISK11
+01d0:    03 6b                  Device_DISK12
+01d2:    03 84                  Device_DISK13
+01d4:    03 9d                  Device_DISK20
+01d6:    03 b6                  Device_DISK21
+01d8:    03 cf                  Device_DISK22
+01da:    03 e8                  Device_DISK23
+01dc:    04 01                  Device_DISK24
+01de:    04 1a                  Device_DISK25
 
-L_01e1:
-01e1:    00                     HALT
+DevicesEnd:
+01e0:    00 00                  (0x0)
 
 R_01e2:
 01e2:    ff                     st B, [P]
@@ -325,16 +318,14 @@ L_01f5:
 0244:    00
 0245:    00
 
-R_0246:
-0246:    c7                     unknown
-0247:    02                     sf
-0248:    01                     nop
-0249:    04                     ei
-024a:    33 c2                  not C, #2
-024c:    1f                     unknown
-024d:    c3 d2                  ld BL, [pc + -0x2e]
-024f:    d4 b0                  ld B, @[pc + -0x50]
-0251:    a0 a0                  st AL, #0xa0
+Device_CRT0:
+0246:    c7                     "G"
+0247:    02 01                  (0x201)
+0249:    04 33                  R_0433
+
+Device_CRT0_Obj:
+024b:    c2 1f                  CrtDeviceObj
+024d:    c3 d2 d4 b0 a0 a0      "CRT0  "
 0253:    00                     HALT
 0254:    00                     HALT
 0255:    f2 00 00               st B, @[L_0000:0x0000]
@@ -362,15 +353,15 @@ R_0246:
 026f:    ff                     st B, [P]
 0270:    ff                     st B, [P]
 
-R_0271:
-0271:    57                     unknown
-0272:    04                     ei
-0273:    00                     HALT
-0274:    04                     ei
-0275:    34 b6 b4 c4            srl [S + [0xb4c4]], #7
-0279:    c9                     ld BL, [B]
-027a:    d3 cb                  ld B, [pc + -0x35]
-027c:    b0 a0 00               st A, #0xa000
+Device_DISK0:
+0271:    57                     "W"
+0272:    04 00                  (0x400)
+0274:    04 34                  R_0434
+
+Device_DISK0_Obj:
+0276:    b6 b4                  R_b6b4
+0278:    c4 c9 d3 cb b0 a0      "DISK0 "
+027e:    00
 027f:    00                     HALT
 0280:    f1 40 03               st B, [0x4003]
 0283:    2a                     clr! AL, #0
@@ -378,13 +369,13 @@ R_0271:
 0285:    05                     di
 0286:    f2 5a 00               st B, @[0x5a00]
 0289:    64 57                  ld X, @[pc + 0x57]
-028b:    04                     ei
-028c:    01                     nop
-028d:    04                     ei
-028e:    34 b6 b6 c4            srl [S + [0xb6c4]], #7
-0292:    c9                     ld BL, [B]
-0293:    d3 cb                  ld B, [pc + -0x35]
-0295:    b1 a0 00               st A, [L_a000:0xa000]
+028b:    04 01                  (0x401)
+028d:    04 34                  R_0434
+
+Device_DISK1_Obj:
+028f:    b6 b6                  HawkDeviceObj
+0291:    c4 c9 d3 cb b1 a0      "DISK1 "
+0297:    00
 0298:    00                     HALT
 0299:    f1 40 03               st B, [0x4003]
 029c:    2a                     clr! AL, #0
@@ -392,13 +383,13 @@ R_0271:
 029e:    05                     di
 029f:    f2 5a 00               st B, @[0x5a00]
 02a2:    64 57                  ld X, @[pc + 0x57]
-02a4:    04                     ei
-02a5:    02                     sf
-02a6:    04                     ei
-02a7:    35 b6 b6 c4            sll [S + [0xb6c4]], #7
-02ab:    c9                     ld BL, [B]
-02ac:    d3 cb                  ld B, [pc + -0x35]
-02ae:    b2 a0 00               st A, @[L_a000:0xa000]
+02a4:    04 02                  (0x402)
+02a6:    04 35                  R_0435
+
+Device_DISK2_Obj:
+02a8:    b6 b6                  HawkDeviceObj
+02aa:    c4 c9 d3 cb b2 a0      "DISK2 "
+02b0:    00
 02b1:    00                     HALT
 02b2:    f1 40 03               st B, [0x4003]
 02b5:    2a                     clr! AL, #0
@@ -406,13 +397,12 @@ R_0271:
 02b7:    05                     di
 02b8:    f2 5a 00               st B, @[0x5a00]
 02bb:    64 57                  ld X, @[pc + 0x57]
-02bd:    04                     ei
-02be:    03                     rf
-02bf:    04                     ei
-02c0:    35 b6 b6 c4            sll [S + [0xb6c4]], #7
-02c4:    c9                     ld BL, [B]
-02c5:    d3 cb                  ld B, [pc + -0x35]
-02c7:    b3 a0                  st A, [pc + -0x60]
+02bd:    04 03                  (0x403)
+02bf:    04 35                  R_0435
+
+Device_DISK3_Obj:
+02c1:    b6 b6                  HawkDeviceObj
+02c3:    c4 c9 d3 cb b3 a0      "DISK3 "
 02c9:    00                     HALT
 02ca:    00                     HALT
 02cb:    f1 40 03               st B, [0x4003]
@@ -421,13 +411,12 @@ R_0271:
 02d0:    05                     di
 02d1:    f2 5a 00               st B, @[0x5a00]
 02d4:    64 57                  ld X, @[pc + 0x57]
-02d6:    04                     ei
-02d7:    04                     ei
-02d8:    04                     ei
-02d9:    36 b6 b6 c4            rrc [S + [0xb6c4]], #7
-02dd:    c9                     ld BL, [B]
-02de:    d3 cb                  ld B, [pc + -0x35]
-02e0:    b4 a0                  st A, @[pc + -0x60]
+02d6:    04 04                  (0x404)
+02d8:    04 36                  R_0436
+
+Device_DISK4_Obj:
+02da:    b6 b6                  HawkDeviceObj
+02dc:    c4 c9 d3 cb b4 a0      "DISK4 "
 02e2:    00                     HALT
 02e3:    00                     HALT
 02e4:    f1 40 03               st B, [0x4003]
@@ -436,13 +425,12 @@ R_0271:
 02e9:    05                     di
 02ea:    f2 5a 00               st B, @[0x5a00]
 02ed:    64 57                  ld X, @[pc + 0x57]
-02ef:    04                     ei
-02f0:    05                     di
-02f1:    04                     ei
-02f2:    36 b6 b6 c4            rrc [S + [0xb6c4]], #7
-02f6:    c9                     ld BL, [B]
-02f7:    d3 cb                  ld B, [pc + -0x35]
-02f9:    b5 a0                  st A, [S]
+02ef:    04 05                  (0x405)
+02f1:    04 36                  R_0436
+
+Device_DISK5_Obj:
+02f3:    b6 b6                  HawkDeviceObj
+02f5:    c4 c9 d3 cb b5 a0      "DISK5 "
 02fb:    00                     HALT
 02fc:    00                     HALT
 02fd:    f1 40 03               st B, [0x4003]
@@ -451,14 +439,13 @@ R_0271:
 0302:    05                     di
 0303:    f2 5a 00               st B, @[0x5a00]
 0306:    64 57                  ld X, @[pc + 0x57]
-0308:    04                     ei
-0309:    06                     sl
-030a:    04                     ei
-030b:    37 b6 b6 c4            rlc [S + [0xb6c4]], #7
-030f:    c9                     ld BL, [B]
-0310:    d3 cb                  ld B, [pc + -0x35]
-0312:    b6                     unknown
-0313:    a0 00                  st AL, #0x00
+0308:    04 06                  (0x406)
+030a:    04 37                  R_0437
+
+Device_DISK6_Obj:
+030c:    b6 b6                  HawkDeviceObj
+030e:    c4 c9 d3 cb b6 a0      "DISK6 "
+0314:    00
 0315:    00                     HALT
 0316:    f1 40 03               st B, [0x4003]
 0319:    2a                     clr! AL, #0
@@ -466,14 +453,13 @@ R_0271:
 031b:    05                     di
 031c:    f2 5a 00               st B, @[0x5a00]
 031f:    64 57                  ld X, @[pc + 0x57]
-0321:    04                     ei
-0322:    07                     rl
-0323:    04                     ei
-0324:    37 b6 b6 c4            rlc [S + [0xb6c4]], #7
-0328:    c9                     ld BL, [B]
-0329:    d3 cb                  ld B, [pc + -0x35]
-032b:    b7                     unknown
-032c:    a0 00                  st AL, #0x00
+0321:    04 07                  (0x407)
+0323:    04 37                  R_0437
+
+Device_DISK7_Obj:
+0325:    b6 b6                  HawkDeviceObj
+0327:    c4 c9 d3 cb b7 a0      "DISK7 "
+032d:    00
 032e:    00                     HALT
 032f:    f1 40 03               st B, [0x4003]
 0332:    2a                     clr! AL, #0
@@ -481,15 +467,13 @@ R_0271:
 0334:    05                     di
 0335:    f2 5a 00               st B, @[0x5a00]
 0338:    64 57                  ld X, @[pc + 0x57]
-033a:    04                     ei
-033b:    0a                     reti
-033c:    04                     ei
-033d:    39                     dec! A, #1
-033e:    bc                     st A, [Z]
-033f:    5c                     mov Y, A
-0340:    c4 c9                  ld BL, @[pc + -0x37]
-0342:    d3 cb                  ld B, [pc + -0x35]
-0344:    b1 b0 00               st A, [0xb000]
+033a:    04 0a                  (0x40a)
+033c:    04 39                  R_0439
+
+Device_DISK10_Obj:
+033e:    bc 5c                  FfcDeviceObj
+0340:    c4 c9 d3 cb b1 b0      "DISK10"
+0346:    00
 0347:    00                     HALT
 0348:    08                     cl
 0349:    00                     HALT
@@ -497,18 +481,12 @@ R_0271:
 034b:    60 01 05               ld X, #0x0105
 034e:    f2 06 00               st B, @[0x0600]
 0351:    64 57                  ld X, @[pc + 0x57]
-0353:    04                     ei
-0354:    0b                     rim
-0355:    04
-0356:    3a
-0357:    bc '<'
-0358:    5c
-0359:    c4 'D'
-035a:    c9 'I'
-035b:    d3 'S'
-035c:    cb 'K'
-035d:    b1 '1'
-035e:    b1 '1'
+0353:    04 0b                  (0x40b)
+0355:    04 3a                  R_043a
+
+Device_DISK11_Obj:
+0357:    bc 5c                  FfcDeviceObj
+0359:    c4 c9 d3 cb b1 b1      "DISK11"
 035f:    00
 0360:    00
 0361:    08
@@ -522,17 +500,15 @@ R_0271:
 0369:    00
 036a:    64
 
-R_036b:
-036b:    57                     unknown
-036c:    04                     ei
-036d:    0c                     unknown
-036e:    04                     ei
-036f:    3b                     not! A, #0
-0370:    bc                     st A, [Z]
-0371:    5c                     mov Y, A
-0372:    c4 c9                  ld BL, @[pc + -0x37]
-0374:    d3 cb                  ld B, [pc + -0x35]
-0376:    b1 b2 00               st A, [0xb200]
+Device_DISK12:
+036b:    57                     "W"
+036c:    04 0c                  (0x40c)
+036e:    04 3b                  R_043b
+
+Device_DISK12_Obj:
+0370:    bc 5c                  FfcDeviceObj
+0372:    c4 c9 d3 cb b1 b2      "DISK12"
+0378:    00
 0379:    00                     HALT
 037a:    08                     cl
 037b:    00                     HALT
@@ -540,15 +516,13 @@ R_036b:
 037d:    60 04 05               ld X, #0x0405
 0380:    f2 06 00               st B, @[0x0600]
 0383:    64 57                  ld X, @[pc + 0x57]
-0385:    04                     ei
-0386:    0d                     unknown
-0387:    04                     ei
-0388:    3c                     srl! A, #1
-0389:    bc                     st A, [Z]
-038a:    5c                     mov Y, A
-038b:    c4 c9                  ld BL, @[pc + -0x37]
-038d:    d3 cb                  ld B, [pc + -0x35]
-038f:    b1 b3 00               st A, [0xb300]
+0385:    04 0d                  (0x40d)
+0387:    04 3c                  R_043c
+
+Device_DISK13_Obj:
+0389:    bc 5c                  FfcDeviceObj
+038b:    c4 c9 d3 cb b1 b3      "DISK13"
+0391:    00
 0392:    00                     HALT
 0393:    08                     cl
 0394:    00                     HALT
@@ -556,15 +530,13 @@ R_036b:
 0396:    60 08 05               ld X, #0x0805
 0399:    f2 06 00               st B, @[0x0600]
 039c:    64 57                  ld X, @[pc + 0x57]
-039e:    04                     ei
-039f:    14 04                  bz L_03a5
-03a1:    3d                     sll! A, #1
-03a2:    c5 ee c4               ld BL, @[--P + -0x03c]
+039e:    04 14                  (0x414)
+03a0:    04 3d                  R_043d
 
-L_03a5:
-03a5:    c9                     ld BL, [B]
-03a6:    d3 cb                  ld B, [pc + -0x35]
-03a8:    b2 b0 00               st A, @[0xb000]
+Device_DISK20_Obj:
+03a2:    c5 ee                  CmdDeviceObj
+03a4:    c4 c9 d3 cb b2 b0      "DISK20"
+03aa:    00
 03ab:    00                     HALT
 03ac:    f8                     st B, [A]
 03ad:    08                     cl
@@ -574,15 +546,13 @@ L_03a5:
 03b1:    05                     di
 03b2:    f2 ff 00               st B, @[0xff00]
 03b5:    64 57                  ld X, @[pc + 0x57]
-03b7:    04                     ei
-03b8:    15 04                  bnz L_03be
-03ba:    3d                     sll! A, #1
-03bb:    c5 ee c4               ld BL, @[--P + -0x03c]
+03b7:    04 15                  (0x415)
+03b9:    04 3d                  R_043d
 
-L_03be:
-03be:    c9                     ld BL, [B]
-03bf:    d3 cb                  ld B, [pc + -0x35]
-03c1:    b2 b1 00               st A, @[0xb100]
+Device_DISK21_Obj:
+03bb:    c5 ee                  CmdDeviceObj
+03bd:    c4 c9 d3 cb b2 b1      "DISK21"
+03c3:    00
 03c4:    00                     HALT
 03c5:    f8                     st B, [A]
 03c6:    08                     cl
@@ -592,15 +562,13 @@ L_03be:
 03ca:    05                     di
 03cb:    f2 ff 00               st B, @[0xff00]
 03ce:    64 57                  ld X, @[pc + 0x57]
-03d0:    04                     ei
-03d1:    16 04                  blt L_03d7
-03d3:    3d                     sll! A, #1
-03d4:    c5 ee c4               ld BL, @[--P + -0x03c]
+03d0:    04 16                  (0x416)
+03d2:    04 3d                  R_043d
 
-L_03d7:
-03d7:    c9                     ld BL, [B]
-03d8:    d3 cb                  ld B, [L_03a5:-0x35]
-03da:    b2 b2 00               st A, @[0xb200]
+Device_DISK22_Obj:
+03d4:    c5 ee                  CmdDeviceObj
+03d6:    c4 c9 d3 cb b2 b2      "DISK22"
+03dc:    00
 03dd:    00                     HALT
 03de:    f8                     st B, [A]
 03df:    08                     cl
@@ -610,15 +578,13 @@ L_03d7:
 03e3:    05                     di
 03e4:    f2 ff 00               st B, @[0xff00]
 03e7:    64 57                  ld X, @[pc + 0x57]
-03e9:    04                     ei
-03ea:    17 04                  bp L_03f0
-03ec:    3d                     sll! A, #1
-03ed:    c5 ee c4               ld BL, @[--P + -0x03c]
+03e9:    04 17                  (0x417)
+03eb:    04 3d                  R_043d
 
-L_03f0:
-03f0:    c9                     ld BL, [B]
-03f1:    d3 cb                  ld B, [L_03be:-0x35]
-03f3:    b2 b3 00               st A, @[0xb300]
+Device_DISK23_Obj:
+03ed:    c5 ee                  CmdDeviceObj
+03ef:    c4 c9 d3 cb b2 b3      "DISK23"
+03f5:    00
 03f6:    00                     HALT
 03f7:    f8                     st B, [A]
 03f8:    08                     cl
@@ -628,15 +594,13 @@ L_03f0:
 03fc:    05                     di
 03fd:    f2 ff 00               st B, @[0xff00]
 0400:    64 57                  ld X, @[pc + 0x57]
-0402:    04                     ei
-0403:    18 04                  bgt L_0409
-0405:    3d                     sll! A, #1
-0406:    c5 ee c4               ld BL, @[--P + -0x03c]
+0402:    04 18                  (0x418)
+0404:    04 3d                  R_043d
 
-L_0409:
-0409:    c9                     ld BL, [B]
-040a:    d3 cb                  ld B, [L_03d7:-0x35]
-040c:    b2 b4 00               st A, @[0xb400]
+Device_DISK24_Obj:
+0406:    c5 ee                  CmdDeviceObj
+0408:    c4 c9 d3 cb b2 b4      "DISK24"
+040e:    00
 040f:    00                     HALT
 0410:    f8                     st B, [A]
 0411:    08                     cl
@@ -646,15 +610,13 @@ L_0409:
 0415:    05                     di
 0416:    f2 ff 00               st B, @[0xff00]
 0419:    64 57                  ld X, @[pc + 0x57]
-041b:    04                     ei
-041c:    19 04                  ble L_0422
-041e:    3d                     sll! A, #1
-041f:    c5 ee c4               ld BL, @[--P + -0x03c]
+041b:    04 19                  (0x419)
+041d:    04 3d                  R_043d
 
-L_0422:
-0422:    c9                     ld BL, [B]
-0423:    d3 cb                  ld B, [L_03f0:-0x35]
-0425:    b2 b5 00               st A, @[R_b500:0xb500]
+Device_DISK25_Obj:
+041f:    c5 ee                  CmdDeviceObj
+0421:    c4 c9 d3 cb b2 b5      "DISK25"
+0427:    00
 0428:    00                     HALT
 0429:    f8                     st B, [A]
 042a:    08                     cl
