@@ -307,12 +307,13 @@ if __name__ == "__main__":
                 while len(data) > 1:
                     fixup = struct.unpack_from(">H", data)[0]
                     old_value = struct.unpack(">H", memory[fixup:fixup+2])[0]
-                    new_value = struct.pack(">H", (old_value + addr) & 0xffff)
+                    new_addr = old_value + addr
+                    new_value = struct.pack(">H", (new_addr) & 0xffff)
                     memory = memory[:fixup] + new_value + memory[fixup + 2:]
                     data = data[2:]
+                    entry_points.append(new_addr)
+                    memory_addr_info[new_addr].label = f"R_{new_addr:04x}"
                     #memory_addr_info[fixup].label = f"F_{fixup:04x}"
-                entry_points.append(addr)
-                memory_addr_info[addr].label = f"R_{addr:04x}"
 
     if args["annotations"]:
         for ann_filename in args["annotations"]:
