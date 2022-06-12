@@ -6,7 +6,7 @@ Start:
 0103:    73 03                  jmp [L_0108:+0x3]
 0105:    00
 0106:    64
-0107:    c5
+0107:    c5 'E'
 
 L_0108:
     ; Entry point
@@ -395,20 +395,20 @@ CallHighMem:
 0362:    8c
 0363:    00	 ; name_buffer
 0364:    05
-0365:    a0
-0366:    a0
-0367:    a0
-0368:    a0
-0369:    a0
-036a:    a0
-036b:    a0
-036c:    a0
-036d:    a0
-036e:    a0
-036f:    a0
-0370:    a0
-0371:    a0
-0372:    a0
+0365:    a0 ' '
+0366:    a0 ' '
+0367:    a0 ' '
+0368:    a0 ' '
+0369:    a0 ' '
+036a:    a0 ' '
+036b:    a0 ' '
+036c:    a0 ' '
+036d:    a0 ' '
+036e:    a0 ' '
+036f:    a0 ' '
+0370:    a0 ' '
+0371:    a0 ' '
+0372:    a0 ' '
 0373:    a0                     (0xa0)
 0374:    00                     HALT	 ; disk_buffer
 0375:    01                     nop
@@ -417,7 +417,7 @@ CallHighMem:
 0379:    00                     HALT
 037a:    a0 a0                  st AL, #0xa0
 037c:    a0 a0                  st AL, #0xa0
-037e:    a0
+037e:    a0 ' '
 037f:    30, "AB 47 - INCORRECT DISK FORMAT\r"
 039f:    28, "AB 48 - INCORRECT DISK CODE\r"
 
@@ -462,7 +462,7 @@ L_03df:
 03e0:    ed                     st BL, [S]	 ; (SP) = digit
 03e1:    3d                     sll! A, #1
 03e2:    5d                     mov B, A	 ; BX = value << 1
-03e3:    35 01                  sll A, #2	 ; should be sll AX, 2
+03e3:    35 01                  sll A, #2
 03e5:    58                     add! B, A	 ; BX = (value << 1) + (value << 3) = value * 10
 03e6:    3a                     clr! A, #0	 ; AX = digit
 03e7:    8d                     ld AL, [S]
@@ -686,7 +686,7 @@ memcpy:
 0510:    19 21                  ble L_0533
 0512:    da                     ld B, [X]	 ; arg[2, 3]
 0513:    79 06 9a               call [L_069a:0x069a]
-0516:    a0
+0516:    a0 ' '
 
 L_0517:
 0517:    dd                     ld B, [S]	 ; BX = length
@@ -793,40 +793,40 @@ RawPrintChar:
 059c:    f6 19 01               st AL, +0x1(Z)
 059f:    a0 bd                  st AL, #0xbd	 ; Shouldn't this be ld ?
 05a1:    09                     ret
-05a2:    f6
+05a2:    f6 'v'
 05a3:    38
 05a4:    0f
 05a5:    0a
 05a6:    55
 05a7:    98
-05a8:    f2
+05a8:    f2 'r'
 05a9:    00
-05aa:    f6
+05aa:    f6 'v'
 05ab:    18
 05ac:    00
 05ad:    2c
 05ae:    10
 05af:    0f
-05b0:    f6
+05b0:    f6 'v'
 05b1:    18
 05b2:    01
-05b3:    f6
+05b3:    f6 'v'
 05b4:    18
 05b5:    03
-05b6:    f6
+05b6:    f6 'v'
 05b7:    18
 05b8:    05
-05b9:    f6
+05b9:    f6 'v'
 05ba:    18
 05bb:    07
 05bc:    2a
 05bd:    73
-05be:    e3
-05bf:    f6
+05be:    e3 'c'
+05bf:    f6 'v'
 05c0:    18
 05c1:    01
 05c2:    73
-05c3:    de
+05c3:    de '^'
 
 L_05c4:
 05c4:    7e 81                  push
@@ -943,14 +943,14 @@ L_065b:
 066b:    e1 05 ea               st BL, [0x05ea]
 066e:    09                     ret
 066f:    65
-0670:    a1
+0670:    a1 '!'
 0671:    3a
-0672:    b5
+0672:    b5 '5'
 0673:    45
 0674:    63
-0675:    ef
+0675:    ef 'o'
 0676:    73
-0677:    ec
+0677:    ec 'l'
 
 L_0678:
 0678:    95 41                  ld A, [X++]

@@ -850,6 +850,6 @@ L_9ed4:
 9ee4:    a1 f1 0b               st AL, [0xf10b]
 9ee7:    a1 f1 0c               st AL, [0xf10c]
 9eea:    72 01 0e               jmp @[PressSpaceThenExit:0x010e]	 ; PressSpaceThenExit
-9eed:    c5	 ; Checksum byte
+9eed:    c5 'E'	 ; Checksum byte
 9eee:    00
 9eef:    00

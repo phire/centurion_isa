@@ -70,9 +70,11 @@ class MemoryWrapper:
     def get_be16(self, addr):
         return get_be16(self.memory, addr)
 
-def _labels(labels):
-    for addr, label in labels.items():
-        memory_addr_info[addr].label = label
+def tochar(byte):
+    c = chr(byte&0x7f)
+    if byte > 0x80 and c.isprintable():
+        return True, c
+    return False, '.'
 
 def disassemble(memory):
     for entry in entry_points:
@@ -177,6 +179,9 @@ def disassemble(memory):
 
         else:
             out += (f"{i:04x}:    {memory[i]:02x}")
+            is_printable, c = tochar(memory[i])
+            if is_printable:
+                out += f" '{c}'"
             i += 1
 
         if info.comment:
