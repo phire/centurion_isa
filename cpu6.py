@@ -288,7 +288,7 @@ branch_instructions = [
 instructions  = [
     I("01111110 NNNNNNNN", "push"),
     I("01111111 NNNNNNNN", "pop"),
-    I("01100110 NNNNNNNN", "jsys"),
+    I("01100110 NNNNNNNN", "jsys {N:x}"),
 
     I("01011011", "mov X, A"),
 

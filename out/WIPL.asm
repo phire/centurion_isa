@@ -126,24 +126,10 @@ BackToPrompt:
     ; location contains zero; while in this one, which has been extracted by dumping
     ; from the TOS after it hit the "Stop" loop and the machine has been restarted,
     ; we see a 0xff. So, apparently, this sequence stores an 0xFF at 0x0265
-01bc:    47                     unknown	 ; fill
-01bd:    4c                     xor! BL, AL
-01be:    00                     HALT
-01bf:    ff                     st B, [P]
-01c0:    02                     sf
-01c1:    65                     unknown
-01c2:    47                     unknown	 ; fill (0x365), 0xa0, 10
-01c3:    9c                     ld A, [Z]
-01c4:    09                     ret
-01c5:    a0
-01c6:    03
-01c7:    65
-01c8:    79
-01c9:    05
-01ca:    5a
-01cb:    79
-01cc:    05
-01cd:    36
+01bc:    47 4c 00 ff 02 65      memcpy [0x0265], #0xff, #0x00	 ; fill
+01c2:    47 9c 09 a0 03 65      unkblk9 [0x0365], #0xa0, #0x09	 ; fill (0x365), 0xa0, 10
+01c8:    79 05 5a               call [L_055a:0x055a]
+01cb:    79 05 36               call [PrintString:0x0536]
 01ce:    03 42                  (0x342)	 ; WIPL version string
 01d0:    80 8a                  ld AL, #0x8a
 01d2:    a1 03 44               st AL, [0x0344]
@@ -185,11 +171,11 @@ L_01fd:
 
 L_021c:
 021c:    45 31                  mov AL, BL	 ; magic_value
-021e:    25 11                  sll AL, #1
+021e:    25 11                  sll AL, #2
 0220:    d0 f1 40               ld B, #0xf140
 0223:    43 12                  or BH, AL	 ; DSK0_BASE | (magic_value << 2)
 0225:    f1 04 b1               st B, [0x04b1]	 ; Set DSK board address
-0228:    25 11                  sll AL, #1
+0228:    25 11                  sll AL, #2
 022a:    c0 04                  ld BL, #0x04
 022c:    48                     add! BL, AL	 ; dma_mode_byte = magic_value << 4
 022d:    e1 04 ac               st BL, [0x04ac]	 ; Patch dma_set_mode insn
@@ -278,7 +264,7 @@ L_0293:
 029b:    54 02                  xor B, A
 029d:    91 01 05               ld A, [0x0105]	 ; entered_disk_code, which we now know is correct
 02a0:    50 20                  add A, B	 ; AX = track number here
-02a2:    35 03                  sll A, #1
+02a2:    35 03                  sll A, #4
 02a4:    5b                     mov X, A	 ; sector = track * 16 (sectors per track)
 02a5:    79 04 b0               call [LoadSector:0x04b0]
 02a8:    00                     (0x0)
@@ -295,8 +281,8 @@ L_0293:
     ; The search goes on to next sector(s), until we hit an entry, starting with
     ; 0x84 0x8d bytes. In the disk image we have we see these bytes prefixing
     ; what we think is a data file name.
-02af:    30 8f                  inc Z, #1	 ; name_on_disk = sector_base + 16, this skips the first entry.
-                                         	 ; That first entry looks like a volume name on the image we have.
+02af:    30 8f                  inc Z, #16	 ; name_on_disk = sector_base + 16, this skips the first entry.
+                                          	 ; That first entry looks like a volume name on the image we have.
 02b1:    79 05 07               call [memcpy:0x0507]	 ; Before proceeding, we copy part of ourselves to the top of RAM.
                                                     	 ; I guess we're preparing to load the boot file into low memory, which would
                                                     	 ; overwrite us.
@@ -476,7 +462,7 @@ L_03df:
 03e0:    ed                     st BL, [S]	 ; (SP) = digit
 03e1:    3d                     sll! A, #1
 03e2:    5d                     mov B, A	 ; BX = value << 1
-03e3:    35 01                  sll A, #1	 ; should be sll AX, 2
+03e3:    35 01                  sll A, #2	 ; should be sll AX, 2
 03e5:    58                     add! B, A	 ; BX = (value << 1) + (value << 3) = value * 10
 03e6:    3a                     clr! A, #0	 ; AX = digit
 03e7:    8d                     ld AL, [S]
@@ -491,7 +477,7 @@ RelocatablePart:
 03ee:    95 a1                  ld A, [S++]
 03f0:    b3 36                  st A, [pc + 0x36]
 03f2:    95 a1                  ld A, [S++]
-03f4:    30 05                  inc A, #1
+03f4:    30 05                  inc A, #6
 03f6:    b3 5c                  st A, [pc + 0x5c]
 03f8:    3a                     clr! A, #0
 03f9:    39                     dec! A, #1
@@ -519,7 +505,7 @@ L_0417:
 041c:    99                     ld A, [B]
 041d:    50 60                  add A, Y
 041f:    b9                     st A, [B]
-0420:    31 41                  dec X, #1
+0420:    31 41                  dec X, #2
 0422:    18 f3                  bgt L_0417
 
 L_0424:
@@ -571,7 +557,7 @@ L_0451:
 0466:    3a                     clr! A, #0
 0467:    b3 f1                  st A, [pc + -0xf]
 0469:    93 e9                  ld A, [pc + -0x17]
-046b:    30 02                  inc A, #1
+046b:    30 02                  inc A, #3
 046d:    b3 e5                  st A, [pc + -0x1b]
 046f:    65 08 01               ld X, [A + 0x0001]
 0472:    5d                     mov B, A
@@ -614,11 +600,11 @@ LoadBuffer1:
 04a2:    7b c5                  (0x7bc5)
 
 SetDmaForSectorLoad:
-04a4:    2f 00                  dma_load_addr A
+04a4:    2f 00                  ld_dma_addr A
 04a6:    90 fe 6f               ld A, #0xfe6f	 ; 400 bytes == 1 sector
-04a9:    2f 02                  dma_load_count A
-04ab:    2f 04                  dma_set_mode 0
-04ad:    2f 06                  dma_enable
+04a9:    2f 02                  ld_dma_count A
+04ab:    2f 04                  ld_dma_mode A
+04ad:    2f 06                  enable_dma
 04af:    09                     ret
 
 LoadSector:
@@ -755,7 +741,7 @@ L_0550:
 
 L_0555:
 0555:    7f 45                  pop
-0557:    30 41                  inc X, #1
+0557:    30 41                  inc X, #2
 0559:    09                     ret
 
 L_055a:
@@ -802,7 +788,7 @@ L_0590:
 
 RawPrintChar:
 0595:    f6 38 00               ld BL, +0x0(Z)
-0598:    24 31                  srl BL, #1
+0598:    24 31                  srl BL, #2
 059a:    11 f9                  bnc RawPrintChar
 059c:    f6 19 01               st AL, +0x1(Z)
 059f:    a0 bd                  st AL, #0xbd	 ; Shouldn't this be ld ?
@@ -848,11 +834,10 @@ L_05c4:
 05ca:    83 a2                  ld AL, [pc + -0x5e]
 05cc:    f6 19 00               st AL, +0x0(Z)
 05cf:    90 05 a6               ld A, #0x05a6
-05d2:    d7                     unknown
-05d3:    6e                     unknown
+05d2:    d7 6e                  mov A, 6e
 05d4:    3a                     clr! A, #0
-05d5:    d7                     unknown
-05d6:    60 80 06               ld X, #0x8006
+05d5:    d7 60                  mov A, 60
+05d7:    80 06                  ld AL, #0x06
 05d9:    f6 19 0a               st AL, +0xa(Z)
 05dc:    f6 19 0e               st AL, +0xe(Z)
 

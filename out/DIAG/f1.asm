@@ -114,13 +114,13 @@ DmaRegTest:
 
 L_8090:
 8090:    c0 11                  ld BL, #0x11
-8092:    2f 42                  dma_load_count X
-8094:    2f 03                  dma_store_count A
+8092:    2f 42                  ld_dma_count X
+8094:    2f 03                  st_dma_count A
 8096:    51 40                  sub A, X
 8098:    15 43                  bnz L_80dd
 809a:    c0 21                  ld BL, #0x21
-809c:    2f 40                  dma_load_addr X
-809e:    2f 01                  dma_store_addr A
+809c:    2f 40                  ld_dma_addr X
+809e:    2f 01                  st_dma_addr A
 80a0:    51 40                  sub A, X
 80a2:    15 39                  bnz L_80dd
 80a4:    20 50                  inc XL, #1
@@ -637,11 +637,11 @@ HawkTest:
 8389:    90 32 bf               ld A, #0x32bf
 838c:    b1 f1 41               st A, [0xf141]
 838f:    90 fe 6f               ld A, #0xfe6f
-8392:    2f 02                  dma_load_count A
+8392:    2f 02                  ld_dma_count A
 8394:    90 01 00               ld A, #0x0100
-8397:    2f 00                  dma_load_addr A
-8399:    2f 04                  dma_set_mode 0
-839b:    2f 06                  dma_enable
+8397:    2f 00                  ld_dma_addr A
+8399:    2f 04                  ld_dma_mode A
+839b:    2f 06                  enable_dma
 839d:    2a                     clr! AL, #0
 839e:    a1 f1 48               st AL, [0xf148]
 83a1:    79 84 52               call [L_8452:0x8452]
@@ -702,10 +702,10 @@ L_83f8:
 83f8:    2a                     clr! AL, #0
 83f9:    a1 00 20               st AL, [0x0020]
 83fc:    90 e6 ff               ld A, #0xe6ff
-83ff:    2f 02                  dma_load_count A
+83ff:    2f 02                  ld_dma_count A
 8401:    90 01 00               ld A, #0x0100
-8404:    2f 00                  dma_load_addr A
-8406:    2f 06                  dma_enable
+8404:    2f 00                  ld_dma_addr A
+8406:    2f 06                  enable_dma
 8408:    2a                     clr! AL, #0
 8409:    a1 f1 48               st AL, [0xf148]
 840c:    7b 44                  call [L_8452:+0x44]
@@ -716,7 +716,7 @@ L_83f8:
 8417:    73 a4                  jmp [L_83bd:-0x5c]
 
 L_8419:
-8419:    2f 03                  dma_store_count A
+8419:    2f 03                  st_dma_count A
 841b:    38                     inc! A, #1
 841c:    14 04                  bz L_8422
 841e:    c0 d9                  ld BL, #0xd9
@@ -725,7 +725,7 @@ L_8420:
 8420:    73 9b                  jmp [L_83bd:-0x65]
 
 L_8422:
-8422:    2f 01                  dma_store_addr A
+8422:    2f 01                  st_dma_addr A
 8424:    d0 1a 00               ld B, #0x1a00
 8427:    59                     sub! B, A
 8428:    14 04                  bz L_842e
@@ -1044,18 +1044,18 @@ L_85eb:
 85ed:    29                     dec! AL, #1
 85ee:    17 fb                  bp L_85eb
 85f0:    f5 a2                  st B, [--S]
-85f2:    2f 14                  dma_set_mode 1
-85f4:    2f 06                  dma_enable
-85f6:    2f a0                  dma_load_addr S
+85f2:    2f 14                  ld_dma_mode A
+85f4:    2f 06                  enable_dma
+85f6:    2f a0                  ld_dma_addr S
 85f8:    90 ff f6               ld A, #0xfff6
-85fb:    2f 02                  dma_load_count A
+85fb:    2f 02                  ld_dma_count A
 85fd:    7b 22                  call [L_8621:+0x22]
 85ff:    43 90                  or AH, ZL
 8601:    01                     nop
 8602:    00                     HALT
-8603:    2f 00                  dma_load_addr A
+8603:    2f 00                  ld_dma_addr A
 8605:    90 f0 ff               ld A, #0xf0ff
-8608:    2f 02                  dma_load_count A
+8608:    2f 02                  ld_dma_count A
 860a:    7b 7e                  call [L_868a:+0x7e]
 860c:    45 15                  mov XL, AL
 860e:    03                     rf
@@ -1125,12 +1125,12 @@ L_8664:
 866c:    d0 00 20               ld B, #0x0020
 866f:    5a                     and! B, A
 8670:    14 f2                  bz L_8664
-8672:    2f 04                  dma_set_mode 0
-8674:    2f 06                  dma_enable
+8672:    2f 04                  ld_dma_mode A
+8674:    2f 06                  enable_dma
 8676:    90 01 00               ld A, #0x0100
-8679:    2f 00                  dma_load_addr A
+8679:    2f 00                  ld_dma_addr A
 867b:    90 ea 1f               ld A, #0xea1f
-867e:    2f 02                  dma_load_count A
+867e:    2f 02                  ld_dma_count A
 8680:    7b 16                  call [L_8698:+0x16]
 8682:    00                     HALT
 8683:    81 f1 44               ld AL, [0xf144]

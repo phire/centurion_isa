@@ -51,9 +51,6 @@
 	 	; from the TOS after it hit the "Stop" loop and the machine has been restarted,
 	 	; we see a 0xff. So, apparently, this sequence stores an 0xFF at 0x0265
 0x1bc ,	comment	; fill
-0x1be ,	comment	; 1 byte
-0x1bf ,	comment	; with this value
-0x1c0 ,	comment	; starting at 0x265
 0x1c2 ,	comment	; fill (0x365), 0xa0, 10
 0x1ce ,	comment	; WIPL version string
 0x1d7 ,	comment	; "NAME"
@@ -93,7 +90,7 @@
 		; So, it is patched at runtime. This means there should be a way to bypass the check,
 		; but i don't know how and didn't search for it since we now have code recovery tool.
 		; Some more info from KenR, which may explain things we see:
-		; 
+		;
 		; The [ Code = ] when booting from the disk was just a simple password to be allowed to read from the disk.
 		; It was just a one time security check at boot time.  The [ Code = ] was an added feature to the Centurion
 		; system sometime in around 1981.  Why I recall this is because I got hung up with a bug in the first release
@@ -195,7 +192,6 @@
 0x3df ,	comment	; AX = value
 0x3e0 ,	comment	; (SP) = digit
 0x3e2 ,	comment	; BX = value << 1
-0x3e3 ,	comment	; should be sll AX, 2
 0x3e5 ,	comment	; BX = (value << 1) + (value << 3) = value * 10
 0x3e6 ,	comment	; AX = digit
 0x3e8 ,	comment	; BX += digit

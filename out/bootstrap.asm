@@ -60,17 +60,17 @@ fc58:    27 30                  rlc BL, #1
 fc5a:    29                     dec! AL, #1
 fc5b:    17 fb                  bp LoadFromFFC
 fc5d:    f5 a2                  st B, [--S]
-fc5f:    2f 14                  dma_set_mode 1
-fc61:    2f 06                  dma_enable
-fc63:    2f a0                  dma_load_addr S
+fc5f:    2f 14                  ld_dma_mode A
+fc61:    2f 06                  enable_dma
+fc63:    2f a0                  ld_dma_addr S
 fc65:    90 ff f6               ld A, #0xfff6
-fc68:    2f 02                  dma_load_count A
+fc68:    2f 02                  ld_dma_count A
 fc6a:    7b 22                  call [FFC_CommandTramp:+0x22]
 fc6c:    43                     (0x43)
 fc6d:    90 01 00               ld A, #0x0100
-fc70:    2f 00                  dma_load_addr A
+fc70:    2f 00                  ld_dma_addr A
 fc72:    90 f0 ff               ld A, #0xf0ff
-fc75:    2f 02                  dma_load_count A
+fc75:    2f 02                  ld_dma_count A
 fc77:    7b 15                  call [FFC_CommandTramp:+0x15]
 fc79:    45                     (0x45)
 fc7a:    15 03                  bnz PrintError
@@ -149,12 +149,12 @@ fcdd:    15 a0                  bnz PrintError
 fcdf:    d0 00 20               ld B, #0x0020
 fce2:    5a                     and! B, A
 fce3:    14 f2                  bz L_fcd7
-fce5:    2f 04                  dma_set_mode 0
-fce7:    2f 06                  dma_enable
+fce5:    2f 04                  ld_dma_mode A
+fce7:    2f 06                  enable_dma
 fce9:    90 01 00               ld A, #0x0100	 ; DMA transfer destination address
-fcec:    2f 00                  dma_load_addr A
+fcec:    2f 00                  ld_dma_addr A
 fcee:    90 ea 1f               ld A, #0xea1f	 ; DMA transfer size, 0xffff - (14 sectors at 400 bytes each)
-fcf1:    2f 02                  dma_load_count A
+fcf1:    2f 02                  ld_dma_count A
 fcf3:    7b 1c                  call [HawkCommand:+0x1c]	 ; HawkCommand(0) - Read
 fcf5:    00                     (0x0)
 fcf6:    81 f1 44               ld AL, [0xf144]	 ; Check Command Status (0 == success?)
@@ -235,12 +235,12 @@ fd62:    0e                     dly
 fd63:    a1 f8 08               st AL, [0xf808]
 fd66:    0e                     dly
 fd67:    90 1f 40               ld A, #0x1f40
-fd6a:    2f 00                  dma_load_addr A
+fd6a:    2f 00                  ld_dma_addr A
 fd6c:    51 80                  sub A, Z
 fd6e:    3b                     not! A, #0
-fd6f:    2f 02                  dma_load_count A
-fd71:    2f 34                  dma_set_mode 3
-fd73:    2f 06                  dma_enable
+fd6f:    2f 02                  ld_dma_count A
+fd71:    2f 34                  ld_dma_mode B
+fd73:    2f 06                  enable_dma
 fd75:    80 43                  ld AL, #0x43
 fd77:    a1 f8 08               st AL, [0xf808]
 fd7a:    0e                     dly
@@ -253,11 +253,11 @@ fd80:    73 9a                  jmp [PrintErrorTramp2:-0x66]
 
 L_fd82:
 fd82:    90 01 00               ld A, #0x0100
-fd85:    2f 00                  dma_load_addr A
+fd85:    2f 00                  ld_dma_addr A
 fd87:    90 ea 1f               ld A, #0xea1f
-fd8a:    2f 02                  dma_load_count A
-fd8c:    2f 34                  dma_set_mode 3
-fd8e:    2f 06                  dma_enable
+fd8a:    2f 02                  ld_dma_count A
+fd8c:    2f 34                  ld_dma_mode B
+fd8e:    2f 06                  enable_dma
 fd90:    80 45                  ld AL, #0x45
 fd92:    a1 f8 08               st AL, [0xf808]
 fd95:    80 08                  ld AL, #0x08
@@ -289,13 +289,10 @@ fdb3:    b3 03                  st A, [pc + 0x03]
 
 L_fdb5:
 fdb5:    79 4c 93               call [L_4c93:0x4c93]
-fdb8:    47                     unknown
-fdb9:    be                     st A, [C]
-fdba:    6d a2                  st X, [--S]
-fdbc:    32 40                  clr X, #0
-
-L_fdbe:
-fdbe:    79 4c e7               call [L_4ce7:0x4ce7]
+fdb8:    47 be 6d a2 32         unkblkB [B], #0xa2, #0x6d
+fdbd:    40 79                  add ZL, YL
+fdbf:    4c                     xor! BL, AL
+fdc0:    e7                     unknown
 fdc1:    4d                     mov! BL, AL
 fdc2:    14 2a                  bz L_fdee
 fdc4:    c0 8d                  ld BL, #0x8d

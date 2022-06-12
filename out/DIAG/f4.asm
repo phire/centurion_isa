@@ -335,11 +335,11 @@ L_9aef:
 9af4:    3f                     dec X
 9af5:    15 f8                  bnz L_9aef
 9af7:    90 f0 ff               ld A, #0xf0ff	 ; -3841, does the DMA count up to 0 ?
-9afa:    2f 02                  dma_load_count A
+9afa:    2f 02                  ld_dma_count A
 9afc:    90 01 1c               ld A, #0x011c
-9aff:    2f 00                  dma_load_addr A
-9b01:    2f 34                  dma_set_mode 3
-9b03:    2f 06                  dma_enable
+9aff:    2f 00                  ld_dma_addr A
+9b01:    2f 34                  ld_dma_mode B
+9b03:    2f 06                  enable_dma
     ; These are the only two commands, whose parameters are sent using the
     ; memory-mapped command register. All other operations (seek, read, etc)
     ; only use a single byte as command; request parameters are sent as a
@@ -370,11 +370,11 @@ L_9b32:
 9b34:    3f                     dec X
 9b35:    15 fb                  bnz L_9b32
 9b37:    90 f0 ff               ld A, #0xf0ff
-9b3a:    2f 02                  dma_load_count A
+9b3a:    2f 02                  ld_dma_count A
 9b3c:    90 01 1c               ld A, #0x011c
-9b3f:    2f 00                  dma_load_addr A
-9b41:    2f 34                  dma_set_mode 3
-9b43:    2f 06                  dma_enable
+9b3f:    2f 00                  ld_dma_addr A
+9b41:    2f 34                  ld_dma_mode B
+9b43:    2f 06                  enable_dma
 9b45:    80 47                  ld AL, #0x47	 ; Read AUX ?
 9b47:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
 9b4a:    7a 01 0c               call @[WaitNotFIn:0x010c]	 ; WaitNotFIn
@@ -456,11 +456,11 @@ Entry_01133_CMD_SEEK_TEST:
 9bed:    90 82 ff               ld A, #0x82ff	 ; packet[2,3] = 0x82FF
 9bf0:    b9                     st A, [B]
 9bf1:    90 ff fb               ld A, #0xfffb	 ; -5 = 4 bytes
-9bf4:    2f 02                  dma_load_count A
+9bf4:    2f 02                  ld_dma_count A
 9bf6:    90 41 4d               ld A, #0x414d	 ; control packet base
-9bf9:    2f 00                  dma_load_addr A
-9bfb:    2f 34                  dma_set_mode 3
-9bfd:    2f 06                  dma_enable
+9bf9:    2f 00                  ld_dma_addr A
+9bfb:    2f 34                  ld_dma_mode B
+9bfd:    2f 06                  enable_dma
 9bff:    80 43                  ld AL, #0x43
 9c01:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
 9c04:    7a 01 18               call @[WaitForReady:0x0118]	 ; WaitForReady
@@ -494,11 +494,11 @@ L_9c12:
 L_9c32:
     ; This is the main loop
 9c32:    90 41 4d               ld A, #0x414d	 ; control packet base
-9c35:    2f 00                  dma_load_addr A
+9c35:    2f 00                  ld_dma_addr A
 9c37:    90 ff f7               ld A, #0xfff7	 ; -9 = 8 bytes
-9c3a:    2f 02                  dma_load_count A
-9c3c:    2f 34                  dma_set_mode 3
-9c3e:    2f 06                  dma_enable
+9c3a:    2f 02                  ld_dma_count A
+9c3c:    2f 34                  ld_dma_mode B
+9c3e:    2f 06                  enable_dma
     ; Seek operation consists of two commands
 9c40:    80 43                  ld AL, #0x43
 9c42:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
@@ -573,11 +573,11 @@ L_9cc5:
 
 L_9cd5:
 9cd5:    90 ff c3               ld A, #0xffc3
-9cd8:    2f 02                  dma_load_count A
+9cd8:    2f 02                  ld_dma_count A
 9cda:    90 41 4d               ld A, #0x414d
-9cdd:    2f 00                  dma_load_addr A
-9cdf:    2f 34                  dma_set_mode 3
-9ce1:    2f 06                  dma_enable
+9cdd:    2f 00                  ld_dma_addr A
+9cdf:    2f 34                  ld_dma_mode B
+9ce1:    2f 06                  enable_dma
 9ce3:    80 43                  ld AL, #0x43
 9ce5:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
 9ce8:    7a 01 18               call @[WaitForReady:0x0118]	 ; WaitForReady
@@ -588,11 +588,11 @@ L_9cd5:
 
 L_9cf6:
 9cf6:    90 e6 ff               ld A, #0xe6ff
-9cf9:    2f 02                  dma_load_count A
+9cf9:    2f 02                  ld_dma_count A
 9cfb:    90 01 1c               ld A, #0x011c
-9cfe:    2f 00                  dma_load_addr A
-9d00:    2f 34                  dma_set_mode 3
-9d02:    2f 06                  dma_enable
+9cfe:    2f 00                  ld_dma_addr A
+9d00:    2f 34                  ld_dma_mode B
+9d02:    2f 06                  enable_dma
 9d04:    80 45                  ld AL, #0x45
 9d06:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
 9d09:    7a 01 18               call @[WaitForReady:0x0118]	 ; WaitForReady
@@ -636,11 +636,11 @@ Entry_FINCH_SEEK_TEST:
 9d55:    90 82 ff               ld A, #0x82ff
 9d58:    b9                     st A, [B]	 ; packet[4, 5] = 0x82ff
 9d59:    90 ff f9               ld A, #0xfff9	 ; -7 = 6 bytes
-9d5c:    2f 02                  dma_load_count A
+9d5c:    2f 02                  ld_dma_count A
 9d5e:    90 41 4d               ld A, #0x414d
-9d61:    2f 00                  dma_load_addr A
-9d63:    2f 34                  dma_set_mode 3
-9d65:    2f 06                  dma_enable
+9d61:    2f 00                  ld_dma_addr A
+9d63:    2f 34                  ld_dma_mode B
+9d65:    2f 06                  enable_dma
 9d67:    80 43                  ld AL, #0x43
 9d69:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
 9d6c:    7a 01 18               call @[WaitForReady:0x0118]	 ; WaitForReady
@@ -674,11 +674,11 @@ L_9d7a:
 L_9d9a:
     ; This is the test's main loop
 9d9a:    90 41 4d               ld A, #0x414d
-9d9d:    2f 00                  dma_load_addr A
+9d9d:    2f 00                  ld_dma_addr A
 9d9f:    90 ff f7               ld A, #0xfff7	 ; 9 bytes
-9da2:    2f 02                  dma_load_count A
-9da4:    2f 34                  dma_set_mode 3
-9da6:    2f 06                  dma_enable
+9da2:    2f 02                  ld_dma_count A
+9da4:    2f 34                  ld_dma_mode B
+9da6:    2f 06                  enable_dma
 9da8:    80 43                  ld AL, #0x43
 9daa:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
 9dad:    7a 01 18               call @[WaitForReady:0x0118]	 ; WaitForReady
@@ -774,11 +774,11 @@ L_9e37:
     ; of the same 0x43, 0x45 commands; but no actual data is
     ; returned. It looks like Seek returns an "empty payload"
 9e37:    90 ff c3               ld A, #0xffc3	 ; Request length = 60 bytes
-9e3a:    2f 02                  dma_load_count A
+9e3a:    2f 02                  ld_dma_count A
 9e3c:    90 41 4d               ld A, #0x414d	 ; Send the request
-9e3f:    2f 00                  dma_load_addr A
-9e41:    2f 34                  dma_set_mode 3
-9e43:    2f 06                  dma_enable
+9e3f:    2f 00                  ld_dma_addr A
+9e41:    2f 34                  ld_dma_mode B
+9e43:    2f 06                  enable_dma
 9e45:    80 43                  ld AL, #0x43	 ; Execute
 9e47:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
 9e4a:    7a 01 18               call @[WaitForReady:0x0118]	 ; WaitForReady
@@ -789,11 +789,11 @@ L_9e37:
 
 L_9e58:
 9e58:    90 e6 ff               ld A, #0xe6ff	 ; 6400 bytes = 16 sectors * 400 bytes
-9e5b:    2f 02                  dma_load_count A
+9e5b:    2f 02                  ld_dma_count A
 9e5d:    90 01 1c               ld A, #0x011c	 ; Address to place data
-9e60:    2f 00                  dma_load_addr A
-9e62:    2f 34                  dma_set_mode 3
-9e64:    2f 06                  dma_enable
+9e60:    2f 00                  ld_dma_addr A
+9e62:    2f 34                  ld_dma_mode B
+9e64:    2f 06                  enable_dma
 9e66:    80 45                  ld AL, #0x45	 ; Return data
 9e68:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
 9e6b:    7a 01 18               call @[WaitForReady:0x0118]	 ; WaitForReady

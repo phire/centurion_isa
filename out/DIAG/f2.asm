@@ -1236,16 +1236,16 @@ L_8d56:
 
 L_8d5a:
 8d5a:    90 60 66               ld A, #0x6066
-8d5d:    2f 00                  dma_load_addr A
-8d5f:    2f 21                  dma_store_addr B
+8d5d:    2f 00                  ld_dma_addr A
+8d5f:    2f 21                  st_dma_addr B
 8d61:    59                     sub! B, A
 8d62:    14 01                  bz L_8d65
 8d64:    00                     HALT
 
 L_8d65:
 8d65:    90 46 11               ld A, #0x4611
-8d68:    2f 02                  dma_load_count A
-8d6a:    2f 23                  dma_store_count B
+8d68:    2f 02                  ld_dma_count A
+8d6a:    2f 23                  st_dma_count B
 8d6c:    59                     sub! B, A
 8d6d:    14 01                  bz L_8d70
 8d6f:    00                     HALT
@@ -1311,12 +1311,7 @@ MappingRamTestLoop:
 8e2f:    90 06 d9               ld A, #0x06d9
 8e32:    50 80                  add A, Z
 8e34:    7d 00                  call [A]	 ; Call MappingInit
-8e36:    47                     unknown
-8e37:    40 ff                  add PL, PL
-8e39:    01                     nop
-8e3a:    00                     HALT
-8e3b:    02                     sf
-8e3c:    00                     HALT
+8e36:    47 40 ff 01 00 02 00   memcpy [0x0200], [0x0100], #0xff
 8e3d:    7b 36                  call [L_8e75:+0x36]
 8e3f:    01                     nop
 8e40:    7b 33                  call [L_8e75:+0x33]
@@ -1354,7 +1349,7 @@ ReturnAddress:
 L_8e75:
 8e75:    3a                     clr! A, #0
 8e76:    85 41                  ld AL, [X++]
-8e78:    35 04                  sll A, #1
+8e78:    35 04                  sll A, #5
 8e7a:    20 00                  inc AH, #1
 8e7c:    7e 45                  push
 8e7e:    5c                     mov Y, A
@@ -1372,12 +1367,7 @@ nextByteValue:
 8e8b:    ac                     st AL, [Z]	 ; HL is EF+0x100
 8e8c:    7b 76                  call [ReadAllPages:+0x76]
 8e8e:    7b 49                  call [WriteAllPages:+0x49]
-8e90:    47                     unknown
-8e91:    80 ff                  ld AL, #0xff
-8e93:    01                     nop
-8e94:    00                     HALT
-8e95:    02                     sf
-8e96:    00                     HALT
+8e90:    47 80 ff 01 00 02 00   memcmp [0x0200], [0x0100], #0xff
 8e97:    15 69                  bnz L_8f02	 ; Branch if parity Error
 8e99:    31 20                  dec B, #1	 ; Test every single byte pattern
 8e9b:    15 eb                  bnz nextByteValue
@@ -1389,14 +1379,8 @@ nextByteValue:
 8ea6:    09                     ret
 
 L_8ea7:
-8ea7:    2e 1c                  ?? r12, r1
-8ea9:    f8                     st B, [A]
-8eaa:    03                     rf
-8eab:    00                     HALT
-8eac:    2e 0c                  ?? r12, r0
-8eae:    f9                     st B, [B]
-8eaf:    03                     rf
-8eb0:    00                     HALT
+8ea7:    2e 1c f8 03 00         rpf #0xf8, [0x0300]
+8eac:    2e 0c f9 03 00         wpf #0xf9, [0x0300]
 8eb1:    80 01                  ld AL, #0x01
 
 L_8eb3:
@@ -1408,98 +1392,42 @@ L_8eb3:
 8ebc:    60 06 c2               ld X, #0x06c2
 8ebf:    50 84                  add X, Z
 8ec1:    0f                     rsys
-8ec2:    7b
-8ec3:    15
-8ec4:    47
-8ec5:    40
-8ec6:    ff
-8ec7:    01
-8ec8:    00
-8ec9:    02
-8eca:    00
-8ecb:    09
+
+rsysContinue:
+8ec2:    7b 15                  call [WriteAllPages:+0x15]
+8ec4:    47 40 ff 01 00 02 00   memcpy [0x0200], [0x0100], #0xff
+8ecb:    09                     ret
 
 L_8ecc:
-8ecc:    2e 1c                  ?? r12, r1
-8ece:    f9                     st B, [B]
-8ecf:    03                     rf
-8ed0:    00                     HALT
-8ed1:    2e 0c                  ?? r12, r0
-8ed3:    f8                     st B, [A]
-8ed4:    03                     rf
-8ed5:    00                     HALT
+8ecc:    2e 1c f9 03 00         rpf #0xf9, [0x0300]
+8ed1:    2e 0c f8 03 00         wpf #0xf8, [0x0300]
 8ed6:    2a                     clr! AL, #0
 8ed7:    73 da                  jmp [L_8eb3:-0x26]
 
 WriteAllPages:
-8ed9:    2e 1c                  ?? r12, r1
-8edb:    f8                     st B, [A]
-8edc:    01                     nop
-8edd:    00                     HALT
-8ede:    2e 1c                  ?? r12, r1
-
-L_8ee0:
-8ee0:    f9                     st B, [B]
-8ee1:    01                     nop
-8ee2:    20 2e                  inc BH, #1
-8ee4:    1c fa                  bs3 L_8ee0
-
-L_8ee6:
-8ee6:    01                     nop
-8ee7:    40 2e                  add PH, BH
-8ee9:    1c fb                  bs3 L_8ee6
-8eeb:    01                     nop
-8eec:    60 2e 1c               ld X, #0x2e1c
-8eef:    fc                     st B, [Z]
-8ef0:    01                     nop
-8ef1:    80 2e                  ld AL, #0x2e
-8ef3:    1c fd                  bs3 L_8ef2
-8ef5:    01                     nop
-8ef6:    a0 2e                  st AL, #0x2e
-
-L_8ef8:
-8ef8:    1c fe                  bs3 L_8ef8
-8efa:    01                     nop
-8efb:    c0 2e                  ld BL, #0x2e
-8efd:    1c ff                  bs3 L_8efe
-8eff:    01                     nop
-8f00:    e0 09                  st BL, #0x09
+8ed9:    2e 1c f8 01 00         rpf #0xf8, [0x0100]
+8ede:    2e 1c f9 01 20         rpf #0xf9, [0x0120]
+8ee3:    2e 1c fa 01 40         rpf #0xfa, [0x0140]
+8ee8:    2e 1c fb 01 60         rpf #0xfb, [0x0160]
+8eed:    2e 1c fc 01 80         rpf #0xfc, [0x0180]
+8ef2:    2e 1c fd 01 a0         rpf #0xfd, [0x01a0]
+8ef7:    2e 1c fe 01 c0         rpf #0xfe, [0x01c0]
+8efc:    2e 1c ff 01 e0         rpf #0xff, [0x01e0]
+8f01:    09                     ret
 
 L_8f02:
 8f02:    73 29                  jmp [L_8f2d:+0x29]
 
 ReadAllPages:
-8f04:    2e 0c                  ?? r12, r0
-8f06:    f8                     st B, [A]
-8f07:    01                     nop
-8f08:    00                     HALT
-8f09:    2e 0c                  ?? r12, r0
-8f0b:    f9                     st B, [B]
-8f0c:    01                     nop
-8f0d:    20 2e                  inc BH, #1
-8f0f:    0c                     unknown
-8f10:    fa                     st B, [X]
-8f11:    01                     nop
-8f12:    40 2e                  add PH, BH
-8f14:    0c                     unknown
-8f15:    fb                     st B, [Y]
-8f16:    01                     nop
-8f17:    60 2e 0c               ld X, #0x2e0c
-8f1a:    fc                     st B, [Z]
-8f1b:    01                     nop
-8f1c:    80 2e                  ld AL, #0x2e
-8f1e:    0c                     unknown
-8f1f:    fd                     st B, [S]
-8f20:    01                     nop
-8f21:    a0 2e                  st AL, #0x2e
-8f23:    0c                     unknown
-8f24:    fe                     st B, [C]
-8f25:    01                     nop
-8f26:    c0 2e                  ld BL, #0x2e
-8f28:    0c                     unknown
-8f29:    ff                     st B, [P]
-8f2a:    01                     nop
-8f2b:    e0 09                  st BL, #0x09
+8f04:    2e 0c f8 01 00         wpf #0xf8, [0x0100]
+8f09:    2e 0c f9 01 20         wpf #0xf9, [0x0120]
+8f0e:    2e 0c fa 01 40         wpf #0xfa, [0x0140]
+8f13:    2e 0c fb 01 60         wpf #0xfb, [0x0160]
+8f18:    2e 0c fc 01 80         wpf #0xfc, [0x0180]
+8f1d:    2e 0c fd 01 a0         wpf #0xfd, [0x01a0]
+8f22:    2e 0c fe 01 c0         wpf #0xfe, [0x01c0]
+8f27:    2e 0c ff 01 e0         wpf #0xff, [0x01e0]
+8f2c:    09                     ret
 
 L_8f2d:
 8f2d:    7f 45                  pop

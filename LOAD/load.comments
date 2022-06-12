@@ -3,3 +3,13 @@
 0x83a0 ,	comment	; modify jump instruction below
 0x83a2 ,	comment	; restore registers
 0x83a4 ,	comment	; jump to syscall
+0xb924 ,	comment	; '
+0xb926 ,	comment	; '
+0xba0d ,	comment	; '
+0xba0f ,	comment	; '
+0xbba1 ,	comment	; '
+0xbbd6 ,	comment	; '
+0xcd4d,	pre_comment 	; Looks like this function converts a 16bit word to hex and writes
+	 	; it to the ascii buffer specified at [X]
+0xcf91 ,	comment	; '
+0xcf97 ,	comment	; '
