@@ -14,12 +14,6 @@ class MemInfo:
 entry_points = []
 memory_addr_info = defaultdict(MemInfo)
 
-def get_be16(memory, addr):
-    return memory[addr] * 256 + memory[addr + 1]
-
-def get_signed_8(memory, addr):
-    return struct.unpack_from('b', memory[addr:addr+1])[0]
-
 signed_wildcards = ("S")
 
 class I:
@@ -30,7 +24,7 @@ class I:
         self.format = format
         self.newpc = None
 
-    def match(self, pc, bitstring, bytes, memory):
+    def match(self, pc, bitstring, bytes, mem):
         bitstring = bitstring[0:len(self.pattern)]
 
         wildcard_bitstrings = defaultdict(str)
@@ -54,7 +48,7 @@ class I:
 
         return InstructionMatch(pc, self, bytes, dict)
 
-    def to_string(self, dict, memory):
+    def to_string(self, dict, mem):
         return self.format.format(**dict)
 
 
@@ -87,7 +81,7 @@ class B(I):
         self.newpc = newpc
         self.name = name
 
-    def to_string(self, dict, memory):
+    def to_string(self, dict, mem):
         if self.newpc == kill_branch:
             return self.name.format(**dict)
         if self.newpc == indirect_relative_call:
@@ -122,7 +116,7 @@ class QuickInstuction:
         return self.format.format(**dict)
 
 class InstructionMatch:
-    def __init__(self, pc, instruction, bytes, dict={}):
+    def __init__(self, pc, instruction, bytes, dict={}, mem=None):
         self.disassembled = True
         self.valid = not isinstance(instruction, InvalidInstruction)
         self.instruction = instruction
@@ -137,13 +131,14 @@ class InstructionMatch:
             "RegNames8": RegNames8,
             "RegNames16": RegNames16,
             "instruction": instruction,
+            "mem": mem,
         }
 
         if self.instruction.newpc is not None:
             self.next_pc = instruction.newpc(**self.dict)
 
-    def to_string(self, memory=None, **kwargs):
-        return self.instruction.to_string(self.dict, memory=memory, **kwargs)
+    def to_string(self, mem=None, **kwargs):
+        return self.instruction.to_string(self.dict, mem=mem, **kwargs)
 
 
 
@@ -175,11 +170,11 @@ def make_bitstring(bytes):
     return bitstring
 
 
-def scan(instructions, memory, pc, len):
-    bytes = memory[pc:pc+len]
+def scan(instructions, mem, pc, len):
+    bytes = mem[pc:pc+len]
     bitstring = make_bitstring(bytes)
 
     for instruction in instructions:
-        if match := instruction.match(pc, bitstring, bytes, memory):
+        if match := instruction.match(pc, bitstring, bytes, mem):
             return match
     return InstructionMatch(pc, InvalidInstruction(), bytes, {})

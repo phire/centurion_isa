@@ -58,7 +58,8 @@ if __name__ == "__main__":
 
     scan_strings(memory, body_addr)
     scan_call_args(memory, body_addr)
+    mem = MemoryWrapper(memory)
 
-    read_annotations("roms/Diag_F3_Rev_1.0.comments", memory)
+    read_annotations("roms/Diag_F3_Rev_1.0.comments", mem)
 
-    disassemble(memory)
+    disassemble(mem)

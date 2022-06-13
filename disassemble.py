@@ -3,40 +3,40 @@
 from collections import defaultdict
 import struct
 from cpu6 import disassemble_instruction
-from generic import memory_addr_info, entry_points, MemInfo, get_be16
+from generic import memory_addr_info, entry_points, MemInfo
 
-def recursive_disassemble(memory, entry):
+def recursive_disassemble(mem, entry):
     valid = True
     pc = entry
     while valid and pc < 0xfe00:
-        if memory_addr_info[pc].visited:
+        if mem.visited(pc):
             return
 
-        memory_addr_info[pc].visited = True
+        mem.info(pc).visited = True
 
-        info = disassemble_instruction(memory, pc)
+        info = disassemble_instruction(mem, pc)
         valid = info.valid
 
         for i in range(pc+1, pc + len(info.bytes)):
-            if memory_addr_info[i].visited:
+            if mem.info(i).visited:
                 valid = False
 
         if valid:
-            memory_addr_info[pc].instruction = info
+            mem.info(pc).instruction = info
 
         if len(info.next_pc) == 0:
             return
 
         for next_pc in info.next_pc[1:]:
-            if memory_addr_info[next_pc].label == None:
-                memory_addr_info[next_pc].label = f"L_{next_pc:04x}"
-            recursive_disassemble(memory, next_pc)
+            if mem.info(next_pc).label == None:
+                mem.info(next_pc).label = f"L_{next_pc:04x}"
+            recursive_disassemble(mem, next_pc)
 
         next_pc = info.next_pc[0]
 
         if next_pc != pc + len(info.bytes):
-            if memory_addr_info[next_pc].label == None:
-                memory_addr_info[next_pc].label = f"L_{next_pc:04x}"
+            if mem.info(next_pc).label == None:
+                mem.info(next_pc).label = f"L_{next_pc:04x}"
         pc = next_pc
 
 def escape_char(c):
@@ -50,14 +50,17 @@ def escape_char(c):
     else:
         return f"\\x{c:02x}"
 
-def get_pstring16_length(memory, addr):
+def get_pstring16_length(mem, addr):
     # Parity is still applied to length bytes
-    return get_be16(memory, addr) & 0x7f7f
+    return mem.get_be16(addr) & 0x7f7f
 
 class MemoryWrapper:
     def __init__(self, memory):
         self.memory = memory
         self.labels = {}
+
+    def __getitem__(self, key):
+        return self.memory.__getitem__(key)
 
     def get_label(self, addr):
         if addr in memory_addr_info:
@@ -65,13 +68,26 @@ class MemoryWrapper:
         return None
 
     def get_u8(self, addr):
-        return self.memory[addr]
+        return struct.unpack_from('B', self.memory[addr:])[0]
 
     def get_be16(self, addr):
-        return get_be16(self.memory, addr)
+        return struct.unpack_from('>H', self.memory[addr:])[0]
+
+    def get_i8(self, addr):
+        return struct.unpack_from('b', self.memory[addr:])[0]
 
     def is_fixup(self, addr):
         return addr in memory_addr_info and memory_addr_info[addr].fixup
+
+    def visited(self, addr):
+        return addr in memory_addr_info and memory_addr_info[addr].visited
+
+    def info(self, addr):
+        return memory_addr_info[addr]
+
+    def read_only_info(self, addr):
+        # like info(), but doesn't create a new entry in the DefaultDict
+        return memory_addr_info[addr] if addr in memory_addr_info else MemInfo()
 
 def tochar(byte):
     c = chr(byte&0x7f)
@@ -83,8 +99,6 @@ def disassemble(memory):
     for entry in entry_points:
         recursive_disassemble(memory, entry)
 
-    mem = MemoryWrapper(memory)
-
     i = 0
     while i < 0xfe00:
         if i & 0x000f == 0:
@@ -94,7 +108,7 @@ def disassemble(memory):
                     continue
             except:
                 pass
-        info = memory_addr_info[i] if i in memory_addr_info else MemInfo()
+        info = memory.read_only_info(i)
 
         if info.label:
             print(f"\n{info.label}:")
@@ -139,10 +153,10 @@ def disassemble(memory):
 
         elif info.type in ["fnptr", "ptr"]:
             # 16 bit absolute pointer
-            addr = get_be16(memory, i)
-            label = memory_addr_info[addr].label
+            addr = memory.get_be16(i)
+            label = memory.info(addr).label
             if label == None:
-                label = memory_addr_info[addr].label = f"L_{addr:04x}"
+                label = memory.info(addr).label = f"L_{addr:04x}"
             out += f"{i:04x}:    "
             out += print_bytes(memory[i:i+2])
             out += f"{label}"
@@ -175,7 +189,7 @@ def disassemble(memory):
             out = f"{i:04x}:    "
             out += print_bytes(inst.bytes)
 
-            out += inst.to_string(mem)
+            out += inst.to_string(memory)
 
             i += len(inst.bytes)
 
@@ -219,9 +233,9 @@ def read_annotations(name, memory):
                # This is a continuation of a multi-line comment
                text = "\n" + comment
                if pre_comment:
-                   memory_addr_info[last_comment].pre_comment += text
+                   memory.info(last_comment).pre_comment += text
                else:
-                   memory_addr_info[last_comment].comment += text
+                   memory.info(last_comment).comment += text
                continue
 
            address = int(addr_str, 0)
@@ -234,7 +248,7 @@ def read_annotations(name, memory):
                    type = ""
 
            if type == "pre_comment":
-               memory_addr_info[address].pre_comment = comment
+               memory.info(address).pre_comment = comment
                last_comment = address
                pre_comment = True
                continue
@@ -245,18 +259,18 @@ def read_annotations(name, memory):
                    label = items[2].strip()
                else:
                    label = f"Entry_{hex(address)}"
-               memory_addr_info[address].label = label
+               memory.info(address).label = label
            elif type == "fnptr":
                 # 16 bit absolute function pointer
-                memory_addr_info[address].type = "fnptr"
-                ptr_addr = get_be16(memory, address)
+                memory.info(address).type = "fnptr"
+                ptr_addr = memory.get_be16(address)
                 entry_points.append(ptr_addr)
 
            elif type == "label":
-               memory_addr_info[address].label = items[2].strip()
+               memory.info(address).label = items[2].strip()
            elif type != "":
-               memory_addr_info[address].visited = True
-               memory_addr_info[address].type = type
+               memory.info(address).visited = True
+               memory.info(address).type = type
                # Data is often embedded in the code, generate an entry point at the end
                # so that disassembly continues.
                if type[0:2] == ">B":
@@ -272,11 +286,11 @@ def read_annotations(name, memory):
                    #entry_points.append(address + 2 + get_pstring16_length(memory, address))
 
            if comment is not None:
-               memory_addr_info[address].comment = comment
+               memory.info(address).comment = comment
                last_comment = address
                pre_comment = False
 
-if __name__ == "__main__":
+def main():
     import argparse
     import sys
 
@@ -327,19 +341,24 @@ if __name__ == "__main__":
                     memory_addr_info[new_addr].label = f"R_{new_addr:04x}"
                     #memory_addr_info[fixup].label = f"F_{fixup:04x}"
 
+    mem = MemoryWrapper(memory)
+
+
     if args["annotations"]:
         for ann_filename in args["annotations"]:
-            read_annotations(ann_filename, memory)
+            read_annotations(ann_filename, mem)
 
     if args["script"]:
         for script_filename in args["script"]:
             with open(script_filename, "r") as f:
                 ast = compile(f.read(), script_filename, 'exec')
             script_globals = {
-                'memory': memory,
+                'memory': mem,
                 'memory_addr_info': memory_addr_info,
                 'entry_points': entry_points}
             exec(ast, script_globals, {})
 
-    disassemble(memory)
+    disassemble(mem)
 
+if __name__ == "__main__":
+    main()

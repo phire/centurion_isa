@@ -110,4 +110,4 @@ if __name__ == "__main__":
     apply_comments(comments)
 
 
-    disassemble(memory)
+    disassemble(MemoryWrapper(memory))

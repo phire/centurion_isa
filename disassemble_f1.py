@@ -193,4 +193,4 @@ if __name__ == "__main__":
 
 
 
-    disassemble(memory)
+    disassemble(MemoryWrapper(memory))
