@@ -1,15 +1,57 @@
+0x43e,	pre_comment 	; Null terminated list of Device objects to early-initialize at boot
 0x839c ,	comment	; Calculate syscall table offset
 0x839d ,	comment	; read function ptr
 0x83a0 ,	comment	; modify jump instruction below
 0x83a2 ,	comment	; restore registers
 0x83a4 ,	comment	; jump to syscall
-0xb924 ,	comment	; '
-0xb926 ,	comment	; '
-0xba0d ,	comment	; '
-0xba0f ,	comment	; '
-0xbba1 ,	comment	; '
-0xbbd6 ,	comment	; '
+0xb924 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+0xb926 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+0xba0d ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+0xba0f ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+0xbac2 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+0xbadd ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+0xbb37 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+0xbba1 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+0xbbd6 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+0xc5a7 ,	comment	; Set exception handler's stack pointer (not a good stack)
+0xc5ac ,	comment	; Install exception handler
 0xcd4d,	pre_comment 	; Looks like this function converts a 16bit word to hex and writes
 	 	; it to the ascii buffer specified at [X]
-0xcf91 ,	comment	; '
-0xcf97 ,	comment	; '
+0xcdd1,	pre_comment 	; This is the entry point where WIPL transfers control
+	 	; Z is the disk type: 0=HAWK, 1=FINCH/FLOPPY, 2=PHOENIX
+0xcdd1 ,	comment	; Sense #3 jumps straight to a debugger
+0xcdd5,	pre_comment 	; The code is careful to not trample too many registers before the debugger runs
+	 	; But it does trample B.
+0xcdd5 ,	comment	; Save return address for the debugger to exit to
+0xcde1 ,	comment	; Transfer exection
+0xcde4 ,	comment	; Clear context register
+0xcde6 ,	comment	; Memset? all registers in other interrupt levels
+0xcdec ,	comment	; Setup Stack? This isn't a very good stack pointer
+0xce09 ,	comment	; BL should now be the DISK number.
+		; 0/1 for Hawk, 10/11 for Finch, 20/21 for Phoenix
+0xcf91 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+0xcf97 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+0xe49b ,	comment	; Setup CRT0 to 9600 baud
+0xe4a1 ,	comment	; "*"
+0xe4ac ,	comment	; "("
+0xe4c3 ,	comment	; ")"
+0xe4d9 ,	comment	; '\\'
+0xe5d6,	pre_comment 	; Mux0_WriteHexByte
+	 	; Takes a Byte in A, converts to hex and writes to MUX0 with leading space
+0xe5dd,	pre_comment 	; Mux0_WriteHexWord
+	 	; Takes a Word in A, converts to hex and writes to MUX0 with leading space
+0xe5e6 ,	comment	; Push senital byte onto stak
+0xe5e8,	pre_comment 	; Loop, pushing nibbles onto stack
+0xe5f2 ,	comment	; ' '
+0xe5f4 ,	comment	; Write leading space
+0xe5f6,	pre_comment 	; Loop, popping nibbles, converting to the range 0-F and writing to MUX0
+0xe5fb ,	comment	; Stop when we see senital byte
+0xe60b,	pre_comment 	; Done
+0xe612,	pre_comment 	; Reads a byte from MUX0, echo it, converts to uppercase and returns in A
+	 	; Stores a copy of the byte in Mux0_LastReadByte
+0xe622 ,	comment	; Echo
+0xe632,	pre_comment 	; Echos the last read byte (again?) from Mux0_LastReadByte
+0xe644 ,	comment	; Write byte
+		; B is set to 0xf200 in the above call
+0xe64b ,	comment	; If byte = '\r'
+0xe653 ,	comment	; also print '\n'

@@ -1311,7 +1311,7 @@ MappingRamTestLoop:
 8e2f:    90 06 d9               ld A, #0x06d9
 8e32:    50 80                  add A, Z
 8e34:    7d 00                  call [A]	 ; Call MappingInit
-8e36:    47 40 ff 01 00 02 00   memcpy [0x0200], [0x0100], #0xff
+8e36:    47 40 ff 01 00 02 00   memcpy #0x100, [0x0100], [0x0200]
 8e3d:    7b 36                  call [L_8e75:+0x36]
 8e3f:    01                     nop
 8e40:    7b 33                  call [L_8e75:+0x33]
@@ -1367,7 +1367,7 @@ nextByteValue:
 8e8b:    ac                     st AL, [Z]	 ; HL is EF+0x100
 8e8c:    7b 76                  call [ReadAllPages:+0x76]
 8e8e:    7b 49                  call [WriteAllPages:+0x49]
-8e90:    47 80 ff 01 00 02 00   memcmp [0x0200], [0x0100], #0xff
+8e90:    47 80 ff 01 00 02 00   memcmp #0x100, [0x0100], [0x0200]
 8e97:    15 69                  bnz L_8f02	 ; Branch if parity Error
 8e99:    31 20                  dec B, #1	 ; Test every single byte pattern
 8e9b:    15 eb                  bnz nextByteValue
@@ -1395,7 +1395,7 @@ L_8eb3:
 
 rsysContinue:
 8ec2:    7b 15                  call [WriteAllPages:+0x15]
-8ec4:    47 40 ff 01 00 02 00   memcpy [0x0200], [0x0100], #0xff
+8ec4:    47 40 ff 01 00 02 00   memcpy #0x100, [0x0100], [0x0200]
 8ecb:    09                     ret
 
 L_8ecc:

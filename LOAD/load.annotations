@@ -1,5 +1,12 @@
 0x0100, label, SyscallVector
+0x0109, label, DevicesPtr
+0x0109, ptr
+0x01ba, label, Devices
 0x011d, fnptr
+0x0126, label, EarlyInitDevicesPtr
+0x0126, ptr
+0x043e, ptr
+0x043e, label, EarlyInitDevices
 0x045b, label, CenturionVI_String
 0x045b, pstring16
 0x80c5, pstring16
@@ -40,7 +47,7 @@
 0xb6c4, fnptr
 0xb6c6, fnptr
 0xb6c8, fnptr
-0xb6ca, code
+#0xb6ca, code
 0xbbde, pstring16
 0xbbe3, pstring16
 0xbbe9, pstring16
@@ -81,11 +88,13 @@
 0xc229, fnptr
 0xc22b, fnptr
 0xc22d, fnptr
-0xc22f, code
-0xc276, code
-0xc27e, code
+#0xc22f, code
+#0xc276, code
+#0xc27e, code
 0xc2e2, pstring16
-0xc5a4, code
+0xc322, code, CrtDevice_InterruptHandler
+0xc402, label, CrtDevice_InterruptHandler_End
+0xc5a4, label, CrtDevice_Init
 0xc5ee, label, CmdDeviceObj
 0xc5ee, <H
 0xc5f0, fnptr
@@ -97,7 +106,7 @@
 0xc5fc, fnptr
 0xc5fe, fnptr
 0xc603, fnptr
-0xc819, code
+#0xc819, code
 0xcd4d, label, FormatHexWord
 0xcd65, label, FormatHexWord_Temp
 0xcd65, <H
@@ -113,7 +122,7 @@
 0xcb9c, pstring16
 0xcbaa, pstring16
 0xcbbc, pstring16
-0xcdd1, label, EntryPoint
+0xcdd1, code, Start
 0xe2c5, pstring16
 0xe2cc, pstring16
 0xe2d5, pstring16
@@ -121,3 +130,34 @@
 0xe2fe, pstring16
 0xe311, pstring16
 0xe316, pstring16
+0xe399, label, Debugger_Entry
+0xe39b, label, Debugger_Return
+0xe526, label, Debug_Regs_A
+0xe526, <H
+0xe528, label, Debug_Regs_B
+0xe528, <H
+0xe52a, label, Debug_Regs_X
+0xe52a, <H
+0xe52c, label, Debug_Regs_Y
+0xe52c, <H
+0xe52e, label, Debug_Regs_Z
+0xe52e, <H
+0xe530, label, Debug_Regs_S
+0xe530, <H
+0xe532, label, Debug_Regs_C
+0xe532, <H
+0xe534, label, Debug_Regs_P
+0xe534, <H
+0xe536, label, Debug_Regs_PC
+0xe536, <H
+0xe538, label, CCR_Value
+0xe538, <B
+0xe5d6, label, Mux0_WriteHexByte
+0xe5dd, label, Mux0_WriteHexWord
+0xe610, label, Mux0_ReadByte
+0xe632, label, Mux0_EchoByte
+0xe63d, label, Mux0_LastReadByte
+0xe63d, <B
+0xe63e, label, Mux0_WriteByte
+0xe65c, label, Mux0_ReadyToSend
+0xe667, label, Mux0_ReadHex

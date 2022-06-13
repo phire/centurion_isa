@@ -126,8 +126,8 @@ BackToPrompt:
     ; location contains zero; while in this one, which has been extracted by dumping
     ; from the TOS after it hit the "Stop" loop and the machine has been restarted,
     ; we see a 0xff. So, apparently, this sequence stores an 0xFF at 0x0265
-01bc:    47 4c 00 ff 02 65      memcpy [0x0265], #0xff, #0x00	 ; fill
-01c2:    47 9c 09 a0 03 65      unkblk9 [0x0365], #0xa0, #0x09	 ; fill (0x365), 0xa0, 10
+01bc:    47 4c 00 ff 02 65      memcpy #0x01, #0xff, [0x0265]	 ; fill
+01c2:    47 9c 09 a0 03 65      memset #0x0a, #0xa0, [0x0365]	 ; fill (0x365), 0xa0, 10
 01c8:    79 05 5a               call [L_055a:0x055a]
 01cb:    79 05 36               call [PrintString:0x0536]
 01ce:    03 42                  (0x342)	 ; WIPL version string
@@ -834,9 +834,9 @@ L_05c4:
 05ca:    83 a2                  ld AL, [pc + -0x5e]
 05cc:    f6 19 00               st AL, +0x0(Z)
 05cf:    90 05 a6               ld A, #0x05a6
-05d2:    d7 6e                  mov A, 6e
+05d2:    d7 6e                  st A, [0x006e]
 05d4:    3a                     clr! A, #0
-05d5:    d7 60                  mov A, 60
+05d5:    d7 60                  st A, [0x0060]
 05d7:    80 06                  ld AL, #0x06
 05d9:    f6 19 0a               st AL, +0xa(Z)
 05dc:    f6 19 0e               st AL, +0xe(Z)

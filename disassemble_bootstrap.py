@@ -29,6 +29,8 @@ functions = [
     (0xfd11, "HawkCommand"), # takes arguments from pc
     (0xfd9e, "CMDErrorCheck", "Returns if no error"),
     (0xfda6, "CMDWait", "Spins until command is done"),
+    (0xfdad, "JunkData", "This isn't actually part of bootstrap, it's just a code fragment left\n"
+                        "over from a previous program that the programmer compiled or ran")
 ]
 
 labels = [

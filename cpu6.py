@@ -168,6 +168,10 @@ def Match47(pc, memory):
     src_len = blk_len
     if op == 9: # memset
         src_len = 1
+    if op == 0xb:
+        # unknown. The only example of this is a small bit of junk code at the end of bootstrap
+        # which looks like it was left over from the previous code that the programmer assembled
+        src_len = 1
 
     a_ref, pc = Cpu6AddrMode(a_mode, pc, memory, None, src_len)
     b_ref, pc = Cpu6AddrMode(b_mode, pc, memory, a_ref, blk_len)

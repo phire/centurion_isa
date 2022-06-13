@@ -280,6 +280,10 @@ fda6:    c1 f8 09               ld BL, [0xf809]
 fda9:    4a                     and! BL, AL
 fdaa:    15 fa                  bnz CMDWait
 fdac:    09                     ret
+
+JunkData:
+    ; This isn't actually part of bootstrap, it's just a code fragment left
+    ; over from a previous program that the programmer compiled or ran
 fdad:    8c                     ld AL, [Z]
 fdae:    00                     HALT
 fdaf:    8b                     ld AL, [Y]
@@ -289,7 +293,7 @@ fdb3:    b3 03                  st A, [pc + 0x03]
 
 L_fdb5:
 fdb5:    79 4c 93               call [L_4c93:0x4c93]
-fdb8:    47 be 6d a2 32         unkblkB [B], #0xa2, #0x6d
+fdb8:    47 be 6d a2 32         unkblkB #0x6e, #0xa2, [B]
 fdbd:    40 79                  add ZL, YL
 fdbf:    4c                     xor! BL, AL
 fdc0:    e7                     unknown

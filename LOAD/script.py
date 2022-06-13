@@ -29,6 +29,7 @@ def add_device(addr):
     memory_addr_info[addr+5].type = "fnptr"
     memory_addr_info[addr+5].label = f"Device_{name}_Obj"
     memory_addr_info[addr+7].type = 'char[6]'
+    memory_addr_info[addr+15].type = "fnptr"
 
 # Devices table (might be special files?)
 table_start = 0x01ba
@@ -46,3 +47,5 @@ while True:
     memory_addr_info[addr].type = "fnptr"
     add_device(device_addr)
     device_num += 1
+
+#memory_addr_info[0xce38].visited = True
