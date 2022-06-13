@@ -680,7 +680,9 @@ memcpy:
                                            	 ; but what's the real purpose of this fragment here ? In pristine on-disk WIPL it looks the same.
                                            	 ; Is this patched during installation ?
 0509:    5d                     mov B, A
-050a:    71 05 0d               jmp [0x050d]
+050a:    71 05 0d               jmp [L_050d|0x050d]
+
+L_050d:
 050d:    f5 a2                  st B, [--S]	 ; push length
 050f:    59                     sub! B, A	 ; length = min(AX, BX)
 0510:    19 21                  ble L_0533

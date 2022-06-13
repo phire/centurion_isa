@@ -3,7 +3,7 @@
 from collections import defaultdict
 import struct
 from cpu6 import disassemble_instruction
-from generic import memory_addr_info, entry_points, MemInfo
+from generic import memory_addr_info, entry_points, MemInfo, TransferExecution
 
 def recursive_disassemble(mem, entry):
     valid = True
@@ -28,16 +28,17 @@ def recursive_disassemble(mem, entry):
             return
 
         for next_pc in info.next_pc[1:]:
-            if mem.info(next_pc).label == None:
-                mem.info(next_pc).label = f"L_{next_pc:04x}"
-            recursive_disassemble(mem, next_pc)
+            if isinstance(next_pc, TransferExecution):
+                if mem.info(next_pc()).label == None:
+                    mem.info(next_pc()).label = f"L_{next_pc():04x}"
+            recursive_disassemble(mem, next_pc())
 
         next_pc = info.next_pc[0]
 
-        if next_pc != pc + len(info.bytes):
-            if mem.info(next_pc).label == None:
-                mem.info(next_pc).label = f"L_{next_pc:04x}"
-        pc = next_pc
+        if isinstance(next_pc, TransferExecution):
+            if mem.info(next_pc()).label == None:
+                mem.info(next_pc()).label = f"L_{next_pc():04x}"
+        pc = next_pc()
 
 def escape_char(c):
     # if char is printable, print it
@@ -54,10 +55,43 @@ def get_pstring16_length(mem, addr):
     # Parity is still applied to length bytes
     return mem.get_be16(addr) & 0x7f7f
 
+
+class Xargs():
+    def __init__(self, xargs):
+        self.xargs = xargs
+
+    def length(self, mem, pc):
+        orig_pc = pc
+        for name, arg in self.xargs.items():
+            match arg:
+                case "ptr":
+                    pc += 2
+                case "word":
+                    pc += 2
+                case "byte" | "char":
+                    pc += 1
+        return pc - orig_pc
+
+    def annotate(self, mem, pc):
+        for name, arg in self.xargs.items():
+            info = mem.info(pc)
+            info.arg_name = name
+            match arg:
+                case "ptr":
+                    info.type = "ptr"
+                    pc += 2
+                case "word":
+                    info.type = "<H"
+                    pc += 2
+                case "byte" | "char":
+                    pc += 1
+                    info.type = "B"
+
 class MemoryWrapper:
     def __init__(self, memory):
         self.memory = memory
         self.labels = {}
+        self.syscall_map = {}
 
     def __getitem__(self, key):
         return self.memory.__getitem__(key)
@@ -65,6 +99,12 @@ class MemoryWrapper:
     def get_label(self, addr):
         if addr in memory_addr_info:
             return memory_addr_info[addr].label
+        return None
+
+    def get_xargs(self, addr):
+        if memory_addr_info[addr].func_info:
+            if memory_addr_info[addr].func_info.xargs:
+                return Xargs(memory_addr_info[addr].func_info.xargs)
         return None
 
     def get_u8(self, addr):
@@ -118,22 +158,21 @@ def disassemble(memory):
             for line in lines:
                 print(f"    ; {line}")
 
+        start_addr = i
         out = ""
+        data = bytes()
 
-        def print_bytes(data):
-            str = ""
-            for b in data:
-                str += f"{b:02x} "
-            str += " " * (23 - len(str))
-            return str
+        # For data that follows a call
+        if info.arg_name:
+            out = f"    {info.arg_name} = "
 
         if info.type == "cstring":
-            out += f"{i:04x}:    \""
+            out += '"'
 
             while c := memory[i] & 0x7f:
                 out += escape_char(c)
                 i += 1
-            out += "\\0\""
+            out += '\\0"'
 
             i += 1
 
@@ -141,7 +180,7 @@ def disassemble(memory):
             # Pascal-style string, prefixed by a WORD of length.
             # Note high bit still needs to be stripped
             l = get_pstring16_length(memory, i)
-            out += f"{i:04x}:    {l:d}, \""
+            out += f"{l:d}, \""
             i += 2
 
             for j in range(0, l):
@@ -157,21 +196,18 @@ def disassemble(memory):
             label = memory.info(addr).label
             if label == None:
                 label = memory.info(addr).label = f"L_{addr:04x}"
-            out += f"{i:04x}:    "
-            out += print_bytes(memory[i:i+2])
+            data = memory[i:i+2]
             out += f"{label}"
             i += 2
 
         elif info.type and info.type.startswith("char["):
             # fixed length string
             str_len = int(info.type[5:-1])
-            out += f"{i:04x}:    "
             data = memory[i:i+str_len]
             i += str_len
 
-            out += print_bytes(data)
-            data = bytes([c & 0x7f for c in data]) # strip high bit
-            string = data.decode("ascii", errors="replace")
+            stripped_data = bytes([c & 0x7f for c in data]) # strip high bit
+            string = stripped_data.decode("ascii", errors="replace")
             out += f"\"{string}\""
 
 
@@ -179,26 +215,33 @@ def disassemble(memory):
             value = struct.unpack_from(info.type, memory[i:])[0]
             data = struct.pack(info.type, value)
 
-            out += f"{i:04x}:    "
-            out += print_bytes(data)
             i += len(data)
             out += f"({value:#x})"
 
         elif info.instruction:
             inst = info.instruction
-            out = f"{i:04x}:    "
-            out += print_bytes(inst.bytes)
+            data = inst.bytes
 
             out += inst.to_string(memory)
 
             i += len(inst.bytes)
 
         else:
-            out += (f"{i:04x}:    {memory[i]:02x}")
+            out += f"{memory[i]:02x}"
             is_printable, c = tochar(memory[i])
             if is_printable:
                 out += f" '{c}'"
             i += 1
+
+        def print_bytes(bytes):
+            str = ""
+            if len(bytes) != 0:
+                for b in bytes:
+                    str += f"{b:02x} "
+                str += " " * (23 - len(str))
+            return str
+
+        out = f"{start_addr:04x}:    {print_bytes(data)}{out}"
 
         if info.comment:
             indent = len(out)
@@ -206,8 +249,7 @@ def disassemble(memory):
             out += f"\t ; {lines[0]}"
             for line in lines[1:]:
                 out += "\n" + " " * indent + f"\t ; {line}"
-
-        print(out)
+        print(out.strip())
 
 def apply_comments(comments):
     for addr, comment in comments:
@@ -342,7 +384,6 @@ def main():
                     #memory_addr_info[fixup].label = f"F_{fixup:04x}"
 
     mem = MemoryWrapper(memory)
-
 
     if args["annotations"]:
         for ann_filename in args["annotations"]:

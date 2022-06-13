@@ -1,8 +1,13 @@
 import struct
+from generic import entry_points, memory_addr_info, FunctionInfo
 
 Syscalls = {
-    0x09: "Abort",
+    0x08: ("Read?", {"op_struct": "ptr"}),
+    0x09: ("Abort", None),
+    0x10: ("Write?", None),
 }
+
+syscall_map = {}
 
 # Syscall table
 for num, addr in enumerate(range(0x88cc, 0x89ac, 2)):
@@ -16,9 +21,14 @@ for num, addr in enumerate(range(0x88cc, 0x89ac, 2)):
     entry_points.append(syscall_addr)
     label = f"Syscall_{num:02x}"
     if num in Syscalls:
-        label = f"Syscall_{Syscalls[num]}"
-    memory_addr_info[syscall_addr].label = f"Syscall_{num:02x}"
+        (label, xargs) = Syscalls[num]
+        label = f"Syscall_{label}"
+        memory_addr_info[syscall_addr].func_info = FunctionInfo(xargs)
 
+    syscall_map[num] = syscall_addr
+    memory_addr_info[syscall_addr].label = label
+
+memory.syscall_map = syscall_map
 
 def add_device(addr):
     name = bytes([c&0x7f for c in memory[addr+7:addr+13]]).decode("ascii").strip()
@@ -48,4 +58,7 @@ while True:
     add_device(device_addr)
     device_num += 1
 
-#memory_addr_info[0xce38].visited = True
+memory.info(0xcd4d).func_info = FunctionInfo({"dest": "ptr"})
+
+
+#memory_addr_info[]

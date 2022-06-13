@@ -26,15 +26,61 @@ class ControlFlowInst:
         self.mnemonic = mnemonic
         self.src = src
 
+    def get_dst(self, mem):
+        try: return self.src.getValue()
+        except AttributeError: return None
+
+    def get_xargs(self, mem):
+        if addr := self.get_dst(mem):
+            return mem.get_xargs(addr)
+        return None
+
     @staticmethod
-    def newpc(next_pc, instruction, **kwargs):
-        ret = [next_pc] if instruction.mnemonic == "call" else []
-        try: ret += [instruction.src.getValue()]
-        except AttributeError: pass
+    def newpc(next_pc, instruction, mem, **kwargs):
+        ret = []
+        if instruction.mnemonic == "call":
+            if xargs := instruction.get_xargs(mem):
+                xargs.annotate(mem, next_pc)
+                next_pc += xargs.length(mem, next_pc)
+            ret += [ResumeExecution(next_pc)]
+        if dst := instruction.get_dst(mem):
+            ret += [TransferExecution(dst)]
+
         return ret
 
     def to_string(self, dict, mem):
         return f"{self.mnemonic} {self.src.to_string(mem)}"
+
+class SyscallInst:
+    def __init__(self, num):
+        self.num = num
+
+    def get_dst(self, mem):
+        if self.num in mem.syscall_map:
+            return mem.syscall_map[self.num]
+        return None
+
+    def get_xargs(self, mem):
+        if addr := self.get_dst(mem):
+            return mem.get_xargs(addr)
+        return None
+
+    @staticmethod
+    def newpc(next_pc, instruction, mem, **kwargs):
+        if xargs := instruction.get_xargs(mem):
+            xargs.annotate(mem, next_pc)
+            next_pc += xargs.length(mem, next_pc)
+        ret = [ResumeExecution(next_pc)]
+        if dst := instruction.get_dst(mem):
+            ret += [TransferExecution(dst)]
+        return ret
+
+    def to_string(self, dict, mem):
+        label = f"{self.num:02x}"
+        if addr := self.get_dst(mem):
+            if name := mem.get_label(addr):
+                label = name
+        return f"jsys {label}"
 
 
 def AluMatch(pc, mem):
@@ -296,7 +342,7 @@ def MemoryMatch(pc, mem):
 
     if isinstance(operand, LiteralRef):
         return None
-    return InstructionMatch(orig_pc, ControlFlowInst(mode, operand), bytes)
+    return InstructionMatch(orig_pc, ControlFlowInst(mode, operand), bytes, mem=mem)
 
 # 00
 control_instructions = [
@@ -344,8 +390,6 @@ branch_instructions = [
 ]
 
 instructions  = [
-    I("01100110 NNNNNNNN", "jsys {N:x}"),
-
     I("01011011", "mov X, A"),
 
 # 30
@@ -400,6 +444,8 @@ def disassemble_instruction(mem, pc):
     match byte:
     #    case 0x77 | 0x78:
     #        return MatchMul(pc, mem)
+        case 0x66: # jsys aka Syscall
+            return InstructionMatch(pc, SyscallInst(mem[pc+1]), mem[pc:pc+2], mem=mem)
         case 0x7e | 0x7f:
             return MatchPushPop(pc, mem)
         case 0xd6:

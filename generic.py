@@ -10,6 +10,28 @@ class MemInfo:
         self.type = None
         self.comment = None
         self.pre_comment = None
+        self.fixup = None
+        self.func_info = None
+        self.arg_name = None
+
+class FunctionInfo:
+    def __init__(self, x_args):
+        self.xargs = x_args
+
+class ResumeExecution:
+    def __init__(self, pc):
+        self.pc = pc
+
+    def __call__(self):
+        return self.pc
+
+class TransferExecution:
+    def __init__(self, pc):
+        self.pc = pc
+
+    def __call__(self):
+        return self.pc
+
 
 entry_points = []
 memory_addr_info = defaultdict(MemInfo)
@@ -53,23 +75,23 @@ class I:
 
 
 def relative_branch(next_pc, S, **kwargs):
-    return [next_pc, next_pc + S]
+    return [ResumeExecution(next_pc), TransferExecution(next_pc + S)]
 
 def relative_branch_unconditional(next_pc, S, **kwargs):
-    return [next_pc + S]
+    return [TransferExecution(next_pc + S)]
 
 def relative_call(next_pc, S, **kwargs):
-    return [next_pc, next_pc + S]
+    return [ResumeExecution(next_pc), TransferExecution(next_pc + S)]
 
 def indirect_relative_call(next_pc, S, **kwargs):
     # FIXME: Provide memory view here and do the indirection
-    return [next_pc]
+    return [ResumeExecution(next_pc)]
 
 def abolsute_branch_uncondtionional(N, **kwargs):
-    return [N]
+    return [TransferExecution(N)]
 
 def absolute_call(next_pc, N, **kwargs):
-    return [next_pc, N]
+    return [ResumeExecution(next_pc), TransferExecution(N)]
 
 def kill_branch(**kwargs):
     return []
@@ -122,12 +144,12 @@ class InstructionMatch:
         self.instruction = instruction
 
         self.bytes = bytes
-        self.next_pc = [pc + len(self.bytes)]
+        self.next_pc = [ResumeExecution(pc + len(self.bytes))]
 
         self.dict = dict | {
             "bytes": " ".join([f"{b:02x}" for b in self.bytes]),
             "pc": pc,
-            "next_pc": self.next_pc[0],
+            "next_pc": self.next_pc[0](),
             "RegNames8": RegNames8,
             "RegNames16": RegNames16,
             "instruction": instruction,

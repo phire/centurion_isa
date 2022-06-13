@@ -62,14 +62,14 @@ TestFunctions:
                                         	 ; On parity interrupt, shows some error hex value ?2
                                         	 ; On any other interrupt, shows error hex ?f where x is the interrupt
                                         	 ; On success, lights the success DP pattern and loops.
-                                        	 ; 
+                                        	 ;
 805b:    81 83                  (0x8183)	 ; Test_03
 805d:    81 dc                  (0x81dc)	 ; MuxSendTest: Test_04: Continually writes U to mux port 0.
                                         	 ; Fails if MMIO f200 & 0x1c is not zero
 805f:    82 03                  (0x8203)	 ; MuxRecvTest: Test_05: Echos whatever is received on mux port 0 back
                                         	 ; Fails if MMIO f200 & 0x1c is not zero
 8061:    82 47                  (0x8247)	 ; MuxRecvInterruptTest: Test_06: Same as Test_05, but uses interrupts instead of polling
-                                        	 ; 
+                                        	 ;
 8063:    82 84                  (0x8284)	 ; Test_07
 8065:    82 e3                  (0x82e3)	 ; Test_08
 8067:    83 7f                  (0x837f)	 ; HawkTest: Test_09: Tests Hawk and DMA
@@ -79,7 +79,7 @@ TestFunctions:
 806d:    86 b2                  (0x86b2)	 ; Diag_self_test: Test_0c: Checksum's the F1 rom, flashes 1c if fail.
                                         	 ; Then test diag's sram from b800 to bfff, flashes 2c if fail.
                                         	 ; If everything passes, it lights up all decimal points, sets the
-                                        	 ; hex displays to 88 (aka Christmas tree) and loops. 
+                                        	 ; hex displays to 88 (aka Christmas tree) and loops.
 806f:    87 28                  (0x8728)	 ; AuxiliaryTestMenu
 8071:    80 01                  (0x8001)	 ; DiagEntryPoint
 8073:    80 01                  (0x8001)	 ; DiagEntryPoint
@@ -102,7 +102,7 @@ L_807e:
 8084:    a1 f1 0b               st AL, [0xf10b]
 8087:    a1 f1 06               st AL, [0xf106]
 808a:    3a                     clr! A, #0
-808b:    71 00 00               jmp [L_0000|0x0000]
+808b:    71 00 00               jmp [0x0000]
 
 DmaRegTest:
     ; Test_01: Write every single bit pattern to DMA's address and count
