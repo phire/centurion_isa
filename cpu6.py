@@ -1,5 +1,5 @@
 from generic import *
-from cpu6_regs import RegNames16, RegNames8, Reg16Ref, Reg8Ref
+from cpu6_regs import Reg16Ref, Reg8Ref, MultiRegRef
 from cpu6_addr import Cpu6AddrMode, Cpu4AddrMode, LiteralRef, SmallLiteralRef, AluAddrMode, D6Mode, DirectRef
 import struct
 
@@ -190,7 +190,7 @@ def MatchMul(pc, memory):
     bytes = memory[orig_pc:pc]
 
     mnemonic = "mul" if inst == 0x78 else "div"
-    return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, dst, src, src2), bytes, {})
+    return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, dst, src, src2), bytes)
 
 def MatchD6(pc, memory):
     orig_pc = pc
@@ -202,9 +202,23 @@ def MatchD6(pc, memory):
 
     bytes = memory[orig_pc:pc]
     if mode & 0x1 != 1:
-        return InstructionMatch(orig_pc, BasicCpu6Inst("unknown_d6", reg, ref), bytes, {})
+        return InstructionMatch(orig_pc, BasicCpu6Inst("unknown_d6", reg, ref), bytes)
 
-    return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, reg, ref), bytes, {})
+    return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, reg, ref), bytes)
+
+def MatchPushPop(pc, memory):
+    orig_pc = pc
+    mnemonic = "push" if memory[pc] == 0x7e else "pop"
+    start = memory[pc+1] >> 4
+    count = memory[pc+1] & 0x0f
+    pc += 2
+    bytes = memory[orig_pc:pc]
+    if start + count > 15:
+        return InstructionMatch(orig_pc, BasicCpu6Inst("unknown_push"), bytes)
+
+    return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, MultiRegRef(start, count)), bytes )
+
+
 
 # Implements all opcodes 0x80 and above
 # Memory and load immediate
@@ -322,8 +336,6 @@ branch_instructions = [
 ]
 
 instructions  = [
-    I("01111110 NNNNNNNN", "push"),
-    I("01111111 NNNNNNNN", "pop"),
     I("01100110 NNNNNNNN", "jsys {N:x}"),
 
     I("01011011", "mov X, A"),
@@ -380,6 +392,8 @@ def disassemble_instruction(memory, pc):
     match byte:
     #    case 0x77 | 0x78:
     #        return MatchMul(pc, memory)
+        case 0x7e | 0x7f:
+            return MatchPushPop(pc, memory)
         case 0xd6:
             if inst := MatchD6(pc, memory):
                 return inst
@@ -387,6 +401,7 @@ def disassemble_instruction(memory, pc):
             # Store A to [addr] where addr is a single byte (aka, the register file)
             addr = memory[pc+1]
             return InstructionMatch(pc, BasicCpu6Inst("st", Reg16Ref(0), DirectRef(addr)), memory[pc:pc+2])
+
 
 
     return scan(instructions, memory, pc, 5)

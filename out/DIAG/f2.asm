@@ -1351,7 +1351,7 @@ L_8e75:
 8e76:    85 41                  ld AL, [X++]
 8e78:    35 04                  sll A, #5
 8e7a:    20 00                  inc AH, #1
-8e7c:    7e 45                  push
+8e7c:    7e 45                  push {X, Y, Z}
 8e7e:    5c                     mov Y, A
 8e7f:    5e                     mov Z, A
 8e80:    20 80                  inc ZH, #1
@@ -1375,7 +1375,7 @@ nextByteValue:
 8e9f:    30 80                  inc Z, #1
 8ea1:    3f                     dec X
 8ea2:    15 e1                  bnz nextMemoryLcation
-8ea4:    7f 45                  pop
+8ea4:    7f 45                  pop {X, Y, Z}
 8ea6:    09                     ret
 
 L_8ea7:
@@ -1430,7 +1430,7 @@ ReadAllPages:
 8f2c:    09                     ret
 
 L_8f2d:
-8f2d:    7f 45                  pop
+8f2d:    7f 45                  pop {X, Y, Z}
 8f2f:    65 a1                  ld X, [S++]
 8f31:    90 07 cc               ld A, #0x07cc
 8f34:    50 80                  add A, Z

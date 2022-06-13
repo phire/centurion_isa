@@ -1087,8 +1087,8 @@ R_805a:
 805c:    91 01 03               ld A, [0x0103]
 805f:    2e 0d f8 00 36         wpf #0xf8, [A + 0x0036]
 8064:    3a                     clr! A, #0
-8065:    7e 01                  push
-8067:    7e 41                  push
+8065:    7e 01                  push {A}
+8067:    7e 41                  push {X}
 8069:    31 a0                  dec S, #1
 806b:    60 80 6f               ld X, #0x806f
 806e:    0f                     rsys
@@ -1103,8 +1103,8 @@ L_8073:
 8078:    2e 0d fb 00 36         wpf #0xfb, [A + 0x0036]
 807d:    2e 0c 7b 01 81         wpf #0x7b, [0x0181]
 8082:    90 00 03               ld A, #0x0003
-8085:    7e 01                  push
-8087:    7e 41                  push
+8085:    7e 01                  push {A}
+8087:    7e 41                  push {X}
 8089:    31 a0                  dec S, #1
 808b:    60 80 8f               ld X, #0x808f
 808e:    0f                     rsys
@@ -1220,7 +1220,7 @@ R_8234:
 8338:    "@OJX00\0"
 
 R_833f:
-833f:    7e 03                  push
+833f:    7e 03                  push {A, B}
 8341:    2a                     clr! AL, #0
 8342:    a1 01 41               st AL, [0x0141]
 8345:    b6                     unknown
@@ -1279,20 +1279,20 @@ L_838b:
 839d:    99                     ld A, [B]	 ; read function ptr
 839e:    14 1a                  bz L_83ba
 83a0:    b3 03                  st A, [pc + 0x03]	 ; modify jump instruction below
-83a2:    7f 03                  pop	 ; restore registers
+83a2:    7f 03                  pop {A, B}	 ; restore registers
 83a4:    71 80 00               jmp [R_8000:0x8000]	 ; jump to syscall
 
 R_83a7:
-83a7:    7e 03                  push
+83a7:    7e 03                  push {A, B}
 83a9:    79 88 05               call [R_8805:0x8805]
 83ac:    89                     ld AL, [B]
 83ad:    21 11                  dec AL, #2
 83af:    15 03                  bnz L_83b4
-83b1:    7f 03                  pop
+83b1:    7f 03                  pop {A, B}
 83b3:    09                     ret
 
 L_83b4:
-83b4:    7f 03                  pop
+83b4:    7f 03                  pop {A, B}
 83b6:    65 a1                  ld X, [S++]
 83b8:    73 00                  jmp [L_83ba:+0x0]
 
@@ -1345,9 +1345,9 @@ L_83fa:
 
 Syscall_0d:
 8400:    b3 e2                  st A, [pc + -0x1e]
-8402:    7e 21                  push
+8402:    7e 21                  push {B}
 8404:    7b a1                  call [R_83a7:-0x5f]
-8406:    7f 21                  pop
+8406:    7f 21                  pop {B}
 8408:    80 05                  ld AL, #0x05
 840a:    73 ee                  jmp [L_83fa:-0x12]
 
@@ -1369,7 +1369,7 @@ L_8418:
 8427:    91 01 5a               ld A, [0x015a]
 842a:    2e 4d 87 20 46 2e      wpf32 #0x87, [B + 0x462e]
 8430:    0e                     dly
-8431:    7f 00                  pop
+8431:    7f 00                  pop {AH}
 8433:    6d a8 01               st X, [S + 0x0001]
 8436:    91 01 58               ld A, [0x0158]
 8439:    14 dd                  bz L_8418
@@ -1448,10 +1448,10 @@ L_848c:
 84a5:    14 e5                  bz L_848c
 84a7:    32 01                  clr A, #1
 84a9:    cd                     ld BL, [S]
-84aa:    7e 63                  push
+84aa:    7e 63                  push {Y, Z}
 84ac:    55 86                  mov Y, Z
 84ae:    79 80 3b               call [R_803b:0x803b]
-84b1:    7f 63                  pop
+84b1:    7f 63                  pop {Y, Z}
 84b3:    73 d7                  jmp [L_848c:-0x29]
 
 L_84b5:
@@ -1485,12 +1485,12 @@ L_84d6:
 84dd:    09                     ret
 
 Syscall_6b:
-84de:    7e 09                  push
+84de:    7e 09                  push {A, B, X, Y, Z}
 84e0:    45 31                  mov AL, BL
 84e2:    73 03                  jmp [L_84e7:+0x3]
 
 Syscall_09:
-84e4:    7e 09                  push
+84e4:    7e 09                  push {A, B, X, Y, Z}
 84e6:    8a                     ld AL, [X]
 
 L_84e7:
@@ -1547,7 +1547,7 @@ L_8546:
 8551:    b3 0c                  st A, [pc + 0x0c]
 8553:    95 48 0e               ld A, [X + 0x000e]
 8556:    b3 09                  st A, [pc + 0x09]
-8558:    7f 09                  pop
+8558:    7f 09                  pop {A, B, X, Y, Z}
 855a:    65 a1                  ld X, [S++]
 855c:    66 05                  jsys 5
 855e:    06                     sl
@@ -1670,7 +1670,7 @@ R_85fa:
 85fa:    95 41                  ld A, [X++]
 
 L_85fc:
-85fc:    7e 01                  push
+85fc:    7e 01                  push {A}
 
 L_85fe:
 85fe:    85 a4                  ld AL, @[S]
@@ -1718,7 +1718,7 @@ Syscall_0b:
 
 R_8631:
 8631:    d1 01 03               ld B, [0x0103]
-8634:    7e 45                  push
+8634:    7e 45                  push {X, Y, Z}
 8636:    55 a0                  mov A, S
 8638:    b5 28 10               st A, [B + 0x0010]
 863b:    3a                     clr! A, #0
@@ -1759,7 +1759,7 @@ L_8660:
 
 L_867b:
 867b:    5f                     mov S, A
-867c:    7f 45                  pop
+867c:    7f 45                  pop {X, Y, Z}
 867e:    09                     ret
 
 R_867f:
@@ -2257,7 +2257,7 @@ NumSyscalls:
 Syscall_19:
 89ad:    3a                     clr! A, #0
 89ae:    39                     dec! A, #1
-89af:    7e 03                  push
+89af:    7e 03                  push {A, B}
 89b1:    79 85 b9               call [R_85b9:0x85b9]
 89b4:    1c 3a                  bs3 L_89f0
 89b6:    71 aa 25               jmp [R_aa25:0xaa25]
@@ -2267,7 +2267,7 @@ Syscall_66:
 89bb:    0f                     rsys
 
 R_89bc:
-89bc:    7e 03                  push
+89bc:    7e 03                  push {A, B}
 89be:    79 8a a6               call [R_8aa6:0x8aa6]
 89c1:    99                     ld A, [B]
 89c2:    dd                     ld B, [S]
@@ -2275,7 +2275,7 @@ R_89bc:
 89c4:    11 04                  bnc L_89ca
 
 L_89c6:
-89c6:    7f 03                  pop
+89c6:    7f 03                  pop {A, B}
 89c8:    3a                     clr! A, #0
 89c9:    09                     ret
 
@@ -2341,7 +2341,7 @@ L_8a0f:
 8a1e:    47 45 18 20 02 00 02 47 memcpy #0x19, [B + 0x0200], [A + B + 0x0047]
 8a26:    9d                     ld A, [S]
 8a27:    00                     HALT
-8a28:    7e 00                  push
+8a28:    7e 00                  push {AH}
 8a2a:    ff                     st B, [P]
 8a2b:    66 17                  jsys 17
 8a2d:    00                     HALT
@@ -2353,7 +2353,7 @@ L_8a0f:
 8a34:    10 90                  bc L_89c6
 
 L_8a36:
-8a36:    7f 03                  pop
+8a36:    7f 03                  pop {A, B}
 8a38:    3a                     clr! A, #0
 8a39:    39                     dec! A, #1
 8a3a:    09                     ret
@@ -2367,7 +2367,7 @@ Syscall_00:
 8a47:    0f                     rsys
 
 R_8a48:
-8a48:    7e 45                  push
+8a48:    7e 45                  push {X, Y, Z}
 8a4a:    55 28                  mov Z, B
 8a4c:    7b 58                  call [R_8aa6:+0x58]
 8a4e:    5b                     mov X, A
@@ -2483,7 +2483,7 @@ Syscall_0f:
 8aff:    0f                     rsys
 
 R_8b00:
-8b00:    7e 45                  push
+8b00:    7e 45                  push {X, Y, Z}
 8b02:    5b                     mov X, A
 8b03:    55 28                  mov Z, B
 8b05:    8a                     ld AL, [X]
@@ -2916,7 +2916,7 @@ L_8da4:
 8daa:    b1 8e 7b               st A, [R_8e7b:0x8e7b]
 8dad:    e3 74                  st BL, [R_8e23:+0x74]
 8daf:    f0 00 00               st B, #0x0000
-8db2:    7e 63                  push
+8db2:    7e 63                  push {Y, Z}
 8db4:    91 01 03               ld A, [0x0103]
 8db7:    5c                     mov Y, A
 8db8:    95 68 0c               ld A, [Y + 0x000c]
@@ -2945,10 +2945,10 @@ Syscall_5b:
 8de2:    73 ba                  jmp [L_8d9e:-0x46]
 
 R_8de4:
-8de4:    7e 03                  push
+8de4:    7e 03                  push {A, B}
 8de6:    79 85 b9               call [R_85b9:0x85b9]
 8de9:    3b                     not! A, #0
-8dea:    7f 03                  pop
+8dea:    7f 03                  pop {A, B}
 8dec:    09                     ret
 
 R_8ded:
@@ -3076,7 +3076,7 @@ L_8e96:
 8e96:    85 a1                  ld AL, [S++]
 8e98:    14 07                  bz L_8ea1
 8e9a:    65 a1                  ld X, [S++]
-8e9c:    7f 63                  pop
+8e9c:    7f 63                  pop {Y, Z}
 8e9e:    93 b8                  ld A, [R_8e58:-0x48]
 8ea0:    0f                     rsys
 
@@ -3106,10 +3106,10 @@ L_8ebe:
 L_8ec5:
 8ec5:    93 0f                  ld A, [R_8ed6:+0xf]
 8ec7:    b3 89                  st A, [R_8e52:-0x77]
-8ec9:    7e 21                  push
+8ec9:    7e 21                  push {B}
 8ecb:    91 01 03               ld A, [0x0103]
 8ece:    66 59                  jsys 59
-8ed0:    7f 21                  pop
+8ed0:    7f 21                  pop {B}
 8ed2:    71 8e 50               jmp [R_8e50:0x8e50]
 
 R_8ed5:
@@ -3121,7 +3121,7 @@ R_8ed6:
 
 Syscall_6d:
 8ed8:    79 8d e4               call [R_8de4:0x8de4]
-8edb:    7e 45                  push
+8edb:    7e 45                  push {X, Y, Z}
 8edd:    3a                     clr! A, #0
 8ede:    a1 8d b0               st AL, [R_8db0:0x8db0]
 8ee1:    b3 2d                  st A, [pc + 0x2d]
@@ -3211,7 +3211,7 @@ L_8f5e:
 8f61:    a1 8e 90               st AL, [R_8e90:0x8e90]
 8f64:    39                     dec! A, #1
 8f65:    a1 01 3b               st AL, [0x013b]
-8f68:    7f 45                  pop
+8f68:    7f 45                  pop {X, Y, Z}
 8f6a:    30 4c                  inc X, #13
 8f6c:    0f                     rsys
 
@@ -3230,7 +3230,7 @@ R_8f6d:
 L_8f84:
 8f84:    95 68 0c               ld A, [Y + 0x000c]
 8f87:    b5 41                  st A, [X++]
-8f89:    7f 45                  pop
+8f89:    7f 45                  pop {X, Y, Z}
 8f8b:    30 4c                  inc X, #13
 8f8d:    3a                     clr! A, #0
 8f8e:    0f                     rsys
@@ -3770,7 +3770,7 @@ R_92df:
 92df:    0f                     rsys
 
 Syscall_67:
-92e0:    7e 45                  push
+92e0:    7e 45                  push {X, Y, Z}
 92e2:    55 20                  mov A, B
 92e4:    79 b2 d1               call [R_b2d1:0xb2d1]
 92e7:    b5 a2                  st A, [--S]
@@ -3814,7 +3814,7 @@ R_932b:
 933d:    3a                     clr! A, #0
 933e:    39                     dec! A, #1
 933f:    a1 01 3c               st AL, [0x013c]
-9342:    7f 45                  pop
+9342:    7f 45                  pop {X, Y, Z}
 9344:    30 41                  inc X, #2
 9346:    0f                     rsys
 
@@ -4254,7 +4254,7 @@ Syscall_1f:
 960f:    0f                     rsys
 
 Syscall_43:
-9610:    7e 81                  push
+9610:    7e 81                  push {Z}
 9612:    7c 6a                  call @[pc + 0x6a]
 9614:    5d                     mov B, A
 9615:    9a                     ld A, [X]
@@ -4279,7 +4279,7 @@ L_962f:
 9633:    73 23                  jmp [L_9658:+0x23]
 
 Syscall_26:
-9635:    7e 81                  push
+9635:    7e 81                  push {Z}
 9637:    7c 45                  call @[pc + 0x45]
 9639:    5d                     mov B, A
 963a:    9a                     ld A, [X]
@@ -4326,13 +4326,13 @@ L_9666:
 9670:    5b                     mov X, A
 
 L_9671:
-9671:    7f 81                  pop
+9671:    7f 81                  pop {Z}
 9673:    0f                     rsys
 
 Syscall_27:
 9674:    79 99 21               call [R_9921:0x9921]
 9677:    00                     HALT
-9678:    7e 81                  push
+9678:    7e 81                  push {Z}
 967a:    7c 02                  call @[pc + 0x02]
 967c:    5d                     mov B, A
 967d:    79 b2 cb               call [R_b2cb:0xb2cb]
@@ -4363,7 +4363,7 @@ Syscall_28:
 969f:    a3 0e                  st AL, [pc + 0x0e]
 
 L_96a1:
-96a1:    7e 81                  push
+96a1:    7e 81                  push {Z}
 96a3:    55 46                  mov Y, X
 96a5:    95 41                  ld A, [X++]
 96a7:    5d                     mov B, A
@@ -4381,18 +4381,18 @@ L_96a1:
 96bb:    5b                     mov X, A
 
 L_96bc:
-96bc:    7f 81                  pop
+96bc:    7f 81                  pop {Z}
 96be:    0f                     rsys
 
 Syscall_29:
-96bf:    7e 81                  push
+96bf:    7e 81                  push {Z}
 96c1:    7c bb                  call @[pc + -0x45]
 96c3:    5e                     mov Z, A
 
 L_96c4:
 96c4:    95 41                  ld A, [X++]
 96c6:    15 03                  bnz L_96cb
-96c8:    7f 81                  pop
+96c8:    7f 81                  pop {Z}
 96ca:    0f                     rsys
 
 L_96cb:
@@ -4413,7 +4413,7 @@ Syscall_34:
 96e1:    79 99 2f               call [R_992f:0x992f]
 
 L_96e4:
-96e4:    7e 63                  push
+96e4:    7e 63                  push {Y, Z}
 96e6:    79 98 f7               call [R_98f7:0x98f7]
 96e9:    01                     nop
 96ea:    15 24                  bnz L_9710
@@ -4614,7 +4614,7 @@ L_980d:
 980f:    71 97 3d               jmp [R_973d:0x973d]
 
 Syscall_2a:
-9812:    7e 63                  push
+9812:    7e 63                  push {Y, Z}
 9814:    79 99 2f               call [R_992f:0x992f]
 9817:    b5 a2                  st A, [--S]
 9819:    30 01                  inc A, #2
@@ -4653,7 +4653,7 @@ Syscall_2f:
 
 L_984d:
 984d:    a3 1e                  st AL, [pc + 0x1e]
-984f:    7e 63                  push
+984f:    7e 63                  push {Y, Z}
 9851:    79 99 2f               call [R_992f:0x992f]
 9854:    5c                     mov Y, A
 9855:    79 b2 cb               call [R_b2cb:0xb2cb]
@@ -4744,7 +4744,7 @@ Syscall_3a:
 98d2:    0f                     rsys
 
 Syscall_37:
-98d3:    7e 63                  push
+98d3:    7e 63                  push {Y, Z}
 98d5:    79 b2 cb               call [R_b2cb:0xb2cb]
 98d8:    5d                     mov B, A
 98d9:    79 b2 cb               call [R_b2cb:0xb2cb]
@@ -4753,7 +4753,7 @@ Syscall_37:
 98df:    73 13                  jmp [R_98f4:+0x13]
 
 Syscall_38:
-98e1:    7e 63                  push
+98e1:    7e 63                  push {Y, Z}
 98e3:    79 b2 cb               call [R_b2cb:0xb2cb]
 98e6:    b5 a2                  st A, [--S]
 98e8:    79 b2 cb               call [R_b2cb:0xb2cb]
@@ -4764,7 +4764,7 @@ Syscall_38:
 98f3:    02                     sf
 
 R_98f4:
-98f4:    7f 63                  pop
+98f4:    7f 63                  pop {Y, Z}
 98f6:    0f                     rsys
 
 R_98f7:
@@ -4836,7 +4836,7 @@ R_9953:
 995d:    09                     ret
 
 Syscall_33:
-995e:    7e 63                  push
+995e:    7e 63                  push {Y, Z}
 9960:    3a                     clr! A, #0
 9961:    a5 a2                  st AL, [--S]
 9963:    b5 a2                  st A, [--S]
@@ -4869,7 +4869,7 @@ L_9988:
 9988:    80 02                  ld AL, #0x02
 
 L_998a:
-998a:    7e 63                  push
+998a:    7e 63                  push {Y, Z}
 998c:    a5 a2                  st AL, [--S]
 998e:    79 b2 cb               call [R_b2cb:0xb2cb]
 9991:    5d                     mov B, A
@@ -5090,7 +5090,7 @@ L_9acc:
 
 L_9ad5:
 9ad5:    65 a1                  ld X, [S++]
-9ad7:    7f 61                  pop
+9ad7:    7f 61                  pop {Y}
 9ad9:    71 99 a6               jmp [R_99a6:0x99a6]
 
 L_9adc:
@@ -5110,7 +5110,7 @@ L_9aee:
 9af0:    73 f5                  jmp [L_9ae7:-0xb]
 
 R_9af2:
-9af2:    7e 81                  push
+9af2:    7e 81                  push {Z}
 
 L_9af4:
 9af4:    3a                     clr! A, #0
@@ -5217,7 +5217,7 @@ Syscall_18:
 9b8d:    0f                     rsys
 
 R_9b8e:
-9b8e:    7e 45                  push
+9b8e:    7e 45                  push {X, Y, Z}
 9b90:    55 28                  mov Z, B
 9b92:    55 80                  mov A, Z
 9b94:    79 a2 db               call [R_a2db:0xa2db]
@@ -5329,7 +5329,7 @@ L_9c2f:
 
 R_9c32:
 9c32:    30 a1                  inc S, #2
-9c34:    7f 45                  pop
+9c34:    7f 45                  pop {X, Y, Z}
 9c36:    09                     ret
 
 L_9c37:
@@ -5601,7 +5601,7 @@ L_9d8b:
 9d8b:    09                     ret
 
 R_9d8c:
-9d8c:    7f 45                  pop
+9d8c:    7f 45                  pop {X, Y, Z}
 9d8e:    09                     ret
 
 R_9d8f:
@@ -5660,16 +5660,16 @@ L_9dd0:
 9ddc:    79 a2 fc               call [R_a2fc:0xa2fc]
 9ddf:    b5 88 06               st A, [Z + 0x0006]
 9de2:    55 82                  mov B, Z
-9de4:    7f 45                  pop
+9de4:    7f 45                  pop {X, Y, Z}
 9de6:    f5 a2                  st B, [--S]
 9de8:    79 8b 33               call [R_8b33:0x8b33]
 9deb:    d5 a1                  ld B, [S++]
-9ded:    7e 81                  push
+9ded:    7e 81                  push {Z}
 9def:    55 28                  mov Z, B
 9df1:    7b c0                  call [L_9db3:-0x40]
 9df3:    3a                     clr! A, #0
 9df4:    b5 88 06               st A, [Z + 0x0006]
-9df7:    7f 81                  pop
+9df7:    7f 81                  pop {Z}
 9df9:    09                     ret
 
 R_9dfa:
@@ -5690,7 +5690,7 @@ L_9e17:
 9e19:    73 34                  jmp [R_9e4f:+0x34]
 
 L_9e1b:
-9e1b:    7e 81                  push
+9e1b:    7e 81                  push {Z}
 9e1d:    47 2a ff 8d            unkblk2 #0x100, [Z], [C]
 9e21:    66 7f                  jsys 7f
 9e23:    81 55 40               ld AL, [0x5540]
@@ -6492,23 +6492,23 @@ a2f9:    d5 a1                  ld B, [S++]
 a2fb:    09                     ret
 
 R_a2fc:
-a2fc:    7e 03                  push
+a2fc:    7e 03                  push {A, B}
 a2fe:    95 88 10               ld A, [Z + 0x0010]
 a301:    7b 1b                  call [L_a31e:+0x1b]
 a303:    d5 88 0e               ld B, [Z + 0x000e]
 a306:    50 20                  add A, B
 a308:    7b 14                  call [L_a31e:+0x14]
-a30a:    7f 03                  pop
+a30a:    7f 03                  pop {A, B}
 a30c:    09                     ret
 
 R_a30d:
-a30d:    7e 03                  push
+a30d:    7e 03                  push {A, B}
 a30f:    95 88 06               ld A, [Z + 0x0006]
 a312:    7b 0a                  call [L_a31e:+0xa]
 a314:    d5 88 04               ld B, [Z + 0x0004]
 a317:    50 20                  add A, B
 a319:    7b 03                  call [L_a31e:+0x3]
-a31b:    7f 03                  pop
+a31b:    7f 03                  pop {A, B}
 a31d:    09                     ret
 
 L_a31e:
@@ -7348,7 +7348,7 @@ a6e9:    04                     ei
 a6ea:    09                     ret
 
 R_a6eb:
-a6eb:    7e 41                  push
+a6eb:    7e 41                  push {X}
 a6ed:    32 20                  clr B, #0
 a6ef:    c5 68 23               ld BL, [Y + 0x0023]
 a6f2:    55 24                  mov X, B
@@ -7392,7 +7392,7 @@ a750:    a1 7f 41               st AL, [0x7f41]
 a753:    09                     ret
 
 R_a754:
-a754:    7e 61                  push
+a754:    7e 61                  push {Y}
 a756:    b5 a2                  st A, [--S]
 a758:    55 28                  mov Z, B
 a75a:    85 68 23               ld AL, [Y + 0x0023]
@@ -7416,7 +7416,7 @@ a775:    73 38                  jmp [L_a7af:+0x38]
 
 L_a777:
 a777:    30 a1                  inc S, #2
-a779:    7f 61                  pop
+a779:    7f 61                  pop {Y}
 a77b:    79 a6 a9               call [R_a6a9:0xa6a9]
 a77e:    02                     sf
 
@@ -7443,7 +7443,7 @@ a799:    21 20                  dec BH, #1
 a79b:    18 12                  bgt L_a7af
 a79d:    95 a1                  ld A, [S++]
 a79f:    5e                     mov Z, A
-a7a0:    7f 61                  pop
+a7a0:    7f 61                  pop {Y}
 a7a2:    09                     ret
 
 L_a7a3:
@@ -7453,7 +7453,7 @@ a7a8:    29                     dec! AL, #1
 a7a9:    67                     unknown
 a7aa:    4a                     and! BL, AL
 a7ab:    28                     inc! AL, #1
-a7ac:    7f 61                  pop
+a7ac:    7f 61                  pop {Y}
 a7ae:    09                     ret
 
 L_a7af:
@@ -7824,13 +7824,13 @@ aa15:    a9                     st AL, [B]
 aa16:    00                     HALT
 
 Syscall_05:
-aa17:    7e 03                  push
+aa17:    7e 03                  push {A, B}
 aa19:    3a                     clr! A, #0
 aa1a:    85 41                  ld AL, [X++]
 aa1c:    73 07                  jmp [R_aa25:+0x7]
 
 Syscall_21:
-aa1e:    7e 03                  push
+aa1e:    7e 03                  push {A, B}
 aa20:    45 03                  mov BL, AH
 aa22:    3a                     clr! A, #0
 aa23:    45 31                  mov AL, BL
@@ -7958,7 +7958,7 @@ L_aaf7:
 aaf7:    2a                     clr! AL, #0
 aaf8:    29                     dec! AL, #1
 aaf9:    a3 17                  st AL, [R_ab12:+0x17]
-aafb:    7f 03                  pop
+aafb:    7f 03                  pop {A, B}
 aafd:    60 00 00               ld X, #0x0000
 ab00:    0f                     rsys
 
@@ -7980,7 +7980,7 @@ ab16:    79 86 12               call [R_8612:0x8612]
 ab19:    73 f6                  jmp [R_ab11:-0xa]
 
 Syscall_01:
-ab1b:    7e 03                  push
+ab1b:    7e 03                  push {A, B}
 ab1d:    85 a8 08               ld AL, [S + 0x0008]
 ab20:    c0 07                  ld BL, #0x07
 ab22:    4a                     and! BL, AL
@@ -8028,7 +8028,7 @@ ab6e:    c0 00                  ld BL, #0x00
 ab70:    95 a8 09               ld A, [S + 0x0009]
 ab73:    b5 a8 07               st A, [S + 0x0007]
 ab76:    f5 a8 09               st B, [S + 0x0009]
-ab79:    7f 03                  pop
+ab79:    7f 03                  pop {A, B}
 ab7b:    65 a9 01               ld X, [S++ + 0x0001]
 ab7e:    0f                     rsys
 
@@ -8112,9 +8112,9 @@ abf0:    b5 41                  st A, [X++]
 abf2:    0f                     rsys
 
 Syscall_13:
-abf3:    7e 01                  push
+abf3:    7e 01                  push {A}
 abf5:    79 ab 11               call [R_ab11:0xab11]
-abf8:    7f 01                  pop
+abf8:    7f 01                  pop {A}
 abfa:    73 05                  jmp [L_ac01:+0x5]
 
 Syscall_17:
@@ -8123,7 +8123,7 @@ abff:    95 41                  ld A, [X++]
 
 L_ac01:
 ac01:    31 04                  dec A, #5
-ac03:    7e 45                  push
+ac03:    7e 45                  push {X, Y, Z}
 ac05:    60 ad c6               ld X, #0xadc6
 
 L_ac08:
@@ -8181,7 +8181,7 @@ ac6d:    73 a7                  jmp [L_ac16:-0x59]
 
 L_ac6f:
 ac6f:    95 a1                  ld A, [S++]
-ac71:    7f 45                  pop
+ac71:    7f 45                  pop {X, Y, Z}
 ac73:    0f                     rsys
 
 L_ac74:
@@ -8197,7 +8197,7 @@ ac7f:    79 84 e4               call [Syscall_09:0x84e4]
 ac82:    20
 
 R_ac83:
-ac83:    7e 45                  push
+ac83:    7e 45                  push {X, Y, Z}
 ac85:    55 76 01 61            mov Y, Y, #0x0161
 ac89:    32 40                  clr X, #0
 ac8b:    3f                     dec X
@@ -8209,7 +8209,7 @@ ac91:    18 09                  bgt L_ac9c
 
 L_ac93:
 ac93:    79 b0 c5               call [R_b0c5:0xb0c5]
-ac96:    7f 45                  pop
+ac96:    7f 45                  pop {X, Y, Z}
 ac98:    90 00 01               ld A, #0x0001
 ac9b:    09                     ret
 
@@ -8234,7 +8234,7 @@ acc1:    a5 48 04               st AL, [X + 0x0004]
 acc4:    6b 4d                  st X, [R_ad13:+0x4d]
 acc6:    79 ad 65               call [R_ad65:0xad65]
 acc9:    7b 04                  call [R_accf:+0x4]
-accb:    7f 45                  pop
+accb:    7f 45                  pop {X, Y, Z}
 accd:    3a                     clr! A, #0
 acce:    09                     ret
 
@@ -8406,7 +8406,7 @@ add3:    73 f3                  jmp [AbortHandler:-0xd]
 
 R_add5:
 add5:    2e 2c 00 af 83         wpf1 #0x00, [R_af83:0xaf83]
-adda:    7e 41                  push
+adda:    7e 41                  push {X}
 addc:    f1 af 43               st B, [R_af43:0xaf43]
 addf:    a1 af 3e               st AL, [Abort_CD:0xaf3e]
 ade2:    21 14                  dec AL, #5
@@ -8528,7 +8528,7 @@ L_aee2:
 aee2:    6b 33                  st X, [pc + 0x33]
 
 R_aee4:
-aee4:    7f 41                  pop
+aee4:    7f 41                  pop {X}
 aee6:    09                     ret
 
 L_aee7:
@@ -8567,9 +8567,9 @@ L_af16:
 af16:    d0 00 00               ld B, #0x0000
 af19:    80 80                  ld AL, #0x80
 af1b:    a3 16                  st AL, [R_af33:+0x16]
-af1d:    7e 81                  push
-af1f:    7e 61                  push
-af21:    7e 41                  push
+af1d:    7e 81                  push {Z}
+af1f:    7e 61                  push {Y}
+af21:    7e 41                  push {X}
 af23:    55 98 af 33            mov Z, Z, #0xaf33
 af27:    95 28 08               ld A, [B + 0x0008]
 af2a:    5b                     mov X, A
@@ -8648,7 +8648,7 @@ af9b:    7b 01                  call [R_af9e:+0x1]
 af9d:    0f                     rsys
 
 R_af9e:
-af9e:    7e 63                  push
+af9e:    7e 63                  push {Y, Z}
 afa0:    55 26                  mov Y, B
 afa2:    f3 17                  st B, [pc + 0x17]
 afa4:    7b 31                  call [R_afd7:+0x31]
@@ -8673,7 +8673,7 @@ afcc:    79 86 f5               call [R_86f5:0x86f5]
 afcf:    3a                     clr! A, #0
 
 L_afd0:
-afd0:    7f 63                  pop
+afd0:    7f 63                  pop {Y, Z}
 afd2:    5d                     mov B, A
 afd3:    09                     ret
 
@@ -8683,7 +8683,7 @@ afd5:    73 c1                  jmp [L_af98:-0x3f]
 
 R_afd7:
 afd7:    a3 16                  st AL, [pc + 0x16]
-afd9:    7e 63                  push
+afd9:    7e 63                  push {Y, Z}
 
 L_afdb:
 afdb:    90 01 44               ld A, #0x0144
@@ -8721,12 +8721,12 @@ b00b:    18 f9                  bgt L_b006
 b00d:    ec                     st BL, [Z]
 
 L_b00e:
-b00e:    7f 63                  pop
+b00e:    7f 63                  pop {Y, Z}
 b010:    5d                     mov B, A
 b011:    09                     ret
 
 Syscall_63:
-b012:    7e 45                  push
+b012:    7e 45                  push {X, Y, Z}
 b014:    d6 89 b0 50            st Z, [R_b050:0xb050]
 b018:    b3 1e                  st A, [pc + 0x1e]
 b01a:    79 88 05               call [R_8805:0x8805]
@@ -8737,7 +8737,7 @@ b022:    79 84 e4               call [Syscall_09:0x84e4]
 b025:    09                     ret
 
 Syscall_5a:
-b026:    7e 45                  push
+b026:    7e 45                  push {X, Y, Z}
 b028:    b3 0e                  st A, [pc + 0x0e]
 b02a:    91 01 03               ld A, [0x0103]
 b02d:    b3 21                  st A, [R_b050:+0x21]
@@ -8814,7 +8814,7 @@ b099:    79 86 12               call [R_8612:0x8612]
 L_b09c:
 b09c:    95 a1                  ld A, [S++]
 b09e:    5f                     mov S, A
-b09f:    7f 45                  pop
+b09f:    7f 45                  pop {X, Y, Z}
 b0a1:    0f                     rsys
 
 R_b0a2:
@@ -8843,7 +8843,7 @@ b0c2:    65 a1                  ld X, [S++]
 b0c4:    09                     ret
 
 R_b0c5:
-b0c5:    7e 63                  push
+b0c5:    7e 63                  push {Y, Z}
 b0c7:    55 67 01 03            mov Y, Y, [0x0103]
 b0cb:    8b                     ld AL, [Y]
 b0cc:    c0 10                  ld BL, #0x10
@@ -8949,7 +8949,7 @@ b174:    a3 c9                  st AL, [pc + -0x37]
 b176:    79 86 12               call [R_8612:0x8612]
 
 L_b179:
-b179:    7f 63                  pop
+b179:    7f 63                  pop {Y, Z}
 b17b:    09                     ret
 
 R_b17c:
@@ -8978,7 +8978,7 @@ b18f:    ff                     st B, [P]
 b190:    00                     HALT
 
 Syscall_5c:
-b191:    7e 43                  push
+b191:    7e 43                  push {X, Y}
 b193:    3a                     clr! A, #0
 b194:    85 41                  ld AL, [X++]
 b196:    14 25                  bz L_b1bd
@@ -9051,7 +9051,7 @@ b204:    d0 00 00               ld B, #0x0000
 b207:    73 a0                  jmp [L_b1a9:-0x60]
 
 R_b209:
-b209:    7f 43                  pop
+b209:    7f 43                  pop {X, Y}
 b20b:    d5 48 01               ld B, [X + 0x0001]
 b20e:    55 40                  mov A, X
 b210:    79 84 e4               call [Syscall_09:0x84e4]
@@ -9202,7 +9202,7 @@ b2ef:    d0 00 00               ld B, #0x0000
 b2f2:    09                     ret
 
 Syscall_69:
-b2f3:    7e 23                  push
+b2f3:    7e 23                  push {B, X}
 b2f5:    5d                     mov B, A
 b2f6:    14 12                  bz L_b30a
 b2f8:    61 01 54               ld X, [0x0154]
@@ -9230,13 +9230,13 @@ b313:    42 23                  and BL, BH
 b315:    14 09                  bz L_b320
 b317:    dd                     ld B, [S]
 b318:    f5 08 1b               st B, [A + 0x001b]
-b31b:    7f 23                  pop
+b31b:    7f 23                  pop {B, X}
 b31d:    3a                     clr! A, #0
 b31e:    5d                     mov B, A
 b31f:    0f                     rsys
 
 L_b320:
-b320:    7f 23                  pop
+b320:    7f 23                  pop {B, X}
 b322:    3a                     clr! A, #0
 b323:    39                     dec! A, #1
 b324:    5d                     mov B, A
@@ -9256,7 +9256,7 @@ R_b330:
 b330:    33 2c                  not B, #12
 b332:    00                     HALT
 b333:    d0 00 00               ld B, #0x0000
-b336:    7f bf                  pop
+b336:    7f bf                  unknown_push
 
 R_b338:
 b338:    33 6f                  not Y, #15
@@ -9273,17 +9273,17 @@ b343:    fe                     st B, [C]
 b344:    bf                     st A, [P]
 
 Syscall_5f:
-b345:    7e 43                  push
+b345:    7e 43                  push {X, Y}
 b347:    7b 13                  call [L_b35c:+0x13]
 b349:    47 4a 09 26            memcpy #0x0a, [B], [Y]
 
 L_b34d:
-b34d:    7f 43                  pop
+b34d:    7f 43                  pop {X, Y}
 b34f:    30 42                  inc X, #3
 b351:    0f                     rsys
 
 Syscall_60:
-b352:    7e 43                  push
+b352:    7e 43                  push {X, Y}
 b354:    7b 06                  call [L_b35c:+0x6]
 b356:    47 4a 09 62            memcpy #0x0a, [Y], [B]
 b35a:    73 f1                  jmp [L_b34d:-0xf]
@@ -9323,7 +9323,7 @@ b393:    55 42                  mov B, X
 b395:    73 ed                  jmp [L_b384:-0x13]
 
 L_b397:
-b397:    7f 43                  pop
+b397:    7f 43                  pop {X, Y}
 b399:    32 20                  clr B, #0
 b39b:    ca                     ld BL, [X]
 b39c:    55 40                  mov A, X
@@ -9558,7 +9558,7 @@ b4fd:    92 01 07               ld A, @[0x0107]
 
 R_b500:
 b500:    d5 41                  ld B, [X++]
-b502:    7e 45                  push
+b502:    7e 45                  push {X, Y, Z}
 b504:    65 21                  ld X, [B++]
 b506:    95 08 08               ld A, [A + 0x0008]
 b509:    55 17 00 0f            mov Y, [[0x000f] + A]
@@ -9590,7 +9590,7 @@ b537:    f6 17 01               st AL, +0x1(Y)
 b53a:    73 d1                  jmp [L_b50d:-0x2f]
 
 L_b53c:
-b53c:    7f 45                  pop
+b53c:    7f 45                  pop {X, Y, Z}
 b53e:    09                     ret
 
 Syscall_2b:
@@ -9618,7 +9618,7 @@ b554:    d5 41                  ld B, [X++]
 
 L_b556:
 b556:    30 20                  inc B, #1
-b558:    7e 43                  push
+b558:    7e 43                  push {X, Y}
 b55a:    55 24                  mov X, B
 b55c:    47 9c 05 c0 b5 93      memset #0x06, #0xc0, [R_b593:0xb593]
 b562:    c0 a3                  ld BL, #0xa3
@@ -9646,7 +9646,7 @@ b58a:    73 f8                  jmp [L_b584:-0x8]
 L_b58c:
 b58c:    c5 a1                  ld BL, [S++]
 b58e:    e5 42                  st BL, [--X]
-b590:    7f 43                  pop
+b590:    7f 43                  pop {X, Y}
 b592:    09                     ret
 
 R_b593:
@@ -9694,7 +9694,7 @@ b5c4:    79 b6 41               call [R_b641:0xb641]
 b5c7:    0f                     rsys
 
 Syscall_55:
-b5c8:    7e 63                  push
+b5c8:    7e 63                  push {Y, Z}
 b5ca:    55 00                  mov A, A
 b5cc:    15 03                  bnz L_b5d1
 b5ce:    79 8a a6               call [R_8aa6:0x8aa6]
@@ -9703,7 +9703,7 @@ L_b5d1:
 b5d1:    d5 41                  ld B, [X++]
 b5d3:    55 28                  mov Z, B
 b5d5:    79 b6 3c               call [R_b63c:0xb63c]
-b5d8:    7f 63                  pop
+b5d8:    7f 63                  pop {Y, Z}
 b5da:    0f                     rsys
 
 Syscall_23:
@@ -9720,7 +9720,7 @@ b5ee:    79 80 42               call [R_8042:0x8042]
 b5f1:    0f                     rsys
 
 R_b5f2:
-b5f2:    7e 61                  push
+b5f2:    7e 61                  push {Y}
 b5f4:    95 41                  ld A, [X++]
 b5f6:    d5 41                  ld B, [X++]
 b5f8:    f5 a2                  st B, [--S]
@@ -9883,7 +9883,7 @@ b6c6:    cb ca                  R_cbca
 b6c8:    b5 4b                  Syscall_2e
 
 R_b6ca:
-b6ca:    7f 01                  pop
+b6ca:    7f 01                  pop {A}
 b6cc:    b1 b8 5b               st A, [R_b85b:0xb85b]
 b6cf:    85 a1                  ld AL, [S++]
 b6d1:    a1 b7 a4               st AL, [R_b7a4:0xb7a4]
@@ -10127,7 +10127,7 @@ b857:    91 ba 6e               ld A, [R_ba6e:0xba6e]
 
 L_b85a:
 b85a:    d0 00 00               ld B, #0x0000
-b85d:    7e 21                  push
+b85d:    7e 21                  push {B}
 b85f:    d1 ba 68               ld B, [R_ba68:0xba68]
 b862:    09                     ret
 
@@ -10157,7 +10157,7 @@ L_b88a:
 b88a:    09                     ret
 
 HawkDevice_Init:
-b88b:    7e 45                  push
+b88b:    7e 45                  push {X, Y, Z}
 b88d:    65 a8 08               ld X, [S + 0x0008]
 b890:    91 01 03               ld A, [0x0103]
 b893:    2e 0d fa 00 36         wpf #0xfa, [A + 0x0036]
@@ -10227,7 +10227,7 @@ b914:    95 a1                  ld A, [S++]
 b916:    30 a1                  inc S, #2
 b918:    60 00 00               ld X, #0x0000
 b91b:    ba                     st A, [X]
-b91c:    7f 45                  pop
+b91c:    7f 45                  pop {X, Y, Z}
 b91e:    30 ba 00 02            inc [S + [0x0002]], #11
 b922:    09                     ret
 
@@ -10740,7 +10740,7 @@ bc6a:    be b8                  FfcDevice_Init
 bc6c:    cb ca                  R_cbca
 
 R_bc6e:
-bc6e:    7f 01                  pop
+bc6e:    7f 01                  pop {A}
 bc70:    b1 bd 91               st A, [R_bd91:0xbd91]
 bc73:    79 be 08               call [R_be08:0xbe08]
 bc76:    85 a8 06               ld AL, [S + 0x0006]
@@ -10898,7 +10898,7 @@ bd8a:    a1 01 1f               st AL, [0x011f]
 bd8d:    2a                     clr! AL, #0
 bd8e:    a3 7c                  st AL, [R_be0c:+0x7c]
 bd90:    90 00 00               ld A, #0x0000
-bd93:    7e 01                  push
+bd93:    7e 01                  push {A}
 bd95:    90 00 00               ld A, #0x0000
 bd98:    09                     ret
 
@@ -10940,7 +10940,7 @@ be1e:    09                     ret
 
 R_be1f:
 be1f:    7b e7                  call [R_be08:-0x19]
-be21:    7e 41                  push
+be21:    7e 41                  push {X}
 be23:    65 68 0f               ld X, [Y + 0x000f]
 
 L_be26:
@@ -10950,7 +10950,7 @@ be2b:    f6 15 00               st AL, +0x0(X)
 be2e:    79 bf b1               call [R_bfb1:0xbfb1]
 be31:    45 11                  mov AL, AL
 be33:    15 0b                  bnz L_be40
-be35:    7f 41                  pop
+be35:    7f 41                  pop {X}
 be37:    a3 d3                  st AL, [R_be0c:-0x2d]
 be39:    29                     dec! AL, #1
 be3a:    a1 01 1f               st AL, [0x011f]
@@ -10994,7 +10994,7 @@ be81:    79 bf 6e               call [R_bf6e:0xbf6e]
 be84:    2a                     clr! AL, #0
 be85:    f6 15 00               st AL, +0x0(X)
 be88:    85 a1                  ld AL, [S++]
-be8a:    7f 41                  pop
+be8a:    7f 41                  pop {X}
 be8c:    d0 10 ff               ld B, #0x10ff
 be8f:    e1 01 1f               st BL, [0x011f]
 be92:    22 30                  clr BL, #0
@@ -11020,10 +11020,10 @@ beb4:    a1 be 0c               st AL, [R_be0c:0xbe0c]
 beb7:    09                     ret
 
 FfcDevice_Init:
-beb8:    7e 63                  push
+beb8:    7e 63                  push {Y, Z}
 beba:    79 be 08               call [R_be08:0xbe08]
 bebd:    79 bc 84               call [R_bc84:0xbc84]
-bec0:    7f 63                  pop
+bec0:    7f 63                  pop {Y, Z}
 bec2:    d6 89 be d1            st Z, [R_bed1:0xbed1]
 bec6:    c5 68 13               ld BL, [Y + 0x0013]
 bec9:    e5 88 04               st BL, [Z + 0x0004]
@@ -11070,7 +11070,7 @@ L_befe:
 befe:    a1 c0 52               st AL, [R_c052:0xc052]
 bf01:    22 12                  clr AL, #2
 bf03:    a1 bf da               st AL, [R_bfda:0xbfda]
-bf06:    7e 45                  push
+bf06:    7e 45                  push {X, Y, Z}
 bf08:    95 68 0f               ld A, [Y + 0x000f]
 bf0b:    5e                     mov Z, A
 bf0c:    2a                     clr! AL, #0
@@ -11121,7 +11121,7 @@ L_bf67:
 bf67:    15 6b                  bnz R_bfd4
 
 R_bf69:
-bf69:    7f 45                  pop
+bf69:    7f 45                  pop {X, Y, Z}
 bf6b:    d5 41                  ld B, [X++]
 bf6d:    09                     ret
 
@@ -12079,7 +12079,7 @@ c5fc:    c8 2d                  CmdDevice_Init
 c5fe:    cb ca                  R_cbca
 
 R_c600:
-c600:    7f 01                  pop
+c600:    7f 01                  pop {A}
 c602:    b1 c6 fa               st A, [R_c6fa:0xc6fa]
 c605:    85 a8 06               ld AL, [S + 0x0006]
 c608:    79 c7 8c               call [R_c78c:0xc78c]
@@ -12220,7 +12220,7 @@ c6f3:    5c                     mov Y, A
 c6f4:    80 ff                  ld AL, #0xff
 c6f6:    a1 01 1f               st AL, [0x011f]
 c6f9:    90 00 00               ld A, #0x0000
-c6fc:    7e 01                  push
+c6fc:    7e 01                  push {A}
 c6fe:    d1 ca 51               ld B, [R_ca51:0xca51]
 c701:    90 00 00               ld A, #0x0000
 c704:    09                     ret
@@ -12277,7 +12277,7 @@ c7a4:    45 01                  mov AL, AH
 c7a6:    09                     ret
 
 R_c7a7:
-c7a7:    7e 45                  push
+c7a7:    7e 45                  push {X, Y, Z}
 c7a9:    d6 ab c8 13            st S, [R_c813:0xc813]
 c7ad:    80 ff                  ld AL, #0xff
 c7af:    a1 c8 5c               st AL, [R_c85c:0xc85c]
@@ -12334,7 +12334,7 @@ c80e:    f6 19 01               st AL, +0x1(Z)
 
 L_c811:
 c811:    55 ba 00 00            mov S, S, #0x0000
-c815:    7f 45                  pop
+c815:    7f 45                  pop {X, Y, Z}
 c817:    09                     ret
 
 R_c818:
@@ -12352,7 +12352,7 @@ c82b:    08                     cl
 c82c:    09                     ret
 
 CmdDevice_Init:
-c82d:    7e 45                  push
+c82d:    7e 45                  push {X, Y, Z}
 c82f:    d6 ab c8 13            st S, [R_c813:0xc813]
 c833:    d6 89 c8 4f            st Z, [R_c84f:0xc84f]
 c837:    85 68 13               ld AL, [Y + 0x0013]
@@ -12380,7 +12380,7 @@ c85f:    80 0d                  ld AL, #0x0d
 
 L_c861:
 c861:    a1 c9 ba               st AL, [R_c9ba:0xc9ba]
-c864:    7e 45                  push
+c864:    7e 45                  push {X, Y, Z}
 c866:    55 a0                  mov A, S
 c868:    b1 c8 f2               st A, [R_c8f2:0xc8f2]
 c86b:    95 68 0f               ld A, [Y + 0x000f]
@@ -12468,14 +12468,14 @@ c8e1:    80 45                  ld AL, #0x45
 c8e3:    f6 19 00               st AL, +0x0(Z)
 c8e6:    7b 16                  call [R_c8fe:+0x16]
 c8e8:    15 65                  bnz R_c94f
-c8ea:    7e 01                  push
+c8ea:    7e 01                  push {A}
 c8ec:    79 ca a5               call [R_caa5:0xcaa5]
-c8ef:    7f 01                  pop
+c8ef:    7f 01                  pop {A}
 
 R_c8f1:
 c8f1:    60 00 00               ld X, #0x0000
 c8f4:    55 4a                  mov S, X
-c8f6:    7f 45                  pop
+c8f6:    7f 45                  pop {X, Y, Z}
 c8f8:    d1 ca 51               ld B, [R_ca51:0xca51]
 c8fb:    30 41                  inc X, #2
 c8fd:    09                     ret
@@ -12852,7 +12852,7 @@ R_cbbc:
 cbbc:    12, "RTZ FAILURE\r"
 
 R_cbca:
-cbca:    7e 61                  push
+cbca:    7e 61                  push {Y}
 cbcc:    95 41                  ld A, [X++]
 cbce:    d5 41                  ld B, [X++]
 cbd0:    f5 a2                  st B, [--S]
@@ -12904,7 +12904,7 @@ cc19:    7d 04                  call @[A]
 cc1b:    09                     ret
 
 L_cc1c:
-cc1c:    7e 61                  push
+cc1c:    7e 61                  push {Y}
 cc1e:    95 88 04               ld A, [Z + 0x0004]
 cc21:    b5 a2                  st A, [--S]
 cc23:    55 82                  mov B, Z
@@ -13098,13 +13098,13 @@ cd4c:    09                     ret
 FormatHexWord:
     ; Looks like this function converts a 16bit word to hex and writes
     ; it to the ascii buffer specified at [X]
-cd4d:    7e 05                  push
+cd4d:    7e 05                  push {A, B, X}
 cd4f:    b3 14                  st A, [FormatHexWord_Temp:+0x14]
 cd51:    65 41                  ld X, [X++]
 cd53:    47 9e 03 c0 04         memset #0x04, #0xc0, [X]
 cd58:    80 04                  ld AL, #0x04
 cd5a:    46 e1 98 40 cd 65      baseconv(1, e) [FormatHexWord_Temp:0xcd65], [X]
-cd60:    7f 05                  pop
+cd60:    7f 05                  pop {A, B, X}
 cd62:    30 41                  inc X, #2
 cd64:    09                     ret
 
@@ -13114,16 +13114,16 @@ cd65:    00 00                  (0x0)
 R_cd67:
 cd67:    6d a2                  st X, [--S]
 cd69:    32 40                  clr X, #0
-cd6b:    7e 03                  push
+cd6b:    7e 03                  push {A, B}
 cd6d:    d9                     ld B, [B]
 cd6e:    51 20                  sub A, B
 cd70:    10 06                  bc L_cd78
-cd72:    7f 01                  pop
+cd72:    7f 01                  pop {A}
 cd74:    c0 24                  ld BL, #0x24
 cd76:    66 6b                  jsys 6b
 
 L_cd78:
-cd78:    7f 01                  pop
+cd78:    7f 01                  pop {A}
 cd7a:    dd                     ld B, [S]
 cd7b:    d5 28 04               ld B, [B + 0x0004]
 cd7e:    c0 10                  ld BL, #0x10
@@ -13388,13 +13388,13 @@ cf8d:    73
 cf8e:    e8 'h'
 cf8f:    d0 'P'
 cf90:    e2 'b'
-cf91:    bb ';'	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+cf91:    bb ';'	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
 cf92:    66
 cf93:    10
 cf94:    66
 cf95:    08
 cf96:    e2 'b'
-cf97:    bb ';'	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+cf97:    bb ';'	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
 cf98:    92
 cf99:    01
 cf9a:    09
@@ -14224,7 +14224,7 @@ L_d7ae:
 d7ae:    79 d2 93               call [R_d293:0xd293]
 d7b1:    47 48 33 60 e0 e4      memcpy #0x34, [Y], [R_e0e4:0xe0e4]
 d7b7:    50 76 00 34            add Y, Y, #0x0034
-d7bb:    7e 63                  push
+d7bb:    7e 63                  push {Y, Z}
 d7bd:    47 40 00 db 19 d7 cf   memcpy #0x01, [R_db19:0xdb19], [R_d7cf:0xd7cf]
 d7c4:    d6 89 d7 d2            st Z, [R_d7d2:0xd7d2]
 d7c8:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a:0xe11a]
@@ -14239,7 +14239,7 @@ d7d2:    00                     HALT
 d7d3:    00                     HALT
 d7d4:    01                     nop
 d7d5:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118:0xe118]
-d7da:    7f 63                  pop
+d7da:    7f 63                  pop {Y, Z}
 d7dc:    38                     inc! A, #1
 d7dd:    5e                     mov Z, A
 d7de:    81 e1 17               ld AL, [R_e117:0xe117]
@@ -14250,7 +14250,7 @@ d7e4:    08                     cl
 d7e5:    d6 93 00 05            ld Z, [[0x0005] + B]
 d7e9:    91 e0 ff               ld A, [R_e0ff:0xe0ff]
 d7ec:    14 2f                  bz L_d81d
-d7ee:    7e 63                  push
+d7ee:    7e 63                  push {Y, Z}
 d7f0:    47 40 00 db 19 d8 02   memcpy #0x01, [R_db19:0xdb19], [R_d802:0xd802]
 d7f7:    d6 89 d8 05            st Z, [R_d805:0xd805]
 d7fb:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a:0xe11a]
@@ -14265,7 +14265,7 @@ d805:    00                     HALT
 d806:    00                     HALT
 d807:    01                     nop
 d808:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118:0xe118]
-d80d:    7f 63                  pop
+d80d:    7f 63                  pop {Y, Z}
 d80f:    38                     inc! A, #1
 d810:    5e                     mov Z, A
 d811:    90 d8 5f               ld A, #0xd85f
@@ -14615,7 +14615,7 @@ daca:    15 03                  bnz L_dacf
 dacc:    71 dc d2               jmp [R_dcd2:0xdcd2]
 
 L_dacf:
-dacf:    7e 01                  push
+dacf:    7e 01                  push {A}
 dad1:    55 37 00 05            mov Y, [[0x0005] + B]
 dad5:    14 1a                  bz L_daf1
 dad7:    16 53                  blt L_db2c
@@ -14686,7 +14686,7 @@ db25:    2e 0c 70 01 61         wpf #0x70, [0x0161]
 db2a:    30 80                  inc Z, #1
 
 L_db2c:
-db2c:    7f 01                  pop
+db2c:    7f 01                  pop {A}
 db2e:    73 98                  jmp [L_dac8:-0x68]
 
 R_db30:
@@ -14920,7 +14920,7 @@ dcdf:    71 de 01               jmp [R_de01:0xde01]
 L_dce2:
 dce2:    d5 01                  ld B, [A++]
 dce4:    14 f1                  bz L_dcd7
-dce6:    7e 01                  push
+dce6:    7e 01                  push {A}
 dce8:    55 37 00 1b            mov Y, [[0x001b] + B]
 dcec:    52 70 ff f0            and A, Y, #0xfff0
 dcf0:    14 08                  bz L_dcfa
@@ -14960,7 +14960,7 @@ dd24:    2e 0c 70 01 61         wpf #0x70, [0x0161]
 dd29:    30 80                  inc Z, #1
 
 L_dd2b:
-dd2b:    7f 01                  pop
+dd2b:    7f 01                  pop {A}
 dd2d:    73 a8                  jmp [L_dcd7:-0x58]
 
 R_dd2f:
@@ -15090,7 +15090,7 @@ de0e:    71 df ac               jmp [R_dfac:0xdfac]
 L_de11:
 de11:    d5 01                  ld B, [A++]
 de13:    14 f1                  bz L_de06
-de15:    7e 01                  push
+de15:    7e 01                  push {A}
 de17:    55 37 00 1d            mov Y, [[0x001d] + B]
 de1b:    52 70 ff f0            and A, Y, #0xfff0
 de1f:    15 4d                  bnz L_de6e
@@ -15136,7 +15136,7 @@ de67:    2e 0c 70 01 61         wpf #0x70, [0x0161]
 de6c:    30 80                  inc Z, #1
 
 L_de6e:
-de6e:    7f 01                  pop
+de6e:    7f 01                  pop {A}
 de70:    73 94                  jmp [L_de06:-0x6c]
 
 R_de72:
@@ -15236,7 +15236,7 @@ df18:    00                     HALT
 df19:    00                     HALT
 
 R_df1a:
-df1a:    7e 27                  push
+df1a:    7e 27                  push {B, X, Y, Z}
 df1c:    51 90 78 00            sub A, Z, #0x7800
 df20:    16 27                  blt L_df49
 df22:    3a                     clr! A, #0
@@ -15324,7 +15324,7 @@ dfa4:    73 84                  jmp [L_df2a:-0x7c]
 L_dfa6:
 dfa6:    2a                     clr! AL, #0
 dfa7:    a3 ea                  st AL, [pc + -0x16]
-dfa9:    7f 27                  pop
+dfa9:    7f 27                  pop {B, X, Y, Z}
 dfab:    09                     ret
 
 R_dfac:

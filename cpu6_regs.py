@@ -40,3 +40,23 @@ class PreDecRef(Ref):
 
     def __str__(self):
         return f"--{self.reg}"
+
+class MultiRegRef(Ref):
+    def __init__(self, start, count):
+        self.start = start
+        self.count = count + 1
+
+    def __str__(self):
+        i = self.start
+        end = self.start + self.count
+        regs = []
+        if i & 1 == 1:
+            regs.append(RegNames8[i])
+            i += 1
+        while i+1 < end:
+            regs.append(RegNames16[i>>1])
+            i += 2
+        if i < end:
+            regs.append(RegNames8[i])
+
+        return f"{{{', '.join(regs)}}}"

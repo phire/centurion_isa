@@ -718,7 +718,7 @@ L_0533:
 
 PrintString:
 0536:    7b 22                  call [L_055a:+0x22]
-0538:    7e 45                  push
+0538:    7e 45                  push {X, Y, Z}
 053a:    9a                     ld A, [X]
 053b:    5c                     mov Y, A
 053c:    55 98 f2 00            mov Z, Z, #0xf200
@@ -740,7 +740,7 @@ L_0550:
 0553:    18 ef                  bgt L_0544
 
 L_0555:
-0555:    7f 45                  pop
+0555:    7f 45                  pop {X, Y, Z}
 0557:    30 41                  inc X, #2
 0559:    09                     ret
 
@@ -755,7 +755,7 @@ L_0563:
 0563:    09                     ret
 
 PrintChar:
-0564:    7e 81                  push
+0564:    7e 81                  push {Z}
 0566:    55 98 f2 00            mov Z, Z, #0xf200	 ; Serisl port 0 base address
 056a:    f6 19 0d               st AL, +0xd(Z)
 056d:    c0 c5                  ld BL, #0xc5	 ; Set up baud rate ?
@@ -772,18 +772,18 @@ PrintChar:
 0582:    80 8d                  ld AL, #0x8d
 0584:    a3 1a                  st AL, [pc + 0x1a]	 ; (0x5a0) - preserve the original character ???
 0586:    0e                     dly
-0587:    7f 81                  pop
+0587:    7f 81                  pop {Z}
 0589:    09                     ret
 
 L_058a:
 058a:    7b 09                  call [RawPrintChar:+0x9]
 058c:    0e                     dly
-058d:    7f 81                  pop
+058d:    7f 81                  pop {Z}
 058f:    09                     ret
 
 L_0590:
 0590:    7b 03                  call [RawPrintChar:+0x3]
-0592:    7f 81                  pop
+0592:    7f 81                  pop {Z}
 0594:    09                     ret
 
 RawPrintChar:
@@ -829,7 +829,7 @@ RawPrintChar:
 05c3:    de '^'
 
 L_05c4:
-05c4:    7e 81                  push
+05c4:    7e 81                  push {Z}
 05c6:    55 98 f2 00            mov Z, Z, #0xf200
 05ca:    83 a2                  ld AL, [pc + -0x5e]
 05cc:    f6 19 00               st AL, +0x0(Z)
@@ -868,7 +868,7 @@ L_05fa:
 0604:    55 24                  mov X, B
 
 L_0606:
-0606:    7f 81                  pop
+0606:    7f 81                  pop {Z}
 0608:    09                     ret
 
 ReadLine:
