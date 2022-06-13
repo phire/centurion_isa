@@ -70,6 +70,9 @@ class MemoryWrapper:
     def get_be16(self, addr):
         return get_be16(self.memory, addr)
 
+    def is_fixup(self, addr):
+        return addr in memory_addr_info and memory_addr_info[addr].fixup
+
 def tochar(byte):
     c = chr(byte&0x7f)
     if byte > 0x80 and c.isprintable():
@@ -313,6 +316,8 @@ if __name__ == "__main__":
             elif type == 1:
                 while len(data) > 1:
                     fixup = struct.unpack_from(">H", data)[0]
+                    memory_addr_info[fixup].fixup = addr
+
                     old_value = struct.unpack(">H", memory[fixup:fixup+2])[0]
                     new_addr = old_value + addr
                     new_value = struct.pack(">H", (new_addr) & 0xffff)

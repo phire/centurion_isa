@@ -14,7 +14,7 @@ class DirectRef(Ref):
 
     def to_string(self, memory, **kwargs):
         if label := memory.get_label(self.addr):
-            return f"[{label}:{self.addr:#06x}]"
+            return f"[{label}|{self.addr:#06x}]"
         return str(self)
 
 class IndexedRef(Ref):
@@ -46,9 +46,14 @@ class LiteralRef(Ref):
         self.pc = pc
 
     def __str__(self):
-        if self.size == 1:
-            return f"#{self.val:#04x}"
-        return f"#{self.val:#06x}"
+        return f"#{self.val:#0{self.size*2+2}x}"
+
+    def to_string(self, memory, **kwargs):
+        # Only label literals if they have been fixed up
+        if self.pc and memory.is_fixup(self.pc):
+            if label := memory.get_label(self.val):
+                return f"{label}|{self}"
+        return str(self)
 
 class SmallLiteralRef(Ref):
     def __init__(self, val):
@@ -70,7 +75,7 @@ class PcDisplacementRef(Ref):
 
     def to_string(self, memory, **kwargs):
         if label := memory.get_label(self.pc + self.disp):
-            return f"[{label}:{self.disp:+#04x}]"
+            return f"[{label}|{self.disp:+#04x}]"
         return str(self)
 
 class IndirectRef(Ref):

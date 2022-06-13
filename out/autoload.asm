@@ -1,7 +1,7 @@
 
 L_ef00:
 ef00:    1c 03                  bs3 L_ef05
-ef02:    71 ef c0               jmp [L_efc0:0xefc0]
+ef02:    71 ef c0               jmp [L_efc0|0xefc0]
 
 L_ef05:
 ef05:    80 01                  ld AL, #0x01
@@ -18,9 +18,9 @@ ef19:    5f                     mov S, A
 ef1a:    90 e8 8f               ld A, #0xe88f
 ef1d:    b1 ff f2               st A, [0xfff2]
 ef20:    80 03                  ld AL, #0x03
-ef22:    7b 06                  call [L_ef2a:+0x6]
+ef22:    7b 06                  call [L_ef2a|+0x6]
 ef24:    80 00                  ld AL, #0x00
-ef26:    7b 02                  call [L_ef2a:+0x2]
+ef26:    7b 02                  call [L_ef2a|+0x2]
 ef28:    75 a0                  jmp [S]
 
 L_ef2a:
@@ -49,25 +49,25 @@ efca:    90 00 f0               ld A, #0x00f0
 efcd:    5f                     mov S, A
 
 L_efce:
-efce:    7b 1f                  call [L_efef:+0x1f]
+efce:    7b 1f                  call [L_efef|+0x1f]
 efd0:    4d                     mov! BL, AL
-efd1:    7b 1c                  call [L_efef:+0x1c]
+efd1:    7b 1c                  call [L_efef|+0x1c]
 efd3:    5b                     mov X, A
 efd4:    4e                     unknown
-efd5:    7b 18                  call [L_efef:+0x18]
+efd5:    7b 18                  call [L_efef|+0x18]
 efd7:    45 16                  mov YH, AL
-efd9:    7b 14                  call [L_efef:+0x14]
+efd9:    7b 14                  call [L_efef|+0x14]
 efdb:    4c                     xor! BL, AL
 
 L_efdc:
 efdc:    3f                     dec X
 efdd:    16 06                  blt L_efe5
-efdf:    7b 0e                  call [L_efef:+0xe]
+efdf:    7b 0e                  call [L_efef|+0xe]
 efe1:    a5 61                  st AL, [Y++]
-efe3:    73 f7                  jmp [L_efdc:-0x9]
+efe3:    73 f7                  jmp [L_efdc|-0x9]
 
 L_efe5:
-efe5:    7b 08                  call [L_efef:+0x8]
+efe5:    7b 08                  call [L_efef|+0x8]
 efe7:    15 e2                  bnz L_efcb
 efe9:    45 99                  mov ZL, ZL
 efeb:    15 e1                  bnz L_efce

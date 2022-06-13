@@ -1054,7 +1054,7 @@ L_8c61:
 8c6c:    00                     HALT
 
 L_8c6d:
-8c6d:    73 04                  jmp [L_8c73:+0x4]
+8c6d:    73 04                  jmp [L_8c73|+0x4]
 8c6f:    00
 8c70:    22
 8c71:    00
@@ -1186,11 +1186,11 @@ L_8d14:
 8d14:    90 00 3a               ld A, #0x003a
 8d17:    5f                     mov S, A
 8d18:    60 20 20               ld X, #0x2020
-8d1b:    7b 06                  call [L_8d23:+0x6]
+8d1b:    7b 06                  call [L_8d23|+0x6]
 8d1d:    01                     nop
 8d1e:    01                     nop
 8d1f:    00                     HALT
-8d20:    73 16                  jmp [L_8d38:+0x16]
+8d20:    73 16                  jmp [L_8d38|+0x16]
 8d22:    00
 
 L_8d23:
@@ -1312,24 +1312,24 @@ MappingRamTestLoop:
 8e32:    50 80                  add A, Z
 8e34:    7d 00                  call [A]	 ; Call MappingInit
 8e36:    47 40 ff 01 00 02 00   memcpy #0x100, [0x0100], [0x0200]
-8e3d:    7b 36                  call [L_8e75:+0x36]
+8e3d:    7b 36                  call [L_8e75|+0x36]
 8e3f:    01                     nop
-8e40:    7b 33                  call [L_8e75:+0x33]
+8e40:    7b 33                  call [L_8e75|+0x33]
 8e42:    02                     sf
-8e43:    7b 30                  call [L_8e75:+0x30]
+8e43:    7b 30                  call [L_8e75|+0x30]
 8e45:    03                     rf
-8e46:    7b 2d                  call [L_8e75:+0x2d]
+8e46:    7b 2d                  call [L_8e75|+0x2d]
 8e48:    04                     ei
-8e49:    7b 2a                  call [L_8e75:+0x2a]
+8e49:    7b 2a                  call [L_8e75|+0x2a]
 8e4b:    05                     di
-8e4c:    7b 27                  call [L_8e75:+0x27]
+8e4c:    7b 27                  call [L_8e75|+0x27]
 8e4e:    06                     sl
-8e4f:    7b 24                  call [L_8e75:+0x24]
+8e4f:    7b 24                  call [L_8e75|+0x24]
 8e51:    07                     rl
-8e52:    7b 53                  call [L_8ea7:+0x53]
-8e54:    7b 1f                  call [L_8e75:+0x1f]
+8e52:    7b 53                  call [L_8ea7|+0x53]
+8e54:    7b 1f                  call [L_8e75|+0x1f]
 8e56:    00                     HALT
-8e57:    7b 73                  call [L_8ecc:+0x73]
+8e57:    7b 73                  call [L_8ecc|+0x73]
 8e59:    a1 f1 0a               st AL, [0xf10a]
 8e5c:    81 f2 00               ld AL, [0xf200]
 8e5f:    2c                     srl! AL, #1
@@ -1365,8 +1365,8 @@ nextByteValue:
 8e89:    28                     inc! AL, #1
 8e8a:    ab                     st AL, [Y]
 8e8b:    ac                     st AL, [Z]	 ; HL is EF+0x100
-8e8c:    7b 76                  call [ReadAllPages:+0x76]
-8e8e:    7b 49                  call [WriteAllPages:+0x49]
+8e8c:    7b 76                  call [ReadAllPages|+0x76]
+8e8e:    7b 49                  call [WriteAllPages|+0x49]
 8e90:    47 80 ff 01 00 02 00   memcmp #0x100, [0x0100], [0x0200]
 8e97:    15 69                  bnz L_8f02	 ; Branch if parity Error
 8e99:    31 20                  dec B, #1	 ; Test every single byte pattern
@@ -1394,7 +1394,7 @@ L_8eb3:
 8ec1:    0f                     rsys
 
 rsysContinue:
-8ec2:    7b 15                  call [WriteAllPages:+0x15]
+8ec2:    7b 15                  call [WriteAllPages|+0x15]
 8ec4:    47 40 ff 01 00 02 00   memcpy #0x100, [0x0100], [0x0200]
 8ecb:    09                     ret
 
@@ -1402,7 +1402,7 @@ L_8ecc:
 8ecc:    2e 1c f9 03 00         rpf #0xf9, [0x0300]
 8ed1:    2e 0c f8 03 00         wpf #0xf8, [0x0300]
 8ed6:    2a                     clr! AL, #0
-8ed7:    73 da                  jmp [L_8eb3:-0x26]
+8ed7:    73 da                  jmp [L_8eb3|-0x26]
 
 WriteAllPages:
 8ed9:    2e 1c f8 01 00         rpf #0xf8, [0x0100]
@@ -1416,7 +1416,7 @@ WriteAllPages:
 8f01:    09                     ret
 
 L_8f02:
-8f02:    73 29                  jmp [L_8f2d:+0x29]
+8f02:    73 29                  jmp [L_8f2d|+0x29]
 
 ReadAllPages:
 8f04:    2e 0c f8 01 00         wpf #0xf8, [0x0100]
@@ -1458,12 +1458,12 @@ ChecksumLoop:
 8f72:    15 32                  bnz ChecksumFail
 
 PrintPassedAndExit:
-8f74:    7b 56                  call [WriteString:+0x56]
+8f74:    7b 56                  call [WriteString|+0x56]
 8f76:    "\r\n*** PASS ***\r\n\0"
 8f87:    a1 f1 0a               st AL, [0xf10a]
 
 L_8f8a:
-8f8a:    7b 40                  call [WriteString:+0x40]
+8f8a:    7b 40                  call [WriteString|+0x40]
 8f8c:    "PRESS SPACE\x07\r\n\0"
 
 WaitForKey:
@@ -1474,11 +1474,11 @@ WaitForKey:
 8fa4:    75 40                  jmp [X]
 
 ChecksumFail:
-8fa6:    7b 24                  call [WriteString:+0x24]
+8fa6:    7b 24                  call [WriteString|+0x24]
 8fa8:    "\r\n*** CHECK SUM ERROR ***\r\n\0"
 8fc4:    a1 f1 0b               st AL, [0xf10b]
 8fc7:    a1 f1 0c               st AL, [0xf10c]
-8fca:    73 be                  jmp [L_8f8a:-0x42]
+8fca:    73 be                  jmp [L_8f8a|-0x42]
 
 WriteString:
 8fcc:    81 f2 00               ld AL, [0xf200]
@@ -1491,7 +1491,7 @@ WriteString:
 
 L_8fd8:
 8fd8:    a1 f2 01               st AL, [0xf201]
-8fdb:    73 ef                  jmp [WriteString:-0x11]
+8fdb:    73 ef                  jmp [WriteString|-0x11]
 8fdd:    82
 8fde:    00
 8fdf:    00

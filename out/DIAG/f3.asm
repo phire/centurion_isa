@@ -36,8 +36,8 @@ WriteString:
 909e:    09                     ret
 
 L_909f:
-909f:    7b 02                  call [WriteByte:+0x2]
-90a1:    73 f7                  jmp [WriteString:-0x9]
+909f:    7b 02                  call [WriteByte|+0x2]
+90a1:    73 f7                  jmp [WriteString|-0x9]
 
 WriteByte:
 90a3:    c1 f2 00               ld BL, [0xf200]
@@ -57,9 +57,9 @@ ReadChar:
 WriteHexWord:
 90ba:    a5 a2                  st AL, [--S]
 90bc:    45 01                  mov AL, AH
-90be:    7b 05                  call [WriteHexByte:+0x5]
+90be:    7b 05                  call [WriteHexByte|+0x5]
 90c0:    85 a1                  ld AL, [S++]
-90c2:    7b 01                  call [WriteHexByte:+0x1]
+90c2:    7b 01                  call [WriteHexByte|+0x1]
 90c4:    09                     ret
 
 WriteHexByte:
@@ -80,7 +80,7 @@ WriteHexByte:
 90dc:    40 31                  add AL, BL
 
 L_90de:
-90de:    7b c3                  call [WriteByte:-0x3d]
+90de:    7b c3                  call [WriteByte|-0x3d]
 90e0:    85 a1                  ld AL, [S++]
 90e2:    c0 0f                  ld BL, #0x0f
 90e4:    42 31                  and AL, BL
@@ -93,7 +93,7 @@ L_90de:
 90f1:    40 31                  add AL, BL
 
 L_90f3:
-90f3:    7b ae                  call [WriteByte:-0x52]
+90f3:    7b ae                  call [WriteByte|-0x52]
 90f5:    09                     ret
 
 FinishTest:
@@ -109,21 +109,21 @@ FinishTest:
 9109:    15 4b                  bnz L_9156
 910b:    81 01 08               ld AL, [0x0108]
 910e:    14 32                  bz L_9142
-9110:    7a 01 12               call @[WriteString:0x0112]
+9110:    7a 01 12               call @[WriteString|0x0112]
 9113:    "\r\n*** FAIL ***\0"
 9122:    a1 f1 0b               st AL, [0xf10b]
 9125:    a1 f1 0c               st AL, [0xf10c]
 
 PressSpaceThenExit:
-9128:    7a 01 12               call @[WriteString:0x0112]
+9128:    7a 01 12               call @[WriteString|0x0112]
 912b:    "\r\nPRESS SPACE\x07\r\n\0"
-913c:    7a 01 02               call @[ReadChar:0x0102]
+913c:    7a 01 02               call @[ReadChar|0x0102]
 913f:    72 01 00               jmp @[0x0100]
 
 L_9142:
-9142:    7a 01 12               call @[WriteString:0x0112]
+9142:    7a 01 12               call @[WriteString|0x0112]
 9145:    "\r\n*** PASS ***\0"
-9154:    73 d2                  jmp [PressSpaceThenExit:-0x2e]
+9154:    73 d2                  jmp [PressSpaceThenExit|-0x2e]
 
 L_9156:
 9156:    90 c0 00               ld A, #0xc000
@@ -135,7 +135,7 @@ L_9156:
 9162:    75 00                  jmp [A]
 
 PrintCtrlCToExit:
-9164:    7a 01 12               call @[WriteString:0x0112]
+9164:    7a 01 12               call @[WriteString|0x0112]
 9167:    "\r\n(CONTROL-C TO EXIT)\r\n\0"
 917f:    09                     ret
 
@@ -144,31 +144,31 @@ Init:
 9181:    b1 01 08               st A, [0x0108]
 9184:    90 01 e3               ld A, #0x01e3
 9187:    50 80                  add A, Z
-9189:    b1 01 18               st A, [Fn_1e3:0x0118]
+9189:    b1 01 18               st A, [Fn_1e3|0x0118]
 918c:    90 00 c5               ld A, #0x00c5
 918f:    50 80                  add A, Z
-9191:    b1 01 0a               st A, [WriteHexByte:0x010a]
+9191:    b1 01 0a               st A, [WriteHexByte|0x010a]
 9194:    90 02 86               ld A, #0x0286
 9197:    50 80                  add A, Z
-9199:    b1 01 0c               st A, [Fn_286:0x010c]
+9199:    b1 01 0c               st A, [Fn_286|0x010c]
 919c:    90 01 64               ld A, #0x0164
 919f:    50 80                  add A, Z
-91a1:    b1 01 06               st A, [PrintCtrlCToExit:0x0106]
+91a1:    b1 01 06               st A, [PrintCtrlCToExit|0x0106]
 91a4:    90 00 b0               ld A, #0x00b0
 91a7:    50 80                  add A, Z
-91a9:    b1 01 02               st A, [ReadChar:0x0102]
+91a9:    b1 01 02               st A, [ReadChar|0x0102]
 91ac:    90 00 9a               ld A, #0x009a
 91af:    50 80                  add A, Z
-91b1:    b1 01 12               st A, [WriteString:0x0112]
+91b1:    b1 01 12               st A, [WriteString|0x0112]
 91b4:    90 00 ba               ld A, #0x00ba
 91b7:    50 80                  add A, Z
-91b9:    b1 01 10               st A, [WriteHexWord:0x0110]
+91b9:    b1 01 10               st A, [WriteHexWord|0x0110]
 91bc:    90 00 f6               ld A, #0x00f6
 91bf:    50 80                  add A, Z
-91c1:    b1 01 04               st A, [FinishTest:0x0104]
+91c1:    b1 01 04               st A, [FinishTest|0x0104]
 91c4:    90 01 28               ld A, #0x0128
 91c7:    50 80                  add A, Z
-91c9:    b1 01 0e               st A, [PressSpaceThenExit:0x010e]
+91c9:    b1 01 0e               st A, [PressSpaceThenExit|0x010e]
 91cc:    55 80                  mov A, Z
 91ce:    b1 01 1a               st A, [0x011a]
 91d1:    95 41                  ld A, [X++]
@@ -181,7 +181,7 @@ Init:
 91e1:    75 00                  jmp [A]
 
 Fn_1e3:
-91e3:    7a 01 0c               call @[Fn_286:0x010c]
+91e3:    7a 01 0c               call @[Fn_286|0x010c]
 91e6:    6d a2                  st X, [--S]
 91e8:    60 03 e8               ld X, #0x03e8
 
@@ -193,11 +193,11 @@ L_91eb:
 91f3:    0e                     dly
 91f4:    3f                     dec X
 91f5:    15 f4                  bnz L_91eb
-91f7:    7a 01 12               call @[WriteString:0x0112]
+91f7:    7a 01 12               call @[WriteString|0x0112]
 91fa:    "*** BUSY DID NOT CLEAR ***\0"
 9215:    a1 f1 0b               st AL, [0xf10b]
 9218:    a1 f1 0c               st AL, [0xf10c]
-921b:    72 01 0e               jmp @[PressSpaceThenExit:0x010e]
+921b:    72 01 0e               jmp @[PressSpaceThenExit|0x010e]
 
 L_921e:
 921e:    60 03 e8               ld X, #0x03e8
@@ -208,11 +208,11 @@ L_9221:
 9224:    0e                     dly
 9225:    3f                     dec X
 9226:    15 f9                  bnz L_9221
-9228:    7a 01 12               call @[WriteString:0x0112]
+9228:    7a 01 12               call @[WriteString|0x0112]
 922b:    "*** FOUT NEVER CAME ON ***\0"
 9246:    a1 f1 0b               st AL, [0xf10b]
 9249:    a1 f1 0c               st AL, [0xf10c]
-924c:    72 01 0e               jmp @[PressSpaceThenExit:0x010e]
+924c:    72 01 0e               jmp @[PressSpaceThenExit|0x010e]
 
 L_924f:
 924f:    03                     rf
@@ -223,11 +223,11 @@ L_924f:
 
 L_9258:
 9258:    a5 a2                  st AL, [--S]
-925a:    7a 01 12               call @[WriteString:0x0112]
+925a:    7a 01 12               call @[WriteString|0x0112]
 925d:    "*** \0"
 9262:    85 a1                  ld AL, [S++]
-9264:    7a 01 0a               call @[WriteHexByte:0x010a]
-9267:    7a 01 12               call @[WriteString:0x0112]
+9264:    7a 01 0a               call @[WriteHexByte|0x010a]
+9267:    7a 01 12               call @[WriteString|0x0112]
 926a:    " ERROR ***\r\n\0"
 9277:    80 01                  ld AL, #0x01
 9279:    a1 01 08               st AL, [0x0108]
@@ -250,11 +250,11 @@ L_928c:
 9293:    0e                     dly
 9294:    3f                     dec X
 9295:    15 f5                  bnz L_928c
-9297:    7a 01 12               call @[WriteString:0x0112]
+9297:    7a 01 12               call @[WriteString|0x0112]
 929a:    "*** FIN DID NOT GO OFF ***\r\n\0"
 92b7:    a1 f1 0b               st AL, [0xf10b]
 92ba:    a1 f1 0c               st AL, [0xf10c]
-92bd:    72 01 0e               jmp @[PressSpaceThenExit:0x010e]
+92bd:    72 01 0e               jmp @[PressSpaceThenExit|0x010e]
 
 L_92c0:
 92c0:    65 a1                  ld X, [S++]
@@ -267,7 +267,7 @@ L_92c0:
 92c8:    7d
 92c9:    00
 92ca:    f8 08                  (0xf808)
-92cc:    73 09                  jmp [L_92d7:+0x9]
+92cc:    73 09                  jmp [L_92d7|+0x9]
 
 Entry_FLOPPY_COMMAND_BUFFER_TEST:
 92ce:    90 01 80               ld A, #0x0180
@@ -276,7 +276,7 @@ Entry_FLOPPY_COMMAND_BUFFER_TEST:
 92d5:    f8 00                  (0xf800)
 
 L_92d7:
-92d7:    7a 01 06               call @[PrintCtrlCToExit:0x0106]
+92d7:    7a 01 06               call @[PrintCtrlCToExit|0x0106]
 92da:    32 60                  clr Y, #0
 92dc:    60 00 c8               ld X, #0x00c8
 92df:    55 60                  mov A, Y
@@ -297,7 +297,7 @@ L_92e4:
 92f8:    2f 06                  enable_dma
 92fa:    80 43                  ld AL, #0x43
 92fc:    a2 01 14               st AL, @[0x0114]
-92ff:    7a 01 18               call @[Fn_1e3:0x0118]
+92ff:    7a 01 18               call @[Fn_1e3|0x0118]
 9302:    60 00 e6               ld X, #0x00e6
 9305:    3a                     clr! A, #0
 9306:    d0 01 1c               ld B, #0x011c
@@ -314,7 +314,7 @@ L_9309:
 931a:    2f 06                  enable_dma
 931c:    80 44                  ld AL, #0x44
 931e:    a2 01 14               st AL, @[0x0114]
-9321:    7a 01 18               call @[Fn_1e3:0x0118]
+9321:    7a 01 18               call @[Fn_1e3|0x0118]
 9324:    60 00 c8               ld X, #0x00c8
 9327:    d0 01 1c               ld B, #0x011c
 932a:    55 60                  mov A, Y
@@ -330,22 +330,22 @@ L_932e:
 933a:    3f                     dec X
 933b:    15 f1                  bnz L_932e
 933d:    20 70                  inc YL, #1
-933f:    7a 01 04               call @[FinishTest:0x0104]
+933f:    7a 01 04               call @[FinishTest|0x0104]
 9342:    02 da                  (0x2da)
 
 L_9344:
-9344:    7a 01 12               call @[WriteString:0x0112]
+9344:    7a 01 12               call @[WriteString|0x0112]
 9347:    "*** COMMAND BUFFER ERROR ***\0"
 9364:    a1 f1 0b               st AL, [0xf10b]
 9367:    a1 f1 0c               st AL, [0xf10c]
-936a:    72 01 0e               jmp @[PressSpaceThenExit:0x010e]
+936a:    72 01 0e               jmp @[PressSpaceThenExit|0x010e]
 
 Entry_CMD_AUX_MEMORY_TEST:
 936d:    90 01 80               ld A, #0x0180
 9370:    50 80                  add A, Z
 9372:    7d 00                  call [A]
 9374:    f8 08                  (0xf808)
-9376:    7a 01 06               call @[PrintCtrlCToExit:0x0106]
+9376:    7a 01 06               call @[PrintCtrlCToExit|0x0106]
 9379:    32 60                  clr Y, #0
 937b:    60 3f ff               ld X, #0x3fff
 937e:    55 60                  mov A, Y
@@ -366,19 +366,19 @@ L_9383:
 9397:    2f 06                  enable_dma
 9399:    80 46                  ld AL, #0x46
 939b:    a2 01 14               st AL, @[0x0114]
-939e:    7a 01 0c               call @[Fn_286:0x010c]
+939e:    7a 01 0c               call @[Fn_286|0x010c]
 93a1:    2a                     clr! AL, #0
 93a2:    a2 01 14               st AL, @[0x0114]
-93a5:    7a 01 0c               call @[Fn_286:0x010c]
+93a5:    7a 01 0c               call @[Fn_286|0x010c]
 93a8:    2a                     clr! AL, #0
 93a9:    a2 01 14               st AL, @[0x0114]
-93ac:    7a 01 0c               call @[Fn_286:0x010c]
+93ac:    7a 01 0c               call @[Fn_286|0x010c]
 93af:    80 3f                  ld AL, #0x3f
 93b1:    a2 01 14               st AL, @[0x0114]
-93b4:    7a 01 0c               call @[Fn_286:0x010c]
+93b4:    7a 01 0c               call @[Fn_286|0x010c]
 93b7:    80 ff                  ld AL, #0xff
 93b9:    a2 01 14               st AL, @[0x0114]
-93bc:    7a 01 18               call @[Fn_1e3:0x0118]
+93bc:    7a 01 18               call @[Fn_1e3|0x0118]
 93bf:    60 3f ff               ld X, #0x3fff
 93c2:    3a                     clr! A, #0
 93c3:    d0 01 1c               ld B, #0x011c
@@ -395,19 +395,19 @@ L_93c6:
 93d7:    2f 06                  enable_dma
 93d9:    80 47                  ld AL, #0x47
 93db:    a2 01 14               st AL, @[0x0114]
-93de:    7a 01 0c               call @[Fn_286:0x010c]
+93de:    7a 01 0c               call @[Fn_286|0x010c]
 93e1:    2a                     clr! AL, #0
 93e2:    a2 01 14               st AL, @[0x0114]
-93e5:    7a 01 0c               call @[Fn_286:0x010c]
+93e5:    7a 01 0c               call @[Fn_286|0x010c]
 93e8:    2a                     clr! AL, #0
 93e9:    a2 01 14               st AL, @[0x0114]
-93ec:    7a 01 0c               call @[Fn_286:0x010c]
+93ec:    7a 01 0c               call @[Fn_286|0x010c]
 93ef:    80 3f                  ld AL, #0x3f
 93f1:    a2 01 14               st AL, @[0x0114]
-93f4:    7a 01 0c               call @[Fn_286:0x010c]
+93f4:    7a 01 0c               call @[Fn_286|0x010c]
 93f7:    80 ff                  ld AL, #0xff
 93f9:    a2 01 14               st AL, @[0x0114]
-93fc:    7a 01 18               call @[Fn_1e3:0x0118]
+93fc:    7a 01 18               call @[Fn_1e3|0x0118]
 93ff:    b5 a2                  st A, [--S]
 9401:    60 3f ff               ld X, #0x3fff
 9404:    d0 01 1c               ld B, #0x011c
@@ -426,36 +426,36 @@ L_940b:
 9419:    15 f0                  bnz L_940b
 941b:    95 a1                  ld A, [S++]
 941d:    20 70                  inc YL, #1
-941f:    7a 01 04               call @[FinishTest:0x0104]
+941f:    7a 01 04               call @[FinishTest|0x0104]
 9422:    03 79                  (0x379)
 
 L_9424:
 9424:    a1 f1 0b               st AL, [0xf10b]
 9427:    a1 f1 0c               st AL, [0xf10c]
 942a:    f5 a2                  st B, [--S]
-942c:    7a 01 12               call @[WriteString:0x0112]
+942c:    7a 01 12               call @[WriteString|0x0112]
 942f:    "*** ERROR, ADDR=\0"
 9440:    95 a1                  ld A, [S++]
 9442:    39                     dec! A, #1
-9443:    7a 01 10               call @[WriteHexWord:0x0110]
-9446:    7a 01 12               call @[WriteString:0x0112]
+9443:    7a 01 10               call @[WriteHexWord|0x0110]
+9446:    7a 01 12               call @[WriteString|0x0112]
 9449:    " EXP=\0"
 944f:    85 a1                  ld AL, [S++]
-9451:    7a 01 0a               call @[WriteHexByte:0x010a]
-9454:    7a 01 12               call @[WriteString:0x0112]
+9451:    7a 01 0a               call @[WriteHexByte|0x010a]
+9454:    7a 01 12               call @[WriteString|0x0112]
 9457:    " ACT=\0"
 945d:    85 a1                  ld AL, [S++]
-945f:    7a 01 0a               call @[WriteHexByte:0x010a]
-9462:    7a 01 12               call @[WriteString:0x0112]
+945f:    7a 01 0a               call @[WriteHexByte|0x010a]
+9462:    7a 01 12               call @[WriteString|0x0112]
 9465:    " ***\0"
-946a:    72 01 0e               jmp @[PressSpaceThenExit:0x010e]
+946a:    72 01 0e               jmp @[PressSpaceThenExit|0x010e]
 
 Entry_CMD_SEEK_TEST:
 946d:    90 01 80               ld A, #0x0180
 9470:    50 80                  add A, Z
 9472:    7d 00                  call [A]
 9474:    f8 08                  (0xf808)
-9476:    7a 01 06               call @[PrintCtrlCToExit:0x0106]
+9476:    7a 01 06               call @[PrintCtrlCToExit|0x0106]
 9479:    d0 41 4d               ld B, #0x414d
 947c:    90 81 00               ld A, #0x8100
 947f:    b5 21                  st A, [B++]
@@ -469,18 +469,18 @@ Entry_CMD_SEEK_TEST:
 9491:    2f 06                  enable_dma
 9493:    80 43                  ld AL, #0x43
 9495:    a2 01 14               st AL, @[0x0114]
-9498:    7a 01 18               call @[Fn_1e3:0x0118]
+9498:    7a 01 18               call @[Fn_1e3|0x0118]
 949b:    13 09                  bnn L_94a6
 
 L_949d:
 949d:    a1 f1 0b               st AL, [0xf10b]
 94a0:    a1 f1 0c               st AL, [0xf10c]
-94a3:    72 01 0e               jmp @[PressSpaceThenExit:0x010e]
+94a3:    72 01 0e               jmp @[PressSpaceThenExit|0x010e]
 
 L_94a6:
 94a6:    80 45                  ld AL, #0x45
 94a8:    a2 01 14               st AL, @[0x0114]
-94ab:    7a 01 18               call @[Fn_1e3:0x0118]
+94ab:    7a 01 18               call @[Fn_1e3|0x0118]
 94ae:    12 ed                  bn L_949d
 94b0:    d0 41 4f               ld B, #0x414f
 94b3:    90 84 00               ld A, #0x8400
@@ -504,17 +504,17 @@ L_94c6:
 94d2:    2f 06                  enable_dma
 94d4:    80 43                  ld AL, #0x43
 94d6:    a2 01 14               st AL, @[0x0114]
-94d9:    7a 01 18               call @[Fn_1e3:0x0118]
+94d9:    7a 01 18               call @[Fn_1e3|0x0118]
 94dc:    12 bf                  bn L_949d
 94de:    80 45                  ld AL, #0x45
 94e0:    a2 01 14               st AL, @[0x0114]
-94e3:    7a 01 18               call @[Fn_1e3:0x0118]
+94e3:    7a 01 18               call @[Fn_1e3|0x0118]
 94e6:    13 1c                  bnn L_9504
-94e8:    7a 01 12               call @[WriteString:0x0112]
+94e8:    7a 01 12               call @[WriteString|0x0112]
 94eb:    "TRACK=\0"
 94f2:    91 41 52               ld A, [0x4152]
-94f5:    7a 01 10               call @[WriteHexWord:0x0110]
-94f8:    7a 01 12               call @[WriteString:0x0112]
+94f5:    7a 01 10               call @[WriteHexWord|0x0110]
+94f8:    7a 01 12               call @[WriteString|0x0112]
 94fb:    "\r\n\0"
 94fe:    a1 f1 0b               st AL, [0xf10b]
 9501:    a1 f1 0c               st AL, [0xf10c]
@@ -533,14 +533,14 @@ L_9504:
 9519:    b1 41 b1               st A, [0x41b1]
 951c:    80 10                  ld AL, #0x10
 951e:    a1 41 50               st AL, [0x4150]
-9521:    73 a3                  jmp [L_94c6:-0x5d]
+9521:    73 a3                  jmp [L_94c6|-0x5d]
 
 L_9523:
 9523:    91 41 52               ld A, [0x4152]
 9526:    39                     dec! A, #1
 9527:    b1 41 52               st A, [0x4152]
 952a:    17 9a                  bp L_94c6
-952c:    7a 01 04               call @[FinishTest:0x0104]
+952c:    7a 01 04               call @[FinishTest|0x0104]
 952f:    04 79                  (0x479)
 
 Entry_CMD_READ_TEST:
@@ -548,16 +548,16 @@ Entry_CMD_READ_TEST:
 9534:    50 80                  add A, Z
 9536:    7d 00                  call [A]
 9538:    f8 08                  (0xf808)
-953a:    7a 01 06               call @[PrintCtrlCToExit:0x0106]
+953a:    7a 01 06               call @[PrintCtrlCToExit|0x0106]
 953d:    80 41                  ld AL, #0x41
 953f:    a2 01 14               st AL, @[0x0114]
-9542:    7a 01 0c               call @[Fn_286:0x010c]
+9542:    7a 01 0c               call @[Fn_286|0x010c]
 9545:    2a                     clr! AL, #0
 9546:    a2 01 14               st AL, @[0x0114]
-9549:    7a 01 0c               call @[Fn_286:0x010c]
+9549:    7a 01 0c               call @[Fn_286|0x010c]
 954c:    2a                     clr! AL, #0
 954d:    a2 01 14               st AL, @[0x0114]
-9550:    7a 01 18               call @[Fn_1e3:0x0118]
+9550:    7a 01 18               call @[Fn_1e3|0x0118]
 9553:    12 44                  bn L_9599
 9555:    90 41 4d               ld A, #0x414d
 9558:    5c                     mov Y, A
@@ -592,13 +592,13 @@ L_9581:
 958d:    2f 06                  enable_dma
 958f:    80 43                  ld AL, #0x43
 9591:    a2 01 14               st AL, @[0x0114]
-9594:    7a 01 18               call @[Fn_1e3:0x0118]
+9594:    7a 01 18               call @[Fn_1e3|0x0118]
 9597:    13 09                  bnn L_95a2
 
 L_9599:
 9599:    a1 f1 0b               st AL, [0xf10b]
 959c:    a1 f1 0c               st AL, [0xf10c]
-959f:    72 01 0e               jmp @[PressSpaceThenExit:0x010e]
+959f:    72 01 0e               jmp @[PressSpaceThenExit|0x010e]
 
 L_95a2:
 95a2:    90 e6 ff               ld A, #0xe6ff
@@ -609,13 +609,13 @@ L_95a2:
 95ae:    2f 06                  enable_dma
 95b0:    80 45                  ld AL, #0x45
 95b2:    a2 01 14               st AL, @[0x0114]
-95b5:    7a 01 18               call @[Fn_1e3:0x0118]
+95b5:    7a 01 18               call @[Fn_1e3|0x0118]
 95b8:    13 16                  bnn L_95d0
-95ba:    7a 01 12               call @[WriteString:0x0112]
+95ba:    7a 01 12               call @[WriteString|0x0112]
 95bd:    "TRACK=\0"
 95c4:    91 41 52               ld A, [0x4152]
-95c7:    7a 01 10               call @[WriteHexWord:0x0110]
-95ca:    7a 01 12               call @[WriteString:0x0112]
+95c7:    7a 01 10               call @[WriteHexWord|0x0110]
+95ca:    7a 01 12               call @[WriteString|0x0112]
 95cd:    "\r\n\0"
 
 L_95d0:
@@ -630,7 +630,7 @@ L_95d6:
 95dd:    59                     sub! B, A
 95de:    19 a1                  ble L_9581
 95e0:    a1 f1 0a               st AL, [0xf10a]
-95e3:    7a 01 04               call @[FinishTest:0x0104]
+95e3:    7a 01 04               call @[FinishTest|0x0104]
 95e6:    05 3d                  (0x53d)
 
 Entry_FLOPPY_SEEK_TEST:
@@ -642,7 +642,7 @@ Entry_FLOPPY_SEEK_TEST:
 95eb:    50 80                  add A, Z
 95ed:    7d 00                  call [A]	 ; Init
 95ef:    f8 00                  (0xf800)	 ; FFC_BASE
-95f1:    7a 01 06               call @[PrintCtrlCToExit:0x0106]
+95f1:    7a 01 06               call @[PrintCtrlCToExit|0x0106]
 95f4:    d0 41 4d               ld B, #0x414d
 95f7:    90 81 01               ld A, #0x8101	 ; Unit number 1 ???
 95fa:    b5 21                  st A, [B++]
@@ -656,18 +656,18 @@ Entry_FLOPPY_SEEK_TEST:
 960b:    2f 06                  enable_dma
 960d:    80 43                  ld AL, #0x43
 960f:    a2 01 14               st AL, @[0x0114]
-9612:    7a 01 18               call @[Fn_1e3:0x0118]
+9612:    7a 01 18               call @[Fn_1e3|0x0118]
 9615:    13 09                  bnn L_9620
 
 L_9617:
 9617:    a1 f1 0b               st AL, [0xf10b]
 961a:    a1 f1 0c               st AL, [0xf10c]
-961d:    72 01 0e               jmp @[PressSpaceThenExit:0x010e]
+961d:    72 01 0e               jmp @[PressSpaceThenExit|0x010e]
 
 L_9620:
 9620:    80 45                  ld AL, #0x45
 9622:    a2 01 14               st AL, @[0x0114]
-9625:    7a 01 18               call @[Fn_1e3:0x0118]
+9625:    7a 01 18               call @[Fn_1e3|0x0118]
 9628:    12 ed                  bn L_9617
 962a:    d0 41 4f               ld B, #0x414f
 962d:    90 83 01               ld A, #0x8301
@@ -684,17 +684,17 @@ L_9636:
 9642:    2f 06                  enable_dma
 9644:    80 43                  ld AL, #0x43
 9646:    a2 01 14               st AL, @[0x0114]
-9649:    7a 01 18               call @[Fn_1e3:0x0118]
+9649:    7a 01 18               call @[Fn_1e3|0x0118]
 964c:    12 c9                  bn L_9617
 964e:    80 45                  ld AL, #0x45
 9650:    a2 01 14               st AL, @[0x0114]
-9653:    7a 01 18               call @[Fn_1e3:0x0118]
+9653:    7a 01 18               call @[Fn_1e3|0x0118]
 9656:    13 1c                  bnn L_9674
-9658:    7a 01 12               call @[WriteString:0x0112]
+9658:    7a 01 12               call @[WriteString|0x0112]
 965b:    "TRACK=\0"
 9662:    81 41 50               ld AL, [0x4150]
-9665:    7a 01 0a               call @[WriteHexByte:0x010a]
-9668:    7a 01 12               call @[WriteString:0x0112]
+9665:    7a 01 0a               call @[WriteHexByte|0x010a]
+9668:    7a 01 12               call @[WriteString|0x0112]
 966b:    "\r\n\0"
 966e:    a1 f1 0b               st AL, [0xf10b]
 9671:    a1 f1 0c               st AL, [0xf10c]
@@ -710,14 +710,14 @@ L_9674:
 9684:    15 b0                  bnz L_9636
 9686:    80 ff                  ld AL, #0xff	 ; -1 track per step, going backwards
 9688:    a1 41 b1               st AL, [0x41b1]
-968b:    73 a9                  jmp [L_9636:-0x57]
+968b:    73 a9                  jmp [L_9636|-0x57]
 
 L_968d:
 968d:    81 41 50               ld AL, [0x4150]
 9690:    29                     dec! AL, #1
 9691:    a1 41 50               st AL, [0x4150]
 9694:    17 a0                  bp L_9636
-9696:    7a 01 04               call @[FinishTest:0x0104]
+9696:    7a 01 04               call @[FinishTest|0x0104]
 9699:    05 f4                  (0x5f4)
 
 Entry_FLOPPY_READ_TEST:
@@ -728,16 +728,16 @@ Entry_FLOPPY_READ_TEST:
     ; Init
 96a2:    f8 00                  (0xf800)	 ; FFC_BASE
     ; Restart point is here
-96a4:    7a 01 06               call @[PrintCtrlCToExit:0x0106]	 ; PrintCtrlCToExit
+96a4:    7a 01 06               call @[PrintCtrlCToExit|0x0106]	 ; PrintCtrlCToExit
 96a7:    80 41                  ld AL, #0x41
 96a9:    a2 01 14               st AL, @[0x0114]
-96ac:    7a 01 0c               call @[Fn_286:0x010c]
+96ac:    7a 01 0c               call @[Fn_286|0x010c]
 96af:    2a                     clr! AL, #0
 96b0:    a2 01 14               st AL, @[0x0114]
-96b3:    7a 01 0c               call @[Fn_286:0x010c]
+96b3:    7a 01 0c               call @[Fn_286|0x010c]
 96b6:    2a                     clr! AL, #0
 96b7:    a2 01 14               st AL, @[0x0114]
-96ba:    7a 01 18               call @[Fn_1e3:0x0118]
+96ba:    7a 01 18               call @[Fn_1e3|0x0118]
 96bd:    12 3d                  bn L_96fc
 96bf:    90 41 4d               ld A, #0x414d
 96c2:    5c                     mov Y, A
@@ -768,13 +768,13 @@ L_96e4:
 96f0:    2f 06                  enable_dma
 96f2:    80 43                  ld AL, #0x43
 96f4:    a2 01 14               st AL, @[0x0114]
-96f7:    7a 01 18               call @[Fn_1e3:0x0118]
+96f7:    7a 01 18               call @[Fn_1e3|0x0118]
 96fa:    13 09                  bnn L_9705
 
 L_96fc:
 96fc:    a1 f1 0b               st AL, [0xf10b]
 96ff:    a1 f1 0c               st AL, [0xf10c]
-9702:    72 01 0e               jmp @[PressSpaceThenExit:0x010e]
+9702:    72 01 0e               jmp @[PressSpaceThenExit|0x010e]
 
 L_9705:
 9705:    90 e6 ff               ld A, #0xe6ff	 ; 6400 bytes = 16 sectors * 400 bytes
@@ -785,13 +785,13 @@ L_9705:
 9711:    2f 06                  enable_dma
 9713:    80 45                  ld AL, #0x45
 9715:    a2 01 14               st AL, @[0x0114]
-9718:    7a 01 18               call @[Fn_1e3:0x0118]
+9718:    7a 01 18               call @[Fn_1e3|0x0118]
 971b:    13 16                  bnn L_9733
-971d:    7a 01 12               call @[WriteString:0x0112]
+971d:    7a 01 12               call @[WriteString|0x0112]
 9720:    "TRACK=\0"
 9727:    81 41 50               ld AL, [0x4150]	 ; track number
-972a:    7a 01 0a               call @[WriteHexByte:0x010a]
-972d:    7a 01 12               call @[WriteString:0x0112]
+972a:    7a 01 0a               call @[WriteHexByte|0x010a]
+972d:    7a 01 12               call @[WriteString|0x0112]
 9730:    "\r\n\0"
 
 L_9733:
@@ -802,7 +802,7 @@ L_9733:
 973c:    49                     sub! BL, AL
 973d:    19 a5                  ble L_96e4
 973f:    a1 f1 0a               st AL, [0xf10a]
-9742:    7a 01 04               call @[FinishTest:0x0104]	 ; FinishTest
+9742:    7a 01 04               call @[FinishTest|0x0104]	 ; FinishTest
 9745:    06 a7                  (0x6a7)	 ; Restart point = 0x96a7
 
 Entry_ROM_SELF_TEST:
@@ -824,17 +824,17 @@ L_9753:
 9760:    8b                     ld AL, [Y]
 9761:    41 01                  sub AL, AH
 9763:    15 18                  bnz L_977d
-9765:    7a 01 12               call @[WriteString:0x0112]
+9765:    7a 01 12               call @[WriteString|0x0112]
 9768:    "\n\r*** PASS ***\0"
 9777:    a1 f1 0a               st AL, [0xf10a]
-977a:    72 01 0e               jmp @[PressSpaceThenExit:0x010e]
+977a:    72 01 0e               jmp @[PressSpaceThenExit|0x010e]
 
 L_977d:
-977d:    7a 01 12               call @[WriteString:0x0112]
+977d:    7a 01 12               call @[WriteString|0x0112]
 9780:    "*** FAIL ***\0"
 978d:    a1 f1 0b               st AL, [0xf10b]
 9790:    a1 f1 0c               st AL, [0xf10c]
-9793:    72 01 0e               jmp @[PressSpaceThenExit:0x010e]
+9793:    72 01 0e               jmp @[PressSpaceThenExit|0x010e]
 9796:    8c	 ; Checksum byte
 9797:    00
 9798:    00
