@@ -1085,7 +1085,7 @@ L_8053:
 R_805a:
 805a:    b3 14                  st A, [pc + 0x14]
 805c:    91 01 03               ld A, [0x0103]
-805f:    2e 0d f8 00 36         wpf #0xf8, [B + Y]
+805f:    2e 0d f8 00 36         wpf #0xf8, [A + 0x0036]
 8064:    3a                     clr! A, #0
 8065:    7e 01                  push
 8067:    7e 41                  push
@@ -1100,7 +1100,7 @@ R_806f:
 L_8073:
 8073:    b3 1b                  st A, [pc + 0x1b]
 8075:    91 01 03               ld A, [0x0103]
-8078:    2e 0d fb 00 36         wpf #0xfb, [B + Y]
+8078:    2e 0d fb 00 36         wpf #0xfb, [A + 0x0036]
 807d:    2e 0c 7b 01 81         wpf #0x7b, [0x0181]
 8082:    90 00 03               ld A, #0x0003
 8085:    7e 01                  push
@@ -1367,8 +1367,9 @@ L_8418:
 8421:    d1 01 03               ld B, [0x0103]
 8424:    b5 28 5a               st A, [B + 0x005a]
 8427:    91 01 5a               ld A, [0x015a]
-842a:    2e 4d 87 20 46         wpf32 #0x87, [X + Y + 0x0020]
-842f:    2e 0e 7f 00            wpf #0x7f, [A]
+842a:    2e 4d 87 20 46 2e      wpf32 #0x87, [B + 0x462e]
+8430:    0e                     dly
+8431:    7f 00                  pop
 8433:    6d a8 01               st X, [S + 0x0001]
 8436:    91 01 58               ld A, [0x0158]
 8439:    14 dd                  bz L_8418
@@ -1584,13 +1585,13 @@ L_8580:
 8580:    e5 88 13               st BL, [Z + 0x0013]
 8583:    2a                     clr! AL, #0
 8584:    a1 01 25               st AL, [0x0125]
-8587:    47 5d 00 fb 80 00      unkblk5 #0x01, #0xfb, [A + -0x080]
+8587:    47 5d 00 fb 80 00      unkblk5 #0x01, #0xfb, [Z]
 858d:    d5 88 08               ld B, [Z + 0x0008]
 8590:    85 28 13               ld AL, [B + 0x0013]
 8593:    2d                     sll! AL, #1
 8594:    2c                     srl! AL, #1
 8595:    a5 28 13               st AL, [B + 0x0013]
-8598:    2e 0d f8 80 36         wpf #0xf8, [B + Y + -0x080]
+8598:    2e 0d f8 80 36         wpf #0xf8, [Z + 0x0036]
 859d:    55 ba 81 bc            mov S, S, #0x81bc
 85a1:    79 84 5a               call [R_845a:0x845a]
 85a4:    8c                     ld AL, [Z]
@@ -1835,16 +1836,16 @@ R_86f1:
 86f4:    ff                     st B, [P]
 
 R_86f5:
-86f5:    47 41 0f 01 61 80 36   memcpy #0x10, [0x0161], [B + Y + -0x080]
-86fc:    2e 0d f8 80 36         wpf #0xf8, [B + Y + -0x080]
-8701:    2e 0d fb 80 36         wpf #0xfb, [B + Y + -0x080]
+86f5:    47 41 0f 01 61 80 36   memcpy #0x10, [0x0161], [Z + 0x0036]
+86fc:    2e 0d f8 80 36         wpf #0xf8, [Z + 0x0036]
+8701:    2e 0d fb 80 36         wpf #0xfb, [Z + 0x0036]
 8706:    2e 0c 7b 01 81         wpf #0x7b, [0x0181]
-870b:    2e 0d fd 80 36         wpf #0xfd, [B + Y + -0x080]
-8710:    2e 4d 84 80 46         wpf32 #0x84, [X + Y + -0x080]
+870b:    2e 0d fd 80 36         wpf #0xfd, [Z + 0x0036]
+8710:    2e 4d 84 80 46         wpf32 #0x84, [Z + 0x0046]
 8715:    91 01 39               ld A, [0x0139]
 8718:    14 0c                  bz L_8726
 871a:    91 01 56               ld A, [0x0156]
-871d:    2e 4d 86 80 46         wpf32 #0x86, [X + Y + -0x080]
+871d:    2e 4d 86 80 46         wpf32 #0x86, [Z + 0x0046]
 8722:    2e 0e 7e 00            wpf #0x7e, [A]
 
 L_8726:
@@ -2337,8 +2338,11 @@ L_8a0f:
 8a1a:    9d                     ld A, [S]
 8a1b:    b9                     st A, [B]
 8a1c:    d3 0f                  ld B, [pc + 0x0f]
-8a1e:    47 45 18 20 02 00 02   memcpy #0x19, [A + B + 0x0020], [A + B]
-8a25:    47 9d 00 7e 00 ff      memset #0x01, #0x7e, [P + P]
+8a1e:    47 45 18 20 02 00 02 47 memcpy #0x19, [B + 0x0200], [A + B + 0x0047]
+8a26:    9d                     ld A, [S]
+8a27:    00                     HALT
+8a28:    7e 00                  push
+8a2a:    ff                     st B, [P]
 8a2b:    66 17                  jsys 17
 8a2d:    00                     HALT
 8a2e:    00                     HALT
@@ -3513,7 +3517,7 @@ R_915f:
 
 L_916d:
 916d:    61 92 4f               ld X, [R_924f:0x924f]
-9170:    47 44 02 40 0d 92 53   memcpy #0x03, [A + C + 0x0040], [R_9253:0x9253]
+9170:    47 44 02 40 0d 92 53   memcpy #0x03, [X + 0x000d], [R_9253:0x9253]
 9177:    90 00 00               ld A, #0x0000
 917a:    16 1f                  blt L_919b
 917c:    b1 92 4d               st A, [R_924d:0x924d]
@@ -4075,19 +4079,19 @@ Syscall_4e:
 
 Syscall_49:
 94f1:    79 95 92               call [R_9592:0x9592]
-94f4:    46 77 59 20 00 29      unkbig5(7, 7) [B + Z], [B]
+94f4:    46 77 59 20 00 29      unkbig5(7, 7) [A + 0x0029], [B]
 94fa:    12 70                  bn R_956c
 94fc:    0f                     rsys
 
 Syscall_41:
 94fd:    79 95 92               call [R_9592:0x9592]
-9500:    46 57 59 20 00 29      unkbig5(7, 5) [B + Z], [B]
+9500:    46 57 59 20 00 29      unkbig5(7, 5) [A + 0x0029], [B]
 9506:    12 64                  bn R_956c
 9508:    0f                     rsys
 
 Syscall_24:
 9509:    79 95 a0               call [R_95a0:0x95a0]
-950c:    46 37 59 20 00 29      unkbig5(7, 3) [B + Z], [B]
+950c:    46 37 59 20 00 29      unkbig5(7, 3) [A + 0x0029], [B]
 9512:    12 58                  bn R_956c
 9514:    0f                     rsys
 
@@ -4095,8 +4099,8 @@ Syscall_4a:
 9515:    7b 7b                  call [R_9592:+0x7b]
 9517:    5c                     mov Y, A
 9518:    90 95 c3               ld A, #0x95c3
-951b:    46 77 79 20 60 29      unkbig7(7, 7) [B + Z + 0x0060], [B]
-9521:    12 49                  bn R_956c
+951b:    46 77 79 20 60 29 12   unkbig7(7, 7) [Y + 0x2912], [B]
+9522:    49                     sub! BL, AL
 9523:    55 67 95 c9            mov Y, Y, [R_95c9:0x95c9]
 9527:    0f                     rsys
 
@@ -4104,35 +4108,36 @@ Syscall_42:
 9528:    7b 68                  call [R_9592:+0x68]
 952a:    5c                     mov Y, A
 952b:    93 ec                  ld A, [pc + -0x14]
-952d:    46 57 79 20 60 29      unkbig7(7, 5) [B + Z + 0x0060], [B]
-9533:    12 37                  bn R_956c
-9535:    55 67 95 c7            mov Y, Y, [R_95c7:0x95c7]
+952d:    46 57 79 20 60 29 12   unkbig7(7, 5) [Y + 0x2912], [B]
+9534:    37 55 67 95            rlc [X + [0x6795]], #6
+9538:    c7                     unknown
 9539:    0f                     rsys
 
 Syscall_25:
 953a:    7b 64                  call [R_95a0:+0x64]
 953c:    5c                     mov Y, A
 953d:    93 da                  ld A, [pc + -0x26]
-953f:    46 37 79 20 60 29      unkbig7(7, 3) [B + Z + 0x0060], [B]
-9545:    12 25                  bn R_956c
-9547:    55 67 95 c5            mov Y, Y, [R_95c5:0x95c5]
+953f:    46 37 79 20 60 29 12   unkbig7(7, 3) [Y + 0x2912], [B]
+9546:    25 55                  sll XL, #6
+9548:    67                     unknown
+9549:    95 c5                  ld A, @[C++]
 954b:    0f                     rsys
 
 Syscall_47:
 954c:    7b 44                  call [R_9592:+0x44]
-954e:    46 77 09 20 00 29      addbig(7, 7) [B + Z], [B]
+954e:    46 77 09 20 00 29      addbig(7, 7) [A + 0x0029], [B]
 9554:    12 16                  bn R_956c
 9556:    0f                     rsys
 
 Syscall_3d:
 9557:    7b 39                  call [R_9592:+0x39]
-9559:    46 57 09 20 00 29      addbig(7, 5) [B + Z], [B]
+9559:    46 57 09 20 00 29      addbig(7, 5) [A + 0x0029], [B]
 955f:    12 0b                  bn R_956c
 9561:    0f                     rsys
 
 Syscall_20:
 9562:    7b 3c                  call [R_95a0:+0x3c]
-9564:    46 37 09 20 00 29      addbig(7, 3) [B + Z], [B]
+9564:    46 37 09 20 00 29      addbig(7, 3) [A + 0x0029], [B]
 956a:    13 04                  bnn L_9570
 
 R_956c:
@@ -4144,19 +4149,19 @@ L_9570:
 
 Syscall_48:
 9571:    7b 1f                  call [R_9592:+0x1f]
-9573:    46 77 19 20 00 29      subbig(7, 7) [B + Z], [B]
+9573:    46 77 19 20 00 29      subbig(7, 7) [A + 0x0029], [B]
 9579:    12 f1                  bn R_956c
 957b:    0f                     rsys
 
 Syscall_3f:
 957c:    7b 14                  call [R_9592:+0x14]
-957e:    46 57 19 20 00 29      subbig(7, 5) [B + Z], [B]
+957e:    46 57 19 20 00 29      subbig(7, 5) [A + 0x0029], [B]
 9584:    12 e6                  bn R_956c
 9586:    0f                     rsys
 
 Syscall_22:
 9587:    7b 17                  call [R_95a0:+0x17]
-9589:    46 37 19 20 00 29      subbig(7, 3) [B + Z], [B]
+9589:    46 37 19 20 00 29      subbig(7, 3) [A + 0x0029], [B]
 958f:    12 db                  bn R_956c
 9591:    0f                     rsys
 
@@ -4209,31 +4214,31 @@ R_95c9:
 
 Syscall_45:
 95cb:    7b c5                  call [R_9592:-0x3b]
-95cd:    46 77 39 20 00 29      unkbig3(7, 7) [B + Z], [B]
+95cd:    46 77 39 20 00 29      unkbig3(7, 7) [A + 0x0029], [B]
 95d3:    0f                     rsys
 
 Syscall_3b:
 95d4:    79 99 21               call [R_9921:0x9921]
 95d7:    00                     HALT
 95d8:    7b b8                  call [R_9592:-0x48]
-95da:    46 57 39 20 00 29      unkbig3(7, 5) [B + Z], [B]
+95da:    46 57 39 20 00 29      unkbig3(7, 5) [A + 0x0029], [B]
 95e0:    0f                     rsys
 
 Syscall_1e:
 95e1:    79 99 21               call [R_9921:0x9921]
 95e4:    00                     HALT
 95e5:    7b b9                  call [R_95a0:-0x47]
-95e7:    46 37 39 20 00 29      unkbig3(7, 3) [B + Z], [B]
+95e7:    46 37 39 20 00 29      unkbig3(7, 3) [A + 0x0029], [B]
 95ed:    0f                     rsys
 
 Syscall_46:
 95ee:    7b a2                  call [R_9592:-0x5e]
-95f0:    46 77 36 00 29 02      unkbig3(7, 7) [B], [B + Z]
+95f0:    46 77 36 00 29 02      unkbig3(7, 7) [B], [A + 0x0029]
 95f6:    0f                     rsys
 
 Syscall_3c:
 95f7:    7b 99                  call [R_9592:-0x67]
-95f9:    46 75 36 00 29 02      unkbig3(5, 7) [B], [B + Z]
+95f9:    46 75 36 00 29 02      unkbig3(5, 7) [B], [A + 0x0029]
 95ff:    13 03                  bnn L_9604
 
 L_9601:
@@ -4244,7 +4249,7 @@ L_9604:
 
 Syscall_1f:
 9605:    7b 8b                  call [R_9592:-0x75]
-9607:    46 73 36 00 29 02      unkbig3(3, 7) [B], [B + Z]
+9607:    46 73 36 00 29 02      unkbig3(3, 7) [B], [A + 0x0029]
 960d:    12 f2                  bn L_9601
 960f:    0f                     rsys
 
@@ -6013,7 +6018,7 @@ a00e:    15 20                  bnz L_a030
 a010:    95 88 1a               ld A, [Z + 0x001a]
 a013:    46 35 38 00 a0 01      unkbig3(5, 3) [R_a001:0xa001], [A]
 a019:    16 67                  blt L_a082
-a01b:    46 15 54 80 1c a0 01   unkbig5(5, 1) [R_a001:0xa001], [A + C + -0x080]
+a01b:    46 15 54 80 1c a0 01   unkbig5(5, 1) [R_a001:0xa001], [Z + 0x001c]
 a022:    12 5e                  bn L_a082
 a024:    90 a0 07               ld A, #0xa007
 a027:    46 15 7c 01 90 a0      unkbig7(5, 1) [0x90a0], #0x01
@@ -6037,7 +6042,7 @@ a049:    a0 ' '
 L_a04a:
 a04a:    07                     rl
 a04b:    46 15 70 a0 07 a0 01   unkbig7(5, 1) [R_a001:0xa001], [R_a007:0xa007]
-a052:    46 11 54 80 1c a0 07   unkbig5(1, 1) [R_a007:0xa007], [A + C + -0x080]
+a052:    46 11 54 80 1c a0 07   unkbig5(1, 1) [R_a007:0xa007], [Z + 0x001c]
 a059:    12 27                  bn L_a082
 
 L_a05b:
@@ -6098,7 +6103,7 @@ a0a5:    7b f7                  call [L_a09e:-0x9]
 a0a7:    73 c3                  jmp [L_a06c:-0x3d]
 
 R_a0a9:
-a0a9:    46 11 2d 01 90 80      unkbig2(1, 1) [Z + -0x070], #0x01
+a0a9:    46 11 2d 01 90 80      unkbig2(1, 1) [Z + -0x080], #0x01
 a0af:    04                     ei
 a0b0:    11 06                  bnc L_a0b8
 a0b2:    85 88 03               ld AL, [Z + 0x0003]
@@ -6653,18 +6658,16 @@ a3ae:    00
 a3af:    00
 a3b0:    a2 '"'
 a3b1:    a6 '&'
-a3b2:    a2 '"'
-a3b3:    b7 '7'
-a3b4:    a2 '"'
-a3b5:    c5 'E'
-a3b6:    00
-a3b7:    00
-a3b8:    00
-a3b9:    00
-a3ba:    9c
-a3bb:    6c
-a3bc:    9c
-a3bd:    39
+
+L_a3b2:
+a3b2:    a2 b7 a2               st AL, @[0xb7a2]
+a3b5:    c5 00                  ld BL, [A]
+a3b7:    00                     HALT
+a3b8:    00                     HALT
+a3b9:    00                     HALT
+a3ba:    9c                     ld A, [Z]
+a3bb:    6c 9c                  st X, @[R_a359:-0x64]
+a3bd:    39                     dec! A, #1
 a3be:    a2 '"'
 a3bf:    9a
 
@@ -6725,140 +6728,348 @@ a3fa:    55 60                  mov A, Y
 a3fc:    79 a2 db               call [R_a2db:0xa2db]
 a3ff:    b5 a2                  st A, [--S]
 a401:    79 a6 59               call [R_a659:0xa659]
-a404:    47 9d 02 00 60 27      memset #0x03, #0x00, [B + Y + 0x0060]
-a40a:    22 11                  clr AL, #1
-a40c:    a5 68 30               st AL, [Y + 0x0030]
-a40f:    79 a8 0b               call [R_a80b:0xa80b]
-a412:    9d                     ld A, [S]
-a413:    79 a6 eb               call [R_a6eb:0xa6eb]
-a416:    47 41 02 a8 6c 60 2d   memcpy #0x03, [R_a86c:0xa86c], [B + C + 0x0060]
-a41d:    47 45 02 60 24 60 2a   memcpy #0x03, [B + X + 0x0060], [B + S + 0x0060]
-a424:    79 a7 b6               call [R_a7b6:0xa7b6]
-a427:    46 02 2d 00 60 38      unkbig2(2, 0) [B + Z + 0x0060], #0x00
-a42d:    14 60                  bz L_a48f
-a42f:    90 00 3e               ld A, #0x003e
-a432:    50 60                  add A, Y
-a434:    7c de                  call @[pc + -0x22]
-a436:    47 85 02 60 24 60 2a   memcmp #0x03, [B + X + 0x0060], [B + S + 0x0060]
-a43d:    15 20                  bnz L_a45f
-a43f:    47 9d 02 00 60 2a      memset #0x03, #0x00, [B + S + 0x0060]
-a445:    7c 21                  call @[pc + 0x21]
-a447:    47 49 02 00 60 2a      memcpy #0x03, [A], [B + S + 0x0060]
-a44d:    47 45 02 60 2a 60 27   memcpy #0x03, [B + S + 0x0060], [B + Y + 0x0060]
-a454:    79 a5 84               call [R_a584:0xa584]
-a457:    47 49 02 00 60 24      memcpy #0x03, [A], [B + X + 0x0060]
-a45d:    73 30                  jmp [L_a48f:+0x30]
-
-L_a45f:
-a45f:    7c f4                  call @[pc + -0xc]
-a461:    47 49 02 00 60 27      memcpy #0x03, [A], [B + Y + 0x0060]
-a467:    79 a5 67               call [R_a567:0xa567]
-a46a:    47 45 02 60 27 60 3b   memcpy #0x03, [B + Y + 0x0060], [B + S + 0x0060]
-a471:    79 a7 ec               call [R_a7ec:0xa7ec]
-a474:    79 a6 41               call [R_a641:0xa641]
-a477:    2a                     clr! AL, #0
-a478:    79 a7 ba               call [R_a7ba:0xa7ba]
-a47b:    79 a6 41               call [R_a641:0xa641]
-a47e:    27 79                  rlc YL, #10
-a480:    a7                     unknown
-a481:    ec                     st BL, [Z]
-a482:    47 45 02 60 2a 60 24   memcpy #0x03, [B + S + 0x0060], [B + X + 0x0060]
-a489:    47 9d 02 00 60 27      memset #0x03, #0x00, [B + Y + 0x0060]
-
-L_a48f:
-a48f:    9d                     ld A, [S]
-a490:    d0 a5 c5               ld B, #0xa5c5
-a493:    79 a7 54               call [R_a754:0xa754]
-a496:    3a                     clr! A, #0
-a497:    85 68 23               ld AL, [Y + 0x0023]
-a49a:    39                     dec! A, #1
-a49b:    67                     unknown
-a49c:    49                     sub! BL, AL
-a49d:    80 60                  ld AL, #0x60
-a49f:    3e                     inc X
-a4a0:    47 45 02 60 2d 60 38   memcpy #0x03, [B + C + 0x0060], [B + Z + 0x0060]
-a4a7:    47 9d 02 00 60 3b      memset #0x03, #0x00, [B + S + 0x0060]
-a4ad:    79 a7 e8               call [R_a7e8:0xa7e8]
-a4b0:    46 02 2d 00 60 27      unkbig2(2, 0) [B + Y + 0x0060], #0x00
-a4b6:    14 11                  bz L_a4c9
-a4b8:    79 a6 41               call [R_a641:0xa641]
-a4bb:    27 79                  rlc YL, #10
-a4bd:    a7                     unknown
-a4be:    ba                     st A, [X]
-a4bf:    47 45 02 60 24 60 3b   memcpy #0x03, [B + X + 0x0060], [B + S + 0x0060]
-a4c6:    79 a7 ec               call [R_a7ec:0xa7ec]
-
-L_a4c9:
-a4c9:    79 a6 41               call [R_a641:0xa641]
-a4cc:    2d                     sll! AL, #1
-a4cd:    79 a6 ce               call [R_a6ce:0xa6ce]
-a4d0:    32 04                  clr A, #4
-a4d2:    b5 68 36               st A, [Y + 0x0036]
-a4d5:    b5 68 0e               st A, [Y + 0x000e]
-a4d8:    79 a5 fc               call [R_a5fc:0xa5fc]
-a4db:    01                     nop
-a4dc:    79 a6 72               call [R_a672:0xa672]
-a4df:    8b                     ld AL, [Y]
-a4e0:    29                     dec! AL, #1
-a4e1:    a5 a2                  st AL, [--S]
-a4e3:    18 7e                  bgt L_a563
-a4e5:    14 0e                  bz L_a4f5
-a4e7:    85 68 3b               ld AL, [Y + 0x003b]
-a4ea:    15 77                  bnz L_a563
-a4ec:    47 45 02 60 38 60 2a   memcpy #0x03, [B + Z + 0x0060], [B + S + 0x0060]
-a4f3:    15 0d                  bnz L_a502
-
-L_a4f5:
-a4f5:    47 45 02 60 2d 60 2a   memcpy #0x03, [B + C + 0x0060], [B + S + 0x0060]
-a4fc:    46 02 0d 01 60 2a      addbig(2, 0) [B + S + 0x0060], #0x01
-
-L_a502:
-a502:    79 a6 38               call [R_a638:0xa638]
-a505:    79 a8 23               call [R_a823:0xa823]
-a508:    47 45 02 60 2a 60 3e   memcpy #0x03, [B + S + 0x0060], [B + P + 0x0060]
-a50f:    79 a6 38               call [R_a638:0xa638]
-a512:    79 a5 eb               call [R_a5eb:0xa5eb]
-a515:    02                     sf
-a516:    85 a1                  ld AL, [S++]
-a518:    15 42                  bnz L_a55c
-a51a:    79 a6 41               call [R_a641:0xa641]
-a51d:    2d                     sll! AL, #1
-a51e:    79 a6 ce               call [R_a6ce:0xa6ce]
-a521:    3a                     clr! A, #0
-a522:    b5 68 38               st A, [Y + 0x0038]
-a525:    30 01                  inc A, #2
-a527:    b5 68 36               st A, [Y + 0x0036]
-a52a:    b5 68 0e               st A, [Y + 0x000e]
-a52d:    79 a5 fc               call [R_a5fc:0xa5fc]
-a530:    02                     sf
-a531:    79 a6 72               call [R_a672:0xa672]
-a534:    8b                     ld AL, [Y]
-a535:    14 25                  bz L_a55c
-a537:    79 a6 8d               call [R_a68d:0xa68d]
-a53a:    79 a6 ce               call [R_a6ce:0xa6ce]
-a53d:    55 62                  mov B, Y
-a53f:    9d                     ld A, [S]
-a540:    5c                     mov Y, A
-a541:    95 28 32               ld A, [B + 0x0032]
-a544:    b5 a2                  st A, [--S]
-a546:    f5 a2                  st B, [--S]
-a548:    32 0e                  clr A, #14
-a54a:    a5 28 03               st AL, [B + 0x0003]
-a54d:    79 9b 8e               call [R_9b8e:0x9b8e]
-a550:    95 a1                  ld A, [S++]
-a552:    5c                     mov Y, A
-a553:    95 a1                  ld A, [S++]
-a555:    b5 68 32               st A, [Y + 0x0032]
-a558:    80 01                  ld AL, #0x01
-a55a:    73 01                  jmp [L_a55d:+0x1]
-
-L_a55c:
-a55c:    2a                     clr! AL, #0
-
-L_a55d:
-a55d:    a3 03                  st AL, [pc + 0x03]
-a55f:    79 a6 a9               call [R_a6a9:0xa6a9]
-a562:    00                     HALT
+a404:    47 9d 02 00 60 27 22   memset #0x03, #0x00, [Y + 0x2722]
+a40b:    11 a5                  bnc L_a3b2
+a40d:    68 30 79               st X, #0x3079
+a410:    a8                     st AL, [A]
+a411:    0b                     rim
+a412:    9d
+a413:    79
+a414:    a6 '&'
+a415:    eb 'k'
+a416:    47
+a417:    41
+a418:    02
+a419:    a8 '('
+a41a:    6c
+a41b:    60
+a41c:    2d
+a41d:    47
+a41e:    45
+a41f:    02
+a420:    60
+a421:    24
+a422:    60
+a423:    2a
+a424:    79
+a425:    a7 '''
+a426:    b6 '6'
+a427:    46
+a428:    02
+a429:    2d
+a42a:    00
+a42b:    60
+a42c:    38
+a42d:    14
+a42e:    60
+a42f:    90
+a430:    00
+a431:    3e
+a432:    50
+a433:    60
+a434:    7c
+a435:    de '^'
+a436:    47
+a437:    85
+a438:    02
+a439:    60
+a43a:    24
+a43b:    60
+a43c:    2a
+a43d:    15
+a43e:    20
+a43f:    47
+a440:    9d
+a441:    02
+a442:    00
+a443:    60
+a444:    2a
+a445:    7c
+a446:    21
+a447:    47
+a448:    49
+a449:    02
+a44a:    00
+a44b:    60
+a44c:    2a
+a44d:    47
+a44e:    45
+a44f:    02
+a450:    60
+a451:    2a
+a452:    60
+a453:    27
+a454:    79
+a455:    a5 '%'
+a456:    84
+a457:    47
+a458:    49
+a459:    02
+a45a:    00
+a45b:    60
+a45c:    24
+a45d:    73
+a45e:    30
+a45f:    7c
+a460:    f4 't'
+a461:    47
+a462:    49
+a463:    02
+a464:    00
+a465:    60
+a466:    27
+a467:    79
+a468:    a5 '%'
+a469:    67
+a46a:    47
+a46b:    45
+a46c:    02
+a46d:    60
+a46e:    27
+a46f:    60
+a470:    3b
+a471:    79
+a472:    a7 '''
+a473:    ec 'l'
+a474:    79
+a475:    a6 '&'
+a476:    41
+a477:    2a
+a478:    79
+a479:    a7 '''
+a47a:    ba ':'
+a47b:    79
+a47c:    a6 '&'
+a47d:    41
+a47e:    27
+a47f:    79
+a480:    a7 '''
+a481:    ec 'l'
+a482:    47
+a483:    45
+a484:    02
+a485:    60
+a486:    2a
+a487:    60
+a488:    24
+a489:    47
+a48a:    9d
+a48b:    02
+a48c:    00
+a48d:    60
+a48e:    27
+a48f:    9d
+a490:    d0 'P'
+a491:    a5 '%'
+a492:    c5 'E'
+a493:    79
+a494:    a7 '''
+a495:    54
+a496:    3a
+a497:    85
+a498:    68
+a499:    23
+a49a:    39
+a49b:    67
+a49c:    49
+a49d:    80
+a49e:    60
+a49f:    3e
+a4a0:    47
+a4a1:    45
+a4a2:    02
+a4a3:    60
+a4a4:    2d
+a4a5:    60
+a4a6:    38
+a4a7:    47
+a4a8:    9d
+a4a9:    02
+a4aa:    00
+a4ab:    60
+a4ac:    3b
+a4ad:    79
+a4ae:    a7 '''
+a4af:    e8 'h'
+a4b0:    46
+a4b1:    02
+a4b2:    2d
+a4b3:    00
+a4b4:    60
+a4b5:    27
+a4b6:    14
+a4b7:    11
+a4b8:    79
+a4b9:    a6 '&'
+a4ba:    41
+a4bb:    27
+a4bc:    79
+a4bd:    a7 '''
+a4be:    ba ':'
+a4bf:    47
+a4c0:    45
+a4c1:    02
+a4c2:    60
+a4c3:    24
+a4c4:    60
+a4c5:    3b
+a4c6:    79
+a4c7:    a7 '''
+a4c8:    ec 'l'
+a4c9:    79
+a4ca:    a6 '&'
+a4cb:    41
+a4cc:    2d
+a4cd:    79
+a4ce:    a6 '&'
+a4cf:    ce 'N'
+a4d0:    32
+a4d1:    04
+a4d2:    b5 '5'
+a4d3:    68
+a4d4:    36
+a4d5:    b5 '5'
+a4d6:    68
+a4d7:    0e
+a4d8:    79
+a4d9:    a5 '%'
+a4da:    fc '|'
+a4db:    01
+a4dc:    79
+a4dd:    a6 '&'
+a4de:    72
+a4df:    8b
+a4e0:    29
+a4e1:    a5 '%'
+a4e2:    a2 '"'
+a4e3:    18
+a4e4:    7e
+a4e5:    14
+a4e6:    0e
+a4e7:    85
+a4e8:    68
+a4e9:    3b
+a4ea:    15
+a4eb:    77
+a4ec:    47
+a4ed:    45
+a4ee:    02
+a4ef:    60
+a4f0:    38
+a4f1:    60
+a4f2:    2a
+a4f3:    15
+a4f4:    0d
+a4f5:    47
+a4f6:    45
+a4f7:    02
+a4f8:    60
+a4f9:    2d
+a4fa:    60
+a4fb:    2a
+a4fc:    46
+a4fd:    02
+a4fe:    0d
+a4ff:    01
+a500:    60
+a501:    2a
+a502:    79
+a503:    a6 '&'
+a504:    38
+a505:    79
+a506:    a8 '('
+a507:    23
+a508:    47
+a509:    45
+a50a:    02
+a50b:    60
+a50c:    2a
+a50d:    60
+a50e:    3e
+a50f:    79
+a510:    a6 '&'
+a511:    38
+a512:    79
+a513:    a5 '%'
+a514:    eb 'k'
+a515:    02
+a516:    85
+a517:    a1 '!'
+a518:    15
+a519:    42
+a51a:    79
+a51b:    a6 '&'
+a51c:    41
+a51d:    2d
+a51e:    79
+a51f:    a6 '&'
+a520:    ce 'N'
+a521:    3a
+a522:    b5 '5'
+a523:    68
+a524:    38
+a525:    30
+a526:    01
+a527:    b5 '5'
+a528:    68
+a529:    36
+a52a:    b5 '5'
+a52b:    68
+a52c:    0e
+a52d:    79
+a52e:    a5 '%'
+a52f:    fc '|'
+a530:    02
+a531:    79
+a532:    a6 '&'
+a533:    72
+a534:    8b
+a535:    14
+a536:    25
+a537:    79
+a538:    a6 '&'
+a539:    8d
+a53a:    79
+a53b:    a6 '&'
+a53c:    ce 'N'
+a53d:    55
+a53e:    62
+a53f:    9d
+a540:    5c
+a541:    95
+a542:    28
+a543:    32
+a544:    b5 '5'
+a545:    a2 '"'
+a546:    f5 'u'
+a547:    a2 '"'
+a548:    32
+a549:    0e
+a54a:    a5 '%'
+a54b:    28
+a54c:    03
+a54d:    79
+a54e:    9b
+a54f:    8e
+a550:    95
+a551:    a1 '!'
+a552:    5c
+a553:    95
+a554:    a1 '!'
+a555:    b5 '5'
+a556:    68
+a557:    32
+a558:    80
+a559:    01
+a55a:    73
+a55b:    01
+a55c:    2a
+a55d:    a3 '#'
+a55e:    03
+a55f:    79
+a560:    a6 '&'
+a561:    a9 ')'
+a562:    00
 
 L_a563:
 a563:    79 a6 a9               call [R_a6a9:0xa6a9]
@@ -6869,17 +7080,16 @@ a567:    79 a6 41               call [R_a641:0xa641]
 a56a:    24 79                  srl YL, #10
 a56c:    a7                     unknown
 a56d:    ba                     st A, [X]
-a56e:    46 22 25 60 3b 60 2a   unkbig2(2, 2) [B + S + 0x0060], [B + S + 0x0060]
-a575:    14 08                  bz L_a57f
+a56e:    46 22 25 60 3b 60 2a 14 08 unkbig2(2, 2) [B + S + 0x1408], [Y + 0x3b60]
 a577:    79 a6 41               call [R_a641:0xa641]
 a57a:    3b                     not! A, #0
 a57b:    15 ee                  bnz L_a56b
 a57d:    73 e4                  jmp [L_a563:-0x1c]
-
-L_a57f:
-a57f:    95 68 1a               ld A, [Y + 0x001a]
-a582:    38                     inc! A, #1
-a583:    09                     ret
+a57f:    95
+a580:    68
+a581:    1a
+a582:    38
+a583:    09
 
 R_a584:
 a584:    79 a6 41               call [R_a641:0xa641]
@@ -6888,33 +7098,44 @@ a588:    2a                     clr! AL, #0
 a589:    28                     inc! AL, #1
 a58a:    a5 a2                  st AL, [--S]
 a58c:    73 16                  jmp [L_a5a4:+0x16]
-
-L_a58e:
-a58e:    46 03 0a a0            addbig(3, 0) [A], [S]
-a592:    46 03 2e 01 00         unkbig2(3, 0) [A], #0x01
-a597:    19 28                  ble L_a5c1
-a599:    79 a7 ba               call [R_a7ba:0xa7ba]
-a59c:    46 02 2d 00 60 38      unkbig2(2, 0) [B + Z + 0x0060], #0x00
-a5a2:    14 16                  bz L_a5ba
+a58e:    46
+a58f:    03
+a590:    0a
+a591:    a0 ' '
+a592:    46
+a593:    03
+a594:    2e
+a595:    01
+a596:    00
+a597:    19
+a598:    28
+a599:    79
+a59a:    a7 '''
+a59b:    ba ':'
+a59c:    46
+a59d:    02
+a59e:    2d
+a59f:    00
+a5a0:    60
+a5a1:    38
+a5a2:    14
+a5a3:    16
 
 L_a5a4:
 a5a4:    95 68 1a               ld A, [Y + 0x001a]
-a5a7:    46 32 29 00 60 1e      unkbig2(2, 3) [A + P + 0x0060], [A]
-a5ad:    18 df                  bgt L_a58e
+a5a7:    46 32 29 00 60 1e 18   unkbig2(2, 3) [Y + 0x1e18], [A]
+a5ae:    df                     ld B, [P]
 a5af:    c0 ff                  ld BL, #0xff
 a5b1:    ed                     st BL, [S]
-a5b2:    46 23 36 60 2a 00      unkbig3(3, 2) [A], [B + S + 0x0060]
-a5b8:    73 d4                  jmp [L_a58e:-0x2c]
-
-L_a5ba:
-a5ba:    30 a0                  inc S, #1
-a5bc:    95 68 1a               ld A, [Y + 0x001a]
-a5bf:    38                     inc! A, #1
+a5b2:    46 23 36 60 2a 00 73   unkbig3(3, 2) [B], [Y + 0x2a00]
+a5b9:    d4 30                  ld B, @[R_a5eb:+0x30]
+a5bb:    a0 95                  st AL, #0x95
+a5bd:    68 1a 38               st X, #0x1a38
 a5c0:    09                     ret
-
-L_a5c1:
-a5c1:    79 a6 a9               call [R_a6a9:0xa6a9]
-a5c4:    01                     nop
+a5c1:    79
+a5c2:    a6 '&'
+a5c3:    a9 ')'
+a5c4:    01
 
 R_a5c5:
 a5c5:    00                     HALT
@@ -7084,7 +7305,12 @@ R_a6ab:
 a6ab:    d5 68 1a               ld B, [Y + 0x001a]
 a6ae:    8a                     ld AL, [X]
 a6af:    15 16                  bnz R_a6c7
-a6b1:    46 23 36 60 2d 02      unkbig3(3, 2) [B], [B + C + 0x0060]
+a6b1:    46
+a6b2:    23
+a6b3:    36
+a6b4:    60
+a6b5:    2d
+a6b6:    02
 
 L_a6b7:
 a6b7:    7b 15                  call [R_a6ce:+0x15]
@@ -7143,21 +7369,26 @@ a71b:    15 03                  bnz L_a720
 a71d:    b1 a8 62               st A, [R_a862:0xa862]
 
 L_a720:
-a720:    46 25 34 60 1e a8 5c   unkbig3(5, 2) [R_a85c:0xa85c], [A + P + 0x0060]
-a727:    46 05 1c 01 a8 5c      subbig(5, 0) [R_a85c:0xa85c], #0x01
+a720:    46 25 34 60 1e a8 5c 46 unkbig3(5, 2) [0x5c46], [Y + 0x1ea8]
+a728:    05                     di
+a729:    1c 01                  bs3 L_a72c
+a72b:    a8                     st AL, [A]
+
+L_a72c:
+a72c:    5c                     mov Y, A
 a72d:    46 35 50 a8 62 a8 5c   unkbig5(5, 3) [R_a85c:0xa85c], [R_a862:0xa862]
 a734:    85 68 31               ld AL, [Y + 0x0031]
 a737:    15 09                  bnz L_a742
-a739:    47 41 02 a8 5d 60 24   memcpy #0x03, [R_a85d:0xa85d], [B + X + 0x0060]
-a740:    73 07                  jmp [L_a749:+0x7]
+a739:    47 41 02 a8 5d 60 24 73 memcpy #0x03, [R_a85d:0xa85d], [Y + 0x2473]
+a741:    07                     rl
 
 L_a742:
-a742:    47 41 02 a8 5c 60 24   memcpy #0x03, [R_a85c:0xa85c], [B + X + 0x0060]
-
-L_a749:
-a749:    46 02 0d 02 60 24      addbig(2, 0) [B + X + 0x0060], #0x02
-a74f:    d5 a1                  ld B, [S++]
-a751:    7f 41                  pop
+a742:    47 41 02 a8 5c 60 24 46 memcpy #0x03, [R_a85c:0xa85c], [Y + 0x2446]
+a74a:    02                     sf
+a74b:    0d                     unknown
+a74c:    02                     sf
+a74d:    60 24 d5               ld X, #0x24d5
+a750:    a1 7f 41               st AL, [0x7f41]
 a753:    09                     ret
 
 R_a754:
@@ -7241,13 +7472,15 @@ a7bf:    eb                     st BL, [Y]
 a7c0:    01                     nop
 a7c1:    85 68 31               ld AL, [Y + 0x0031]
 a7c4:    15 21                  bnz L_a7e7
-a7c6:    47 44 22 60 3c a8 39   memcpy #0x23, [B + C + 0x0060], [R_a839:0xa839]
-a7cd:    47 41 22 a8 39 60 3e   memcpy #0x23, [R_a839:0xa839], [B + P + 0x0060]
-a7d4:    95 68 3a               ld A, [Y + 0x003a]
-a7d7:    b5 68 3c               st A, [Y + 0x003c]
-a7da:    95 68 38               ld A, [Y + 0x0038]
-a7dd:    b5 68 39               st A, [Y + 0x0039]
-a7e0:    2a                     clr! AL, #0
+a7c6:    47 44 22 60 3c a8 39 47 memcpy #0x23, [Y + 0x3ca8], [0x3947]
+a7ce:    41 22                  sub BH, BH
+a7d0:    a8                     st AL, [A]
+a7d1:    39                     dec! A, #1
+a7d2:    60 3e 95               ld X, #0x3e95
+a7d5:    68 3a b5               st X, #0x3ab5
+a7d8:    68 3c 95               st X, #0x3c95
+a7db:    68 38 b5               st X, #0x38b5
+a7de:    68 39 2a               st X, #0x392a
 a7e1:    a5 68 38               st AL, [Y + 0x0038]
 a7e4:    a5 68 3b               st AL, [Y + 0x003b]
 
@@ -7256,17 +7489,25 @@ a7e7:    09                     ret
 
 R_a7e8:
 a7e8:    79 a6 41               call [R_a641:0xa641]
-a7eb:    24 85                  srl ZH, #6
-a7ed:    68 31 15               st X, #0x3115
-a7f0:    15 7c                  bnz L_a86e
-a7f2:    43 95                  or XL, ZL
-a7f4:    68 39 b5               st X, #0x39b5
-a7f7:    68 38 95               st X, #0x3895
-a7fa:    68 3c b5               st X, #0x3cb5
-a7fd:    68 3a 47               st X, #0x3a47
-a800:    45 22                  mov BH, BH
-a802:    60 3e 60               ld X, #0x3e60
-a805:    3c                     srl! A, #1
+a7eb:    24
+
+R_a7ec:
+a7ec:    85 68 31               ld AL, [Y + 0x0031]
+a7ef:    15 15                  bnz L_a806
+a7f1:    7c 43                  call @[pc + 0x43]
+a7f3:    95 68 39               ld A, [Y + 0x0039]
+a7f6:    b5 68 38               st A, [Y + 0x0038]
+a7f9:    95 68 3c               ld A, [Y + 0x003c]
+a7fc:    b5 68 3a               st A, [Y + 0x003a]
+a7ff:    47
+a800:    45
+a801:    22
+a802:    60
+a803:    3e
+a804:    60
+a805:    3c
+
+L_a806:
 a806:    79 a5 eb               call [R_a5eb:0xa5eb]
 a809:    02                     sf
 a80a:    09                     ret
@@ -7288,10 +7529,15 @@ a821:    15 f0                  bnz L_a813
 R_a823:
 a823:    79 a5 eb               call [R_a5eb:0xa5eb]
 a826:    01                     nop
-a827:    47 44 0b 60 38 a8 66   memcpy #0x0c, [B + Z + 0x0060], [R_a866:0xa866]
-a82e:    46 22 00 a8 6f a8 66   addbig(2, 2) [R_a866:0xa866], [R_a86f:0xa86f]
-a835:    79 a6 11               call [R_a611:0xa611]
-a838:    09                     ret
+a827:    47 44 0b 60 38 a8 66 46 memcpy #0x0c, [Y + 0x38a8], [0x6646]
+a82f:    22 00                  clr AH, #0
+a831:    a8                     st AL, [A]
+a832:    6f a8 66               stcc [0xa866]
+a835:    79
+a836:    a6 '&'
+
+L_a837:
+a837:    11 09                  bnc L_a842
 
 R_a839:
 a839:    00                     HALT
@@ -7327,8 +7573,7 @@ a892:    6d a2                  st X, [--S]
 a894:    95 a8 04               ld A, [S + 0x0004]
 a897:    79 a6 eb               call [R_a6eb:0xa6eb]
 a89a:    79 a7 b6               call [R_a7b6:0xa7b6]
-a89d:    47 45 02 60 38 60 2d   memcpy #0x03, [B + Z + 0x0060], [B + C + 0x0060]
-a8a4:    14 35                  bz L_a8db
+a89d:    47 45 02 60 38 60 2d 14 35 memcpy #0x03, [Y + 0x3860], [B + C + 0x1435]
 a8a6:    3a                     clr! A, #0
 a8a7:    85 68 23               ld AL, [Y + 0x0023]
 a8aa:    5b                     mov X, A
@@ -7365,11 +7610,11 @@ a8d7:    60
 a8d8:    24
 a8d9:    15
 a8da:    bf '?'
-
-L_a8db:
-a8db:    65 a1                  ld X, [S++]
-a8dd:    32 01                  clr A, #1
-a8df:    09                     ret
+a8db:    65
+a8dc:    a1 '!'
+a8dd:    32
+a8de:    01
+a8df:    09
 a900:    00                     HALT
 a901:    00                     HALT
 a902:    00                     HALT
@@ -7389,78 +7634,166 @@ a91c:    79 a8 0b               call [R_a80b:0xa80b]
 a91f:    9d                     ld A, [S]
 a920:    31 a2                  dec S, #3
 a922:    47 42 02 a8 6c 0a      memcpy #0x03, [R_a86c:0xa86c], [S]
-a928:    47 9d 02 00 60 27      memset #0x03, #0x00, [B + Y + 0x0060]
-a92e:    b5 a2                  st A, [--S]
-a930:    79 a8 92               call [R_a892:0xa892]
-a933:    14 03                  bz L_a938
+a928:    47 9d 02 00 60 27 b5   memset #0x03, #0x00, [Y + 0x27b5]
+a92f:    a2 79 a8               st AL, @[0x79a8]
+a932:    92 14 03               ld A, @[0x1403]
 a935:    71 a8 8e               jmp [R_a88e:0xa88e]
-
-L_a938:
-a938:    30 a1                  inc S, #2
-a93a:    79 a6 11               call [R_a611:0xa611]
-a93d:    47 45 02 60 3b 60 2a   memcpy #0x03, [B + S + 0x0060], [B + S + 0x0060]
-a944:    15 1b                  bnz L_a961
-a946:    47 45 02 60 27 60 27   memcpy #0x03, [B + Y + 0x0060], [B + Y + 0x0060]
-a94d:    14 23                  bz L_a972
-a94f:    79 a6 41               call [R_a641:0xa641]
-a952:    27 79                  rlc YL, #10
-a954:    a7                     unknown
-a955:    ba                     st A, [X]
-a956:    47 9d 02 00 60 3b      memset #0x03, #0x00, [B + S + 0x0060]
-a95c:    79 a7 ec               call [R_a7ec:0xa7ec]
-a95f:    73 11                  jmp [L_a972:+0x11]
-
-L_a961:
-a961:    79 a6 41               call [R_a641:0xa641]
-a964:    2a                     clr! AL, #0
-a965:    79 a7 ba               call [R_a7ba:0xa7ba]
-a968:    79 a7 e8               call [R_a7e8:0xa7e8]
-a96b:    47 45 02 60 2a 60 24   memcpy #0x03, [B + S + 0x0060], [B + X + 0x0060]
-
-L_a972:
-a972:    47 9d 28 00 60 38      memset #0x29, #0x00, [B + Z + 0x0060]
-a978:    79 a7 e8               call [R_a7e8:0xa7e8]
-a97b:    47 49 02 a0 60 38      memcpy #0x03, [S], [B + Z + 0x0060]
-a981:    30 a2                  inc S, #3
-a983:    2a                     clr! AL, #0
-a984:    a5 68 3b               st AL, [Y + 0x003b]
-a987:    79 a6 41               call [R_a641:0xa641]
-a98a:    2d                     sll! AL, #1
-a98b:    79 a6 ce               call [R_a6ce:0xa6ce]
-a98e:    32 04                  clr A, #4
-a990:    b5 68 0e               st A, [Y + 0x000e]
-a993:    b5 68 36               st A, [Y + 0x0036]
-
-L_a996:
-a996:    79 86 12               call [R_8612:0x8612]
-a999:    55 62                  mov B, Y
-a99b:    32 07                  clr A, #7
-a99d:    a5 28 03               st AL, [B + 0x0003]
-a9a0:    79 9b 8e               call [R_9b8e:0x9b8e]
-a9a3:    8b                     ld AL, [Y]
-a9a4:    14 05                  bz L_a9ab
-a9a6:    29                     dec! AL, #1
-a9a7:    14 ed                  bz L_a996
-a9a9:    73 08                  jmp [L_a9b3:+0x8]
-
-L_a9ab:
-a9ab:    79 a5 eb               call [R_a5eb:0xa5eb]
-a9ae:    02                     sf
-a9af:    79 a5 eb               call [R_a5eb:0xa5eb]
-a9b2:    08                     cl
-
-L_a9b3:
-a9b3:    79 a6 72               call [R_a672:0xa672]
-a9b6:    79 a6 38               call [R_a638:0xa638]
-a9b9:    79 a8 23               call [R_a823:0xa823]
-a9bc:    47 45 02 60 2d 60 3e   memcpy #0x03, [B + C + 0x0060], [B + P + 0x0060]
-a9c3:    79 a6 38               call [R_a638:0xa638]
-a9c6:    79 a5 eb               call [R_a5eb:0xa5eb]
-a9c9:    02                     sf
-a9ca:    79 a6 92               call [R_a692:0xa692]
-a9cd:    d5 68 1a               ld B, [Y + 0x001a]
-a9d0:    79 a6 c7               call [R_a6c7:0xa6c7]
-a9d3:    00                     HALT
+a938:    30
+a939:    a1 '!'
+a93a:    79
+a93b:    a6 '&'
+a93c:    11
+a93d:    47
+a93e:    45
+a93f:    02
+a940:    60
+a941:    3b
+a942:    60
+a943:    2a
+a944:    15
+a945:    1b
+a946:    47
+a947:    45
+a948:    02
+a949:    60
+a94a:    27
+a94b:    60
+a94c:    27
+a94d:    14
+a94e:    23
+a94f:    79
+a950:    a6 '&'
+a951:    41
+a952:    27
+a953:    79
+a954:    a7 '''
+a955:    ba ':'
+a956:    47
+a957:    9d
+a958:    02
+a959:    00
+a95a:    60
+a95b:    3b
+a95c:    79
+a95d:    a7 '''
+a95e:    ec 'l'
+a95f:    73
+a960:    11
+a961:    79
+a962:    a6 '&'
+a963:    41
+a964:    2a
+a965:    79
+a966:    a7 '''
+a967:    ba ':'
+a968:    79
+a969:    a7 '''
+a96a:    e8 'h'
+a96b:    47
+a96c:    45
+a96d:    02
+a96e:    60
+a96f:    2a
+a970:    60
+a971:    24
+a972:    47
+a973:    9d
+a974:    28
+a975:    00
+a976:    60
+a977:    38
+a978:    79
+a979:    a7 '''
+a97a:    e8 'h'
+a97b:    47
+a97c:    49
+a97d:    02
+a97e:    a0 ' '
+a97f:    60
+a980:    38
+a981:    30
+a982:    a2 '"'
+a983:    2a
+a984:    a5 '%'
+a985:    68
+a986:    3b
+a987:    79
+a988:    a6 '&'
+a989:    41
+a98a:    2d
+a98b:    79
+a98c:    a6 '&'
+a98d:    ce 'N'
+a98e:    32
+a98f:    04
+a990:    b5 '5'
+a991:    68
+a992:    0e
+a993:    b5 '5'
+a994:    68
+a995:    36
+a996:    79
+a997:    86
+a998:    12
+a999:    55
+a99a:    62
+a99b:    32
+a99c:    07
+a99d:    a5 '%'
+a99e:    28
+a99f:    03
+a9a0:    79
+a9a1:    9b
+a9a2:    8e
+a9a3:    8b
+a9a4:    14
+a9a5:    05
+a9a6:    29
+a9a7:    14
+a9a8:    ed 'm'
+a9a9:    73
+a9aa:    08
+a9ab:    79
+a9ac:    a5 '%'
+a9ad:    eb 'k'
+a9ae:    02
+a9af:    79
+a9b0:    a5 '%'
+a9b1:    eb 'k'
+a9b2:    08
+a9b3:    79
+a9b4:    a6 '&'
+a9b5:    72
+a9b6:    79
+a9b7:    a6 '&'
+a9b8:    38
+a9b9:    79
+a9ba:    a8 '('
+a9bb:    23
+a9bc:    47
+a9bd:    45
+a9be:    02
+a9bf:    60
+a9c0:    2d
+a9c1:    60
+a9c2:    3e
+a9c3:    79
+a9c4:    a6 '&'
+a9c5:    38
+a9c6:    79
+a9c7:    a5 '%'
+a9c8:    eb 'k'
+a9c9:    02
+a9ca:    79
+a9cb:    a6 '&'
+a9cc:    92
+a9cd:    d5 'U'
+a9ce:    68
+a9cf:    1a
+a9d0:    79
+a9d1:    a6 '&'
+a9d2:    c7 'G'
+a9d3:    00
 
 R_a9d4:
 a9d4:    55 a2                  mov B, S
@@ -7472,18 +7805,14 @@ a9e0:    79 a2 db               call [R_a2db:0xa2db]
 a9e3:    b5 a2                  st A, [--S]
 a9e5:    79 a6 59               call [R_a659:0xa659]
 a9e8:    9d                     ld A, [S]
-
-L_a9e9:
-a9e9:    46 22 25 60 24 60 1e   unkbig2(2, 2) [A + P + 0x0060], [B + X + 0x0060]
-a9f0:    17 04                  bp L_a9f6
+a9e9:    46 22 25 60 24 60 1e 17 unkbig2(2, 2) [A + P + 0x0017], [Y + 0x2460]
+a9f1:    04                     ei
 a9f2:    79 a6 a9               call [R_a6a9:0xa6a9]
 a9f5:    01                     nop
-
-L_a9f6:
-a9f6:    46 02 0d 01 60 24      addbig(2, 0) [B + X + 0x0060], #0x01
-a9fc:    79 a7 b6               call [R_a7b6:0xa7b6]
-a9ff:    47 45 02 60 38 60 2d   memcpy #0x03, [B + Z + 0x0060], [B + C + 0x0060]
-aa06:    14 e1                  bz L_a9e9
+a9f6:    46 02 0d 01 60 24 79   addbig(2, 0) [Y + 0x2479], #0x01
+a9fd:    a7                     unknown
+a9fe:    b6                     unknown
+a9ff:    47 45 02 60 38 60 2d 14 e1 memcpy #0x03, [Y + 0x3860], [B + C + 0x14e1]
 aa08:    dd                     ld B, [S]
 aa09:    3a                     clr! A, #0
 aa0a:    85 68 23               ld AL, [Y + 0x0023]
@@ -7508,13 +7837,13 @@ aa23:    45 31                  mov AL, BL
 
 R_aa25:
 aa25:    31 a1                  dec S, #2
-aa27:    47 46 08 a0 02 0a      memcpy #0x09, [A + B + -0x060], [S]
-aa2d:    d5 a8 05               ld B, [S + 0x0005]
+aa27:    47 46 08 a0 02 0a d5   memcpy #0x09, [S + 0x020a], [X]
+aa2e:    a8                     st AL, [A]
+aa2f:    05                     di
 aa30:    f5 a8 09               st B, [S + 0x0009]
 aa33:    6d a8 05               st X, [S + 0x0005]
 aa36:    d1 01 03               ld B, [0x0103]
-aa39:    47 45 00 a0 08 20 29   memcpy #0x01, [A + Z + -0x060], [B + Z + 0x0020]
-aa40:    c0 00                  ld BL, #0x00
+aa39:    47 45 00 a0 08 20 29 c0 00 memcpy #0x01, [S + 0x0820], [B + Z + 0xc000]
 aa42:    e5 a8 08               st BL, [S + 0x0008]
 
 R_aa45:
@@ -7693,7 +8022,7 @@ ab5e:    a9                     st AL, [B]
 L_ab5f:
 ab5f:    61 01 03               ld X, [0x0103]
 ab62:    65 48 08               ld X, [X + 0x0008]
-ab65:    47 5d 00 7f 40 13      unkblk5 #0x01, #0x7f, [A + B + 0x0040]
+ab65:    47 5d 00 7f 40 13      unkblk5 #0x01, #0x7f, [X + 0x0013]
 ab6b:    d5 a8 07               ld B, [S + 0x0007]
 ab6e:    c0 00                  ld BL, #0x00
 ab70:    95 a8 09               ld A, [S + 0x0009]
@@ -8067,19 +8396,19 @@ R_adc6:
 adc6:    00                     HALT
 adc7:    00                     HALT
 
-R_adc8:
-adc8:    55 ba af 96            mov S, S, #0xaf96
+AbortHandler:
+adc8:    55 ba af 96            mov S, S, #0xaf96	 ; Setup StackPointer
 adcc:    55 82                  mov B, Z
 adce:    32 80                  clr Z, #0
 add0:    7b 03                  call [R_add5:+0x3]
 add2:    0a                     reti
-add3:    73 f3                  jmp [R_adc8:-0xd]
+add3:    73 f3                  jmp [AbortHandler:-0xd]
 
 R_add5:
 add5:    2e 2c 00 af 83         wpf1 #0x00, [R_af83:0xaf83]
 adda:    7e 41                  push
 addc:    f1 af 43               st B, [R_af43:0xaf43]
-addf:    a1 af 3e               st AL, [R_af3e:0xaf3e]
+addf:    a1 af 3e               st AL, [Abort_CD:0xaf3e]
 ade2:    21 14                  dec AL, #5
 ade4:    15 12                  bnz L_adf8
 ade6:    91 01 03               ld A, [0x0103]
@@ -8092,12 +8421,12 @@ adf5:    71 ae e4               jmp [R_aee4:0xaee4]
 
 L_adf8:
 adf8:    2a                     clr! AL, #0
-adf9:    a1 af 42               st AL, [R_af42:0xaf42]
+adf9:    a1 af 42               st AL, [Abort_EAD:0xaf42]
 adfc:    07                     rl
 adfd:    55 c0                  mov A, C
 adff:    36 00                  rrc A, #1
 ae01:    34 0a                  srl A, #11
-ae03:    a1 af 3d               st AL, [R_af3d:0xaf3d]
+ae03:    a1 af 3d               st AL, [Abort_LVL:0xaf3d]
 ae06:    25 13                  sll AL, #4
 ae08:    20 1b                  inc AL, #12
 ae0a:    a3 05                  st AL, [pc + 0x05]
@@ -8107,11 +8436,11 @@ ae10:    e6                     unknown
 ae11:    0c                     unknown
 ae12:    c0 07                  ld BL, #0x07
 ae14:    4a                     and! BL, AL
-ae15:    e1 af 3f               st BL, [R_af3f:0xaf3f]
+ae15:    e1 af 3f               st BL, [Abort_MAP:0xaf3f]
 ae18:    e6                     unknown
 ae19:    0e                     dly
-ae1a:    b1 af 40               st A, [R_af40:0xaf40]
-ae1d:    81 af 3e               ld AL, [R_af3e:0xaf3e]
+ae1a:    b1 af 40               st A, [Abort_IAD:0xaf40]
+ae1d:    81 af 3e               ld AL, [Abort_CD:0xaf3e]
 ae20:    21 13                  dec AL, #4
 ae22:    15 27                  bnz L_ae4b
 ae24:    91 af 43               ld A, [R_af43:0xaf43]
@@ -8130,25 +8459,25 @@ ae42:    3a                     clr! A, #0
 ae43:    80 00                  ld AL, #0x00
 ae45:    35 02                  sll A, #3
 ae47:    58                     add! B, A
-ae48:    f1 af 42               st B, [R_af42:0xaf42]
+ae48:    f1 af 42               st B, [Abort_EAD:0xaf42]
 
 L_ae4b:
-ae4b:    47 9c 01 c0 af 4b      memset #0x02, #0xc0, [R_af4b:0xaf4b]
-ae51:    47 9c 01 c0 af 53      memset #0x02, #0xc0, [R_af53:0xaf53]
-ae57:    47 9c 01 c0 af 5b      memset #0x02, #0xc0, [R_af5b:0xaf5b]
-ae5d:    47 9c 03 c0 af 63      memset #0x04, #0xc0, [R_af63:0xaf63]
-ae63:    47 9c 05 c0 af 6d      memset #0x06, #0xc0, [R_af6d:0xaf6d]
+ae4b:    47 9c 01 c0 af 4b      memset #0x02, #0xc0, [AbortString_CD:0xaf4b]
+ae51:    47 9c 01 c0 af 53      memset #0x02, #0xc0, [AbortString_LVL:0xaf53]
+ae57:    47 9c 01 c0 af 5b      memset #0x02, #0xc0, [AbortString_MAP:0xaf5b]
+ae5d:    47 9c 03 c0 af 63      memset #0x04, #0xc0, [AbortString_IAD:0xaf63]
+ae63:    47 9c 05 c0 af 6d      memset #0x06, #0xc0, [AbortString_EAD:0xaf6d]
 ae69:    80 06                  ld AL, #0x06
-ae6b:    46 e2 90 af 6d af 42   baseconv(2, e) [R_af42:0xaf42], [R_af6d:0xaf6d]
+ae6b:    46 e2 90 af 6d af 42   baseconv(2, e) [Abort_EAD:0xaf42], [AbortString_EAD:0xaf6d]
 ae72:    80 04                  ld AL, #0x04
-ae74:    46 e1 90 af 63 af 40   baseconv(1, e) [R_af40:0xaf40], [R_af63:0xaf63]
+ae74:    46 e1 90 af 63 af 40   baseconv(1, e) [Abort_IAD:0xaf40], [AbortString_IAD:0xaf63]
 ae7b:    80 02                  ld AL, #0x02
-ae7d:    46 e0 90 af 5b af 3f   baseconv(0, e) [R_af3f:0xaf3f], [R_af5b:0xaf5b]
+ae7d:    46 e0 90 af 5b af 3f   baseconv(0, e) [Abort_MAP:0xaf3f], [AbortString_MAP:0xaf5b]
 ae84:    80 02                  ld AL, #0x02
-ae86:    46 80 90 af 53 af 3d   baseconv(0, 8) [R_af3d:0xaf3d], [R_af53:0xaf53]
+ae86:    46 80 90 af 53 af 3d   baseconv(0, 8) [Abort_LVL:0xaf3d], [AbortString_LVL:0xaf53]
 ae8d:    80 02                  ld AL, #0x02
-ae8f:    46 80 90 af 4b af 3e   baseconv(0, 8) [R_af3e:0xaf3e], [R_af4b:0xaf4b]
-ae96:    81 af 3d               ld AL, [R_af3d:0xaf3d]
+ae8f:    46 80 90 af 4b af 3e   baseconv(0, 8) [Abort_CD:0xaf3e], [AbortString_CD:0xaf4b]
+ae96:    81 af 3d               ld AL, [Abort_LVL:0xaf3d]
 ae99:    15 05                  bnz L_aea0
 ae9b:    61 01 03               ld X, [0x0103]
 ae9e:    15 1a                  bnz L_aeba
@@ -8160,7 +8489,7 @@ aea4:    3d                     sll! A, #1
 aea5:    d1 01 07               ld B, [0x0107]
 aea8:    58                     add! B, A
 aea9:    65 20                  ld X, [B]
-aeab:    91 af 40               ld A, [R_af40:0xaf40]
+aeab:    91 af 40               ld A, [Abort_IAD:0xaf40]
 aeae:    d1 01 1d               ld B, [0x011d]
 aeb1:    59                     sub! B, A
 aeb2:    11 33                  bnc L_aee7
@@ -8181,7 +8510,7 @@ aecd:    f8                     st B, [A]
 aece:    73 12                  jmp [L_aee2:+0x12]
 
 L_aed0:
-aed0:    83 6c                  ld AL, [R_af3e:+0x6c]
+aed0:    83 6c                  ld AL, [Abort_CD:+0x6c]
 aed2:    21 13                  dec AL, #4
 aed4:    14 11                  bz L_aee7
 aed6:    73 0a                  jmp [L_aee2:+0xa]
@@ -8258,20 +8587,20 @@ af3a:    46
 af3b:    00
 af3c:    00
 
-R_af3d:
-af3d:    00                     HALT
+Abort_LVL:
+af3d:    00                     (0x0)
 
-R_af3e:
-af3e:    00                     HALT
+Abort_CD:
+af3e:    00                     (0x0)
 
-R_af3f:
-af3f:    00                     HALT
+Abort_MAP:
+af3f:    00                     (0x0)
 
-R_af40:
+Abort_IAD:
 af40:    00                     HALT
 af41:    00                     HALT
 
-R_af42:
+Abort_EAD:
 af42:    00                     HALT
 
 R_af43:
@@ -8283,7 +8612,7 @@ af44:    00                     HALT
 R_af45:
 af45:    00                     HALT
 
-R_af46:
+AbortString:
 af46:    44, "CD:XX, LVL:XX, MAP:XX, IAD:XXXX, EAD:XXXXXX\r"
 
 R_af74:
@@ -8324,8 +8653,9 @@ afa0:    55 26                  mov Y, B
 afa2:    f3 17                  st B, [pc + 0x17]
 afa4:    7b 31                  call [R_afd7:+0x31]
 afa6:    16 28                  blt L_afd0
-afa8:    47 25 0f fd 60 46 60   unkblk2 #0x10, [Y + -0x003], [Y + 0x0046]
-afaf:    46 13 07 79 b0 a2      addbig(3, 1) #0xa2, [S + 0x0079]
+afa8:    47 25 0f fd 60 46 60 46 13 unkblk2 #0x10, [P + C + 0x6046], [Y + 0x4613]
+afb1:    07                     rl
+afb2:    79 b0 a2               call [R_b0a2:0xb0a2]
 
 R_afb5:
 afb5:    79 84 e4               call [Syscall_09:0x84e4]
@@ -8449,11 +8779,11 @@ b061:    71 af b5               jmp [R_afb5:0xafb5]
 
 L_b064:
 b064:    55 64                  mov X, Y
-b066:    47 25 0f fd 00 46 00   unkblk2 #0x10, [A + -0x003], [A + 0x0046]
-b06d:    46 55 46 46 11 1d      unkbig4(5, 5) [C], [A + 0x0046]
-b073:    08                     cl
-b074:    00                     HALT
-b075:    00                     HALT
+b066:    47 25 0f fd 00 46 00 46 unkblk2 #0x10, [P + C + 0x0046], [A + 0x0046]
+b06e:    55 46                  mov Y, X
+
+L_b070:
+b070:    46 11 1d 08 00 00      subbig(1, 1) [A], #0x08
 b076:    0c                     unknown
 b077:    3f                     dec X
 b078:    18 f6                  bgt L_b070
@@ -9496,6 +9826,8 @@ b674:    65 88 06               ld X, [Z + 0x0006]
 b677:    30 41                  inc X, #2
 b679:    9a                     ld A, [X]
 b67a:    d0 9b b1               ld B, #0x9bb1
+
+L_b67d:
 b67d:    59                     sub! B, A
 b67e:    15 2a                  bnz L_b6aa
 
@@ -9539,14 +9871,14 @@ b6b4:    00                     HALT
 b6b5:    00                     HALT
 
 HawkDeviceObj:
-b6b6:    00 06                  (0x600)
+b6b6:    00 06                  (0x6)
 b6b8:    cc ed                  R_cced
 b6ba:    cc 49                  R_cc49
 b6bc:    cc 79                  R_cc79
 b6be:    b6 ca                  R_b6ca
 b6c0:    b8 63                  R_b863
 b6c2:    b8 7b                  R_b87b
-b6c4:    b8 8b                  R_b88b
+b6c4:    b8 8b                  HawkDevice_Init
 b6c6:    cb ca                  R_cbca
 b6c8:    b5 4b                  Syscall_2e
 
@@ -9573,7 +9905,7 @@ b6f8:    f6 31 0f               st BL, +0xf(A)
 b6fb:    95 a1                  ld A, [S++]
 b6fd:    b1 b7 a7               st A, [R_b7a7:0xb7a7]
 b700:    91 01 03               ld A, [0x0103]
-b703:    2e 0d fa 00 36         wpf #0xfa, [B + Y]
+b703:    2e 0d fa 00 36         wpf #0xfa, [A + 0x0036]
 b708:    2e 0c 7a 01 81         wpf #0x7a, [0x0181]
 b70d:    c0 02                  ld BL, #0x02
 b70f:    2f 28                  ld_isr B
@@ -9824,11 +10156,11 @@ b887:    f6 31 0b               st BL, +0xb(A)
 L_b88a:
 b88a:    09                     ret
 
-R_b88b:
+HawkDevice_Init:
 b88b:    7e 45                  push
 b88d:    65 a8 08               ld X, [S + 0x0008]
 b890:    91 01 03               ld A, [0x0103]
-b893:    2e 0d fa 00 36         wpf #0xfa, [B + Y]
+b893:    2e 0d fa 00 36         wpf #0xfa, [A + 0x0036]
 b898:    2e 0c 7a 01 81         wpf #0x7a, [0x0181]
 b89d:    c0 02                  ld BL, #0x02
 b89f:    2f 28                  ld_isr B
@@ -10397,14 +10729,14 @@ bc5a:    00
 bc5b:    00
 
 FfcDeviceObj:
-bc5c:    00 06                  (0x600)
+bc5c:    00 06                  (0x6)
 bc5e:    cc ed                  R_cced
 bc60:    cc 49                  R_cc49
 bc62:    cc 79                  R_cc79
 bc64:    bc 6e                  R_bc6e
 bc66:    be 1f                  R_be1f
 bc68:    be 9e                  R_be9e
-bc6a:    be b8                  R_beb8
+bc6a:    be b8                  FfcDevice_Init
 bc6c:    cb ca                  R_cbca
 
 R_bc6e:
@@ -10687,7 +11019,7 @@ beb3:    2a                     clr! AL, #0
 beb4:    a1 be 0c               st AL, [R_be0c:0xbe0c]
 beb7:    09                     ret
 
-R_beb8:
+FfcDevice_Init:
 beb8:    7e 63                  push
 beba:    79 be 08               call [R_be08:0xbe08]
 bebd:    79 bc 84               call [R_bc84:0xbc84]
@@ -10744,7 +11076,7 @@ bf0b:    5e                     mov Z, A
 bf0c:    2a                     clr! AL, #0
 bf0d:    a1 c0 3b               st AL, [R_c03b:0xc03b]
 bf10:    91 01 03               ld A, [0x0103]
-bf13:    2e 0d fa 00 36         wpf #0xfa, [B + Y]
+bf13:    2e 0d fa 00 36         wpf #0xfa, [A + 0x0036]
 bf18:    2e 0c 7a 01 81         wpf #0x7a, [0x0181]
 bf1d:    c0 02                  ld BL, #0x02
 bf1f:    2f 28                  ld_isr B
@@ -10894,10 +11226,10 @@ bffd:    b1 c1 9c               st A, [R_c19c:0xc19c]
 c000:    90 c0 c0               ld A, #0xc0c0
 c003:    b1 c1 9f               st A, [R_c19f:0xc19f]
 c006:    80 02                  ld AL, #0x02
-c008:    46 80 91 c1 9f 60 02   baseconv(0, 8) [A + B + 0x0060], [R_c19f:0xc19f]
-c00f:    79 c1 42               call [R_c142:0xc142]
-c012:    c1 99 60               ld BL, [0x9960]
-c015:    13 88                  bnn L_bf9f
+c008:    46 80 91 c1 9f 60 02 79 baseconv(0, 8) [Y + 0x0279], [R_c19f:0xc19f]
+c010:    c1 42 c1               ld BL, [0x42c1]
+c013:    99                     ld A, [B]
+c014:    60 13 88               ld X, #0x1388
 
 L_c017:
 c017:    66 07                  jsys 7
@@ -11136,7 +11468,7 @@ R_c210:
 c210:    13, "DMA STAT FAIL"
 
 CrtDeviceObj:
-c21f:    00 02                  (0x200)
+c21f:    00 02                  (0x2)
 c221:    cc a0                  R_cca0
 c223:    c2 2f                  R_c22f
 c225:    c2 76                  R_c276
@@ -11324,7 +11656,7 @@ L_c354:
 c354:    95 68 0d               ld A, [Y + 0x000d]
 c357:    14 13                  bz L_c36c
 c359:    47 40 0f 01 81 c3 7f   memcpy #0x10, [0x0181], [R_c37f:0xc37f]
-c360:    47 44 0f 00 46 c3 8f   memcpy #0x10, [X + Y], [R_c38f:0xc38f]
+c360:    47 44 0f 00 46 c3 8f   memcpy #0x10, [A + 0x0046], [R_c38f:0xc38f]
 c367:    2e 0c f9 c3 7f         wpf #0xf9, [R_c37f:0xc37f]
 
 L_c36c:
@@ -11694,8 +12026,11 @@ c5a2:    73 cf                  jmp [L_c573:-0x31]
 
 CrtDevice_Init:
 c5a4:    90 c5 ee               ld A, #0xc5ee
-c5a7:    d7 6a                  st A, [0x006a]	 ; Set exception handler's stack pointer (not a good stack)
+c5a7:    d7 6a                  st A, [0x006a]	 ; Set exception handler's S register
+                                              	 ; Doesn't actually get used as a Stack
 c5a9:    90 c3 22               ld A, #0xc322
+
+L_c5ac:
 c5ac:    d7 6e                  st A, [0x006e]	 ; Install exception handler
 c5ae:    55 60                  mov A, Y
 c5b0:    b5 a2                  st A, [--S]
@@ -11733,14 +12068,14 @@ c5ec:    5c                     mov Y, A
 c5ed:    09                     ret
 
 CmdDeviceObj:
-c5ee:    00 06                  (0x600)
+c5ee:    00 06                  (0x6)
 c5f0:    cc ed                  R_cced
 c5f2:    cc 49                  R_cc49
 c5f4:    cc 79                  R_cc79
 c5f6:    c6 00                  R_c600
 c5f8:    c7 a7                  R_c7a7
 c5fa:    c8 19                  R_c819
-c5fc:    c8 2d                  R_c82d
+c5fc:    c8 2d                  CmdDevice_Init
 c5fe:    cb ca                  R_cbca
 
 R_c600:
@@ -12016,7 +12351,7 @@ c828:    79 c9 2c               call [R_c92c:0xc92c]
 c82b:    08                     cl
 c82c:    09                     ret
 
-R_c82d:
+CmdDevice_Init:
 c82d:    7e 45                  push
 c82f:    d6 ab c8 13            st S, [R_c813:0xc813]
 c833:    d6 89 c8 4f            st Z, [R_c84f:0xc84f]
@@ -12051,7 +12386,7 @@ c868:    b1 c8 f2               st A, [R_c8f2:0xc8f2]
 c86b:    95 68 0f               ld A, [Y + 0x000f]
 c86e:    5e                     mov Z, A
 c86f:    91 01 03               ld A, [0x0103]
-c872:    2e 0d fa 00 36         wpf #0xfa, [B + Y]
+c872:    2e 0d fa 00 36         wpf #0xfa, [A + 0x0036]
 c877:    2e 0c 7a 01 81         wpf #0x7a, [0x0181]
 c87c:    c0 02                  ld BL, #0x02
 c87e:    2f 28                  ld_isr B
@@ -12233,8 +12568,8 @@ c975:    b1 cb 3a               st A, [R_cb3a:0xcb3a]
 c978:    90 c0 c0               ld A, #0xc0c0
 c97b:    b1 cb 3d               st A, [R_cb3d:0xcb3d]
 c97e:    80 02                  ld AL, #0x02
-c980:    46 80 91 cb 3d 60 02   baseconv(0, 8) [A + B + 0x0060], [R_cb3d:0xcb3d]
-c987:    79 b4 f8               call [R_b4f8:0xb4f8]
+c980:    46 80 91 cb 3d 60 02 79 baseconv(0, 8) [Y + 0x0279], [R_cb3d:0xcb3d]
+c988:    b4 f8                  st A, @[pc + -0x8]
 c98a:    cb                     ld BL, [Y]
 c98b:    37 60                  rlc Y, #1
 c98d:    13 88                  bnn L_c917
@@ -12843,8 +13178,8 @@ cdbc:    09                     ret
 L_cdbd:
 cdbd:    cb                     ld BL, [Y]
 cdbe:    14 f3                  bz L_cdb3
-cdc0:    46 00 2d 04 60 01      unkbig2(0, 0) [A + 0x0060], #0x04
-cdc6:    15 eb                  bnz L_cdb3
+cdc0:    46 00 2d 04 60 01 15   unkbig2(0, 0) [Y + 0x0115], #0x04
+cdc7:    eb                     st BL, [Y]
 cdc8:    c5 68 02               ld BL, [Y + 0x0002]
 cdcb:    49                     sub! BL, AL
 cdcc:    15 e5                  bnz L_cdb3
@@ -12899,7 +13234,7 @@ L_ce14:
 ce14:    d2 01 09               ld B, @[DevicesPtr:0x0109]
 ce17:    a5 28 19               st AL, [B + 0x0019]
 ce1a:    90 ad c8               ld A, #0xadc8
-ce1d:    d7 fe                  st A, [0x00fe]
+ce1d:    d7 fe                  st A, [0x00fe]	 ; Install exception handler in interrupt level 15
 ce1f:    3a                     clr! A, #0
 ce20:    d7 ac                  st A, [0x00ac]
 ce22:    90 01 00               ld A, #0x0100
@@ -12922,9 +13257,9 @@ ce55:    b1 ad c6               st A, [R_adc6:0xadc6]
 ce58:    47 4c 04 00 00 00 05 7f 78 00 memcpy #0x05, #0x057f, [0x7800]
 ce62:    47 4c 04 78 00 07 f0 ff 78 05 memcpy #0x05, #0x780007f0ff, [0x7805]
 ce6c:    92 01 07               ld A, @[0x0107]
-ce6f:    2e 0d f9 00 36         wpf #0xf9, [B + Y]
-ce74:    2e 0d fb 00 36         wpf #0xfb, [B + Y]
-ce79:    47 44 0f 00 36 01 81   memcpy #0x10, [B + Y], [0x0181]
+ce6f:    2e 0d f9 00 36         wpf #0xf9, [A + 0x0036]
+ce74:    2e 0d fb 00 36         wpf #0xfb, [A + 0x0036]
+ce79:    47 44 0f 00 36 01 81   memcpy #0x10, [A + 0x0036], [0x0181]
 ce80:    90 00 01               ld A, #0x0001
 ce83:    d7 6c                  st A, [0x006c]
 ce85:    60 ff ff               ld X, #0xffff
@@ -13053,13 +13388,13 @@ cf8d:    73
 cf8e:    e8 'h'
 cf8f:    d0 'P'
 cf90:    e2 'b'
-cf91:    bb ';'	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+cf91:    bb ';'	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
 cf92:    66
 cf93:    10
 cf94:    66
 cf95:    08
 cf96:    e2 'b'
-cf97:    bb ';'	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+cf97:    bb ';'	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
 cf98:    92
 cf99:    01
 cf9a:    09
@@ -13483,19 +13818,19 @@ d2bd:    30 63                  inc Y, #4
 d2bf:    91 e3 8b               ld A, [R_e38b:0xe38b]
 d2c2:    3d                     sll! A, #1
 d2c3:    50 01 01 07            add A, A, [0x0107]
-d2c7:    d6 19 00 00            ld A, [[0x0000] + Z]
-d2cb:    47 4d 01 00 00 00 02   memcpy #0x02, #0x0000, [A + B]
+d2c7:    d6 19 00 00            ld A, [Z]
+d2cb:    47 4d 01 00 00 00 02   memcpy #0x02, #0x0000, [A + 0x0002]
 d2d2:    47 9e 5c 00 08         memset #0x5d, #0x00, [Z]
-d2d7:    47 41 00 e3 8c 80 01   memcpy #0x01, [R_e38c:0xe38c], [A + -0x080]
-d2de:    47 41 00 e0 87 80 03   memcpy #0x01, [R_e087:0xe087], [A + B + -0x080]
-d2e5:    47 4d 00 04 80 06      memcpy #0x01, #0x04, [A + Y + -0x080]
+d2d7:    47 41 00 e3 8c 80 01   memcpy #0x01, [R_e38c:0xe38c], [Z + 0x0001]
+d2de:    47 41 00 e0 87 80 03   memcpy #0x01, [R_e087:0xe087], [Z + 0x0003]
+d2e5:    47 4d 00 04 80 06      memcpy #0x01, #0x04, [Z + 0x0006]
 d2eb:    30 13 e0 88            inc [R_e088:0xe088], #4
-d2ef:    47 41 00 e0 89 80 07   memcpy #0x01, [R_e089:0xe089], [A + Y + -0x080]
-d2f6:    47 4d 00 01 80 12      memcpy #0x01, #0x01, [A + B + -0x080]
-d2fc:    47 41 00 e0 8a 80 16   memcpy #0x01, [R_e08a:0xe08a], [A + Y + -0x080]
-d303:    47 41 00 e0 88 80 31   memcpy #0x01, [R_e088:0xe088], [B + -0x080]
-d30a:    47 9d 01 ff 80 32      memset #0x02, #0xff, [B + B + -0x080]
-d310:    47 4d 00 fd 80 56      memcpy #0x01, #0xfd, [X + Y + -0x080]
+d2ef:    47 41 00 e0 89 80 07   memcpy #0x01, [R_e089:0xe089], [Z + 0x0007]
+d2f6:    47 4d 00 01 80 12      memcpy #0x01, #0x01, [Z + 0x0012]
+d2fc:    47 41 00 e0 8a 80 16   memcpy #0x01, [R_e08a:0xe08a], [Z + 0x0016]
+d303:    47 41 00 e0 88 80 31   memcpy #0x01, [R_e088:0xe088], [Z + 0x0031]
+d30a:    47 9d 01 ff 80 32      memset #0x02, #0xff, [Z + 0x0032]
+d310:    47 4d 00 fd 80 56      memcpy #0x01, #0xfd, [Z + 0x0056]
 d316:    50 98 00 5c            add Z, Z, #0x005c
 d31a:    30 10 e3 8b            inc [R_e38b:0xe38b], #1
 d31e:    81 e0 7a               ld AL, [R_e07a:0xe07a]
@@ -13510,25 +13845,25 @@ d32d:    b1 e3 97               st A, [R_e397:0xe397]
 d330:    91 e3 8d               ld A, [R_e38d:0xe38d]
 d333:    3d                     sll! A, #1
 d334:    50 01 01 09            add A, A, [DevicesPtr:0x0109]
-d338:    d6 19 00 00            ld A, [[0x0000] + Z]
+d338:    d6 19 00 00            ld A, [Z]
 d33c:    47 9e 3b 00 08         memset #0x3c, #0x00, [Z]
-d341:    47 4d 01 47 00 80 00   memcpy #0x02, #0x4700, [A + -0x080]
+d341:    47 4d 01 47 00 80 00   memcpy #0x02, #0x4700, [Z]
 d348:    30 10 e3 93            inc [R_e393:0xe393], #1
-d34c:    47 41 01 e3 93 80 03   memcpy #0x02, [R_e393:0xe393], [A + B + -0x080]
-d353:    47 4d 01 00 03 80 05   memcpy #0x02, #0x0003, [A + X + -0x080]
-d35a:    47 4d 05 c4 d5 cd cd d9 a0 80 07 memcpy #0x06, #0xc4d5cdcdd9a0, [A + Y + -0x080]
+d34c:    47 41 01 e3 93 80 03   memcpy #0x02, [R_e393:0xe393], [Z + 0x0003]
+d353:    47 4d 01 00 03 80 05   memcpy #0x02, #0x0003, [Z + 0x0005]
+d35a:    47 4d 05 c4 d5 cd cd d9 a0 80 07 memcpy #0x06, #0xc4d5cdcdd9a0, [Z + 0x0007]
 d365:    50 98 00 11            add Z, Z, #0x0011
 d369:    30 01                  inc A, #2
-d36b:    d6 19 00 00            ld A, [[0x0000] + Z]
-d36f:    47 4d 01 00 00 00 02   memcpy #0x02, #0x0000, [A + B]
-d376:    47 4d 01 c7 00 80 00   memcpy #0x02, #0xc700, [A + -0x080]
+d36b:    d6 19 00 00            ld A, [Z]
+d36f:    47 4d 01 00 00 00 02   memcpy #0x02, #0x0000, [A + 0x0002]
+d376:    47 4d 01 c7 00 80 00   memcpy #0x02, #0xc700, [Z]
 d37d:    30 10 e3 93            inc [R_e393:0xe393], #1
-d381:    47 41 01 e3 93 80 03   memcpy #0x02, [R_e393:0xe393], [A + B + -0x080]
+d381:    47 41 01 e3 93 80 03   memcpy #0x02, [R_e393:0xe393], [Z + 0x0003]
 d388:    30 10 e3 93            inc [R_e393:0xe393], #1
-d38c:    47 4d 01 00 03 80 05   memcpy #0x02, #0x0003, [A + X + -0x080]
-d393:    47 4d 05 c2 cc c9 ce c4 a0 80 07 memcpy #0x06, #0xc2ccc9cec4a0, [A + Y + -0x080]
-d39e:    47 4d 00 ff 80 1a      memcpy #0x01, #0xff, [A + S + -0x080]
-d3a4:    47 9d 05 ff 80 25      memset #0x06, #0xff, [B + X + -0x080]
+d38c:    47 4d 01 00 03 80 05   memcpy #0x02, #0x0003, [Z + 0x0005]
+d393:    47 4d 05 c2 cc c9 ce c4 a0 80 07 memcpy #0x06, #0xc2ccc9cec4a0, [Z + 0x0007]
+d39e:    47 4d 00 ff 80 1a      memcpy #0x01, #0xff, [Z + 0x001a]
+d3a4:    47 9d 05 ff 80 25      memset #0x06, #0xff, [Z + 0x0025]
 d3aa:    50 98 00 2b            add Z, Z, #0x002b
 d3ae:    30 11 e3 8d            inc [R_e38d:0xe38d], #2
 d3b2:    09                     ret
@@ -13547,11 +13882,11 @@ d3c8:    50 76 00 0d            add Y, Y, #0x000d
 d3cc:    91 e3 8d               ld A, [R_e38d:0xe38d]
 d3cf:    3d                     sll! A, #1
 d3d0:    50 01 01 09            add A, A, [DevicesPtr:0x0109]
-d3d4:    d6 19 00 00            ld A, [[0x0000] + Z]
-d3d8:    47 4d 01 57 04 80 00   memcpy #0x02, #0x5704, [A + -0x080]
-d3df:    47 41 00 e0 91 80 02   memcpy #0x01, [R_e091:0xe091], [A + B + -0x080]
+d3d4:    d6 19 00 00            ld A, [Z]
+d3d8:    47 4d 01 57 04 80 00   memcpy #0x02, #0x5704, [Z]
+d3df:    47 41 00 e0 91 80 02   memcpy #0x01, [R_e091:0xe091], [Z + 0x0002]
 d3e6:    47 40 00 e0 91 01 06   memcpy #0x01, [R_e091:0xe091], [0x0106]
-d3ed:    47 41 01 e3 93 80 03   memcpy #0x02, [R_e393:0xe393], [A + B + -0x080]
+d3ed:    47 41 01 e3 93 80 03   memcpy #0x02, [R_e393:0xe393], [Z + 0x0003]
 d3f4:    47 8c 00 c3 e0 92      memcmp #0x01, #0xc3, [R_e092:0xe092]
 d3fa:    15 22                  bnz L_d41e
 d3fc:    32 20                  clr B, #0
@@ -13601,22 +13936,22 @@ d455:    47 8c 00 d3 e0 92      memcmp #0x01, #0xd3, [R_e092:0xe092]
 d45b:    14 1a                  bz L_d477
 d45d:    47 8c 00 c3 e0 92      memcmp #0x01, #0xc3, [R_e092:0xe092]
 d463:    15 09                  bnz L_d46e
-d465:    47 4d 01 00 0e 80 05   memcpy #0x02, #0x000e, [A + X + -0x080]
+d465:    47 4d 01 00 0e 80 05   memcpy #0x02, #0x000e, [Z + 0x0005]
 d46c:    73 18                  jmp [L_d486:+0x18]
 
 L_d46e:
-d46e:    47 4d 01 00 01 80 05   memcpy #0x02, #0x0001, [A + X + -0x080]
+d46e:    47 4d 01 00 01 80 05   memcpy #0x02, #0x0001, [Z + 0x0005]
 d475:    73 0f                  jmp [L_d486:+0xf]
 
 L_d477:
-d477:    47 4d 01 00 0c 80 05   memcpy #0x02, #0x000c, [A + X + -0x080]
+d477:    47 4d 01 00 0c 80 05   memcpy #0x02, #0x000c, [Z + 0x0005]
 d47e:    30 10 e3 93            inc [R_e393:0xe393], #1
 d482:    30 90 00 03            inc [Z + [0x0003]], #1
 
 L_d486:
-d486:    47 41 05 e0 8b 80 07   memcpy #0x06, [R_e08b:0xe08b], [A + Y + -0x080]
-d48d:    47 4d 01 00 00 80 0d   memcpy #0x02, #0x0000, [A + C + -0x080]
-d494:    47 41 01 e0 95 80 0f   memcpy #0x02, [R_e095:0xe095], [A + P + -0x080]
+d486:    47 41 05 e0 8b 80 07   memcpy #0x06, [R_e08b:0xe08b], [Z + 0x0007]
+d48d:    47 4d 01 00 00 80 0d   memcpy #0x02, #0x0000, [Z + 0x000d]
+d494:    47 41 01 e0 95 80 0f   memcpy #0x02, [R_e095:0xe095], [Z + 0x000f]
 d49b:    47 8c 00 c4 e0 92      memcmp #0x01, #0xc4, [R_e092:0xe092]
 d4a1:    14 3c                  bz L_d4df
 d4a3:    47 8c 00 d3 e0 92      memcmp #0x01, #0xd3, [R_e092:0xe092]
@@ -13625,27 +13960,27 @@ d4ab:    47 8c 00 c6 e0 92      memcmp #0x01, #0xc6, [R_e092:0xe092]
 d4b1:    14 11                  bz L_d4c4
 d4b3:    47 8c 00 c3 e0 92      memcmp #0x01, #0xc3, [R_e092:0xe092]
 d4b9:    14 12                  bz L_d4cd
-d4bb:    47 4d 01 03 2a 80 11   memcpy #0x02, #0x032a, [A + -0x080]
+d4bb:    47 4d 01 03 2a 80 11   memcpy #0x02, #0x032a, [Z + 0x0011]
 d4c2:    73 22                  jmp [L_d4e6:+0x22]
 
 L_d4c4:
-d4c4:    47 4d 01 06 54 80 11   memcpy #0x02, #0x0654, [A + -0x080]
+d4c4:    47 4d 01 06 54 80 11   memcpy #0x02, #0x0654, [Z + 0x0011]
 d4cb:    73 19                  jmp [L_d4e6:+0x19]
 
 L_d4cd:
-d4cd:    47 4d 01 08 03 80 11   memcpy #0x02, #0x0803, [A + -0x080]
+d4cd:    47 4d 01 08 03 80 11   memcpy #0x02, #0x0803, [Z + 0x0011]
 d4d4:    73 10                  jmp [L_d4e6:+0x10]
 
 L_d4d6:
-d4d6:    47 4d 01 00 60 80 11   memcpy #0x02, #0x0060, [A + -0x080]
+d4d6:    47 4d 01 00 60 80 11   memcpy #0x02, #0x0060, [Z + 0x0011]
 d4dd:    73 07                  jmp [L_d4e6:+0x7]
 
 L_d4df:
-d4df:    47 4d 01 00 c0 80 11   memcpy #0x02, #0x00c0, [A + -0x080]
+d4df:    47 4d 01 00 c0 80 11   memcpy #0x02, #0x00c0, [Z + 0x0011]
 
 L_d4e6:
-d4e6:    47 41 00 e0 97 80 13   memcpy #0x01, [R_e097:0xe097], [A + B + -0x080]
-d4ed:    47 41 01 e0 93 80 17   memcpy #0x02, [R_e093:0xe093], [A + Y + -0x080]
+d4e6:    47 41 00 e0 97 80 13   memcpy #0x01, [R_e097:0xe097], [Z + 0x0013]
+d4ed:    47 41 01 e0 93 80 17   memcpy #0x02, [R_e093:0xe093], [Z + 0x0017]
 d4f4:    50 90 00 19            add A, Z, #0x0019
 d4f8:    d6 91 00 14            ld Z, [[0x0014] + A]
 d4fc:    47 8c 00 d3 e0 92      memcmp #0x01, #0xd3, [R_e092:0xe092]
@@ -13654,15 +13989,15 @@ d504:    47 8c 00 c4 e0 92      memcmp #0x01, #0xc4, [R_e092:0xe092]
 d50a:    14 18                  bz L_d524
 d50c:    47 8c 00 c3 e0 92      memcmp #0x01, #0xc3, [R_e092:0xe092]
 d512:    15 08                  bnz L_d51c
-d514:    47 4d 00 ff 80 16      memcpy #0x01, #0xff, [A + Y + -0x080]
+d514:    47 4d 00 ff 80 16      memcpy #0x01, #0xff, [Z + 0x0016]
 d51a:    73 0e                  jmp [L_d52a:+0xe]
 
 L_d51c:
-d51c:    47 4d 00 5a 80 16      memcpy #0x01, #0x5a, [A + Y + -0x080]
+d51c:    47 4d 00 5a 80 16      memcpy #0x01, #0x5a, [Z + 0x0016]
 d522:    73 06                  jmp [L_d52a:+0x6]
 
 L_d524:
-d524:    47 4d 00 06 80 16      memcpy #0x01, #0x06, [A + Y + -0x080]
+d524:    47 4d 00 06 80 16      memcpy #0x01, #0x06, [Z + 0x0016]
 
 L_d52a:
 d52a:    30 10 e3 8d            inc [R_e38d:0xe38d], #1
@@ -13688,7 +14023,7 @@ L_d55a:
 d55a:    91 e3 8d               ld A, [R_e38d:0xe38d]
 d55d:    3d                     sll! A, #1
 d55e:    50 01 01 09            add A, A, [DevicesPtr:0x0109]
-d562:    d6 19 00 00            ld A, [[0x0000] + Z]
+d562:    d6 19 00 00            ld A, [Z]
 d566:    3a                     clr! A, #0
 d567:    d1 e0 a8               ld B, [R_e0a8:0xe0a8]
 d56a:    90 06 f0               ld A, #0x06f0
@@ -13707,21 +14042,21 @@ d585:    f1 e3 8f               st B, [R_e38f:0xe38f]
 
 L_d588:
 d588:    47 9e 2a 00 08         memset #0x2b, #0x00, [Z]
-d58d:    47 4d 01 c7 02 80 00   memcpy #0x02, #0xc702, [A + -0x080]
-d594:    47 41 00 e0 aa 80 02   memcpy #0x01, [R_e0aa:0xe0aa], [A + B + -0x080]
+d58d:    47 4d 01 c7 02 80 00   memcpy #0x02, #0xc702, [Z]
+d594:    47 41 00 e0 aa 80 02   memcpy #0x01, [R_e0aa:0xe0aa], [Z + 0x0002]
 d59b:    30 10 e3 93            inc [R_e393:0xe393], #1
-d59f:    47 41 01 e3 93 80 03   memcpy #0x02, [R_e393:0xe393], [A + B + -0x080]
-d5a6:    47 4d 01 00 08 80 05   memcpy #0x02, #0x0008, [A + X + -0x080]
-d5ad:    47 41 05 e0 98 80 07   memcpy #0x06, [R_e098:0xe098], [A + Y + -0x080]
-d5b4:    47 41 01 e0 a8 80 0f   memcpy #0x02, [R_e0a8:0xe0a8], [A + P + -0x080]
-d5bb:    47 4d 00 83 80 17      memcpy #0x01, #0x83, [A + Y + -0x080]
-d5c1:    47 41 00 e0 a5 80 18   memcpy #0x01, [R_e0a5:0xe0a5], [A + Z + -0x080]
-d5c8:    47 41 00 e0 a7 80 19   memcpy #0x01, [R_e0a7:0xe0a7], [A + Z + -0x080]
-d5cf:    47 41 00 e0 9e 80 1a   memcpy #0x01, [R_e09e:0xe09e], [A + S + -0x080]
-d5d6:    47 41 00 e0 ab 80 1c   memcpy #0x01, [R_e0ab:0xe0ab], [A + C + -0x080]
-d5dd:    47 41 00 e0 a6 80 1e   memcpy #0x01, [R_e0a6:0xe0a6], [A + P + -0x080]
-d5e4:    47 41 05 e0 9f 80 1f   memcpy #0x06, [R_e09f:0xe09f], [A + P + -0x080]
-d5eb:    47 9d 05 ff 80 25      memset #0x06, #0xff, [B + X + -0x080]
+d59f:    47 41 01 e3 93 80 03   memcpy #0x02, [R_e393:0xe393], [Z + 0x0003]
+d5a6:    47 4d 01 00 08 80 05   memcpy #0x02, #0x0008, [Z + 0x0005]
+d5ad:    47 41 05 e0 98 80 07   memcpy #0x06, [R_e098:0xe098], [Z + 0x0007]
+d5b4:    47 41 01 e0 a8 80 0f   memcpy #0x02, [R_e0a8:0xe0a8], [Z + 0x000f]
+d5bb:    47 4d 00 83 80 17      memcpy #0x01, #0x83, [Z + 0x0017]
+d5c1:    47 41 00 e0 a5 80 18   memcpy #0x01, [R_e0a5:0xe0a5], [Z + 0x0018]
+d5c8:    47 41 00 e0 a7 80 19   memcpy #0x01, [R_e0a7:0xe0a7], [Z + 0x0019]
+d5cf:    47 41 00 e0 9e 80 1a   memcpy #0x01, [R_e09e:0xe09e], [Z + 0x001a]
+d5d6:    47 41 00 e0 ab 80 1c   memcpy #0x01, [R_e0ab:0xe0ab], [Z + 0x001c]
+d5dd:    47 41 00 e0 a6 80 1e   memcpy #0x01, [R_e0a6:0xe0a6], [Z + 0x001e]
+d5e4:    47 41 05 e0 9f 80 1f   memcpy #0x06, [R_e09f:0xe09f], [Z + 0x001f]
+d5eb:    47 9d 05 ff 80 25      memset #0x06, #0xff, [Z + 0x0025]
 d5f1:    50 98 00 2b            add Z, Z, #0x002b
 d5f5:    30 10 e3 8d            inc [R_e38d:0xe38d], #1
 d5f9:    71 d5 35               jmp [R_d535:0xd535]
@@ -13740,26 +14075,23 @@ d611:    50 76 00 0a            add Y, Y, #0x000a
 d615:    91 e3 8d               ld A, [R_e38d:0xe38d]
 d618:    3d                     sll! A, #1
 d619:    50 01 01 09            add A, A, [DevicesPtr:0x0109]
-d61d:    d6 19 00 00            ld A, [[0x0000] + Z]
+d61d:    d6 19 00 00            ld A, [Z]
 d621:    47 9e 2a 00 08         memset #0x2b, #0x00, [Z]
-d626:    47 4d 01 42 03 80 00   memcpy #0x02, #0x4203, [A + -0x080]
-d62d:    47 41 00 e0 b5 80 02   memcpy #0x01, [R_e0b5:0xe0b5], [A + B + -0x080]
+d626:    47 4d 01 42 03 80 00   memcpy #0x02, #0x4203, [Z]
+d62d:    47 41 00 e0 b5 80 02   memcpy #0x01, [R_e0b5:0xe0b5], [Z + 0x0002]
 d634:    30 10 e3 93            inc [R_e393:0xe393], #1
-d638:    47 41 01 e3 93 80 03   memcpy #0x02, [R_e393:0xe393], [A + B + -0x080]
+d638:    47 41 01 e3 93 80 03   memcpy #0x02, [R_e393:0xe393], [Z + 0x0003]
 d63f:    d0 d7 09               ld B, #0xd709
-
-L_d642:
 d642:    95 21                  ld A, [B++]
 d644:    15 03                  bnz L_d649
 d646:    71 d1 70               jmp [R_d170:0xd170]
 
 L_d649:
-d649:    47 84 00 20 fe e0 b2   memcmp #0x01, [P + P + 0x0020], [R_e0b2:0xe0b2]
-d650:    15 f0                  bnz L_d642
-d652:    22 00                  clr AH, #0
+d649:    47 84 00 20 fe e0 b2 15 memcmp #0x01, [B + 0xfee0], [0xb215]
+d651:    f0 22 00               st B, #0x2200
 d654:    b5 88 05               st A, [Z + 0x0005]
-d657:    47 41 05 e0 ac 80 07   memcpy #0x06, [R_e0ac:0xe0ac], [A + Y + -0x080]
-d65e:    47 41 01 e0 b3 80 0f   memcpy #0x02, [R_e0b3:0xe0b3], [A + P + -0x080]
+d657:    47 41 05 e0 ac 80 07   memcpy #0x06, [R_e0ac:0xe0ac], [Z + 0x0007]
+d65e:    47 41 01 e0 b3 80 0f   memcpy #0x02, [R_e0b3:0xe0b3], [Z + 0x000f]
 d665:    47 8c 00 b9 e0 b2      memcmp #0x01, #0xb9, [R_e0b2:0xe0b2]
 d66b:    14 1a                  bz L_d687
 d66d:    47 8c 00 b6 e0 b2      memcmp #0x01, #0xb6, [R_e0b2:0xe0b2]
@@ -13771,11 +14103,11 @@ d683:    14 59                  bz L_d6de
 d685:    73 77                  jmp [L_d6fe:+0x77]
 
 L_d687:
-d687:    47 4d 00 42 80 18      memcpy #0x01, #0x42, [A + Z + -0x080]
-d68d:    47 4d 00 c2 80 00      memcpy #0x01, #0xc2, [A + -0x080]
-d693:    47 4d 00 c5 80 19      memcpy #0x01, #0xc5, [A + Z + -0x080]
-d699:    47 4d 00 ff 80 1b      memcpy #0x01, #0xff, [A + S + -0x080]
-d69f:    47 4d 01 00 01 80 1d   memcpy #0x02, #0x0001, [A + C + -0x080]
+d687:    47 4d 00 42 80 18      memcpy #0x01, #0x42, [Z + 0x0018]
+d68d:    47 4d 00 c2 80 00      memcpy #0x01, #0xc2, [Z]
+d693:    47 4d 00 c5 80 19      memcpy #0x01, #0xc5, [Z + 0x0019]
+d699:    47 4d 00 ff 80 1b      memcpy #0x01, #0xff, [Z + 0x001b]
+d69f:    47 4d 01 00 01 80 1d   memcpy #0x02, #0x0001, [Z + 0x001d]
 d6a6:    91 e0 b3               ld A, [R_e0b3:0xe0b3]
 d6a9:    5d                     mov B, A
 d6aa:    52 10 00 f0            and A, A, #0x00f0
@@ -13793,7 +14125,7 @@ d6c8:    19 03                  ble L_d6cd
 d6ca:    b1 e3 8f               st A, [R_e38f:0xe38f]
 
 L_d6cd:
-d6cd:    47 4d 05 ff ff ff ff ff ff 80 25 memcpy #0x06, #0xffffffffffff, [B + X + -0x080]
+d6cd:    47 4d 05 ff ff ff ff ff ff 80 25 memcpy #0x06, #0xffffffffffff, [Z + 0x0025]
 d6d8:    50 98 00 2b            add Z, Z, #0x002b
 d6dc:    73 24                  jmp [L_d702:+0x24]
 
@@ -13805,7 +14137,7 @@ d6e6:    30 21                  inc B, #2
 d6e8:    50 20                  add A, B
 d6ea:    98                     ld A, [A]
 d6eb:    d6 91 00 0f            ld Z, [[0x000f] + A]
-d6ef:    47 4d 03 42 00 00 79 80 18 memcpy #0x04, #0x42000079, [A + Z + -0x080]
+d6ef:    47 4d 03 42 00 00 79 80 18 memcpy #0x04, #0x42000079, [Z + 0x0018]
 d6f8:    50 98 00 1e            add Z, Z, #0x001e
 d6fc:    73 04                  jmp [L_d702:+0x4]
 
@@ -13851,14 +14183,14 @@ d738:    50 76 00 1c            add Y, Y, #0x001c
 d73c:    91 e3 8d               ld A, [R_e38d:0xe38d]
 d73f:    3d                     sll! A, #1
 d740:    50 01 01 09            add A, A, [DevicesPtr:0x0109]
-d744:    d6 19 00 00            ld A, [[0x0000] + Z]
+d744:    d6 19 00 00            ld A, [Z]
 d748:    47 9e 27 00 08         memset #0x28, #0x00, [Z]
-d74d:    47 4d 01 06 09 80 00   memcpy #0x02, #0x0609, [A + -0x080]
+d74d:    47 4d 01 06 09 80 00   memcpy #0x02, #0x0609, [Z]
 d754:    30 10 e3 93            inc [R_e393:0xe393], #1
-d758:    47 41 01 e3 93 80 03   memcpy #0x02, [R_e393:0xe393], [A + B + -0x080]
-d75f:    47 41 05 e0 b6 80 07   memcpy #0x06, [R_e0b6:0xe0b6], [A + Y + -0x080]
-d766:    47 41 14 e0 bc 80 11   memcpy #0x15, [R_e0bc:0xe0bc], [A + -0x080]
-d76d:    47 41 00 e0 d1 80 26   memcpy #0x01, [R_e0d1:0xe0d1], [B + Y + -0x080]
+d758:    47 41 01 e3 93 80 03   memcpy #0x02, [R_e393:0xe393], [Z + 0x0003]
+d75f:    47 41 05 e0 b6 80 07   memcpy #0x06, [R_e0b6:0xe0b6], [Z + 0x0007]
+d766:    47 41 14 e0 bc 80 11   memcpy #0x15, [R_e0bc:0xe0bc], [Z + 0x0011]
+d76d:    47 41 00 e0 d1 80 26   memcpy #0x01, [R_e0d1:0xe0d1], [Z + 0x0026]
 d774:    50 98 00 27            add Z, Z, #0x0027
 d778:    30 10 e3 8d            inc [R_e38d:0xe38d], #1
 d77c:    73 a5                  jmp [R_d723:-0x5b]
@@ -13945,13 +14277,13 @@ L_d81d:
 d81d:    91 e3 8d               ld A, [R_e38d:0xe38d]
 d820:    3d                     sll! A, #1
 d821:    50 01 01 09            add A, A, [DevicesPtr:0x0109]
-d825:    d6 19 00 00            ld A, [[0x0000] + Z]
+d825:    d6 19 00 00            ld A, [Z]
 d829:    30 10 e3 93            inc [R_e393:0xe393], #1
-d82d:    47 41 01 e3 93 80 03   memcpy #0x02, [R_e393:0xe393], [A + B + -0x080]
-d834:    47 4d 01 57 08 80 00   memcpy #0x02, #0x5708, [A + -0x080]
-d83b:    47 41 05 e0 e4 80 07   memcpy #0x06, [R_e0e4:0xe0e4], [A + Y + -0x080]
-d842:    47 41 01 e1 14 80 0f   memcpy #0x02, [R_e114:0xe114], [A + P + -0x080]
-d849:    47 41 00 e1 16 80 1a   memcpy #0x01, [R_e116:0xe116], [A + S + -0x080]
+d82d:    47 41 01 e3 93 80 03   memcpy #0x02, [R_e393:0xe393], [Z + 0x0003]
+d834:    47 4d 01 57 08 80 00   memcpy #0x02, #0x5708, [Z]
+d83b:    47 41 05 e0 e4 80 07   memcpy #0x06, [R_e0e4:0xe0e4], [Z + 0x0007]
+d842:    47 41 01 e1 14 80 0f   memcpy #0x02, [R_e114:0xe114], [Z + 0x000f]
+d849:    47 41 00 e1 16 80 1a   memcpy #0x01, [R_e116:0xe116], [Z + 0x001a]
 d850:    3a                     clr! A, #0
 d851:    81 e1 17               ld AL, [R_e117:0xe117]
 d854:    50 08                  add Z, A
@@ -13989,7 +14321,7 @@ d87a:    30 01                  inc A, #2
 d87c:    30 22                  inc B, #3
 d87e:    55 37 00 00            mov Y, [[0x0000] + B]
 d882:    50 86                  add Y, Z
-d884:    d6 37 00 00            ld B, [[0x0000] + Y]
+d884:    d6 37 00 00            ld B, [Y]
 d888:    73 ea                  jmp [L_d874:-0x16]
 
 L_d88a:
@@ -14229,7 +14561,7 @@ da6b:    52 10 f8 00            and A, A, #0xf800
 da6f:    50 10 08 00            add A, A, #0x0800
 da73:    5e                     mov Z, A
 da74:    34 0a                  srl A, #11
-da76:    47 4d 00 1e 10 01      memcpy #0x01, #0x1e, [A + 0x0010]
+da76:    47 4d 00 1e 10 01      memcpy #0x01, #0x1e, [A + 0x0001]
 da7c:    81 2e 2c               ld AL, [0x2e2c]
 da7f:    00                     HALT
 da80:    e1 1a 47               st BL, [0x1a47]
@@ -14311,7 +14643,7 @@ daf0:    3b
 L_daf1:
 daf1:    d6 39 00 05            ld B, [[0x0005] + Z]
 daf5:    50 74 dc aa            add X, Y, #0xdcaa
-daf9:    d6 59 00 00            ld X, [[0x0000] + Z]
+daf9:    d6 59 00 00            ld X, [Z]
 
 L_dafd:
 dafd:    34 60                  srl Y, #1
@@ -14775,7 +15107,7 @@ de33:    73 39                  jmp [L_de6e:+0x39]
 L_de35:
 de35:    d6 39 00 1d            ld B, [[0x001d] + Z]
 de39:    50 74 df 05            add X, Y, #0xdf05
-de3d:    d6 59 00 00            ld X, [[0x0000] + Z]
+de3d:    d6 59 00 00            ld X, [Z]
 de41:    77                     unknown
 de42:    76                     unknown
 de43:    00                     HALT
@@ -14957,7 +15289,7 @@ df65:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a:0xe11a]
 df6a:    e8                     st BL, [A]
 df6b:    e5 08 e0               st BL, [A + -0x020]
 df6e:    92 01 07               ld A, @[0x0107]
-df71:    47 41 1f 01 61 00 36   memcpy #0x20, [0x0161], [B + Y]
+df71:    47 41 1f 01 61 00 36   memcpy #0x20, [0x0161], [A + 0x0036]
 df78:    80 80                  ld AL, #0x80
 df7a:    07                     rl
 

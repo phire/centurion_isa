@@ -91,16 +91,23 @@ def Cpu6AddrMode(mode, pc, memory, prev=None, size = 1):
             pc += 2
             return DirectRef(addr), pc
         case 1: # complex
-            imm8 = get_signed_8(memory, pc)
-            regs = memory[pc + 1]
+            regs = memory[pc]
+            pc += 1
+
             reg_a = Reg16Ref(regs >> 4)
             reg_b = Reg16Ref(regs & 0xf)
-            pc += 2
+
+            if regs & 0x20 == 0:
+                imm = get_signed_8(memory, pc)
+                pc += 1
+            else:
+                imm = get_be16(memory, pc)
+                pc += 2
 
             if reg_b.reg == 0:
-                return IndexedRef(reg_a, imm8), pc
+                return IndexedRef(reg_a, imm), pc
             # todo: This mode also does PC-relative addressing?
-            return ComplexRef(reg_a, reg_b, imm8), pc
+            return ComplexRef(reg_a, reg_b, imm), pc
         case 2: # indexed
             if getattr(prev, 'only_upper', False):
                 # Not confirmed
@@ -213,10 +220,12 @@ def D6Mode(mode, pc, memory):
     unk = memory[pc+1] & 0x10
 
     addr = get_be16(memory, pc)
-
     ref = DirectRef(addr)
+    pc += 2
 
     if a != b:
+        if addr == 0:
+            return Reg16Ref(a), IndexedRef(Reg16Ref(b)), pc
         ref = ComplexRef(ref, Reg16Ref(b))
-    return Reg16Ref(a), ref, pc + 2
+    return Reg16Ref(a), ref, pc
 

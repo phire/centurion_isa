@@ -4,16 +4,9 @@
 0x83a0 ,	comment	; modify jump instruction below
 0x83a2 ,	comment	; restore registers
 0x83a4 ,	comment	; jump to syscall
-0xb924 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
-0xb926 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
-0xba0d ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
-0xba0f ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
-0xbac2 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
-0xbadd ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
-0xbb37 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
-0xbba1 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
-0xbbd6 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
-0xc5a7 ,	comment	; Set exception handler's stack pointer (not a good stack)
+0xadc8 ,	comment	; Setup StackPointer
+0xc5a7 ,	comment	; Set exception handler's S register
+		; Doesn't actually get used as a Stack
 0xc5ac ,	comment	; Install exception handler
 0xcd4d,	pre_comment 	; Looks like this function converts a 16bit word to hex and writes
 	 	; it to the ascii buffer specified at [X]
@@ -29,8 +22,7 @@
 0xcdec ,	comment	; Setup Stack? This isn't a very good stack pointer
 0xce09 ,	comment	; BL should now be the DISK number.
 		; 0/1 for Hawk, 10/11 for Finch, 20/21 for Phoenix
-0xcf91 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
-0xcf97 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+0xce1d ,	comment	; Install exception handler in interrupt level 15
 0xe49b ,	comment	; Setup CRT0 to 9600 baud
 0xe4a1 ,	comment	; "*"
 0xe4ac ,	comment	; "("

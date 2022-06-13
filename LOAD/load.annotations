@@ -33,11 +33,26 @@
 0x89ac, label, NumSyscalls
 0x89ac, B
 0x8d54, label, Syscall_02_Singleton
-0x8d54, <H
+0x8d54, >H
+0xadc8, code, AbortHandler
+0xaf3e, label, Abort_CD
+0xaf3e, <B
+0xaf3d, label, Abort_LVL
+0xaf3d, <B
+0xaf3f, label, Abort_MAP
+0xaf3f, <B
+0xaf40, label, Abort_IAD
+0xaf42, label, Abort_EAD
 0xaf46, pstring16
+0xaf46, label, AbortString
+0xaf4b, label, AbortString_CD
+0xaf53, label, AbortString_LVL
+0xaf5b, label, AbortString_MAP
+0xaf63, label, AbortString_IAD
+0xaf6d, label, AbortString_EAD
 0xaf74, pstring16
 0xb6b6, label, HawkDeviceObj
-0xb6b6, <H
+0xb6b6, >H
 0xb6b8, fnptr
 0xb6ba, fnptr
 0xb6bc, fnptr
@@ -48,6 +63,7 @@
 0xb6c6, fnptr
 0xb6c8, fnptr
 #0xb6ca, code
+0xb88b, code, HawkDevice_Init
 0xbbde, pstring16
 0xbbe3, pstring16
 0xbbe9, pstring16
@@ -58,7 +74,7 @@
 0xbc21, pstring16
 0xbc2a, pstring16
 0xbc5c, label, FfcDeviceObj
-0xbc5c, <H
+0xbc5c, >H
 0xbc5e, fnptr
 0xbc60, fnptr
 0xbc62, fnptr
@@ -67,6 +83,7 @@
 0xbc68, fnptr
 0xbc6a, fnptr
 0xbc6c, fnptr
+0xbeb8, label, FfcDevice_Init
 0xc157, pstring16
 0xc172, pstring16
 0xc18c, pstring16
@@ -80,7 +97,7 @@
 0xc204, pstring16
 0xc210, pstring16
 0xc21f, label, CrtDeviceObj
-0xc21f, <H
+0xc21f, >H
 0xc221, fnptr
 0xc223, fnptr
 0xc225, fnptr
@@ -96,7 +113,7 @@
 0xc402, label, CrtDevice_InterruptHandler_End
 0xc5a4, label, CrtDevice_Init
 0xc5ee, label, CmdDeviceObj
-0xc5ee, <H
+0xc5ee, >H
 0xc5f0, fnptr
 0xc5f2, fnptr
 0xc5f4, fnptr
@@ -107,9 +124,10 @@
 0xc5fe, fnptr
 0xc603, fnptr
 #0xc819, code
+0xc82d, code, CmdDevice_Init
 0xcd4d, label, FormatHexWord
 0xcd65, label, FormatHexWord_Temp
-0xcd65, <H
+0xcd65, >H
 0xcae6, pstring16
 0xcb03, pstring16
 0xcb1e, pstring16
@@ -133,23 +151,23 @@
 0xe399, label, Debugger_Entry
 0xe39b, label, Debugger_Return
 0xe526, label, Debug_Regs_A
-0xe526, <H
+0xe526, >H
 0xe528, label, Debug_Regs_B
-0xe528, <H
+0xe528, >H
 0xe52a, label, Debug_Regs_X
-0xe52a, <H
+0xe52a, >H
 0xe52c, label, Debug_Regs_Y
-0xe52c, <H
+0xe52c, >H
 0xe52e, label, Debug_Regs_Z
-0xe52e, <H
+0xe52e, >H
 0xe530, label, Debug_Regs_S
-0xe530, <H
+0xe530, >H
 0xe532, label, Debug_Regs_C
-0xe532, <H
+0xe532, >H
 0xe534, label, Debug_Regs_P
-0xe534, <H
+0xe534, >H
 0xe536, label, Debug_Regs_PC
-0xe536, <H
+0xe536, >H
 0xe538, label, CCR_Value
 0xe538, <B
 0xe5d6, label, Mux0_WriteHexByte
