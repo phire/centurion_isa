@@ -1,8 +1,9 @@
 
 SyscallVector:
 0100:    71 80 00               jmp [R_8000:0x8000]
-0103:    01
-0104:    ea 'j'
+
+SystemInfoPtr:
+0103:    01 ea                  SystemInfo
 0105:    01
 0106:    19
 0107:    01
@@ -226,21 +227,23 @@ R_01e4:
 01e8:    00
 01e9:    00
 
-R_01ea:
+SystemInfo:
 01ea:    01                     nop
 01eb:    00                     HALT
 01ec:    00                     HALT
 01ed:    00                     HALT
-01ee:    04                     ei
-01ef:    45 04                  mov XH, AH
-01f1:    13 02                  bnn L_01f5
+
+SystemInfo_File?:
+01ee:    04 45                  R_0445
+01f0:    04
+01f1:    13
+01f2:    02
 01f3:    46
 01f4:    00
+01f5:    00
 
-L_01f5:
-01f5:    00                     HALT
-01f6:    ef                     st BL, [P]
-01f7:    ff                     st B, [P]
+SystemInfo_TopOfMemory:
+01f6:    ef ff                  (0xefff)
 01f8:    ef                     st BL, [P]
 01f9:    ff                     st B, [P]
 01fa:    00                     HALT
@@ -1084,7 +1087,7 @@ L_8053:
 
 R_805a:
 805a:    b3 14                  st A, [pc + 0x14]
-805c:    91 01 03               ld A, [0x0103]
+805c:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 805f:    2e 0d f8 00 36         wpf #0xf8, [A + 0x0036]
 8064:    3a                     clr! A, #0
 8065:    7e 01                  push {A}
@@ -1099,7 +1102,7 @@ R_806f:
 
 L_8073:
 8073:    b3 1b                  st A, [pc + 0x1b]
-8075:    91 01 03               ld A, [0x0103]
+8075:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 8078:    2e 0d fb 00 36         wpf #0xfb, [A + 0x0036]
 807d:    2e 0c 7b 01 81         wpf #0x7b, [0x0181]
 8082:    90 00 03               ld A, #0x0003
@@ -1240,12 +1243,11 @@ R_833f:
 835f:    4a                     and! BL, AL
 8360:    21 33                  dec BL, #4
 8362:    16 27                  blt L_838b
-8364:    d1 01 03               ld B, [0x0103]
+8364:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 
 L_8367:
 8367:    c5 28 59               ld BL, [B + 0x0059]
-836a:    e6                     unknown
-836b:    a8                     st AL, [A]
+836a:    e6 a8                  mov A, IL10(Z)
 836c:    49                     sub! BL, AL
 836d:    17 04                  bp L_8373
 836f:    20 39                  inc BL, #10
@@ -1256,8 +1258,7 @@ L_8373:
 8375:    85 28 02               ld AL, [B + 0x0002]
 8378:    17 0d                  bp L_8387
 837a:    79 86 12               call [R_8612:0x8612]
-837d:    e6                     unknown
-837e:    a8                     st AL, [A]
+837d:    e6 a8                  mov A, IL10(Z)
 837f:    d4 e4                  ld B, @[pc + -0x1c]
 8381:    a5 28 59               st AL, [B + 0x0059]
 8384:    85 28 03               ld AL, [B + 0x0003]
@@ -1364,7 +1365,7 @@ L_8418:
 841b:    1f b3                  b?F L_83d0
 841d:    c6                     unknown
 841e:    95 a8 01               ld A, [S + 0x0001]
-8421:    d1 01 03               ld B, [0x0103]
+8421:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 8424:    b5 28 5a               st A, [B + 0x005a]
 8427:    91 01 5a               ld A, [0x015a]
 842a:    2e 4d 87 20 46 2e      wpf32 #0x87, [B + 0x462e]
@@ -1383,7 +1384,7 @@ Syscall_6f:
 8445:    6e                     unknown
 8446:    84 58                  ld AL, @[pc + 0x58]
 8448:    65 a8 01               ld X, [S + 0x0001]
-844b:    91 01 03               ld A, [0x0103]
+844b:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 844e:    95 08 5a               ld A, [A + 0x005a]
 8451:    b5 a8 01               st A, [S + 0x0001]
 8454:    80 04                  ld AL, #0x04
@@ -1500,7 +1501,7 @@ L_84e7:
 84ee:    f1 80 d8               st B, [R_80d8:0x80d8]
 84f1:    79 b5 54               call [R_b554:0xb554]
 84f4:    80 da                  ld AL, #0xda
-84f6:    91 01 03               ld A, [0x0103]
+84f6:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 84f9:    5e                     mov Z, A
 84fa:    3a                     clr! A, #0
 84fb:    a1 01 25               st AL, [0x0125]
@@ -1529,7 +1530,7 @@ L_852a:
 
 L_8532:
 8532:    16 fe                  blt L_8532
-8534:    61 01 03               ld X, [0x0103]
+8534:    61 01 03               ld X, [SystemInfoPtr:0x0103]
 8537:    14 2a                  bz L_8563
 8539:    79 88 05               call [R_8805:0x8805]
 853c:    89                     ld AL, [B]
@@ -1563,7 +1564,7 @@ L_8563:
 
 Syscall_6c:
 8568:    32 20                  clr B, #0
-856a:    55 89 01 03            mov Z, Z, [0x0103]
+856a:    55 89 01 03            mov Z, Z, [SystemInfoPtr:0x0103]
 856e:    45 11                  mov AL, AL
 8570:    73 07                  jmp [L_8579:+0x7]
 
@@ -1571,7 +1572,7 @@ Syscall_0a:
 8572:    c0 00                  ld BL, #0x00
 
 L_8574:
-8574:    91 01 03               ld A, [0x0103]
+8574:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 8577:    5e                     mov Z, A
 8578:    8a                     ld AL, [X]
 
@@ -1626,7 +1627,7 @@ L_85bc:
 85bc:    d0 01 00               ld B, #0x0100
 85bf:    58                     add! B, A
 85c0:    f5 a2                  st B, [--S]
-85c2:    d1 01 03               ld B, [0x0103]
+85c2:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 85c5:    c5 28 01               ld BL, [B + 0x0001]
 85c8:    85 a4                  ld AL, @[S]
 85ca:    49                     sub! BL, AL
@@ -1640,7 +1641,7 @@ L_85d0:
 L_85d2:
 85d2:    85 a4                  ld AL, @[S]
 85d4:    17 fa                  bp L_85d0
-85d6:    91 01 03               ld A, [0x0103]
+85d6:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 85d9:    85 08 01               ld AL, [A + 0x0001]
 85dc:    d5 a1                  ld B, [S++]
 85de:    a9                     st AL, [B]
@@ -1675,7 +1676,7 @@ L_85fc:
 L_85fe:
 85fe:    85 a4                  ld AL, @[S]
 8600:    17 0c                  bp L_860e
-8602:    91 01 03               ld A, [0x0103]
+8602:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 8605:    95 08 32               ld A, [A + 0x0032]
 8608:    14 04                  bz L_860e
 860a:    7b 06                  call [R_8612:+0x6]
@@ -1717,7 +1718,7 @@ Syscall_0b:
 8630:    0f                     rsys
 
 R_8631:
-8631:    d1 01 03               ld B, [0x0103]
+8631:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 8634:    7e 45                  push {X, Y, Z}
 8636:    55 a0                  mov A, S
 8638:    b5 28 10               st A, [B + 0x0010]
@@ -1751,7 +1752,7 @@ L_8660:
 8667:    14 dc                  bz L_8645
 8669:    42 23                  and BL, BH
 866b:    15 d8                  bnz L_8645
-866d:    b1 01 03               st A, [0x0103]
+866d:    b1 01 03               st A, [SystemInfoPtr:0x0103]
 8670:    79 86 f5               call [R_86f5:0x86f5]
 8673:    95 88 10               ld A, [Z + 0x0010]
 8676:    15 03                  bnz L_867b
@@ -1804,7 +1805,7 @@ L_86b8:
 86bc:    71 87 3c               jmp [R_873c:0x873c]
 
 L_86bf:
-86bf:    b1 01 03               st A, [0x0103]
+86bf:    b1 01 03               st A, [SystemInfoPtr:0x0103]
 86c2:    5e                     mov Z, A
 86c3:    95 88 08               ld A, [Z + 0x0008]
 86c6:    51 20                  sub A, B
@@ -1954,7 +1955,7 @@ L_8792:
 87cb:    e5 61                  st BL, [Y++]
 87cd:    b5 61                  st A, [Y++]
 87cf:    55 80                  mov A, Z
-87d1:    b1 01 03               st A, [0x0103]
+87d1:    b1 01 03               st A, [SystemInfoPtr:0x0103]
 87d4:    71 86 d0               jmp [R_86d0:0x86d0]
 
 R_87d7:
@@ -1986,7 +1987,7 @@ L_87fe:
 8802:    71 86 7f               jmp [R_867f:0x867f]
 
 R_8805:
-8805:    d1 01 03               ld B, [0x0103]
+8805:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 8808:    3a                     clr! A, #0
 8809:    85 28 01               ld AL, [B + 0x0001]
 880c:    d0 88 72               ld B, #0x8872
@@ -2268,7 +2269,7 @@ Syscall_66:
 
 R_89bc:
 89bc:    7e 03                  push {A, B}
-89be:    79 8a a6               call [R_8aa6:0x8aa6]
+89be:    79 8a a6               call [LookupDeviceInstance:0x8aa6]
 89c1:    99                     ld A, [B]
 89c2:    dd                     ld B, [S]
 89c3:    59                     sub! B, A
@@ -2316,7 +2317,7 @@ L_89f0:
 89fa:    b5 a2                  st A, [--S]
 89fc:    3a                     clr! A, #0
 89fd:    85 28 01               ld AL, [B + 0x0001]
-8a00:    d1 01 03               ld B, [0x0103]
+8a00:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 8a03:    c5 28 06               ld BL, [B + 0x0006]
 8a06:    2d                     sll! AL, #1
 8a07:    2c                     srl! AL, #1
@@ -2360,7 +2361,7 @@ L_8a36:
 
 Syscall_00:
 8a3b:    55 20                  mov A, B
-8a3d:    79 b2 d1               call [R_b2d1:0xb2d1]
+8a3d:    79 b2 d1               call [AssertIsSystemPtr:0xb2d1]
 8a40:    95 28 06               ld A, [B + 0x0006]
 8a43:    7c f9                  call @[pc + -0x7]
 8a45:    7b 01                  call [R_8a48:+0x1]
@@ -2369,7 +2370,7 @@ Syscall_00:
 R_8a48:
 8a48:    7e 45                  push {X, Y, Z}
 8a4a:    55 28                  mov Z, B
-8a4c:    7b 58                  call [R_8aa6:+0x58]
+8a4c:    7b 58                  call [LookupDeviceInstance:+0x58]
 8a4e:    5b                     mov X, A
 8a4f:    55 26                  mov Y, B
 8a51:    95 48 05               ld A, [X + 0x0005]
@@ -2396,7 +2397,7 @@ L_8a69:
 8a74:    15 1c                  bnz L_8a92
 8a76:    f3 15                  st B, [pc + 0x15]
 8a78:    14 18                  bz L_8a92
-8a7a:    91 01 03               ld A, [0x0103]
+8a7a:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 8a7d:    85 08 01               ld AL, [A + 0x0001]
 8a80:    28                     inc! AL, #1
 8a81:    79 80 0c               call [R_800c:0x800c]
@@ -2415,19 +2416,21 @@ L_8a92:
 8a9b:    50 7f ff 10            add P, [[0xff10] + Y]
 8a9f:    03                     rf
 8aa0:    79 83 a7               call [R_83a7:0x83a7]
-8aa3:    7b 01                  call [R_8aa6:+0x1]
+8aa3:    7b 01                  call [LookupDeviceInstance:+0x1]
 8aa5:    0f                     rsys
 
-R_8aa6:
+LookupDeviceInstance:
+    ; Not entirely sure
+    ; Seems to gets the device instance struct corrosponding to byte at [B + 1]
 8aa6:    6d a2                  st X, [--S]
-8aa8:    61 01 03               ld X, [0x0103]
+8aa8:    61 01 03               ld X, [SystemInfoPtr:0x0103]
 8aab:    99                     ld A, [B]
 8aac:    b3 0f                  st A, [R_8abd:+0xf]
 8aae:    3a                     clr! A, #0
-8aaf:    85 28 01               ld AL, [B + 0x0001]
-8ab2:    17 12                  bp L_8ac6
+8aaf:    85 28 01               ld AL, [B + 0x0001]	 ; 0x81
+8ab2:    17 12                  bp L_8ac6	 ; if B < 0x80
 8ab4:    2d                     sll! AL, #1
-8ab5:    2c                     srl! AL, #1
+8ab5:    2c                     srl! AL, #1	 ; Remove top bit
 8ab6:    c5 48 06               ld BL, [X + 0x0006]
 8ab9:    49                     sub! BL, AL
 8aba:    16 0f                  blt L_8acb
@@ -2508,9 +2511,9 @@ L_8b23:
 
 Syscall_10:
 8b26:    55 20                  mov A, B
-8b28:    79 b2 d1               call [R_b2d1:0xb2d1]
+8b28:    79 b2 d1               call [AssertIsSystemPtr:0xb2d1]	 ; Assert B is System Pointer
 8b2b:    95 28 06               ld A, [B + 0x0006]
-8b2e:    7c f9                  call @[pc + -0x7]
+8b2e:    7c f9                  call @[pc + -0x7]	 ; Assert [B + 0x0006] is System pointer
 8b30:    7b 01                  call [R_8b33:+0x1]
 8b32:    0f                     rsys
 
@@ -2518,7 +2521,7 @@ R_8b33:
 8b33:    f5 a2                  st B, [--S]
 8b35:    99                     ld A, [B]
 8b36:    b1 8a bd               st A, [R_8abd:0x8abd]
-8b39:    79 8a a6               call [R_8aa6:0x8aa6]
+8b39:    79 8a a6               call [LookupDeviceInstance:0x8aa6]
 8b3c:    f5 a2                  st B, [--S]
 8b3e:    d5 08 01               ld B, [A + 0x0001]
 8b41:    c0 04                  ld BL, #0x04
@@ -2735,13 +2738,13 @@ L_8c83:
 L_8c94:
 8c94:    79 8d e4               call [R_8de4:0x8de4]
 8c97:    55 82                  mov B, Z
-8c99:    79 8a a6               call [R_8aa6:0x8aa6]
+8c99:    79 8a a6               call [LookupDeviceInstance:0x8aa6]
 8c9c:    55 24                  mov X, B
 8c9e:    f1 8c 0f               st B, [R_8c0f:0x8c0f]
 8ca1:    73 94                  jmp [R_8c37:-0x6c]
 
 Syscall_52:
-8ca3:    79 8a a6               call [R_8aa6:0x8aa6]
+8ca3:    79 8a a6               call [LookupDeviceInstance:0x8aa6]
 8ca6:    b5 a2                  st A, [--S]
 8ca8:    55 60                  mov A, Y
 8caa:    b5 a2                  st A, [--S]
@@ -2837,7 +2840,7 @@ L_8d27:
 8d33:    85 41                  ld AL, [X++]
 8d35:    a3 35                  st AL, [pc + 0x35]
 8d37:    17 17                  bp L_8d50
-8d39:    91 01 03               ld A, [0x0103]
+8d39:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 8d3c:    d5 41                  ld B, [X++]
 8d3e:    f3 0a                  st B, [pc + 0x0a]
 8d40:    d5 08 1c               ld B, [A + 0x001c]
@@ -2917,7 +2920,7 @@ L_8da4:
 8dad:    e3 74                  st BL, [R_8e23:+0x74]
 8daf:    f0 00 00               st B, #0x0000
 8db2:    7e 63                  push {Y, Z}
-8db4:    91 01 03               ld A, [0x0103]
+8db4:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 8db7:    5c                     mov Y, A
 8db8:    95 68 0c               ld A, [Y + 0x000c]
 8dbb:    c3 f3                  ld BL, [R_8db0:-0xd]
@@ -3107,7 +3110,7 @@ L_8ec5:
 8ec5:    93 0f                  ld A, [R_8ed6:+0xf]
 8ec7:    b3 89                  st A, [R_8e52:-0x77]
 8ec9:    7e 21                  push {B}
-8ecb:    91 01 03               ld A, [0x0103]
+8ecb:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 8ece:    66 59                  jsys 59
 8ed0:    7f 21                  pop {B}
 8ed2:    71 8e 50               jmp [R_8e50:0x8e50]
@@ -3127,7 +3130,7 @@ Syscall_6d:
 8ee1:    b3 2d                  st A, [pc + 0x2d]
 8ee3:    39                     dec! A, #1
 8ee4:    a3 aa                  st AL, [R_8e90:-0x56]
-8ee6:    91 01 03               ld A, [0x0103]
+8ee6:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 8ee9:    5c                     mov Y, A
 8eea:    85 08 31               ld AL, [A + 0x0031]
 8eed:    a5 a2                  st AL, [--S]
@@ -3321,7 +3324,7 @@ Syscall_65:
 901b:    dd                     ld B, [S]
 901c:    95 28 06               ld A, [B + 0x0006]
 901f:    ba                     st A, [X]
-9020:    79 8a a6               call [R_8aa6:0x8aa6]
+9020:    79 8a a6               call [LookupDeviceInstance:0x8aa6]
 9023:    85 08 02               ld AL, [A + 0x0002]
 9026:    a5 a2                  st AL, [--S]
 9028:    95 28 07               ld A, [B + 0x0007]
@@ -3334,7 +3337,7 @@ L_9030:
 9036:    84 e1                  ld AL, @[pc + -0x1f]
 9038:    14 11                  bz L_904b
 903a:    9a                     ld A, [X]
-903b:    79 b2 d1               call [R_b2d1:0xb2d1]
+903b:    79 b2 d1               call [AssertIsSystemPtr:0xb2d1]
 903e:    73 0e                  jmp [L_904e:+0xe]
 
 Syscall_50:
@@ -3772,7 +3775,7 @@ R_92df:
 Syscall_67:
 92e0:    7e 45                  push {X, Y, Z}
 92e2:    55 20                  mov A, B
-92e4:    79 b2 d1               call [R_b2d1:0xb2d1]
+92e4:    79 b2 d1               call [AssertIsSystemPtr:0xb2d1]
 92e7:    b5 a2                  st A, [--S]
 92e9:    79 85 b9               call [R_85b9:0x85b9]
 92ec:    3c                     srl! A, #1
@@ -3785,7 +3788,7 @@ Syscall_67:
 92fa:    79 b2 cb               call [R_b2cb:0xb2cb]
 92fd:    b3 31                  st A, [pc + 0x31]
 92ff:    d5 a1                  ld B, [S++]
-9301:    79 8a a6               call [R_8aa6:0x8aa6]
+9301:    79 8a a6               call [LookupDeviceInstance:0x8aa6]
 9304:    b5 a2                  st A, [--S]
 9306:    95 08 17               ld A, [A + 0x0017]
 9309:    b1 91 4d               st A, [R_914d:0x914d]
@@ -4006,7 +4009,7 @@ L_9476:
 947c:    17 f8                  bp L_9476
 947e:    3b                     not! A, #0
 947f:    15 ec                  bnz L_946d
-9481:    91 01 03               ld A, [0x0103]
+9481:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 9484:    95 08 01               ld A, [A + 0x0001]
 9487:    83 18                  ld AL, [pc + 0x18]
 9489:    b5 22                  st A, [--B]
@@ -4066,7 +4069,7 @@ Syscall_4e:
 94d5:    7b c9                  call [L_94a0:-0x37]
 94d7:    14 be                  bz L_9497
 94d9:    b5 a2                  st A, [--S]
-94db:    91 01 03               ld A, [0x0103]
+94db:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 94de:    d5 08 01               ld B, [A + 0x0001]
 94e1:    95 a1                  ld A, [S++]
 94e3:    c5 08 fe               ld BL, [A + -0x002]
@@ -4170,7 +4173,7 @@ R_9592:
 9594:    65 a1                  ld X, [S++]
 9596:    79 b2 cb               call [R_b2cb:0xb2cb]
 9599:    5d                     mov B, A
-959a:    91 01 03               ld A, [0x0103]
+959a:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 959d:    71 00 00               jmp [L_0000:0x0000]
 
 R_95a0:
@@ -4193,7 +4196,7 @@ L_95bb:
 95bb:    7c da                  call @[pc + -0x26]
 
 L_95bd:
-95bd:    91 01 03               ld A, [0x0103]
+95bd:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 95c0:    71 00 00               jmp [L_0000:0x0000]
 
 R_95c3:
@@ -4396,7 +4399,7 @@ L_96c4:
 96ca:    0f                     rsys
 
 L_96cb:
-96cb:    79 b2 d1               call [R_b2d1:0xb2d1]
+96cb:    79 b2 d1               call [AssertIsSystemPtr:0xb2d1]
 96ce:    47 2a ff 00            unkblk2 #0x100, [A], [A]
 96d2:    08                     cl
 96d3:    73 ef                  jmp [L_96c4:-0x11]
@@ -4425,7 +4428,7 @@ R_96f1:
 96f3:    b1 97 b4               st A, [R_97b4:0x97b4]
 96f6:    5e                     mov Z, A
 96f7:    14 1b                  bz L_9714
-96f9:    79 b2 d1               call [R_b2d1:0xb2d1]
+96f9:    79 b2 d1               call [AssertIsSystemPtr:0xb2d1]
 
 L_96fc:
 96fc:    79 9a f2               call [R_9af2:0x9af2]
@@ -4733,7 +4736,7 @@ Syscall_3a:
 98bc:    85 41                  ld AL, [X++]
 98be:    a5 a2                  st AL, [--S]
 98c0:    9a                     ld A, [X]
-98c1:    79 b2 d1               call [R_b2d1:0xb2d1]
+98c1:    79 b2 d1               call [AssertIsSystemPtr:0xb2d1]
 98c4:    5d                     mov B, A
 98c5:    85 a1                  ld AL, [S++]
 98c7:    a5 28 03               st AL, [B + 0x0003]
@@ -4800,7 +4803,7 @@ R_9921:
 9921:    85 41                  ld AL, [X++]
 
 R_9923:
-9923:    d1 01 03               ld B, [0x0103]
+9923:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 9926:    d5 28 19               ld B, [B + 0x0019]
 9929:    14 03                  bz L_992e
 992b:    a5 28 06               st AL, [B + 0x0006]
@@ -4809,7 +4812,7 @@ L_992e:
 992e:    09                     ret
 
 R_992f:
-992f:    91 01 03               ld A, [0x0103]
+992f:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 9932:    95 08 19               ld A, [A + 0x0019]
 9935:    b5 a2                  st A, [--S]
 9937:    51 10 7f ff            sub A, A, #0x7fff
@@ -4850,9 +4853,9 @@ Syscall_36:
 
 Syscall_31:
 996f:    9a                     ld A, [X]
-9970:    79 b2 d1               call [R_b2d1:0xb2d1]
+9970:    79 b2 d1               call [AssertIsSystemPtr:0xb2d1]
 9973:    5d                     mov B, A
-9974:    79 8a a6               call [R_8aa6:0x8aa6]
+9974:    79 8a a6               call [LookupDeviceInstance:0x8aa6]
 9977:    c5 08 01               ld BL, [A + 0x0001]
 997a:    80 03                  ld AL, #0x03
 997c:    49                     sub! BL, AL
@@ -4893,7 +4896,7 @@ R_99a6:
 99a8:    b1 97 b4               st A, [R_97b4:0x97b4]
 99ab:    5e                     mov Z, A
 99ac:    14 05                  bz L_99b3
-99ae:    79 b2 d1               call [R_b2d1:0xb2d1]
+99ae:    79 b2 d1               call [AssertIsSystemPtr:0xb2d1]
 99b1:    73 4a                  jmp [L_99fd:+0x4a]
 
 L_99b3:
@@ -5187,7 +5190,7 @@ L_9b61:
 9b66:    d3 02                  ld B, [R_9b6a:+0x2]
 9b68:    58                     add! B, A
 9b69:    f0 00 00               st B, #0x0000
-9b6c:    91 01 03               ld A, [0x0103]
+9b6c:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 9b6f:    95 0c 19               ld A, @[A + 0x0019]
 9b72:    98                     ld A, [A]
 9b73:    59                     sub! B, A
@@ -5337,7 +5340,7 @@ L_9c37:
 
 R_9c39:
 9c39:    55 82                  mov B, Z
-9c3b:    79 8a a6               call [R_8aa6:0x8aa6]
+9c3b:    79 8a a6               call [LookupDeviceInstance:0x8aa6]
 9c3e:    95 08 01               ld A, [A + 0x0001]
 9c41:    80 09                  ld AL, #0x09
 9c43:    41 01                  sub AL, AH
@@ -5811,7 +5814,7 @@ R_9eda:
 9eda:    80 01                  ld AL, #0x01
 9edc:    a5 a2                  st AL, [--S]
 9ede:    55 82                  mov B, Z
-9ee0:    79 8a a6               call [R_8aa6:0x8aa6]
+9ee0:    79 8a a6               call [LookupDeviceInstance:0x8aa6]
 9ee3:    95 88 06               ld A, [Z + 0x0006]
 9ee6:    79 a3 0d               call [R_a30d:0xa30d]
 9ee9:    79 a0 09               call [R_a009:0xa009]
@@ -5922,7 +5925,7 @@ L_9f7e:
 
 R_9f87:
 9f87:    55 82                  mov B, Z
-9f89:    79 8a a6               call [R_8aa6:0x8aa6]
+9f89:    79 8a a6               call [LookupDeviceInstance:0x8aa6]
 9f8c:    f5 a2                  st B, [--S]
 9f8e:    3a                     clr! A, #0
 9f8f:    85 28 04               ld AL, [B + 0x0004]
@@ -6114,7 +6117,7 @@ L_a0b8:
 a0b8:    7b e4                  call [L_a09e:-0x1c]
 a0ba:    7b cc                  call [L_a088:-0x34]
 a0bc:    b5 a2                  st A, [--S]
-a0be:    79 8a a6               call [R_8aa6:0x8aa6]
+a0be:    79 8a a6               call [LookupDeviceInstance:0x8aa6]
 a0c1:    99                     ld A, [B]
 a0c2:    d5 a1                  ld B, [S++]
 a0c4:    59                     sub! B, A
@@ -6278,7 +6281,7 @@ a1ba:    09                     ret
 
 R_a1bb:
 a1bb:    55 82                  mov B, Z
-a1bd:    79 8a a6               call [R_8aa6:0x8aa6]
+a1bd:    79 8a a6               call [LookupDeviceInstance:0x8aa6]
 a1c0:    85 08 02               ld AL, [A + 0x0002]
 a1c3:    a5 a2                  st AL, [--S]
 a1c5:    95 88 16               ld A, [Z + 0x0016]
@@ -6436,7 +6439,7 @@ a29a:    7b c9                  call [L_a265:-0x37]
 a29c:    71 9e 4f               jmp [R_9e4f:0x9e4f]
 
 R_a29f:
-a29f:    79 8a a6               call [R_8aa6:0x8aa6]
+a29f:    79 8a a6               call [LookupDeviceInstance:0x8aa6]
 a2a2:    55 22                  mov B, B
 a2a4:    14 06                  bz L_a2ac
 
@@ -7842,7 +7845,7 @@ aa2e:    a8                     st AL, [A]
 aa2f:    05                     di
 aa30:    f5 a8 09               st B, [S + 0x0009]
 aa33:    6d a8 05               st X, [S + 0x0005]
-aa36:    d1 01 03               ld B, [0x0103]
+aa36:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 aa39:    47 45 00 a0 08 20 29 c0 00 memcpy #0x01, [S + 0x0820], [B + Z + 0xc000]
 aa42:    e5 a8 08               st BL, [S + 0x0008]
 
@@ -7872,7 +7875,7 @@ L_aa65:
 aa65:    79 85 b9               call [R_85b9:0x85b9]
 aa68:    3b                     not! A, #0
 aa69:    79 ab 11               call [R_ab11:0xab11]
-aa6c:    d1 01 03               ld B, [0x0103]
+aa6c:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 aa6f:    c5 28 01               ld BL, [B + 0x0001]
 aa72:    e1 ab 12               st BL, [R_ab12:0xab12]
 aa75:    d0 ad c6               ld B, #0xadc6
@@ -7935,7 +7938,7 @@ aace:    79 86 12               call [R_8612:0x8612]
 aad1:    79 85 b9               call [R_85b9:0x85b9]
 aad4:    3b                     not! A, #0
 aad5:    7b 3a                  call [R_ab11:+0x3a]
-aad7:    d1 01 03               ld B, [0x0103]
+aad7:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 aada:    c5 28 01               ld BL, [B + 0x0001]
 aadd:    e3 33                  st BL, [R_ab12:+0x33]
 aadf:    73 ae                  jmp [L_aa8f:-0x52]
@@ -7966,7 +7969,7 @@ L_ab01:
 ab01:    79 88 05               call [R_8805:0x8805]
 ab04:    89                     ld AL, [B]
 ab05:    47 4e 00 02 02         memcpy #0x01, #0x02, [B]
-ab0a:    d1 01 03               ld B, [0x0103]
+ab0a:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 ab0d:    a5 28 2a               st AL, [B + 0x002a]
 ab10:    09                     ret
 
@@ -7995,12 +7998,12 @@ ab2f:    09                     ret
 
 L_ab30:
 ab30:    79 88 05               call [R_8805:0x8805]
-ab33:    91 01 03               ld A, [0x0103]
+ab33:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 ab36:    95 08 29               ld A, [A + 0x0029]
 ab39:    a9                     st AL, [B]
 ab3a:    45 01                  mov AL, AH
 ab3c:    a3 31                  st AL, [pc + 0x31]
-ab3e:    91 01 03               ld A, [0x0103]
+ab3e:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 ab41:    95 08 01               ld A, [A + 0x0001]
 ab44:    81 01 3d               ld AL, [0x013d]
 ab47:    41 01                  sub AL, AH
@@ -8020,7 +8023,7 @@ ab5c:    80 02                  ld AL, #0x02
 ab5e:    a9                     st AL, [B]
 
 L_ab5f:
-ab5f:    61 01 03               ld X, [0x0103]
+ab5f:    61 01 03               ld X, [SystemInfoPtr:0x0103]
 ab62:    65 48 08               ld X, [X + 0x0008]
 ab65:    47 5d 00 7f 40 13      unkblk5 #0x01, #0x7f, [X + 0x0013]
 ab6b:    d5 a8 07               ld B, [S + 0x0007]
@@ -8103,7 +8106,7 @@ abdb:    5b                     mov X, A
 abdc:    79 ad 26               call [R_ad26:0xad26]
 abdf:    55 40                  mov A, X
 abe1:    65 a1                  ld X, [S++]
-abe3:    d1 01 03               ld B, [0x0103]
+abe3:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 abe6:    c5 28 01               ld BL, [B + 0x0001]
 abe9:    e5 08 04               st BL, [A + 0x0004]
 abec:    30 04                  inc A, #5
@@ -8224,7 +8227,7 @@ aca8:    79 af d7               call [R_afd7:0xafd7]
 acab:    16 e6                  blt L_ac93
 acad:    ab                     st AL, [Y]
 acae:    a5 68 20               st AL, [Y + 0x0020]
-acb1:    55 89 01 03            mov Z, Z, [0x0103]
+acb1:    55 89 01 03            mov Z, Z, [SystemInfoPtr:0x0103]
 acb5:    79 86 f5               call [R_86f5:0x86f5]
 acb8:    35 4a                  sll X, #11
 acba:    90 08 00               ld A, #0x0800
@@ -8411,7 +8414,7 @@ addc:    f1 af 43               st B, [R_af43:0xaf43]
 addf:    a1 af 3e               st AL, [Abort_CD:0xaf3e]
 ade2:    21 14                  dec AL, #5
 ade4:    15 12                  bnz L_adf8
-ade6:    91 01 03               ld A, [0x0103]
+ade6:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 ade9:    14 0d                  bz L_adf8
 adeb:    d5 08 19               ld B, [A + 0x0019]
 adee:    14 08                  bz L_adf8
@@ -8432,13 +8435,11 @@ ae08:    20 1b                  inc AL, #12
 ae0a:    a3 05                  st AL, [pc + 0x05]
 ae0c:    20 11                  inc AL, #2
 ae0e:    a3 09                  st AL, [pc + 0x09]
-ae10:    e6                     unknown
-ae11:    0c                     unknown
+ae10:    e6 0c                  mov A, IL0(C)
 ae12:    c0 07                  ld BL, #0x07
 ae14:    4a                     and! BL, AL
 ae15:    e1 af 3f               st BL, [Abort_MAP:0xaf3f]
-ae18:    e6                     unknown
-ae19:    0e                     dly
+ae18:    e6 0e                  mov A, IL0(P)
 ae1a:    b1 af 40               st A, [Abort_IAD:0xaf40]
 ae1d:    81 af 3e               ld AL, [Abort_CD:0xaf3e]
 ae20:    21 13                  dec AL, #4
@@ -8479,7 +8480,7 @@ ae8d:    80 02                  ld AL, #0x02
 ae8f:    46 80 90 af 4b af 3e   baseconv(0, 8) [Abort_CD:0xaf3e], [AbortString_CD:0xaf4b]
 ae96:    81 af 3d               ld AL, [Abort_LVL:0xaf3d]
 ae99:    15 05                  bnz L_aea0
-ae9b:    61 01 03               ld X, [0x0103]
+ae9b:    61 01 03               ld X, [SystemInfoPtr:0x0103]
 ae9e:    15 1a                  bnz L_aeba
 
 L_aea0:
@@ -8498,7 +8499,7 @@ aeb7:    59                     sub! B, A
 aeb8:    19 2d                  ble L_aee7
 
 L_aeba:
-aeba:    d1 01 03               ld B, [0x0103]
+aeba:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 aebd:    51 42                  sub B, X
 aebf:    14 17                  bz L_aed8
 aec1:    95 48 10               ld A, [X + 0x0010]
@@ -8520,9 +8521,9 @@ aed8:    90 ae ed               ld A, #0xaeed
 
 L_aedb:
 aedb:    32 c0                  clr C, #0
-aedd:    d7 0e                  st A, [0x000e]
+aedd:    d7 0e                  mov A, IL0(P)
 aedf:    3a                     clr! A, #0
-aee0:    d7 0c                  st A, [0x000c]
+aee0:    d7 0c                  mov A, IL0(C)
 
 L_aee2:
 aee2:    6b 33                  st X, [pc + 0x33]
@@ -8537,7 +8538,7 @@ aee8:    90 af 03               ld A, #0xaf03
 aeeb:    73 ee                  jmp [L_aedb:-0x12]
 
 R_aeed:
-aeed:    91 01 03               ld A, [0x0103]
+aeed:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 aef0:    95 08 0c               ld A, [A + 0x000c]
 aef3:    14 01                  bz L_aef6
 aef5:    5f                     mov S, A
@@ -8643,7 +8644,7 @@ Syscall_59:
 af96:    80 01                  ld AL, #0x01
 
 L_af98:
-af98:    d1 01 03               ld B, [0x0103]
+af98:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 af9b:    7b 01                  call [R_af9e:+0x1]
 af9d:    0f                     rsys
 
@@ -8739,7 +8740,7 @@ b025:    09                     ret
 Syscall_5a:
 b026:    7e 45                  push {X, Y, Z}
 b028:    b3 0e                  st A, [pc + 0x0e]
-b02a:    91 01 03               ld A, [0x0103]
+b02a:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 b02d:    b3 21                  st A, [R_b050:+0x21]
 
 L_b02f:
@@ -8844,7 +8845,7 @@ b0c4:    09                     ret
 
 R_b0c5:
 b0c5:    7e 63                  push {Y, Z}
-b0c7:    55 67 01 03            mov Y, Y, [0x0103]
+b0c7:    55 67 01 03            mov Y, Y, [SystemInfoPtr:0x0103]
 b0cb:    8b                     ld AL, [Y]
 b0cc:    c0 10                  ld BL, #0x10
 b0ce:    4a                     and! BL, AL
@@ -8915,7 +8916,7 @@ b136:    79 84 e4               call [Syscall_09:0x84e4]
 b139:    31
 
 L_b13a:
-b13a:    55 67 01 03            mov Y, Y, [0x0103]
+b13a:    55 67 01 03            mov Y, Y, [SystemInfoPtr:0x0103]
 b13e:    80 ff                  ld AL, #0xff
 b140:    15 0d                  bnz L_b14f
 b142:    80 00                  ld AL, #0x00
@@ -9010,7 +9011,7 @@ b1bb:    44 0f                  xor PL, AH
 L_b1bd:
 b1bd:    90 b3 30               ld A, #0xb330
 b1c0:    79 b2 6b               call [R_b26b:0xb26b]
-b1c3:    d1 01 03               ld B, [0x0103]
+b1c3:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 b1c6:    73 e1                  jmp [L_b1a9:-0x1f]
 
 L_b1c8:
@@ -9021,7 +9022,7 @@ b1ce:    b3 db                  st A, [R_b1ab:-0x25]
 b1d0:    50 01 b1 b2            add A, A, [R_b1b2:0xb1b2]
 b1d4:    39                     dec! A, #1
 b1d5:    5c                     mov Y, A
-b1d6:    79 8a a6               call [R_8aa6:0x8aa6]
+b1d6:    79 8a a6               call [LookupDeviceInstance:0x8aa6]
 b1d9:    b3 2a                  st A, [pc + 0x2a]
 b1db:    32 20                  clr B, #0
 b1dd:    c5 08 01               ld BL, [A + 0x0001]
@@ -9068,12 +9069,12 @@ b220:    90 b3 38               ld A, #0xb338
 b223:    7b 46                  call [R_b26b:+0x46]
 b225:    79 b2 cb               call [R_b2cb:0xb2cb]
 b228:    5d                     mov B, A
-b229:    61 01 03               ld X, [0x0103]
+b229:    61 01 03               ld X, [SystemInfoPtr:0x0103]
 b22c:    50 45 b1 ab            add X, X, [R_b1ab:0xb1ab]
 b230:    71 b1 b1               jmp [R_b1b1:0xb1b1]
 
 L_b233:
-b233:    79 8a a6               call [R_8aa6:0x8aa6]
+b233:    79 8a a6               call [LookupDeviceInstance:0x8aa6]
 b236:    b3 23                  st A, [pc + 0x23]
 b238:    32 20                  clr B, #0
 b23a:    c5 08 01               ld BL, [A + 0x0001]
@@ -9179,10 +9180,12 @@ R_b2cb:
 b2cb:    95 a4                  ld A, @[S]
 b2cd:    30 b1 00 00            inc [S + [0x0000]], #2
 
-R_b2d1:
+AssertIsSystemPtr:
+    ; Checks if A is a pointer within the kernel memory range (0x8000 to 0xefff)
+    ; Aborts if not
 b2d1:    f3 1d                  st B, [pc + 0x1d]
 b2d3:    51 12 7f ff            sub B, A, #0x7fff
-b2d7:    11 0d                  bnc L_b2e6
+b2d7:    11 0d                  bnc L_b2e6	 ; Check A is below 0x8000
 
 L_b2d9:
 b2d9:    dd                     ld B, [S]
@@ -9194,10 +9197,10 @@ b2e2:    79 84 e4               call [Syscall_09:0x84e4]
 b2e5:    17
 
 L_b2e6:
-b2e6:    d1 01 03               ld B, [0x0103]
-b2e9:    d5 28 0c               ld B, [B + 0x000c]
+b2e6:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
+b2e9:    d5 28 0c               ld B, [B + 0x000c]	 ; SystemInfo_TopOfMemory
 b2ec:    59                     sub! B, A
-b2ed:    10 ea                  bc L_b2d9
+b2ed:    10 ea                  bc L_b2d9	 ; A is above 0xefff
 b2ef:    d0 00 00               ld B, #0x0000
 b2f2:    09                     ret
 
@@ -9223,7 +9226,7 @@ b309:    9a                     ld A, [X]
 L_b30a:
 b30a:    dd                     ld B, [S]
 b30b:    bd                     st A, [S]
-b30c:    79 8a a6               call [R_8aa6:0x8aa6]
+b30c:    79 8a a6               call [LookupDeviceInstance:0x8aa6]
 b30f:    d0 80 00               ld B, #0x8000
 b312:    c8                     ld BL, [A]
 b313:    42 23                  and BL, BH
@@ -9299,7 +9302,7 @@ b368:    21 30                  dec BL, #1
 b36a:    16 2b                  blt L_b397
 b36c:    79 b2 cb               call [R_b2cb:0xb2cb]
 b36f:    5c                     mov Y, A
-b370:    61 01 03               ld X, [0x0103]
+b370:    61 01 03               ld X, [SystemInfoPtr:0x0103]
 b373:    3a                     clr! A, #0
 b374:    85 48 16               ld AL, [X + 0x0016]
 b377:    51 20                  sub A, B
@@ -9316,7 +9319,7 @@ b384:    71 00 00               jmp [L_0000:0x0000]
 L_b387:
 b387:    79 b2 cb               call [R_b2cb:0xb2cb]
 b38a:    5c                     mov Y, A
-b38b:    61 01 03               ld X, [0x0103]
+b38b:    61 01 03               ld X, [SystemInfoPtr:0x0103]
 b38e:    65 48 17               ld X, [X + 0x0017]
 b391:    31 49                  dec X, #10
 b393:    55 42                  mov B, X
@@ -9357,14 +9360,11 @@ b3c3:    0f                     rsys
 
 R_b3c4:
 b3c4:    c6                     unknown
-b3c5:    e6                     unknown
-b3c6:    a4 b3                  st AL, @[pc + -0x4d]
-b3c8:    49                     sub! BL, AL
-b3c9:    e6                     unknown
-b3ca:    a6                     unknown
+b3c5:    e6 a4                  mov A, IL10(X)
+b3c7:    b3 49                  st A, [R_b412:+0x49]
+b3c9:    e6 a6                  mov A, IL10(Y)
 b3cb:    b3 47                  st A, [R_b414:+0x47]
-b3cd:    e6                     unknown
-b3ce:    a8                     st AL, [A]
+b3cd:    e6 a8                  mov A, IL10(Z)
 b3cf:    b6                     unknown
 b3d0:    a3 0d                  st AL, [pc + 0x0d]
 b3d2:    91 00 5a               ld A, [0x005a]
@@ -9386,7 +9386,7 @@ b3fa:    89                     ld AL, [B]
 b3fb:    21 11                  dec AL, #2
 b3fd:    14 05                  bz L_b404
 b3ff:    55 60                  mov A, Y
-b401:    79 b2 d1               call [R_b2d1:0xb2d1]
+b401:    79 b2 d1               call [AssertIsSystemPtr:0xb2d1]
 
 L_b404:
 b404:    47 42 07 01 30 06      memcpy #0x08, [0x0130], [Y]
@@ -9418,7 +9418,7 @@ b423:    14 01                  bz L_b426
 b425:    0f                     rsys
 
 L_b426:
-b426:    91 01 03               ld A, [0x0103]
+b426:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 b429:    d0 04 00               ld B, #0x0400
 b42c:    c8                     ld BL, [A]
 b42d:    43 23                  or BL, BH
@@ -9431,22 +9431,22 @@ b434:    79 b4 3f               call [R_b43f:0xb43f]
 b437:    0f                     rsys
 
 R_b438:
-b438:    d1 01 03               ld B, [0x0103]
+b438:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 b43b:    b5 28 32               st A, [B + 0x0032]
 b43e:    09                     ret
 
 R_b43f:
-b43f:    91 01 03               ld A, [0x0103]
+b43f:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 b442:    95 08 32               ld A, [A + 0x0032]
 b445:    09                     ret
 
 R_b446:
 b446:    90 b4 61               ld A, #0xb461
-b449:    d7 ae                  st A, [0x00ae]
+b449:    d7 ae                  mov A, IL10(P)
 b44b:    90 b4 56               ld A, #0xb456
-b44e:    d7 aa                  st A, [0x00aa]
+b44e:    d7 aa                  mov A, IL10(S)
 b450:    90 00 ff               ld A, #0x00ff
-b453:    d7 a8                  st A, [0x00a8]
+b453:    d7 a8                  mov A, IL10(Z)
 b455:    09                     ret
 
 R_b456:
@@ -9552,7 +9552,7 @@ b4f4:    60 00 00               ld X, #0x0000
 b4f7:    09                     ret
 
 R_b4f8:
-b4f8:    91 01 03               ld A, [0x0103]
+b4f8:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 b4fb:    15 03                  bnz R_b500
 b4fd:    92 01 07               ld A, @[0x0107]
 
@@ -9697,7 +9697,7 @@ Syscall_55:
 b5c8:    7e 63                  push {Y, Z}
 b5ca:    55 00                  mov A, A
 b5cc:    15 03                  bnz L_b5d1
-b5ce:    79 8a a6               call [R_8aa6:0x8aa6]
+b5ce:    79 8a a6               call [LookupDeviceInstance:0x8aa6]
 
 L_b5d1:
 b5d1:    d5 41                  ld B, [X++]
@@ -9900,11 +9900,11 @@ b6eb:    a1 b7 b3               st AL, [R_b7b3:0xb7b3]
 b6ee:    95 a1                  ld A, [S++]
 b6f0:    b1 b7 a1               st A, [R_b7a1:0xb7a1]
 b6f3:    95 68 0f               ld A, [Y + 0x000f]
-b6f6:    d7 28                  st A, [0x0028]
+b6f6:    d7 28                  mov A, IL2(Z)
 b6f8:    f6 31 0f               st BL, +0xf(A)
 b6fb:    95 a1                  ld A, [S++]
 b6fd:    b1 b7 a7               st A, [R_b7a7:0xb7a7]
-b700:    91 01 03               ld A, [0x0103]
+b700:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 b703:    2e 0d fa 00 36         wpf #0xfa, [A + 0x0036]
 b708:    2e 0c 7a 01 81         wpf #0x7a, [0x0181]
 b70d:    c0 02                  ld BL, #0x02
@@ -10062,7 +10062,7 @@ L_b7dc:
 b7dc:    a1 b9 49               st AL, [R_b949:0xb949]
 b7df:    a3 23                  st AL, [R_b804:+0x23]
 b7e1:    90 b9 3c               ld A, #0xb93c
-b7e4:    d7 2e                  st A, [0x002e]
+b7e4:    d7 2e                  mov A, IL2(P)
 b7e6:    85 68 0f               ld AL, [Y + 0x000f]
 b7e9:    c0 0c                  ld BL, #0x0c
 b7eb:    42 31                  and AL, BL
@@ -10072,8 +10072,7 @@ b7f1:    48                     add! BL, AL
 b7f2:    e3 01                  st BL, [pc + 0x01]
 b7f4:    2f 04                  ld_dma_mode A
 b7f6:    2f 06                  enable_dma
-b7f8:    e6                     unknown
-b7f9:    28                     inc! AL, #1
+b7f8:    e6 28                  mov A, IL2(Z)
 b7fa:    f6 11 0e               st AL, +0xe(A)
 b7fd:    f6 11 0c               st AL, +0xc(A)
 b800:    79 cc 80               call [R_cc80:0xcc80]
@@ -10159,7 +10158,7 @@ b88a:    09                     ret
 HawkDevice_Init:
 b88b:    7e 45                  push {X, Y, Z}
 b88d:    65 a8 08               ld X, [S + 0x0008]
-b890:    91 01 03               ld A, [0x0103]
+b890:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 b893:    2e 0d fa 00 36         wpf #0xfa, [A + 0x0036]
 b898:    2e 0c 7a 01 81         wpf #0x7a, [0x0181]
 b89d:    c0 02                  ld BL, #0x02
@@ -10168,7 +10167,7 @@ b8a1:    95 41                  ld A, [X++]
 b8a3:    5c                     mov Y, A
 b8a4:    b1 01 3f               st A, [0x013f]
 b8a7:    95 68 0f               ld A, [Y + 0x000f]
-b8aa:    d7 28                  st A, [0x0028]
+b8aa:    d7 28                  mov A, IL2(Z)
 b8ac:    f6 11 0f               st AL, +0xf(A)
 b8af:    95 41                  ld A, [X++]
 b8b1:    b1 b7 a9               st A, [R_b7a9:0xb7a9]
@@ -10233,7 +10232,7 @@ b922:    09                     ret
 
 L_b923:
 b923:    79 bb 3f               call [R_bb3f:0xbb3f]
-b926:    bb                     st A, [Y]	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+b926:    bb                     st A, [Y]
 b927:    e3 80                  st BL, [pc + -0x80]
 b929:    ff                     st B, [P]
 b92a:    a1 b8 04               st AL, [R_b804:0xb804]
@@ -10362,7 +10361,7 @@ ba07:    71 b9 28               jmp [R_b928:0xb928]
 L_ba0a:
 ba0a:    7b 58                  call [L_ba64:+0x58]
 ba0c:    79 bb 3f               call [R_bb3f:0xbb3f]
-ba0f:    bb                     st A, [Y]	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+ba0f:    bb                     st A, [Y]
 ba10:    e9                     st BL, [B]
 
 R_ba11:
@@ -10441,11 +10440,11 @@ ba75:    65 a1                  ld X, [S++]
 
 L_ba77:
 ba77:    3a                     clr! A, #0
-ba78:    d7 12                  st A, [0x0012]
+ba78:    d7 12                  mov A, IL1(B)
 ba7a:    0a                     reti
 ba7b:    f6 19 0f               st AL, +0xf(Z)
-ba7e:    e6                     unknown
-ba7f:    12 5d                  bn L_bade
+ba7e:    e6 12                  mov A, IL1(B)
+ba80:    5d                     mov B, A
 ba81:    14 09                  bz L_ba8c
 ba83:    7b df                  call [L_ba64:-0x21]
 ba85:    b3 e7                  st A, [R_ba6e:-0x19]
@@ -10487,7 +10486,7 @@ babc:    14 06                  bz L_bac4
 L_babe:
 babe:    7b a4                  call [L_ba64:-0x5c]
 bac0:    7b 7d                  call [R_bb3f:+0x7d]
-bac2:    bb                     st A, [Y]	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+bac2:    bb                     st A, [Y]
 bac3:    de                     ld B, [C]
 
 L_bac4:
@@ -10510,9 +10509,7 @@ bad7:    b1 bb f2               st A, [R_bbf2:0xbbf2]
 
 L_bada:
 bada:    79 bb 8b               call [R_bb8b:0xbb8b]
-badd:    bb                     st A, [Y]	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
-
-L_bade:
+badd:    bb                     st A, [Y]
 bade:    ed                     st BL, [S]
 badf:    d0 00 80               ld B, #0x0080
 bae2:    5a                     and! B, A
@@ -10569,7 +10566,7 @@ bb2e:    a3 0d                  st AL, [pc + 0x0d]
 bb30:    3a                     clr! A, #0
 bb31:    81 b7 b3               ld AL, [R_b7b3:0xb7b3]
 bb34:    79 b5 54               call [R_b554:0xb554]
-bb37:    bb                     st A, [Y]	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+bb37:    bb                     st A, [Y]
 bb38:    3e                     inc X
 bb39:    93 02                  ld A, [pc + 0x02]
 bb3b:    09                     ret
@@ -11075,7 +11072,7 @@ bf08:    95 68 0f               ld A, [Y + 0x000f]
 bf0b:    5e                     mov Z, A
 bf0c:    2a                     clr! AL, #0
 bf0d:    a1 c0 3b               st AL, [R_c03b:0xc03b]
-bf10:    91 01 03               ld A, [0x0103]
+bf10:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 bf13:    2e 0d fa 00 36         wpf #0xfa, [A + 0x0036]
 bf18:    2e 0c 7a 01 81         wpf #0x7a, [0x0181]
 bf1d:    c0 02                  ld BL, #0x02
@@ -11128,7 +11125,7 @@ bf6d:    09                     ret
 R_bf6e:
 bf6e:    79 cc 80               call [R_cc80:0xcc80]
 bf71:    3a                     clr! A, #0
-bf72:    d7 12                  st A, [0x0012]
+bf72:    d7 12                  mov A, IL1(B)
 
 L_bf74:
 bf74:    d5 68 0f               ld B, [Y + 0x000f]
@@ -11142,8 +11139,8 @@ bf84:    73 3f                  jmp [R_bfc5:+0x3f]
 
 L_bf86:
 bf86:    79 cc 97               call [R_cc97:0xcc97]
-bf89:    e6                     unknown
-bf8a:    12 5d                  bn L_bfe9
+bf89:    e6 12                  mov A, IL1(B)
+bf8b:    5d                     mov B, A
 bf8c:    14 07                  bz L_bf95
 bf8e:    79 c1 2c               call [R_c12c:0xc12c]
 bf91:    c2 10 80               ld BL, @[0x1080]
@@ -11157,7 +11154,7 @@ bf96:    85 41                  ld AL, [X++]
 bf98:    a3 0c                  st AL, [pc + 0x0c]
 bf9a:    7c d3                  call @[pc + -0x2d]
 bf9c:    3a                     clr! A, #0
-bf9d:    d7 12                  st A, [0x0012]
+bf9d:    d7 12                  mov A, IL1(B)
 
 L_bf9f:
 bf9f:    d5 68 0f               ld B, [Y + 0x000f]
@@ -11173,7 +11170,7 @@ bfaf:    73 14                  jmp [R_bfc5:+0x14]
 R_bfb1:
 bfb1:    7c bc                  call @[pc + -0x44]
 bfb3:    3a                     clr! A, #0
-bfb4:    d7 12                  st A, [0x0012]
+bfb4:    d7 12                  mov A, IL1(B)
 
 L_bfb6:
 bfb6:    d5 68 0f               ld B, [Y + 0x000f]
@@ -11204,8 +11201,6 @@ bfdf:    e3 f9                  st BL, [R_bfda:-0x7]
 bfe1:    c1 c0 52               ld BL, [R_c052:0xc052]
 bfe4:    21 30                  dec BL, #1
 bfe6:    e1 c0 52               st BL, [R_c052:0xc052]
-
-L_bfe9:
 bfe9:    73 31                  jmp [L_c01c:+0x31]
 
 L_bfeb:
@@ -11488,7 +11483,7 @@ c23c:    3a                     clr! A, #0
 c23d:    b5 8c 06               st A, @[Z + 0x0006]
 c240:    28                     inc! AL, #1
 c241:    a5 68 11               st AL, [Y + 0x0011]
-c244:    91 01 03               ld A, [0x0103]
+c244:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 c247:    b5 68 0d               st A, [Y + 0x000d]
 c24a:    d0 08 00               ld B, #0x0800
 c24d:    c8                     ld BL, [A]
@@ -11553,7 +11548,7 @@ c2ad:    73 ef                  jmp [L_c29e:-0x11]
 
 L_c2af:
 c2af:    79 cc 80               call [R_cc80:0xcc80]
-c2b2:    91 01 03               ld A, [0x0103]
+c2b2:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 c2b5:    b5 68 0d               st A, [Y + 0x000d]
 
 L_c2b8:
@@ -12026,12 +12021,12 @@ c5a2:    73 cf                  jmp [L_c573:-0x31]
 
 CrtDevice_Init:
 c5a4:    90 c5 ee               ld A, #0xc5ee
-c5a7:    d7 6a                  st A, [0x006a]	 ; Set exception handler's S register
-                                              	 ; Doesn't actually get used as a Stack
+c5a7:    d7 6a                  mov A, IL6(S)	 ; Set exception handler's S register
+                                             	 ; Doesn't actually get used as a Stack
 c5a9:    90 c3 22               ld A, #0xc322
 
 L_c5ac:
-c5ac:    d7 6e                  st A, [0x006e]	 ; Install exception handler
+c5ac:    d7 6e                  mov A, IL6(P)	 ; Install exception handler
 c5ae:    55 60                  mov A, Y
 c5b0:    b5 a2                  st A, [--S]
 c5b2:    6d a2                  st X, [--S]
@@ -12385,7 +12380,7 @@ c866:    55 a0                  mov A, S
 c868:    b1 c8 f2               st A, [R_c8f2:0xc8f2]
 c86b:    95 68 0f               ld A, [Y + 0x000f]
 c86e:    5e                     mov Z, A
-c86f:    91 01 03               ld A, [0x0103]
+c86f:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 c872:    2e 0d fa 00 36         wpf #0xfa, [A + 0x0036]
 c877:    2e 0c 7a 01 81         wpf #0x7a, [0x0181]
 c87c:    c0 02                  ld BL, #0x02
@@ -12762,7 +12757,7 @@ ca9b:    2f 06                  enable_dma
 ca9d:    59                     sub! B, A
 ca9e:    f0 00 00               st B, #0x0000
 caa1:    3a                     clr! A, #0
-caa2:    d7 12                  st A, [0x0012]
+caa2:    d7 12                  mov A, IL1(B)
 caa4:    09                     ret
 
 R_caa5:
@@ -12775,24 +12770,20 @@ caae:    cb                     ld BL, [Y]
 caaf:    88                     ld AL, [A]
 
 L_cab0:
-cab0:    e6                     unknown
-cab1:    12 15                  bn L_cac8
-cab3:    0b                     rim
-cab4:    2f
-cab5:    03
-cab6:    2f
-cab7:    21
-cab8:    59
-cab9:    93
-caba:    e4 'd'
-cabb:    59
-cabc:    15
-cabd:    01
-cabe:    09
-cabf:    7b
-cac0:    02
-cac1:    cb 'K'
-cac2:    9c
+cab0:    e6 12                  mov A, IL1(B)
+cab2:    15 0b                  bnz L_cabf
+cab4:    2f 03                  st_dma_count A
+cab6:    2f 21                  st_dma_addr B
+cab8:    59                     sub! B, A
+cab9:    93 e4                  ld A, [pc + -0x1c]
+cabb:    59                     sub! B, A
+cabc:    15 01                  bnz L_cabf
+cabe:    09                     ret
+
+L_cabf:
+cabf:    7b 02                  call [R_cac3:+0x2]
+cac1:    cb                     ld BL, [Y]
+cac2:    9c                     ld A, [Z]
 
 R_cac3:
 cac3:    f6 19 01               st AL, +0x1(Z)
@@ -12967,13 +12958,13 @@ cc7e:    73 d5                  jmp [L_cc55:-0x2b]
 
 R_cc80:
 cc80:    32 08                  clr A, #8
-cc82:    d1 01 03               ld B, [0x0103]
+cc82:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 cc85:    b5 28 32               st A, [B + 0x0032]
 cc88:    09                     ret
 
 R_cc89:
 cc89:    66 07                  jsys 7
-cc8b:    d1 01 03               ld B, [0x0103]
+cc8b:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 cc8e:    95 28 32               ld A, [B + 0x0032]
 cc91:    14 02                  bz L_cc95
 cc93:    3a                     clr! A, #0
@@ -12984,7 +12975,7 @@ cc95:    38                     inc! A, #1
 cc96:    09                     ret
 
 R_cc97:
-cc97:    d1 01 03               ld B, [0x0103]
+cc97:    d1 01 03               ld B, [SystemInfoPtr:0x0103]
 cc9a:    3a                     clr! A, #0
 cc9b:    39                     dec! A, #1
 cc9c:    b5 28 32               st A, [B + 0x0032]
@@ -13234,9 +13225,9 @@ L_ce14:
 ce14:    d2 01 09               ld B, @[DevicesPtr:0x0109]
 ce17:    a5 28 19               st AL, [B + 0x0019]
 ce1a:    90 ad c8               ld A, #0xadc8
-ce1d:    d7 fe                  st A, [0x00fe]	 ; Install exception handler in interrupt level 15
+ce1d:    d7 fe                  mov A, IL15(P)	 ; Install abort handler in interrupt level 15
 ce1f:    3a                     clr! A, #0
-ce20:    d7 ac                  st A, [0x00ac]
+ce20:    d7 ac                  mov A, IL10(C)
 ce22:    90 01 00               ld A, #0x0100
 ce25:    b1 00 5a               st A, [0x005a]
 ce28:    2e 2c 78 e1 1a         wpf1 #0x78, [R_e11a:0xe11a]
@@ -13261,7 +13252,7 @@ ce6f:    2e 0d f9 00 36         wpf #0xf9, [A + 0x0036]
 ce74:    2e 0d fb 00 36         wpf #0xfb, [A + 0x0036]
 ce79:    47 44 0f 00 36 01 81   memcpy #0x10, [A + 0x0036], [0x0181]
 ce80:    90 00 01               ld A, #0x0001
-ce83:    d7 6c                  st A, [0x006c]
+ce83:    d7 6c                  mov A, IL6(C)
 ce85:    60 ff ff               ld X, #0xffff
 
 L_ce88:
@@ -13295,6 +13286,8 @@ ceb9:    79 b4 46               call [R_b446:0xb446]
 cebc:    61 01 26               ld X, [EarlyInitDevicesPtr:0x0126]
 
 L_cebf:
+    ; This initilizes all devices in the null-terminated EarlyInitDevices array
+    ; Which in this case is just CrtDevice_Init
 cebf:    95 41                  ld A, [X++]
 cec1:    14 09                  bz L_cecc
 cec3:    95 08 0e               ld A, [A + 0x000e]
@@ -13303,8 +13296,10 @@ cec8:    7d 00                  call [A]
 ceca:    73 f3                  jmp [L_cebf:-0xd]
 
 L_cecc:
+    ; LOS Prompt:
+    ; Asks for NAME, DISK and CODE
 cecc:    04                     ei
-cecd:    47 4c 01 e2 fe e2 b7   memcpy #0x02, #0xe2fe, [R_e2b7:0xe2b7]
+cecd:    47 4c 01 e2 fe e2 b7   memcpy #0x02, #0xe2fe, [R_e2b7:0xe2b7]	 ; "LOS 6.05 - B"
 ced4:    d0 e2 b1               ld B, #0xe2b1
 ced7:    66 10                  jsys 10
 ced9:    66 08                  jsys 8
@@ -13314,7 +13309,7 @@ cee0:    14 03                  bz R_cee5
 cee2:    71 cf b4               jmp [R_cfb4:0xcfb4]
 
 R_cee5:
-cee5:    47 4c 01 e2 cc e2 b7   memcpy #0x02, #0xe2cc, [R_e2b7:0xe2b7]
+cee5:    47 4c 01 e2 cc e2 b7   memcpy #0x02, #0xe2cc, [R_e2b7:0xe2b7]	 ; "NAME="
 ceec:    d0 e2 b1               ld B, #0xe2b1
 ceef:    66 10                  jsys 10
 cef1:    66 08                  jsys 8
@@ -13344,7 +13339,7 @@ cf23:    a5 68 ff               st AL, [Y + -0x001]
 L_cf26:
 cf26:    21 30                  dec BL, #1
 cf28:    18 e2                  bgt L_cf0c
-cf2a:    47 4c 01 e2 d5 e2 b7   memcpy #0x02, #0xe2d5, [R_e2b7:0xe2b7]
+cf2a:    47 4c 01 e2 d5 e2 b7   memcpy #0x02, #0xe2d5, [R_e2b7:0xe2b7]	 ; "DISK="
 cf31:    d0 e2 b1               ld B, #0xe2b1
 cf34:    66 10                  jsys 10
 cf36:    66 08                  jsys 8
@@ -13371,7 +13366,7 @@ cf69:    30 19 e3 43            inc [R_e343:0xe343], #10
 
 L_cf6d:
 cf6d:    47 40 00 e3 44 db 19   memcpy #0x01, [R_e344:0xe344], [R_db19:0xdb19]
-cf74:    47 4c 01 e2 c5 e2 b7   memcpy #0x02, #0xe2c5, [R_e2b7:0xe2b7]
+cf74:    47 4c 01 e2 c5 e2 b7   memcpy #0x02, #0xe2c5, [R_e2b7:0xe2b7]	 ; "CODE="
 cf7b:    d0 e2 b1               ld B, #0xe2b1
 cf7e:    66 10                  jsys 10
 cf80:    66 08                  jsys 8
@@ -13388,13 +13383,13 @@ cf8d:    73
 cf8e:    e8 'h'
 cf8f:    d0 'P'
 cf90:    e2 'b'
-cf91:    bb ';'	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+cf91:    bb ';'
 cf92:    66
 cf93:    10
 cf94:    66
 cf95:    08
 cf96:    e2 'b'
-cf97:    bb ';'	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+cf97:    bb ';'
 cf98:    92
 cf99:    01
 cf9a:    09
@@ -14450,7 +14445,7 @@ d993:    d1 e3 8f               ld B, [R_e38f:0xe38f]
 d996:    51 20                  sub A, B
 d998:    b2 01 0b               st A, @[0x010b]
 d99b:    92 01 07               ld A, @[0x0107]
-d99e:    b1 01 03               st A, [0x0103]
+d99e:    b1 01 03               st A, [SystemInfoPtr:0x0103]
 d9a1:    91 01 07               ld A, [0x0107]
 
 L_d9a4:
@@ -15328,7 +15323,7 @@ dfa9:    7f 27                  pop {B, X, Y, Z}
 dfab:    09                     ret
 
 R_dfac:
-dfac:    91 01 03               ld A, [0x0103]
+dfac:    91 01 03               ld A, [SystemInfoPtr:0x0103]
 dfaf:    95 08 08               ld A, [A + 0x0008]
 dfb2:    95 08 05               ld A, [A + 0x0005]
 dfb5:    b2 01 26               st A, @[EarlyInitDevicesPtr:0x0126]
@@ -15672,10 +15667,19 @@ e2a8:    a0 a0                  st AL, #0xa0
 e2aa:    a0 a0                  st AL, #0xa0
 e2ac:    a0 a0                  st AL, #0xa0
 e2ae:    a0 a0                  st AL, #0xa0
-e2b0:    a0 00                  st AL, #0x00
-e2b2:    81 00 02               ld AL, [0x0002]
+e2b0:    a0 ' '
+
+R_e2b1:
+e2b1:    00                     (0x0)
+e2b2:    81                     (0x81)
+e2b3:    00                     HALT
+e2b4:    02                     sf
 e2b5:    00                     HALT
-e2b6:    51 e1 21 00            sub A, P, [0x2100]
+e2b6:    51
+
+R_e2b7:
+e2b7:    e1 21                  (0xe121)
+e2b9:    00                     HALT
 e2ba:    00                     HALT
 
 R_e2bb:
@@ -15832,8 +15836,7 @@ e3e3:    45 c1                  mov AL, CH
 e3e5:    52 10 00 f0            and A, A, #0x00f0
 e3e9:    53 10 00 0e            or A, A, #0x000e
 e3ed:    a3 01                  st AL, [pc + 0x01]
-e3ef:    e6                     unknown
-e3f0:    0e                     dly
+e3ef:    e6 0e                  mov A, IL0(P)
 e3f1:    d1 e5 ce               ld B, [R_e5ce:0xe5ce]
 e3f4:    59                     sub! B, A
 e3f5:    14 23                  bz L_e41a
@@ -15874,8 +15877,7 @@ e433:    d6 89 e5 2e            st Z, [Debug_Regs_Z:0xe52e]
 e437:    d6 ab e5 30            st S, [Debug_Regs_S:0xe530]
 e43b:    d6 cd e5 32            st C, [Debug_Regs_C:0xe532]
 e43f:    d6 ef e5 34            st P, [Debug_Regs_P:0xe534]
-e443:    e6                     unknown
-e444:    a8                     st AL, [A]
+e443:    e6 a8                  mov A, IL10(Z)
 e445:    b1 e5 39               st A, [R_e539:0xe539]
 e448:    91 e3 9b               ld A, [Debugger_Return:0xe39b]
 e44b:    14 07                  bz L_e454
@@ -16070,15 +16072,14 @@ e56c:    0e                     dly
 e56d:    0e                     dly
 e56e:    90 f2 01               ld A, #0xf201
 e571:    f6 30 00               ld BL, +0x0(A)
-e574:    e6                     unknown
-e575:    6e                     unknown
+e574:    e6 6e                  mov A, IL6(P)
 e576:    b3 08                  st A, [pc + 0x08]
 e578:    90 e5 86               ld A, #0xe586
-e57b:    d7 6e                  st A, [0x006e]
+e57b:    d7 6e                  mov A, IL6(P)
 e57d:    04                     ei
 e57e:    0e                     dly
 e57f:    90 00 00               ld A, #0x0000
-e582:    d7 6e                  st A, [0x006e]
+e582:    d7 6e                  mov A, IL6(P)
 e584:    73 0a                  jmp [L_e590:+0xa]
 
 R_e586:
@@ -16111,7 +16112,7 @@ e5b5:    55 ab e5 30            mov S, S, [Debug_Regs_S:0xe530]
 e5b9:    55 cd e5 32            mov C, C, [Debug_Regs_C:0xe532]
 e5bd:    55 ef e5 34            mov P, P, [Debug_Regs_P:0xe534]
 e5c1:    91 e5 39               ld A, [R_e539:0xe539]
-e5c4:    d7 a8                  st A, [0x00a8]
+e5c4:    d7 a8                  mov A, IL10(Z)
 e5c6:    91 e5 26               ld A, [Debug_Regs_A:0xe526]
 e5c9:    6e                     unknown
 e5ca:    e5 'e'

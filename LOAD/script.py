@@ -1,7 +1,7 @@
 import struct
 
 Syscalls = {
-
+    0x09: "Abort",
 }
 
 # Syscall table
@@ -16,7 +16,7 @@ for num, addr in enumerate(range(0x88cc, 0x89ac, 2)):
     entry_points.append(syscall_addr)
     label = f"Syscall_{num:02x}"
     if num in Syscalls:
-        label = Syscalls[num]
+        label = f"Syscall_{Syscalls[num]}"
     memory_addr_info[syscall_addr].label = f"Syscall_{num:02x}"
 
 

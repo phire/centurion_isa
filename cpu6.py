@@ -1,5 +1,5 @@
 from generic import *
-from cpu6_regs import Reg16Ref, Reg8Ref, MultiRegRef
+from cpu6_regs import Reg16Ref, Reg8Ref, MultiRegRef, LvlRegRef
 from cpu6_addr import Cpu6AddrMode, Cpu4AddrMode, LiteralRef, SmallLiteralRef, AluAddrMode, D6Mode, DirectRef
 import struct
 
@@ -218,6 +218,14 @@ def MatchPushPop(pc, memory):
 
     return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, MultiRegRef(start, count)), bytes )
 
+def MatchD7_E6(pc, memory):
+    store = memory[pc] == 0xd6
+
+    level = memory[pc+1] >> 4
+    ref = LvlRegRef(level, Reg16Ref(memory[pc+1] & 0x0f))
+    dst, src = (ref, Reg16Ref(0)) if store else (Reg16Ref(0), ref)
+
+    return InstructionMatch(pc, BasicCpu6Inst("mov", dst, src), memory[pc:pc+2])
 
 
 # Implements all opcodes 0x80 and above
@@ -397,12 +405,8 @@ def disassemble_instruction(memory, pc):
         case 0xd6:
             if inst := MatchD6(pc, memory):
                 return inst
-        case 0xd7:
-            # Store A to [addr] where addr is a single byte (aka, the register file)
-            addr = memory[pc+1]
-            return InstructionMatch(pc, BasicCpu6Inst("st", Reg16Ref(0), DirectRef(addr)), memory[pc:pc+2])
-
-
+        case 0xd7 | 0xe6:
+            return MatchD7_E6(pc, memory)
 
     return scan(instructions, memory, pc, 5)
 

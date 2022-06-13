@@ -834,16 +834,16 @@ L_05c4:
 05ca:    83 a2                  ld AL, [pc + -0x5e]
 05cc:    f6 19 00               st AL, +0x0(Z)
 05cf:    90 05 a6               ld A, #0x05a6
-05d2:    d7 6e                  st A, [0x006e]
+05d2:    d7 6e                  mov A, IL6(P)
 05d4:    3a                     clr! A, #0
-05d5:    d7 60                  st A, [0x0060]
+05d5:    d7 60                  mov A, IL6(A)
 05d7:    80 06                  ld AL, #0x06
 05d9:    f6 19 0a               st AL, +0xa(Z)
 05dc:    f6 19 0e               st AL, +0xe(Z)
 
 L_05df:
-05df:    e6                     unknown
-05e0:    60 45 10               ld X, #0x4510
+05df:    e6 60                  mov A, IL6(A)
+05e1:    45 10                  mov AH, AL
 05e3:    14 fa                  bz L_05df
 05e5:    c0 80                  ld BL, #0x80
 05e7:    43 31                  or AL, BL

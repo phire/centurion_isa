@@ -1,10 +1,17 @@
 0x0100, label, SyscallVector
+0x0103, label, SystemInfoPtr
+0x0103, ptr
 0x0109, label, DevicesPtr
 0x0109, ptr
 0x01ba, label, Devices
 0x011d, fnptr
 0x0126, label, EarlyInitDevicesPtr
 0x0126, ptr
+0x01ea, label, SystemInfo
+0x01ee, label, SystemInfo_File?
+0x01ee, ptr
+0x01f6, label, SystemInfo_TopOfMemory
+0x01f6, >H
 0x043e, ptr
 0x043e, label, EarlyInitDevices
 0x045b, label, CenturionVI_String
@@ -32,6 +39,7 @@
 0x88cc, label, SyscallTable
 0x89ac, label, NumSyscalls
 0x89ac, B
+0x8aa6, label, LookupDeviceInstance
 0x8d54, label, Syscall_02_Singleton
 0x8d54, >H
 0xadc8, code, AbortHandler
@@ -51,6 +59,7 @@
 0xaf63, label, AbortString_IAD
 0xaf6d, label, AbortString_EAD
 0xaf74, pstring16
+0xb2d1, label, AssertIsSystemPtr
 0xb6b6, label, HawkDeviceObj
 0xb6b6, >H
 0xb6b8, fnptr
@@ -141,6 +150,9 @@
 0xcbaa, pstring16
 0xcbbc, pstring16
 0xcdd1, code, Start
+0xe2b1, >B
+0xe2b2, >B
+0xe2b7, >H
 0xe2c5, pstring16
 0xe2cc, pstring16
 0xe2d5, pstring16

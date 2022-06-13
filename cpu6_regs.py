@@ -13,14 +13,17 @@ class Ref:
     def to_string(self, memory, **kwargs):
         return str(self)
 
-class Reg16Ref(Ref):
+class RegRef(Ref):
+    pass
+
+class Reg16Ref(RegRef):
     def __init__(self, reg):
         self.reg = reg >> 1
 
     def __str__(self):
         return RegNames16[self.reg]
 
-class Reg8Ref(Ref):
+class Reg8Ref(RegRef):
     def __init__(self, reg):
         self.reg = reg
 
@@ -60,3 +63,14 @@ class MultiRegRef(Ref):
             regs.append(RegNames8[i])
 
         return f"{{{', '.join(regs)}}}"
+
+class LvlRegRef(Ref):
+    # For instructions that can touch registers in other interrupt levels
+
+    def __init__(self, level, reg):
+        self.level = level
+        assert isinstance(reg, RegRef)
+        self.reg = reg
+
+    def __str__(self):
+        return f"IL{self.level}({self.reg})"

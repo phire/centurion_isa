@@ -4,7 +4,19 @@
 0x83a0 ,	comment	; modify jump instruction below
 0x83a2 ,	comment	; restore registers
 0x83a4 ,	comment	; jump to syscall
+0x8aa6,	pre_comment 	; Not entirely sure
+	 	; Seems to gets the device instance struct corrosponding to byte at [B + 1]
+0x8aaf ,	comment	; 0x81
+0x8ab2 ,	comment	; if B < 0x80
+0x8ab5 ,	comment	; Remove top bit
+0x8b28 ,	comment	; Assert B is System Pointer
+0x8b2e ,	comment	; Assert [B + 0x0006] is System pointer
 0xadc8 ,	comment	; Setup StackPointer
+0xb2d1,	pre_comment 	; Checks if A is a pointer within the kernel memory range (0x8000 to 0xefff)
+	 	; Aborts if not
+0xb2d7 ,	comment	; Check A is below 0x8000
+0xb2e9 ,	comment	; SystemInfo_TopOfMemory
+0xb2ed ,	comment	; A is above 0xefff
 0xc5a7 ,	comment	; Set exception handler's S register
 		; Doesn't actually get used as a Stack
 0xc5ac ,	comment	; Install exception handler
@@ -22,7 +34,15 @@
 0xcdec ,	comment	; Setup Stack? This isn't a very good stack pointer
 0xce09 ,	comment	; BL should now be the DISK number.
 		; 0/1 for Hawk, 10/11 for Finch, 20/21 for Phoenix
-0xce1d ,	comment	; Install exception handler in interrupt level 15
+0xce1d ,	comment	; Install abort handler in interrupt level 15
+0xcebf,	pre_comment 	; This initilizes all devices in the null-terminated EarlyInitDevices array
+	 	; Which in this case is just CrtDevice_Init
+0xcecc,	pre_comment 	; LOS Prompt:
+	 	; Asks for NAME, DISK and CODE
+0xcecd ,	comment	; "LOS 6.05 - B"
+0xcee5 ,	comment	; "NAME="
+0xcf2a ,	comment	; "DISK="
+0xcf74 ,	comment	; "CODE="
 0xe49b ,	comment	; Setup CRT0 to 9600 baud
 0xe4a1 ,	comment	; "*"
 0xe4ac ,	comment	; "("
