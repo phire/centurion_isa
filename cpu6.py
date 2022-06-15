@@ -5,20 +5,17 @@ import struct
 
 class BasicCpu6Inst:
     newpc = None
-    def __init__(self, mnonomic, dst=None, src=None, src2=None):
+    def __init__(self, mnonomic, dst=None, *sources):
         self.mnemonic = mnonomic
         self.dst = dst
-        self.src = src
-        self.src2 = src2
+        self.srcs = [s for s in sources if s is not None]
 
     def to_string(self, dict, mem):
         str = self.mnemonic
         if self.dst:
             str += f" {self.dst.to_string(mem)}"
-        if self.src:
-            str += f", {self.src.to_string(mem)}"
-        if self.src2:
-            str += f", {self.src2.to_string(mem)}"
+        for src in self.srcs:
+            str += f", {src.to_string(mem)}"
         return str
 
 class ControlFlowInst:
@@ -179,7 +176,7 @@ def Match46(pc, mem):
     b_ref, pc = Cpu6AddrMode(b_mode, pc, mem, a_ref)
 
     bytes = mem[orig_pc:pc]
-    return InstructionMatch(orig_pc, BasicCpu6Inst(f"{ops[op]}({b_size:x}, {a_size:x})", b_ref, a_ref), bytes, {})
+    return InstructionMatch(orig_pc, BasicCpu6Inst(f"{ops[op]}({a_size:x}, {b_size:x})", a_ref, b_ref), bytes, {})
 
 # Implements 47 "block" instructions
 def Match47(pc, mem):
@@ -190,11 +187,19 @@ def Match47(pc, mem):
     b_mode = mem[pc+1] & 0x3
     pc += 2
 
-    blk_len = mem[pc] + 1
-    pc += 1
+    ops = ["unkblk0", "unkblk1", "memchr", "unkblk3", "memcpy", "unkblk5", "unkblk6", "unkblk7",
+        "memcmp", "memset", "unkblkA", "unkblkB", "unkblkC", "unkblkD", "unkblkE", "unkblkF"]
 
-    ops = ["unkblk0", "unkblk1", "unkblk2", "unkblk3", "memcpy", "unkblk5", "unkblk6", "unkblk7",
-           "memcmp", "memset", "unkblkA", "unkblkB", "unkblkC", "unkblkD", "unkblkE", "unkblkF"]
+    blk_len = 1
+    args = []
+    if op != 0:
+        blk_len = mem[pc] + 1
+        args += [LiteralRef(blk_len, 1)]
+        pc += 1
+
+    if op == 2:
+        args += [LiteralRef(mem[pc], 1)]
+        pc += 1
 
     src_len = blk_len
     if op == 9: # memset
@@ -206,11 +211,13 @@ def Match47(pc, mem):
 
     a_ref, pc = Cpu6AddrMode(a_mode, pc, mem, None, src_len)
     b_ref, pc = Cpu6AddrMode(b_mode, pc, mem, a_ref, blk_len)
+    args += [a_ref, b_ref]
 
     bytes = mem[orig_pc:pc]
-    return InstructionMatch(orig_pc, BasicCpu6Inst(f"{ops[op]}", LiteralRef(blk_len, 1), a_ref, b_ref), bytes, {})
+    return InstructionMatch(orig_pc, BasicCpu6Inst(f"{ops[op]}", *args), bytes, {})
 
 # These might be multiple/divide
+# Order is not confirmed
 def MatchMul(pc, mem):
     orig_pc = pc
     inst = mem[pc]
@@ -427,8 +434,8 @@ def disassemble_instruction(mem, pc):
                 return m
 
     match byte:
-    #    case 0x77 | 0x78:
-    #        return MatchMul(pc, mem)
+        case 0x77 | 0x78:
+            return MatchMul(pc, mem)
         case 0x66: # jsys aka Syscall
             return InstructionMatch(pc, SyscallInst(mem[pc+1]), mem[pc:pc+2], mem=mem)
         case 0x7e | 0x7f:

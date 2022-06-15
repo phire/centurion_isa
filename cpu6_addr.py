@@ -100,7 +100,7 @@ def Cpu6AddrMode(mode, pc, mem, prev=None, size = 1):
             reg_a = Reg16Ref(regs >> 4)
             reg_b = Reg16Ref(regs & 0xf)
 
-            if regs & 0x20 == 0:
+            if regs & 0x10 == 0:
                 imm = mem.get_i8(pc)
                 pc += 1
             else:
@@ -211,11 +211,11 @@ def AluAddrMode(mode, inst, pc, mem):
                 case 0x01: # dest <- src (direct)
                     return dst_reg, src_reg, DirectRef(mem.get_be16(pc)), pc + 2
                 case 0x10: # dest <- src op literal
-                    return dst_reg, src_reg, LiteralRef(mem.get_be16(pc), 2), pc + 2
+                    return dst_reg, src_reg, LiteralRef(mem.get_be16(pc), 2, pc), pc + 2
                 case 0x11: # dest <- src op reg
                     index = src_reg
-                    base = DirectRef(mem.get_be16(pc))
-                    return Reg16Ref(mode & 0xe), ComplexRef(base, index), None, pc + 2
+                    base = LiteralRef(mem.get_be16(pc), 2, pc)
+                    return Reg16Ref(mode & 0xe), ComplexRef(index, base), None, pc + 2
 
 def D6Mode(mode, pc, mem):
     a = (mode >> 4) & 0xe
