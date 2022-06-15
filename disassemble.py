@@ -60,18 +60,6 @@ class Xargs():
     def __init__(self, xargs):
         self.xargs = xargs
 
-    def length(self, mem, pc):
-        orig_pc = pc
-        for name, arg in self.xargs.items():
-            match arg:
-                case "ptr":
-                    pc += 2
-                case "word":
-                    pc += 2
-                case "byte" | "char":
-                    pc += 1
-        return pc - orig_pc
-
     def annotate(self, mem, pc):
         for name, arg in self.xargs.items():
             info = mem.info(pc)
@@ -81,11 +69,17 @@ class Xargs():
                     info.type = "ptr"
                     pc += 2
                 case "word":
-                    info.type = "<H"
+                    info.type = ">H"
                     pc += 2
                 case "byte" | "char":
                     pc += 1
                     info.type = "B"
+                case "cstring":
+                    info.type = "cstring"
+                    while mem[pc] != 0:
+                        pc += 1
+        return pc
+
 
 class MemoryWrapper:
     def __init__(self, memory):

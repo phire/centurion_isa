@@ -25,6 +25,7 @@ class ControlFlowInst:
     def __init__(self, mnemonic, src):
         self.mnemonic = mnemonic
         self.src = src
+        self.resume = mnemonic == "call"
 
     def get_dst(self, mem):
         try: return self.src.getValue()
@@ -38,42 +39,26 @@ class ControlFlowInst:
     @staticmethod
     def newpc(next_pc, instruction, mem, **kwargs):
         ret = []
-        if instruction.mnemonic == "call":
+        if instruction.resume:
             if xargs := instruction.get_xargs(mem):
-                xargs.annotate(mem, next_pc)
-                next_pc += xargs.length(mem, next_pc)
+                next_pc = xargs.annotate(mem, next_pc)
             ret += [ResumeExecution(next_pc)]
         if dst := instruction.get_dst(mem):
             ret += [TransferExecution(dst)]
-
         return ret
 
     def to_string(self, dict, mem):
         return f"{self.mnemonic} {self.src.to_string(mem)}"
 
-class SyscallInst:
+class SyscallInst(ControlFlowInst):
     def __init__(self, num):
         self.num = num
+        self.resume = True
 
     def get_dst(self, mem):
         if self.num in mem.syscall_map:
             return mem.syscall_map[self.num]
         return None
-
-    def get_xargs(self, mem):
-        if addr := self.get_dst(mem):
-            return mem.get_xargs(addr)
-        return None
-
-    @staticmethod
-    def newpc(next_pc, instruction, mem, **kwargs):
-        if xargs := instruction.get_xargs(mem):
-            xargs.annotate(mem, next_pc)
-            next_pc += xargs.length(mem, next_pc)
-        ret = [ResumeExecution(next_pc)]
-        if dst := instruction.get_dst(mem):
-            ret += [TransferExecution(dst)]
-        return ret
 
     def to_string(self, dict, mem):
         label = f"{self.num:02x}"
