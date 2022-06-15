@@ -1,4 +1,7 @@
-8000:    00                     HALT
+
+L_0103:
+0103:    <null bytes>
+
 
 DiagEntryPoint:
 8001:    3a                     clr! A, #0
@@ -1354,9 +1357,5 @@ L_87da:
 87f4:    a1 f1 0e               st AL, [0xf10e]
 87f7:    75 00                  jmp [A]
 87f9:    3e
-87fa:    00
-87fb:    00
-87fc:    00
-87fd:    00
-87fe:    00
-87ff:    00
+87fa:    <null bytes>
+

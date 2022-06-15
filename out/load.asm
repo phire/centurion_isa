@@ -40,25 +40,8 @@ DevicesPtr:
 
 EarlyInitDevicesPtr:
 0126:    04 3e                  EarlyInitDevices
-0128:    00
-0129:    00
-012a:    00
-012b:    00
-012c:    00
-012d:    00
-012e:    00
-012f:    00
-0130:    00
-0131:    00
-0132:    00
-0133:    00
-0134:    00
-0135:    00
-0136:    00
-0137:    00
-0138:    00
-0139:    00
-013a:    00
+0128:    <null bytes>
+
 013b:    ff
 013c:    ff
 013d:    ff
@@ -68,22 +51,6 @@ EarlyInitDevicesPtr:
 0141:    00
 0142:    ff
 0143:    ff
-0144:    00
-0145:    00
-0146:    00
-0147:    00
-0148:    00
-0149:    00
-014a:    00
-014b:    00
-014c:    00
-014d:    00
-014e:    00
-014f:    00
-0150:    00
-0151:    00
-0152:    00
-0153:    00
 0154:    01
 0155:    e2 'b'
 0156:    00
@@ -174,16 +141,8 @@ R_01a1:
 01a9:    00                     HALT
 01aa:    b6                     unknown
 01ab:    56                     unknown
-01ac:    00                     HALT
-01ad:    00                     HALT
-01ae:    00                     HALT
-01af:    00                     HALT
-01b0:    00                     HALT
-01b1:    00                     HALT
-01b2:    00                     HALT
-01b3:    00                     HALT
-01b4:    00                     HALT
-01b5:    00                     HALT
+01ac:    <null bytes>
+
 
 R_01b6:
 01b6:    01                     nop
@@ -255,33 +214,12 @@ SystemInfo_TopOfMemory:
 0200:    0a                     reti
 0201:    04                     ei
 0202:    5b                     mov X, A
-0203:    00                     HALT
-0204:    00                     HALT
-0205:    00                     HALT
-0206:    00                     HALT
-0207:    00                     HALT
-0208:    00                     HALT
-0209:    00                     HALT
-020a:    00                     HALT
-020b:    00                     HALT
-020c:    00                     HALT
-020d:    00                     HALT
-020e:    00                     HALT
-020f:    00                     HALT
-0210:    00                     HALT
+0203:    <null bytes>
+
 
 L_0211:
-0211:    00                     HALT
-0212:    00                     HALT
-0213:    00                     HALT
-0214:    00                     HALT
-0215:    00                     HALT
-0216:    00                     HALT
-0217:    00                     HALT
-0218:    00                     HALT
-0219:    00                     HALT
-021a:    00                     HALT
-021b:    00                     HALT
+0211:    <null bytes>
+
 021c:    ff                     st B, [P]
 021d:    ff                     st B, [P]
 021e:    00                     HALT
@@ -635,7 +573,8 @@ Device_DISK25_Obj:
 0432:    64 00                  ld X, @[R_0434|+0x0]
 
 R_0434:
-0434:    00                     HALT
+0434:    <null bytes>
+
 
 R_0435:
 0435:    00                     HALT
@@ -721,22 +660,8 @@ CenturionVI_String:
 048c:    ff
 048d:    ff
 048e:    ff
-048f:    00
-05e0:    00
-05e1:    00
-05e2:    00
-05e3:    00
-05e4:    00
-05e5:    00
-05e6:    00
-05e7:    00
-05e8:    00
-05e9:    00
-05ea:    00
-05eb:    00
-05ec:    00
-05ed:    00
-05ee:    00
+048f:    <null bytes>
+
 05ef:    8d
 05f0:    8d
 05f1:    ff
@@ -999,19 +924,12 @@ R_05f2:
 06f0:    ff                     st B, [P]
 06f1:    ff                     st B, [P]
 06f2:    ff                     st B, [P]
-06f3:    00                     HALT
-06f4:    00                     HALT
-06f5:    00                     HALT
-06f6:    00                     HALT
-06f7:    00                     HALT
-06f8:    00                     HALT
-06f9:    00                     HALT
-06fa:    00                     HALT
-06fb:    00                     HALT
-06fc:    00                     HALT
-06fd:    00                     HALT
-06fe:    00                     HALT
-06ff:    00                     HALT
+06f3:    <null bytes>
+
+
+L_0800:
+0800:    <null bytes>
+
 
 R_8000:
 8000:    71 83 3f               jmp [R_833f|0x833f]
@@ -1122,14 +1040,14 @@ R_8093:
 8095:    00                     HALT
 8096:    00                     HALT
 8097:    0f                     rsys
-8098:    00
-8099:    00
-809a:    00
-809b:    00
-809c:    00
-809d:    00
-809e:    00
-809f:    00
+8098:    <null bytes>
+
+
+R_80ae:
+80ae:    00                     HALT
+
+R_80af:
+80af:    00                     HALT
 
 R_80b0:
 80b0:    00                     HALT
@@ -1188,23 +1106,16 @@ R_812c:
 8150:    00
 8151:    00
 8152:    0f
-8153:    00
-8154:    00
-8155:    00
-8156:    00
-8157:    00
-8158:    00
-8159:    00
-815a:    00
-815b:    00
-815c:    00
-815d:    00
-815e:    00
-815f:    00
-8230:    00                     HALT
-8231:    00                     HALT
-8232:    00                     HALT
-8233:    00                     HALT
+8153:    <null bytes>
+
+
+R_816c:
+816c:    <null bytes>
+
+
+R_81bc:
+81bc:    <null bytes>
+
 
 R_8234:
 8234:    1, "\x0c"
@@ -2011,14 +1922,8 @@ R_8825:
 8827:    00                     HALT
 8828:    ad                     st AL, [S]
 8829:    c8                     ld BL, [A]
-882a:    00                     HALT
-882b:    00                     HALT
-882c:    00                     HALT
-882d:    00                     HALT
-882e:    00                     HALT
-882f:    00                     HALT
-8850:    00                     HALT
-8851:    00                     HALT
+882a:    <null bytes>
+
 
 R_8852:
 8852:    fd                     st B, [S]
@@ -2107,32 +2012,12 @@ R_8872:
 88a1:    02                     sf
 88a2:    02                     sf
 88a3:    02                     sf
-88a4:    00                     HALT
-88a5:    00                     HALT
+88a4:    <null bytes>
+
 
 L_88a6:
-88a6:    00                     HALT
-88a7:    00                     HALT
-88a8:    00                     HALT
-88a9:    00                     HALT
-88aa:    00                     HALT
-88ab:    00                     HALT
-88ac:    00                     HALT
-88ad:    00                     HALT
-88ae:    00                     HALT
-88af:    00                     HALT
-88c0:    00                     HALT
-88c1:    00                     HALT
-88c2:    00                     HALT
-88c3:    00                     HALT
-88c4:    00                     HALT
-88c5:    00                     HALT
-88c6:    00                     HALT
-88c7:    00                     HALT
-88c8:    00                     HALT
-88c9:    00                     HALT
-88ca:    00                     HALT
-88cb:    00                     HALT
+88a6:    <null bytes>
+
 
 SyscallTable:
 88cc:    8a 3b                  Syscall_00
@@ -3968,16 +3853,8 @@ L_9440:
 9449:    71 00 00               jmp [0x0000]
 
 R_944c:
-944c:    00                     HALT
-944d:    00                     HALT
-944e:    00                     HALT
-944f:    00                     HALT
-9450:    00                     HALT
-9451:    00                     HALT
-9452:    00                     HALT
-9453:    00                     HALT
-9454:    00                     HALT
-9455:    00                     HALT
+944c:    <null bytes>
+
 
 Syscall_4d:
 9456:    7b 48                  call [L_94a0|+0x48]
@@ -4585,6 +4462,10 @@ L_97da:
 97da:    65 a1                  ld X, [S++]
 97dc:    71 96 f1               jmp [R_96f1|0x96f1]
 97df:    a0 ' '
+
+R_97e0:
+97e0:    <null bytes>
+
 
 R_97f0:
 97f0:    00                     HALT
@@ -7141,25 +7022,8 @@ a5c3:    a9 ')'
 a5c4:    01
 
 R_a5c5:
-a5c5:    00                     HALT
-a5c6:    00                     HALT
-a5c7:    00                     HALT
-a5c8:    00                     HALT
-a5c9:    00                     HALT
-a5ca:    00                     HALT
-a5cb:    00                     HALT
-a5cc:    00                     HALT
-a5cd:    00                     HALT
-a5ce:    00                     HALT
-a5cf:    00                     HALT
-a5e0:    00                     HALT
-a5e1:    00                     HALT
-a5e2:    00                     HALT
-a5e3:    00                     HALT
-a5e4:    00                     HALT
-a5e5:    00                     HALT
-a5e6:    00                     HALT
-a5e7:    00                     HALT
+a5c5:    <null bytes>
+
 a5e8:    7b 57                  call [R_a641|+0x57]
 a5ea:    24
 
@@ -7543,13 +7407,36 @@ L_a837:
 a837:    11 09                  bnc L_a842
 
 R_a839:
-a839:    00                     HALT
-a83a:    00                     HALT
-a83b:    00                     HALT
-a83c:    00                     HALT
-a83d:    00                     HALT
-a83e:    00                     HALT
-a83f:    00                     HALT
+a839:    <null bytes>
+
+
+L_a842:
+a842:    <null bytes>
+
+
+R_a85c:
+a85c:    <null bytes>
+
+
+R_a85d:
+a85d:    <null bytes>
+
+
+R_a862:
+a862:    <null bytes>
+
+
+R_a866:
+a866:    <null bytes>
+
+
+R_a86c:
+a86c:    00                     HALT
+a86d:    00                     HALT
+a86e:    00                     HALT
+
+R_a86f:
+a86f:    00                     HALT
 a870:    00                     HALT
 a871:    00                     HALT
 
@@ -7618,9 +7505,10 @@ a8dc:    a1 '!'
 a8dd:    32
 a8de:    01
 a8df:    09
-a900:    00                     HALT
-a901:    00                     HALT
-a902:    00                     HALT
+
+R_a8e0:
+a8e0:    <null bytes>
+
 
 R_a903:
 a903:    55 a2                  mov B, S
@@ -8584,11 +8472,12 @@ af37:    00                     HALT
 af38:    00                     HALT
 af39:    af                     st AL, [P]
 af3a:    46
-af3b:    00
-af3c:    00
+af3b:    <null bytes>
+
 
 Abort_LVL:
-af3d:    00                     (0x0)
+af3d:    <null bytes>
+
 
 Abort_CD:
 af3e:    00                     (0x0)
@@ -8620,24 +8509,8 @@ af74:    13, "OPSYS ABORTED"
 
 R_af83:
 af83:    0f                     rsys
-af84:    00
-af85:    00
-af86:    00
-af87:    00
-af88:    00
-af89:    00
-af8a:    00
-af8b:    00
-af8c:    00
-af8d:    00
-af8e:    00
-af8f:    00
-af90:    00
-af91:    00
-af92:    00
-af93:    00
-af94:    00
-af95:    00
+af84:    <null bytes>
+
 
 Syscall_59:
 af96:    80 01                  ld AL, #0x01
@@ -9994,26 +9867,28 @@ b79d:    c0 05                  ld BL, #0x05
 b79f:    66 6b                  jsys Syscall_6b
 
 R_b7a1:
-b7a1:    00                     HALT
-b7a2:    00                     HALT
+b7a1:    <null bytes>
+
 
 R_b7a3:
-b7a3:    00                     HALT
+b7a3:    <null bytes>
+
 
 R_b7a4:
-b7a4:    00                     HALT
+b7a4:    <null bytes>
+
 
 R_b7a5:
-b7a5:    00                     HALT
-b7a6:    00                     HALT
+b7a5:    <null bytes>
+
 
 R_b7a7:
-b7a7:    00                     HALT
-b7a8:    00                     HALT
+b7a7:    <null bytes>
+
 
 R_b7a9:
-b7a9:    00                     HALT
-b7aa:    00                     HALT
+b7a9:    <null bytes>
+
 
 R_b7ab:
 b7ab:    00                     HALT
@@ -10695,30 +10570,8 @@ bc21:    7, "DMA LAG"
 
 R_bc2a:
 bc2a:    8, "DMA STAT"
-bc34:    00
-bc35:    00
-bc36:    00
-bc37:    00
-bc38:    00
-bc39:    00
-bc3a:    00
-bc3b:    00
-bc3c:    00
-bc3d:    00
-bc3e:    00
-bc3f:    00
-bc50:    00
-bc51:    00
-bc52:    00
-bc53:    00
-bc54:    00
-bc55:    00
-bc56:    00
-bc57:    00
-bc58:    00
-bc59:    00
-bc5a:    00
-bc5b:    00
+bc34:    <null bytes>
+
 
 FfcDeviceObj:
 bc5c:    00 06                  (0x6)
@@ -10905,14 +10758,10 @@ bd9d:    00                     HALT
 
 R_bd9e:
 bd9e:    83 00                  ld AL, [R_bda0|+0x0]
-be00:    00                     HALT
-be01:    00                     HALT
-be02:    00                     HALT
-be03:    00                     HALT
-be04:    00                     HALT
-be05:    00                     HALT
-be06:    00                     HALT
-be07:    00                     HALT
+
+R_bda0:
+bda0:    <null bytes>
+
 
 R_be08:
 be08:    79 cc 80               call [R_cc80|0xcc80]
@@ -11662,22 +11511,12 @@ c37a:    14 23                  bz L_c39f
 c37c:    71 c4 ae               jmp [R_c4ae|0xc4ae]
 
 R_c37f:
-c37f:    00                     HALT
-c390:    00                     HALT
-c391:    00                     HALT
-c392:    00                     HALT
-c393:    00                     HALT
-c394:    00                     HALT
-c395:    00                     HALT
-c396:    00                     HALT
-c397:    00                     HALT
-c398:    00                     HALT
-c399:    00                     HALT
-c39a:    00                     HALT
-c39b:    00                     HALT
-c39c:    00                     HALT
-c39d:    00                     HALT
-c39e:    00                     HALT
+c37f:    <null bytes>
+
+
+R_c38f:
+c38f:    <null bytes>
+
 
 L_c39f:
 c39f:    f6 08 00               ld AH, +0x0(Z)
@@ -12229,22 +12068,20 @@ c709:    00                     HALT
 R_c70a:
 c70a:    84 00                  ld AL, @[pc + 0x00]
 c70c:    83 00                  ld AL, [pc + 0x00]
-c70e:    00                     HALT
+c70e:    <null bytes>
+
 
 R_c70f:
-c70f:    00                     HALT
-c780:    00                     HALT
-c781:    00                     HALT
-c782:    00                     HALT
-c783:    00                     HALT
-c784:    00                     HALT
-c785:    00                     HALT
-c786:    00                     HALT
-c787:    00                     HALT
-c788:    00                     HALT
-c789:    00                     HALT
-c78a:    00                     HALT
-c78b:    00                     HALT
+c70f:    <null bytes>
+
+
+R_c711:
+c711:    <null bytes>
+
+
+R_c713:
+c713:    <null bytes>
+
 
 R_c78c:
 c78c:    22 00                  clr AH, #0
@@ -14249,8 +14086,8 @@ d856:    30 10 e3 8d            inc [R_e38d|0xe38d], #1
 d85a:    71 d7 97               jmp [R_d797|0xd797]
 
 R_d85d:
-d85d:    00                     HALT
-d85e:    00                     HALT
+d85d:    <null bytes>
+
 
 R_d85f:
 d85f:    00                     HALT
@@ -14856,13 +14693,8 @@ dca3:    a0 a0                  st AL, #0xa0
 dca5:    a0 a0                  st AL, #0xa0
 dca7:    a0 a0                  st AL, #0xa0
 dca9:    a0 00                  st AL, #0x00
-dcab:    00                     HALT
-dcac:    00                     HALT
-dcad:    00                     HALT
-dcae:    00                     HALT
-dcaf:    00                     HALT
-dcd0:    00                     HALT
-dcd1:    00                     HALT
+dcab:    <null bytes>
+
 
 R_dcd2:
 dcd2:    91 01 0b               ld A, [0x010b]
@@ -15171,27 +15003,8 @@ df02:    a0 a0                  st AL, #0xa0
 df04:    a0 ' '
 
 R_df05:
-df05:    00                     HALT
-df06:    00                     HALT
-df07:    00                     HALT
-df08:    00                     HALT
-df09:    00                     HALT
-df0a:    00                     HALT
-df0b:    00                     HALT
-df0c:    00                     HALT
-df0d:    00                     HALT
-df0e:    00                     HALT
-df0f:    00                     HALT
-df10:    00                     HALT
-df11:    00                     HALT
-df12:    00                     HALT
-df13:    00                     HALT
-df14:    00                     HALT
-df15:    00                     HALT
-df16:    00                     HALT
-df17:    00                     HALT
-df18:    00                     HALT
-df19:    00                     HALT
+df05:    <null bytes>
+
 
 R_df1a:
 df1a:    7e 27                  push {B, X, Y, Z}
@@ -15391,10 +15204,176 @@ R_e06b:
 e06b:    00                     HALT
 e06c:    00                     HALT
 e06d:    75 08 fe               jmp [A + -0x002]
-e110:    00                     HALT
-e111:    00                     HALT
-e112:    00                     HALT
-e113:    00                     HALT
+e070:    <null bytes>
+
+
+R_e076:
+e076:    <null bytes>
+
+
+R_e077:
+e077:    <null bytes>
+
+
+R_e07a:
+e07a:    <null bytes>
+
+
+R_e07b:
+e07b:    <null bytes>
+
+
+R_e07c:
+e07c:    <null bytes>
+
+
+R_e07d:
+e07d:    <null bytes>
+
+
+R_e07e:
+e07e:    <null bytes>
+
+
+R_e07f:
+e07f:    <null bytes>
+
+
+R_e080:
+e080:    <null bytes>
+
+
+R_e081:
+e081:    <null bytes>
+
+
+R_e082:
+e082:    <null bytes>
+
+
+R_e083:
+e083:    <null bytes>
+
+
+R_e087:
+e087:    <null bytes>
+
+
+R_e088:
+e088:    <null bytes>
+
+
+R_e089:
+e089:    <null bytes>
+
+
+R_e08a:
+e08a:    <null bytes>
+
+
+R_e08b:
+e08b:    <null bytes>
+
+
+R_e091:
+e091:    <null bytes>
+
+
+R_e092:
+e092:    <null bytes>
+
+
+R_e093:
+e093:    <null bytes>
+
+
+R_e095:
+e095:    <null bytes>
+
+
+R_e097:
+e097:    <null bytes>
+
+
+R_e098:
+e098:    <null bytes>
+
+
+R_e09e:
+e09e:    <null bytes>
+
+
+R_e09f:
+e09f:    <null bytes>
+
+
+R_e0a5:
+e0a5:    <null bytes>
+
+
+R_e0a6:
+e0a6:    <null bytes>
+
+
+R_e0a7:
+e0a7:    <null bytes>
+
+
+R_e0a8:
+e0a8:    <null bytes>
+
+
+R_e0aa:
+e0aa:    <null bytes>
+
+
+R_e0ab:
+e0ab:    <null bytes>
+
+
+R_e0ac:
+e0ac:    <null bytes>
+
+
+R_e0b2:
+e0b2:    <null bytes>
+
+
+R_e0b3:
+e0b3:    <null bytes>
+
+
+R_e0b5:
+e0b5:    <null bytes>
+
+
+R_e0b6:
+e0b6:    <null bytes>
+
+
+R_e0bc:
+e0bc:    <null bytes>
+
+
+R_e0d1:
+e0d1:    <null bytes>
+
+
+R_e0d2:
+e0d2:    <null bytes>
+
+
+R_e0e4:
+e0e4:    <null bytes>
+
+
+R_e0ea:
+e0ea:    <null bytes>
+
+
+R_e0ff:
+e0ff:    <null bytes>
+
 
 R_e114:
 e114:    00                     HALT
@@ -15734,15 +15713,16 @@ e388:    a0 a0                  st AL, #0xa0
 e38a:    a0 00                  st AL, #0x00
 
 R_e38c:
-e38c:    00                     HALT
+e38c:    <null bytes>
+
 
 R_e38d:
-e38d:    00                     HALT
-e38e:    00                     HALT
+e38d:    <null bytes>
+
 
 R_e38f:
-e38f:    00                     HALT
-e390:    00                     HALT
+e38f:    <null bytes>
+
 
 R_e391:
 e391:    00                     HALT
@@ -15771,14 +15751,8 @@ Debugger_Return:
 e39b:    00                     HALT
 e39c:    00                     HALT
 e39d:    73 28                  jmp [R_e3c7|+0x28]
-e39f:    00
-e3c0:    00
-e3c1:    00
-e3c2:    00
-e3c3:    00
-e3c4:    00
-e3c5:    00
-e3c6:    00
+e39f:    <null bytes>
+
 
 R_e3c7:
 e3c7:    6f e5 38               stcc [0xe538]
@@ -15879,8 +15853,8 @@ e488:    b3 07                  st A, [R_e491|+0x7]
 e48a:    73 0a                  jmp [L_e496|+0xa]
 
 R_e48c:
-e48c:    00                     HALT
-e48d:    00                     HALT
+e48c:    <null bytes>
+
 
 R_e48e:
 e48e:    00                     HALT
@@ -15971,28 +15945,36 @@ e520:    3a                     clr! A, #0
 e521:    71 00 00               jmp [L_0000|0x0000]
 
 R_e524:
-e524:    00                     HALT
+e524:    <null bytes>
+
 
 R_e525:
-e525:    00                     HALT
+e525:    <null bytes>
+
 
 Debug_Regs_A:
-e526:    00 00                  (0x0)
+e526:    <null bytes>
+
 
 Debug_Regs_B:
-e528:    00 00                  (0x0)
+e528:    <null bytes>
+
 
 Debug_Regs_X:
-e52a:    00 00                  (0x0)
+e52a:    <null bytes>
+
 
 Debug_Regs_Y:
-e52c:    00 00                  (0x0)
+e52c:    <null bytes>
+
 
 Debug_Regs_Z:
-e52e:    00 00                  (0x0)
+e52e:    <null bytes>
+
 
 Debug_Regs_S:
-e530:    00 00                  (0x0)
+e530:    <null bytes>
+
 
 Debug_Regs_C:
 e532:    00 00                  (0x0)
@@ -16872,10 +16854,21 @@ e967:    03                     rf
 e968:    a7                     unknown
 
 R_e969:
-e969:    00                     HALT
-e96a:    00                     HALT
-e96b:    00                     HALT
-e96c:    00                     HALT
-e96d:    00                     HALT
-e96e:    00                     HALT
-e96f:    00                     HALT
+e969:    <null bytes>
+
+
+L_f140:
+f140:    <null bytes>
+
+
+L_f200:
+f200:    <null bytes>
+
+
+L_f808:
+f808:    <null bytes>
+
+
+L_fd00:
+fd00:    <null bytes>
+

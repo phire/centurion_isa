@@ -92,6 +92,7 @@ class MemoryWrapper:
         self.memory = memory
         self.labels = {}
         self.syscall_map = {}
+        self.top = 0xffff
 
     def __getitem__(self, key):
         return self.memory.__getitem__(key)
@@ -129,6 +130,13 @@ class MemoryWrapper:
         # like info(), but doesn't create a new entry in the DefaultDict
         return memory_addr_info[addr] if addr in memory_addr_info else MemInfo()
 
+    def hasInfo(self, addr):
+        if addr in memory_addr_info:
+            return (memory_addr_info[addr].label
+                or memory_addr_info[addr].comment
+                or memory_addr_info[addr].type)
+        return False
+
 def tochar(byte):
     c = chr(byte&0x7f)
     if byte > 0x80 and c.isprintable():
@@ -139,19 +147,25 @@ def disassemble(memory):
     for entry in entry_points:
         recursive_disassemble(memory, entry)
 
+    skipping = True # Ignore null bytes at start of memory
+
     i = 0
     while i < 0xfe00:
-        if i & 0x000f == 0:
-            try:
-                if memory[i:i+16] == b"\x00" * 16:
-                    i += 16
-                    continue
-            except:
-                pass
         info = memory.read_only_info(i)
 
         if info.label:
             print(f"\n{info.label}:")
+            skipping = False
+
+        # Skip large blocks of zeros, but only if they don't have lables/comments
+        if memory[i] == 0 and memory[i:i+10] == b"\x00" * 10:
+            if not skipping:
+                print(f"{i:04x}:    <null bytes>\n")
+                skipping = True
+            i += 1
+            while i < memory.top and memory[i] == 0 and not memory.hasInfo(i):
+                i += 1
+            continue
 
         if info.pre_comment:
             # Make sure an empty line is present in front of pre_comment

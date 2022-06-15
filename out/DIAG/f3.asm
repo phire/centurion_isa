@@ -1,4 +1,40 @@
 
+ReadChar:
+0102:    <null bytes>
+
+
+FinishTest:
+0104:    <null bytes>
+
+
+PrintCtrlCToExit:
+0106:    <null bytes>
+
+
+WriteHexByte:
+010a:    <null bytes>
+
+
+Fn_286:
+010c:    <null bytes>
+
+
+PressSpaceThenExit:
+010e:    <null bytes>
+
+
+WriteHexWord:
+0110:    <null bytes>
+
+
+WriteString:
+0112:    <null bytes>
+
+
+Fn_1e3:
+0118:    <null bytes>
+
+
 TEST_0:
 9000:    03 6d                  (0x36d)
 9002:    "CMD AUX MEMORY TEST\r\n\0"
@@ -725,8 +761,10 @@ Entry_FLOPPY_READ_TEST:
 969b:    90 01 80               ld A, #0x0180
 969e:    50 80                  add A, Z
 96a0:    7d 00                  call [A]
+
     ; Init
 96a2:    f8 00                  (0xf800)	 ; FFC_BASE
+
     ; Restart point is here
 96a4:    7a 01 06               call @[PrintCtrlCToExit|0x0106]	 ; PrintCtrlCToExit
 96a7:    80 41                  ld AL, #0x41
@@ -836,12 +874,5 @@ L_977d:
 9790:    a1 f1 0c               st AL, [0xf10c]
 9793:    72 01 0e               jmp @[PressSpaceThenExit|0x010e]
 9796:    8c	 ; Checksum byte
-9797:    00
-9798:    00
-9799:    00
-979a:    00
-979b:    00
-979c:    00
-979d:    00
-979e:    00
-979f:    00
+9797:    <null bytes>
+

@@ -1493,5 +1493,5 @@ L_8fd8:
 8fd8:    a1 f2 01               st AL, [0xf201]
 8fdb:    73 ef                  jmp [WriteString|-0x11]
 8fdd:    82
-8fde:    00
-8fdf:    00
+8fde:    <null bytes>
+

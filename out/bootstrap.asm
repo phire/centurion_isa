@@ -1,4 +1,20 @@
 
+IPL_Entry_point:
+0103:    <null bytes>
+
+
+L_4c93:
+4c93:    <null bytes>
+
+
+L_4ce7:
+4ce7:    <null bytes>
+
+
+L_8001:
+8001:    <null bytes>
+
+
 EntryPoint:
 fc00:    1a 02                  bs1 L_fc04	 ; Check the Sense switch to see if we should jump straight to DIAG
 fc02:    73 03                  jmp [L_fc07|+0x3]

@@ -1043,9 +1043,5 @@ L_069f:
 L_06a6:
 06a6:    a5 21                  st AL, [B++]
 06a8:    73 f5                  jmp [L_069f|-0xb]
-06aa:    00
-06ab:    00
-06ac:    00
-06ad:    00
-06ae:    00
-06af:    00
+06aa:    <null bytes>
+

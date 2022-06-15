@@ -37,6 +37,8 @@ ef3a:    42 31                  and AL, BL
 ef3c:    49                     sub! BL, AL
 ef3d:    15 ee                  bnz L_ef2d
 ef3f:    09                     ret
+ef40:    <null bytes>
+
 
 L_efc0:
 efc0:    90 f0 b0               ld A, #0xf0b0
@@ -86,3 +88,5 @@ effb:    11 f2                  bnc L_efef
 effd:    8e                     ld AL, [C]
 effe:    48                     add! BL, AL
 efff:    09                     ret
+f000:    <null bytes>
+

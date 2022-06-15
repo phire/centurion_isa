@@ -1,4 +1,44 @@
 
+Init:
+0100:    <null bytes>
+
+
+ReadChar:
+0102:    <null bytes>
+
+
+FinishTest:
+0104:    <null bytes>
+
+
+PrintCtrlCToExit:
+0106:    <null bytes>
+
+
+WriteHex:
+010a:    <null bytes>
+
+
+WaitNotFIn:
+010c:    <null bytes>
+
+
+PressSpaceThenExit:
+010e:    <null bytes>
+
+
+WriteHex16:
+0110:    <null bytes>
+
+
+WriteString:
+0112:    <null bytes>
+
+
+WaitForReady:
+0118:    <null bytes>
+
+
 TEST_0:
     ; This is a header for this ROM.
     ; It looks like these ROMs are pluggable. There's nothing that refers to this table
@@ -320,6 +360,7 @@ Entry_FINCH_AUX_MEMORY_TEST:
 
 L_9ae2:
 9ae2:    7a 01 06               call @[PrintCtrlCToExit|0x0106]
+
     ; PrintCtrlCToExit
     ; The test restarts from here
 9ae5:    32 60                  clr Y, #0
@@ -340,6 +381,7 @@ L_9aef:
 9aff:    2f 00                  ld_dma_addr A
 9b01:    2f 34                  ld_dma_mode B
 9b03:    2f 06                  enable_dma
+
     ; These are the only two commands, whose parameters are sent using the
     ; memory-mapped command register. All other operations (seek, read, etc)
     ; only use a single byte as command; request parameters are sent as a
@@ -446,6 +488,7 @@ Entry_01133_CMD_SEEK_TEST:
 9bde:    7d 00                  call [A]	 ; Init
 9be0:    f8 08                  (0xf808)	 ; CMD_REGS_BASE
 9be2:    7a 01 06               call @[PrintCtrlCToExit|0x0106]
+
     ; This is restart point
     ; All the code below differs from the aux memory test. The command
     ; is sent to the card via DMA; controller's command register does not
@@ -477,6 +520,7 @@ L_9c12:
 9c14:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
 9c17:    7a 01 18               call @[WaitForReady|0x0118]	 ; WaitForReady
 9c1a:    12 ed                  bn L_9c09
+
     ; packet[0,1] stays = 0x8100
 9c1c:    d0 41 4f               ld B, #0x414f	 ; &packet[2]
 9c1f:    90 84 00               ld A, #0x8400
@@ -499,6 +543,7 @@ L_9c32:
 9c3a:    2f 02                  ld_dma_count A
 9c3c:    2f 34                  ld_dma_mode B
 9c3e:    2f 06                  enable_dma
+
     ; Seek operation consists of two commands
 9c40:    80 43                  ld AL, #0x43
 9c42:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
@@ -657,6 +702,7 @@ L_9d7a:
 9d7c:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
 9d7f:    7a 01 18               call @[WaitForReady|0x0118]	 ; WaitForReady
 9d82:    12 ed                  bn L_9d71
+
     ; Prepare seek request
 9d84:    d0 41 4f               ld B, #0x414f	 ; &packet[2]
 9d87:    90 84 00               ld A, #0x8400
@@ -851,5 +897,5 @@ L_9ed4:
 9ee7:    a1 f1 0c               st AL, [0xf10c]
 9eea:    72 01 0e               jmp @[PressSpaceThenExit|0x010e]	 ; PressSpaceThenExit
 9eed:    c5 'E'	 ; Checksum byte
-9eee:    00
-9eef:    00
+9eee:    <null bytes>
+
