@@ -401,7 +401,7 @@ def main():
                 'memory': mem,
                 'memory_addr_info': memory_addr_info,
                 'entry_points': entry_points}
-            exec(ast, script_globals, {})
+            exec(ast, script_globals, script_globals)
 
     disassemble(mem)
 
