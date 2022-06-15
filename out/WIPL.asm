@@ -4,8 +4,9 @@ Start:
 0101:    01                     nop
 0102:    01                     nop
 0103:    73 03                  jmp [L_0108|+0x3]
-0105:    00
-0106:    64
+
+DiskCodeValue:
+0105:    00 64                  (0x64)
 0107:    c5 'E'
 
 L_0108:
@@ -34,7 +35,7 @@ L_0108:
 
 L_0138:
     ; We go here if sense1 switch is set (DIAG board is present)
-0138:    61 00 1a               ld X, [0x001a]	 ; RT = (0x001a) - 20
+0138:    61 00 1a               ld X, [0x001a]	 ; X = (0x001a) - 20
 013b:    50 54 ff ec            add X, X, #0xffec	 ; Looks like DIAG overrides our mem test and tells us
 013f:    73 44                  jmp [L_0185|+0x44]	 ; size of RAM to use
 
@@ -76,17 +77,17 @@ L_016f:
     ; Continuation of boot process
 016f:    90 10 00               ld A, #0x1000
 0172:    5b                     mov X, A
-0173:    5c                     mov Y, A	 ; DX = 4096
+0173:    5c                     mov Y, A	 ; Y = 4096
 
 L_0174:
     ; This locates end of RAM, effectively probing how much RAM we've got
-0174:    8a                     ld AL, [X]	 ; Preserve original (RT) value
+0174:    8a                     ld AL, [X]	 ; Preserve original (X) value
 0175:    c0 ff                  ld BL, #0xff	 ; Try to store 0xff
 0177:    ea                     st BL, [X]
 0178:    ca                     ld BL, [X]	 ; Load it back
 0179:    14 0a                  bz L_0185	 ; Exit if we got zero (failed to store)
 017b:    aa                     st AL, [X]	 ; Put original value back
-017c:    50 64                  add X, Y	 ; RT += 4096 (page size ?)
+017c:    50 64                  add X, Y	 ; X += 4096 (page size ?)
 017e:    90 f0 00               ld A, #0xf000	 ; Reached 0xf000 ?
 0181:    51 40                  sub A, X
 0183:    15 ef                  bnz L_0174	 ; Repeat until we reach 0xf000
@@ -94,40 +95,36 @@ L_0174:
 L_0185:
 0185:    69 03 3d               st X, [0x033d]	 ; Store final address of our RAM
 0188:    55 42                  mov B, X
-018a:    50 32 fd 55            add B, B, #0xfd55
-018e:    f1 04 a0               st B, [LoadBuffer0|0x04a0]
-0191:    50 32 fe 70            add B, B, #0xfe70
+018a:    50 32 fd 55            add B, B, #0xfd55	 ; B = ram_top - 683
+018e:    f1 04 a0               st B, [LoadBuffer0|0x04a0]	 ; Set up buffers for sector I/O
+0191:    50 32 fe 70            add B, B, #0xfe70	 ; B = buffer0 - 400
 0195:    f1 04 a2               st B, [LoadBuffer1|0x04a2]
-0198:    50 32 fe 70            add B, B, #0xfe70
+0198:    50 32 fe 70            add B, B, #0xfe70	 ; Set stack at buffer1 - 400
 019c:    55 2a                  mov S, B
 019e:    d0 fe e5               ld B, #0xfee5
-01a1:    50 42                  add B, X	 ; BX = top of RAM - 283
+01a1:    50 42                  add B, X	 ; B = top of RAM - 283
 01a3:    f1 02 b6               st B, [0x02b6]	 ; This will be address of our trampoline code
-01a6:    80 bd                  ld AL, #0xbd
-01a8:    a1 06 18               st AL, [0x0618]
+01a6:    80 bd                  ld AL, #0xbd	 ; '='
+01a8:    a1 06 18               st AL, [0x0618]	 ; This sets up prompt character, i wonder why...
 01ab:    90 01 bb               ld A, #0x01bb
 01ae:    b1 06 00               st A, [0x0600]
-01b1:    80 b1                  ld AL, #0xb1
-01b3:    1d 01                  bs4 L_01b6
-01b5:    29                     dec! AL, #1
+01b1:    80 b1                  ld AL, #0xb1	 ; '1'
+01b3:    1d 01                  bs4 L_01b6	 ; This sets default boot disk to "01" or "00"
+01b5:    29                     dec! AL, #1	 ; depending on Sense4 value
 
 L_01b6:
-01b6:    a1 03 77               st AL, [0x0377]
-01b9:    73 42                  jmp [L_01fd|+0x42]
+01b6:    a1 03 77               st AL, [0x0377]	 ; Store to disk_buffer[4]
+01b9:    73 42                  jmp [L_01fd|+0x42]	 ; Bypass the prompt and try to boot with preset default values
 
 BackToPrompt:
     ; The code jumps here when for instance empty string was entered on CODE prompt
     ; According to known behavior, thus jumps back to WIPL prompt, effectively
     ; restarting it
 01bb:    04                     ei
-    ; We don't currently understand what 47 instruction really does, but this
-    ; is the only reference to 0x0265, where a "skip code check" flag is stored.
-    ; And we also know that in pristine WIPL, obtained from disk dump, the respective
-    ; location contains zero; while in this one, which has been extracted by dumping
-    ; from the TOS after it hit the "Stop" loop and the machine has been restarted,
-    ; we see a 0xff. So, apparently, this sequence stores an 0xFF at 0x0265
-01bc:    47 4c 00 ff 02 65      memcpy #0x01, #0xff, [0x0265]	 ; fill
-01c2:    47 9c 09 a0 03 65      memset #0x0a, #0xa0, [0x0365]	 ; fill (0x365), 0xa0, 10
+
+    ; This forces the user to enter the disk code and boot file name
+01bc:    47 4c 00 ff 02 65      memcpy #0x01, #0xff, [CheckCodeFlag|0x0265]	 ; This sets CheckCodeFlag to 0xFF (true)
+01c2:    47 9c 09 a0 03 65      memset #0x0a, #0xa0, [NameBufferStr|0x0365]	 ; Pre-fill buffer for NAME= with spaces
 01c8:    79 05 5a               call [L_055a|0x055a]
 01cb:    79 05 36               call [PrintString|0x0536]
 01ce:    03 42                  (0x342)	 ; WIPL version string
@@ -195,16 +192,18 @@ L_023f:
 0242:    90 03 78               ld A, #0x0378	 ; code_buffer
 0245:    5e                     mov Z, A
 0246:    95 81                  ld A, [Z++]	 ; Check string length
-0248:    14 06                  bz L_0250
+0248:    14 06                  bz L_0250	 ; If zero, use the default code
 024a:    79 03 c9               call [StrToNum|0x03c9]
-    ; EX points at the first non-numeric character after the code
-024d:    b1 01 05               st A, [0x0105]	 ; Store entered_disk_code
+
+    ; Z points at the first non-numeric character after the code
+024d:    b1 01 05               st A, [DiskCodeValue|0x0105]	 ; DiskCodeValue = StrToNum(CodeBuffer + 2)
 
 L_0250:
 0250:    60 00 0e               ld X, #0x000e	 ; Track 0 side 0 sector 15
 0253:    79 04 b0               call [LoadSector|0x04b0]
 0256:    00                     (0x0)
-    ; EX is an address of the loaded sector
+
+    ; Z is an address of the loaded sector
 0257:    85 88 08               ld AL, [Z + 0x0008]	 ; Disk format flag
 025a:    28                     inc! AL, #1	 ; Must be equal to 0xff
 025b:    14 09                  bz L_0266	 ; Proceed to disk code checking
@@ -212,24 +211,16 @@ L_0250:
 025e:    79 05 36               call [PrintString|0x0536]
 0261:    03 7f                  (0x37f)	 ; Incorrect disk format
 0263:    73 d7                  jmp [BackToPrompt_tramp|-0x29]
-0265:    ff	 ; This is a "check disk code" flag. If zero, the check will be bypassed.
-           	 ; In pristine bootloader, read from the disk image, there's a 00 at this location.
-           	 ; So, it is patched at runtime. This means there should be a way to bypass the check,
-           	 ; but i don't know how and didn't search for it since we now have code recovery tool.
-           	 ; Some more info from KenR, which may explain things we see:
-           	 ; 
-           	 ; The [ Code = ] when booting from the disk was just a simple password to be allowed to read from the disk.
-           	 ; It was just a one time security check at boot time.  The [ Code = ] was an added feature to the Centurion
-           	 ; system sometime in around 1981.  Why I recall this is because I got hung up with a bug in the first release
-           	 ; of the new "Code" feature. Bug was the code value was set to a value the customer picked during disk format
-           	 ; and worked fine until the system was rebooted then the code value set no longer worked...!   Yes... what fun
-           	 ; this bug was.  The OPSYS system programmer was able to figure out a work around so the customer could get back
-           	 ; into the system till the bug was fixed.
+
+CheckCodeFlag:
+0265:    ff                     (0xff)	 ; This is a "check disk code" flag. If zero, the check will be bypassed.
+                                      	 ; In pristine bootloader, read from the disk image, there's a 00 at this location.
+                                      	 ; It is set to 0xff (true) when the prompt is issued for the first time.
 
 L_0266:
 0266:    95 88 06               ld A, [Z + 0x0006]	 ; Disk code is derived from this value
 0269:    3b                     not! A, #0
-026a:    c0 80                  ld BL, #0x80	 ; This whole thing rotates AX right WITHOUT carry
+026a:    c0 80                  ld BL, #0x80	 ; This whole thing rotates A right WITHOUT carry
 026c:    07                     rl
 026d:    36 00                  rrc A, #1
 026f:    11 02                  bnc L_0273
@@ -238,16 +229,16 @@ L_0266:
 L_0273:
 0273:    d0 3c b1               ld B, #0x3cb1	 ; Some more obfuscation
 0276:    44 32                  xor BH, BL
-0278:    54 02                  xor B, A	 ; BX is the final expected value here
-027a:    81 02 65               ld AL, [0x0265]	 ; This is "request check" flag. We don't know how/where it's set.
+0278:    54 02                  xor B, A	 ; B is the final expected value here
+027a:    81 02 65               ld AL, [CheckCodeFlag|0x0265]	 ; This is "request check" flag. We don't know how/where it's set.
 027d:    15 05                  bnz L_0284	 ; If not zero, the check is required
-027f:    f1 01 05               st B, [0x0105]	 ; entered_disk_code = expected_entered_disk_code
+027f:    f1 01 05               st B, [DiskCodeValue|0x0105]	 ; DiskCodeValue = expected_code
 0282:    73 0f                  jmp [L_0293|+0xf]	 ; Bypass
 
 L_0284:
-    ; Check the disk code
-0284:    91 01 05               ld A, [0x0105]	 ; AX - entered_disk_code
-0287:    59                     sub! B, A	 ; BX = expected_disk_code
+    ; Check the disk code. Expected value is in B.
+0284:    91 01 05               ld A, [DiskCodeValue|0x0105]	 ; A = DiskCodeValue
+0287:    59                     sub! B, A	 ; B = expected_disk_code
 0288:    14 09                  bz L_0293	 ; Proceed if there's a match
 028a:    04                     ei
 028b:    79 05 36               call [PrintString|0x0536]
@@ -262,14 +253,15 @@ L_0293:
 0296:    44 10                  xor AH, AL
 0298:    d0 3c b1               ld B, #0x3cb1	 ; The same magic constant as used for making the code
 029b:    54 02                  xor B, A
-029d:    91 01 05               ld A, [0x0105]	 ; entered_disk_code, which we now know is correct
-02a0:    50 20                  add A, B	 ; AX = track number here
+029d:    91 01 05               ld A, [DiskCodeValue|0x0105]	 ; DiskCodeValue, which we now know is correct
+02a0:    50 20                  add A, B	 ; A = track number here
 02a2:    35 03                  sll A, #4
 02a4:    5b                     mov X, A	 ; sector = track * 16 (sectors per track)
-02a5:    79 04 b0               call [LoadSector|0x04b0]
+02a5:    79 04 b0               call [LoadSector|0x04b0]	 ; This should be the first sector of volume's filesystem
 02a8:    00                     (0x0)
-02a9:    95 88 0e               ld A, [Z + 0x000e]	 ; EX is still sector address
-02ac:    b1 04 8a               st A, [0x048a]
+02a9:    95 88 0e               ld A, [Z + 0x000e]	 ; Z is address of the loaded sector
+02ac:    b1 04 8a               st A, [0x048a]	 ; fs_metadata_start_sector - filesystem metadata starts here
+
     ; And here we start searching for a bootable file (let's say so).
     ; The boot directory (let's say so) is composed of 16-byte entries.
     ; Each entry contains exactly 10 characters of a file name and 6 bytes of some
@@ -283,10 +275,10 @@ L_0293:
     ; what we think is a data file name.
 02af:    30 8f                  inc Z, #16	 ; name_on_disk = sector_base + 16, this skips the first entry.
                                           	 ; That first entry looks like a volume name on the image we have.
-02b1:    79 05 07               call [memcpy|0x0507]	 ; Before proceeding, we copy part of ourselves to the top of RAM.
-                                                    	 ; I guess we're preparing to load the boot file into low memory, which would
-                                                    	 ; overwrite us.
-                                                    	 ; Calls to the relocated fragment are done via CallHighMem routine
+02b1:    79 05 07               call [CopyMem|0x0507]	 ; Before proceeding, we copy part of ourselves to the top of RAM.
+                                                     	 ; I guess we're preparing to load the boot file into low memory, which would
+                                                     	 ; overwrite us.
+                                                     	 ; Calls to the relocated fragment are done via CallHighMem routine
 02b4:    01 1b                  (0x11b)	 ; length = 283 bytes
 02b6:    7e e5                  (0x7ee5)	 ; destination, set to top_of_ram - 283
 02b8:    03 ec                  (0x3ec)	 ; source
@@ -294,10 +286,25 @@ L_0293:
 L_02ba:
     ; Here we are trying to find our "name" on the disk
     ; Names are stored in a series of entries, 16 bytes each.
-    ; Each name is exactly 10 characters long, padded up with spaces. Remaining 6
-    ; bytes probably specify file location on the disk.
-    ; Entries proceed to following sectors until the table terminated with a word of 0x848d.
-    ; This is probably disk's root directory.
+    ; struct {
+    ; char name[10];
+    ; uint8_t metadata_entry;
+    ; uint16_t metadata_sector;
+    ; uint8_t file_type;
+    ; }
+    ; name is exactly 10 characters long, padded up with spaces.
+    ; metadata_sector specifies a sector in the filesystem metadata area, from which
+    ; reading starts. metadata_entry is an index of a 3-byte entry within that sector,
+    ; from which the file starts.
+    ; All the metadata sector numbers are relative to fs_metadata_start_sector, fetched
+    ; from the volume header.
+    ; Metadata consists of 3-byte structures:
+    ; struct {
+    ; uint8_t entry_type;
+    ; uint16_t payload;
+    ; }
+    ; The actual meaning of these fields varies depending on the situation,
+    ; see the code below.
 02ba:    9c                     ld A, [Z]	 ; Check if we hit the terminator
 02bb:    d0 84 8d               ld B, #0x848d
 02be:    59                     sub! B, A
@@ -306,7 +313,7 @@ L_02ba:
 
 L_02c4:
 02c4:    90 03 65               ld A, #0x0365
-02c7:    5c                     mov Y, A	 ; DX = name_buffer + 2 - start of entered NAME string, skip over length
+02c7:    5c                     mov Y, A	 ; Y = name_buffer + 2 - start of entered NAME string, skip over length
 02c8:    90 0a 00               ld A, #0x0a00	 ; AH = 10 - maximum length
 
 L_02cb:
@@ -319,9 +326,9 @@ L_02cb:
 02d6:    45 01                  mov AL, AH	 ; Mismatch
 02d8:    22 00                  clr AH, #0
 02da:    50 08                  add Z, A	 ; name_on_disk += length (remaining) - this skips past the string
-02dc:    50 98 00 06            add Z, Z, #0x0006	 ; EX = EX + 6 - this skips over to the next entry
-02e0:    d1 04 a0               ld B, [LoadBuffer0|0x04a0]	 ; BX = LoadBuffer0 - sector address
-02e3:    50 32 01 90            add B, B, #0x0190	 ; This makes sense as add BX, BX, 400 - point at the end of sector
+02dc:    50 98 00 06            add Z, Z, #0x0006	 ; Z = Z + 6 - this skips over to the next entry
+02e0:    d1 04 a0               ld B, [LoadBuffer0|0x04a0]	 ; B = LoadBuffer0 - sector address
+02e3:    50 32 01 90            add B, B, #0x0190	 ; This makes sense as add B, B, 400 - point at the end of sector
 02e7:    51 82                  sub B, Z
 02e9:    15 cf                  bnz L_02ba	 ; Check the next entry if not reached the end
 02eb:    3e                     inc X	 ; Go to the next sector
@@ -329,61 +336,65 @@ L_02cb:
 02ef:    7b 4b                  call [CallHighMem|+0x4b]	 ; Call (end_of_ram - 87) = LoadSector
 02f1:    00                     HALT
 02f2:    73 c6                  jmp [L_02ba|-0x3a]	 ; Restart the search from the beginning.
-                                                  	 ; EX will point at the beginning of the sector this time!!!
+                                                  	 ; Z will point at the beginning of the sector this time!!!
 
 L_02f4:
-    ; NAME found. EX points right after the string in the loaded sector.
+    ; NAME found. Z points right after the string in the loaded sector.
     ; Since length of the name is exactly 10 bytes, we have three words,
     ; specifying something. The code below reads them.
 02f4:    3a                     clr! A, #0
-02f5:    85 81                  ld AL, [Z++]
+02f5:    85 81                  ld AL, [Z++]	 ; A = (unsigned short)dirent.metadata_entry
 02f7:    5d                     mov B, A
 02f8:    3d                     sll! A, #1
-02f9:    58                     add! B, A
+02f9:    58                     add! B, A	 ; B = metadata_entry * 3
 02fa:    91 04 a2               ld A, [LoadBuffer1|0x04a2]
-02fd:    58                     add! B, A
-02fe:    f5 a2                  st B, [--S]
-0300:    95 81                  ld A, [Z++]
-0302:    61 04 8a               ld X, [0x048a]
-0305:    50 04                  add X, A
-0307:    85 81                  ld AL, [Z++]
-0309:    b5 a2                  st A, [--S]
+02fd:    58                     add! B, A	 ; B = fs_metadata_start_entry = LoadBuffer1 + metadata_entry * 3
+02fe:    f5 a2                  st B, [--S]	 ; Push fs_metadata_start_entry
+0300:    95 81                  ld A, [Z++]	 ; sector_offset = dirent.metadata_sector
+0302:    61 04 8a               ld X, [0x048a]	 ; X = fs_metadata_start_sector
+0305:    50 04                  add X, A	 ; sector_to_read = fs_metadata_start_sector + sector_offset
+0307:    85 81                  ld AL, [Z++]	 ; dirent.file_type
+0309:    b5 a2                  st A, [--S]	 ; push file_type
 030b:    90 ff a9               ld A, #0xffa9
 030e:    7b 2c                  call [CallHighMem|+0x2c]	 ; Call (end_of_ram - 87) = LoadSector
-0310:    01                     nop
-0311:    d5 a8 02               ld B, [S + 0x0002]
+0310:    01                     nop	 ; Load the metadata sector into buffer #1
+
+    ; The first two metadata entries constitute a header. We know nothing of
+    ; the first entry, payload of the second entry yields file cluster size
+    ; by doing 1 << payload
+0311:    d5 a8 02               ld B, [S + 0x0002]	 ; B = fs_metadata_start_entry
 0314:    3a                     clr! A, #0
-0315:    85 28 04               ld AL, [B + 0x0004]
-0318:    5b                     mov X, A
-0319:    3a                     clr! A, #0
+0315:    85 28 04               ld AL, [B + 0x0004]	 ; A = fs_metadata_start_entry[1].payload
+0318:    5b                     mov X, A	 ; X = fs_metadata_start_entry[1].payload
+0319:    3a                     clr! A, #0	 ; A = 1
 031a:    38                     inc! A, #1
 
 L_031b:
-031b:    3f                     dec X
+031b:    3f                     dec X	 ; This loop does A = 1 << fs_metadata_start_entry[1].payload
 031c:    16 03                  blt L_0321
 031e:    3d                     sll! A, #1
 031f:    73 fa                  jmp [L_031b|-0x6]
 
 L_0321:
-0321:    dd                     ld B, [S]
-0322:    bd                     st A, [S]
+0321:    dd                     ld B, [S]	 ; file_type
+0322:    bd                     st A, [S]	 ; [S] is now 1 << fs_metadata_start_entry[1].payload, this will become ClusterSize
 0323:    80 0f                  ld AL, #0x0f
-0325:    4a                     and! BL, AL
+0325:    4a                     and! BL, AL	 ; file_type & 0x0f
 0326:    80 04                  ld AL, #0x04
-0328:    49                     sub! BL, AL	 ; Here we check something else.
+0328:    49                     sub! BL, AL	 ; Should be equal to 4. That's why i think it's a file type
 0329:    15 0e                  bnz L_0339	 ; If the check fails, we will jump back to the IPL prompt
 032b:    90 ff ff               ld A, #0xffff
-032e:    d3 0d                  ld B, [pc + 0x0d]
+032e:    d3 0d                  ld B, [pc + 0x0d]	 ; B = ram_top
 0330:    58                     add! B, A
-0331:    f1 00 fe               st B, [0x00fe]
+0331:    f1 00 fe               st B, [0x00fe]	 ; Set 0x00fe ram_top - 1; i don't get why.
 0334:    90 fe e5               ld A, #0xfee5
-0337:    7b 03                  call [CallHighMem|+0x3]	 ; Call (end_of_ram - 283) - boot the file ???
+0337:    7b 03                  call [CallHighMem|+0x3]	 ; Call (end_of_ram - 283) = RelocatablePart
 
 L_0339:
 0339:    71 01 bb               jmp [BackToPrompt|0x01bb]
 
 CallHighMem:
-033c:    d0 80 00               ld B, #0x8000	 ; BX = end of RAM, patched in the beginning
+033c:    d0 80 00               ld B, #0x8000	 ; B = ram_top, patched in the beginning
 033f:    58                     add! B, A
 0340:    75 20                  jmp [B]
 0342:    10, "\nHDIPL 6.2"
@@ -393,53 +404,53 @@ CallHighMem:
 0360:    00
 0361:    01
 0362:    8c
-0363:    00	 ; name_buffer
-0364:    05
-0365:    a0 ' '
-0366:    a0 ' '
-0367:    a0 ' '
-0368:    a0 ' '
-0369:    a0 ' '
-036a:    a0 ' '
-036b:    a0 ' '
-036c:    a0 ' '
-036d:    a0 ' '
-036e:    a0 ' '
-036f:    a0 ' '
-0370:    a0 ' '
-0371:    a0 ' '
-0372:    a0 ' '
+
+NameBuffer:
+0363:    00 05                  (0x5)	 ; Length of entered NAME will be set here
+
+NameBufferStr:
+0365:    a0 a0                  st AL, #0xa0
+0367:    a0 a0                  st AL, #0xa0
+0369:    a0 a0                  st AL, #0xa0
+036b:    a0 a0                  st AL, #0xa0
+036d:    a0 a0                  st AL, #0xa0
+036f:    a0 a0                  st AL, #0xa0
+0371:    a0 a0                  st AL, #0xa0
 0373:    a0                     (0xa0)
-0374:    00                     HALT	 ; disk_buffer
-0375:    01                     nop
+
+DiskBuffer:
+0374:    00 01                  (0x1)	 ; disk_buffer
 0376:    b0 b0                  (0xb0b0)
-0378:    00                     HALT	 ; code_buffer
-0379:    00                     HALT
+
+CodeBuffer:
+0378:    00 00                  (0x0)	 ; code_buffer
+
+CodeBufferStr:
 037a:    a0 a0                  st AL, #0xa0
 037c:    a0 a0                  st AL, #0xa0
 037e:    a0 ' '
 037f:    30, "AB 47 - INCORRECT DISK FORMAT\r"
 039f:    28, "AB 48 - INCORRECT DISK CODE\r"
 
-AsciiToHex:
-    ; This function converts one hexadecimal digit from its ASCII representation
+AsciiToDecimal:
+    ; This function converts one decimal digit from its ASCII representation
     ; to value. Result is returned in BL.
-03bd:    c0 b9                  ld BL, #0xb9
+03bd:    c0 b9                  ld BL, #0xb9	 ; '9'
 03bf:    49                     sub! BL, AL
 03c0:    19 03                  ble L_03c5
-03c2:    c0 ff                  ld BL, #0xff	 ; -1 is returned on error
+03c2:    c0 ff                  ld BL, #0xff	 ; -1 is returned on invalid character
 03c4:    09                     ret
 
 L_03c5:
-03c5:    c0 b0                  ld BL, #0xb0
-03c7:    49                     sub! BL, AL
+03c5:    c0 b0                  ld BL, #0xb0	 ; '0'
+03c7:    49                     sub! BL, AL	 ; BL = AL - '0'
 03c8:    09                     ret
 
 StrToNum:
-    ; Parses a numeric string, pointed to by EX, and returns the
-    ; parsed value in AX. EX is updated to point at the first non-digit character
+    ; Parses a numeric string, pointed to by Z, and returns the
+    ; parsed value in A. Z is updated to point at the first non-digit character
 03c9:    8c                     ld AL, [Z]	 ; Check the first character
-03ca:    7b f1                  call [AsciiToHex|-0xf]
+03ca:    7b f1                  call [AsciiToDecimal|-0xf]
 03cc:    17 03                  bp L_03d1
 03ce:    71 01 bb               jmp [BackToPrompt|0x01bb]	 ; The character is invalid
 
@@ -450,7 +461,7 @@ L_03d1:
 
 L_03d4:
 03d4:    85 81                  ld AL, [Z++]	 ; Do the conversion again, increment pointer this time
-03d6:    7b e5                  call [AsciiToHex|-0x1b]
+03d6:    7b e5                  call [AsciiToDecimal|-0x1b]
 03d8:    17 05                  bp L_03df
 03da:    31 80                  dec Z, #1	 ; Invalid character, restore the pointer
                                          	 ; It now points behind our number
@@ -458,136 +469,170 @@ L_03d4:
 03de:    09                     ret
 
 L_03df:
-03df:    9d                     ld A, [S]	 ; AX = value
+03df:    9d                     ld A, [S]	 ; A = value
 03e0:    ed                     st BL, [S]	 ; (SP) = digit
 03e1:    3d                     sll! A, #1
-03e2:    5d                     mov B, A	 ; BX = value << 1
+03e2:    5d                     mov B, A	 ; B = value << 1
 03e3:    35 01                  sll A, #2
-03e5:    58                     add! B, A	 ; BX = (value << 1) + (value << 3) = value * 10
-03e6:    3a                     clr! A, #0	 ; AX = digit
+03e5:    58                     add! B, A	 ; B = (value << 1) + (value << 3) = value * 10
+03e6:    3a                     clr! A, #0	 ; A = digit
 03e7:    8d                     ld AL, [S]
-03e8:    58                     add! B, A	 ; BX += digit
+03e8:    58                     add! B, A	 ; B += digit
 03e9:    fd                     st B, [S]	 ; value = value * 10 + digit
 03ea:    73 e8                  jmp [L_03d4|-0x18]
 
 RelocatablePart:
     ; This code is copied to high RAM (top - 283) and operates from there
     ; Note that it includes Hawk disk driver. The code is apparently fully relocatable
-03ec:    95 a1                  ld A, [S++]
-03ee:    95 a1                  ld A, [S++]
-03f0:    b3 36                  st A, [pc + 0x36]
-03f2:    95 a1                  ld A, [S++]
-03f4:    30 05                  inc A, #6
-03f6:    b3 5c                  st A, [pc + 0x5c]
+    ; This is the actual file loading procedure
+03ec:    95 a1                  ld A, [S++]	 ; Remove saved X from the stack, we aren't going to return
+03ee:    95 a1                  ld A, [S++]	 ; pop ClusterSize
+03f0:    b3 36                  st A, [ClusterSize|+0x36]
+03f2:    95 a1                  ld A, [S++]	 ; pop fs_metadata_start_entry
+03f4:    30 05                  inc A, #6	 ; This skips over header (two 3-byte entries, see above)
+03f6:    b3 5c                  st A, [pc + 0x5c]	 ; fs_metadata_current_entry = fs_metadata_start_entry + 6
 03f8:    3a                     clr! A, #0
 03f9:    39                     dec! A, #1
-03fa:    b3 5e                  st A, [pc + 0x5e]
-03fc:    7b 53                  call [L_0451|+0x53]
-03fe:    d0 00 4c               ld B, #0x004c
+03fa:    b3 5e                  st A, [pc + 0x5e]	 ; Preset sector_in_cluster to -1, it's preincremented
+03fc:    7b 53                  call [LoadNextFileSector|+0x53]	 ; This should load the first data sector of the file,
+                                                               	 ; locate and parse the first section
+                                                               	 ; A will hold relative address of the section on return
+03fe:    d0 00 4c               ld B, #0x004c	 ; If A equals to 0x004c, we're doing something interesting
 0401:    59                     sub! B, A
-0402:    15 26                  bnz L_042a
-0404:    95 88 1b               ld A, [Z + 0x001b]
-0407:    b3 40                  st A, [pc + 0x40]
-0409:    50 48                  add Z, X
-040b:    30 80                  inc Z, #1
-040d:    7b 31                  call [L_0440|+0x31]
-040f:    30 80                  inc Z, #1
+0402:    15 26                  bnz HandleDataSection	 ; This assumes the first section is always data
+0404:    95 88 1b               ld A, [Z + 0x001b]	 ; Apparently the data in this section is a header, which holds
+                                                  	 ; loading address of the file at offset 27
+0407:    b3 40                  st A, [pc + 0x40]	 ; set load_base
+0409:    50 48                  add Z, X	 ; Skip over this section
+040b:    30 80                  inc Z, #1	 ; Skip over checksum byte
+040d:    7b 31                  call [ParseSection|+0x31]	 ; The next section after the header will be ignored, but we may load next sector(s)
+040f:    30 80                  inc Z, #1	 ; Skip over checksum (is body going to have zero length ?)
 
-L_0411:
-0411:    7b 2d                  call [L_0440|+0x2d]
+LoadBinaryLoop:
+0411:    7b 2d                  call [ParseSection|+0x2d]
 0413:    45 33                  mov BL, BL
-0415:    14 13                  bz L_042a
+0415:    14 13                  bz HandleDataSection
 
-L_0417:
+HandleFixupSection:
+    ; Y = start address of the binary being loaded
+    ; Z = pointer to section's data
+    ; X = section length in bytes
 0417:    d5 81                  ld B, [Z++]
-0419:    93 2e                  ld A, [pc + 0x2e]
-041b:    58                     add! B, A
+0419:    93 2e                  ld A, [pc + 0x2e]	 ; load_base
+041b:    58                     add! B, A	 ; load_base + offset
 041c:    99                     ld A, [B]
 041d:    50 60                  add A, Y
-041f:    b9                     st A, [B]
-0420:    31 41                  dec X, #2
-0422:    18 f3                  bgt L_0417
+041f:    b9                     st A, [B]	 ; *(load_base + offset) = *(load_base + offset) + Y
+0420:    31 41                  dec X, #2	 ; length -= 2
+0422:    18 f3                  bgt HandleFixupSection
 
-L_0424:
-0424:    85 81                  ld AL, [Z++]
-0426:    73 e9                  jmp [L_0411|-0x17]
-0428:    00
-0429:    00
+ReadChecksum:
+0424:    85 81                  ld AL, [Z++]	 ; AL = checksum
+0426:    73 e9                  jmp [LoadBinaryLoop|-0x17]	 ; But it seems to be ignored by the destination of this jump
 
-L_042a:
-042a:    55 44                  mov X, X
-042c:    14 0c                  bz L_043a
+ClusterSize:
+0428:    00 00                  (0x0)
+
+HandleDataSection:
+    ; Y = start address of the binary being loaded
+    ; Z = pointer to section's data
+    ; X = section length in bytes
+042a:    55 44                  mov X, X	 ; If length == 0, loading process has ended
+042c:    14 0c                  bz JumpToBinary
 042e:    55 40                  mov A, X
-0430:    39                     dec! A, #1
-0431:    67                     unknown
+0430:    39                     dec! A, #1	 ; A - size - 1
+0431:    67                     unknown	 ; This must be memcpy of A+1 bytes from (Z) to (Y)
 0432:    4a                     and! BL, AL
 0433:    86                     unknown
-0434:    50 46                  add Y, X
+0434:    50 46                  add Y, X	 ; Move our source and destination pointers
 0436:    50 48                  add Z, X
-0438:    73 ea                  jmp [L_0424|-0x16]
+0438:    73 ea                  jmp [ReadChecksum|-0x16]
 
-L_043a:
-043a:    32 80                  clr Z, #0
+JumpToBinary:
+    ; Jump to the loaded file
+043a:    32 80                  clr Z, #0	 ; Set up some arguments
 043c:    80 c5                  ld AL, #0xc5
-043e:    75 60                  jmp [Y]
+043e:    75 60                  jmp [Y]	 ; Y (section's address) is our entry point
 
-L_0440:
-0440:    c5 81                  ld BL, [Z++]
-0442:    16 0d                  blt L_0451
+ParseSection:
+    ; Parse and interpret a single segment of the binary file
+    ; Z points to a buffer, where segment header is located
+    ; Returns Y = destination address for the segment
+    ; BL = section type
+    ; X = section size
+    ; Z = section data pointer
+0440:    c5 81                  ld BL, [Z++]	 ; Section type
+0442:    16 0d                  blt LoadNextFileSector	 ; if less than zero, proceed to next sector
+                                                      	 ; @LOAD file we know that the actual value is 0x80
 0444:    3a                     clr! A, #0
-0445:    85 81                  ld AL, [Z++]
-0447:    bd                     st A, [S]
-0448:    90 00 00               ld A, #0x0000
+0445:    85 81                  ld AL, [Z++]	 ; Section size
+0447:    bd                     st A, [S]	 ; This will end up in X on return
+0448:    90 00 00               ld A, #0x0000	 ; load_base (inline variable)
 044b:    5c                     mov Y, A
-044c:    95 81                  ld A, [Z++]
-044e:    50 06                  add Y, A
+044c:    95 81                  ld A, [Z++]	 ; Section address
+044e:    50 06                  add Y, A	 ; Y = load_base + addr
 0450:    09                     ret
 
-L_0451:
-0451:    6d a2                  st X, [--S]
-0453:    90 00 00               ld A, #0x0000
-0456:    65 08 01               ld X, [A + 0x0001]
-0459:    90 00 00               ld A, #0x0000
+LoadNextFileSector:
+    ; At this point fs_metadata_current_entry points at a 3-byte entry, presumably
+    ; inside filesystem's metadata. Let's refresh on entry format:
+    ; struct {
+    ; uint8_t entry_type;
+    ; uint16_t payload;
+    ; }
+    ; if entry_type > 0, payload specifies starting sector of the cluster (absolute).
+    ; if entry_type < 0, ~entry_type is a number of the next metadata sector, relative to
+    ; fs_metadata_start_sector, and payload's LSB specifies an index of the starting
+    ; 3-byte entry in that sector
+0451:    6d a2                  st X, [--S]	 ; Preserve X
+0453:    90 00 00               ld A, #0x0000	 ; A = fs_metadata_current_entry (inline variable)
+0456:    65 08 01               ld X, [A + 0x0001]	 ; X = fs_metadata_current_entry.payload
+0459:    90 00 00               ld A, #0x0000	 ; sector_in_cluster, inline variable
 045c:    38                     inc! A, #1
-045d:    b3 fb                  st A, [pc + -0x5]
-045f:    50 04                  add X, A
-0461:    d3 c5                  ld B, [pc + -0x3b]
+045d:    b3 fb                  st A, [pc + -0x5]	 ; sector_in_cluster += 1 - preincrement because we start from -1
+045f:    50 04                  add X, A	 ; X = fs_metadata_current_entry.payload + sector_in_cluster
+0461:    d3 c5                  ld B, [ClusterSize|-0x3b]
 0463:    59                     sub! B, A
-0464:    11 30                  bnc L_0496
+0464:    11 30                  bnc LoadDataSector	 ; If sector_in_cluster <= ClusterSize , load data sector X and start parsing it
 0466:    3a                     clr! A, #0
-0467:    b3 f1                  st A, [pc + -0xf]
-0469:    93 e9                  ld A, [pc + -0x17]
+0467:    b3 f1                  st A, [pc + -0xf]	 ; sector_in_cluster = 0
+0469:    93 e9                  ld A, [pc + -0x17]	 ; fs_metadata_current_entry += 3 - go to next entry
 046b:    30 02                  inc A, #3
 046d:    b3 e5                  st A, [pc + -0x1b]
-046f:    65 08 01               ld X, [A + 0x0001]
-0472:    5d                     mov B, A
-0473:    98                     ld A, [A]
-0474:    17 20                  bp L_0496
+046f:    65 08 01               ld X, [A + 0x0001]	 ; X = fs_metadata_current_entry.payload
+0472:    5d                     mov B, A	 ; B = fs_metadata_current_entry
+0473:    98                     ld A, [A]	 ; A = fs_metadata_current_entry.entry_type
+0474:    17 20                  bp LoadDataSector	 ; if (fs_metadata_current_entry.entry_type > 0) then proceed to loading data sector
+
+    ; fs_metadata_current_entry.link < 0
+    ; This tells us to load the next medatata sector and start decoding it
+    ; from the offset of (fs_metadata_current_entry.payload & 0x00FF) * 3
+    ; Number of the next sector is: fs_metadata_start_sector + ~fs_metadata_current_entry.entry_type
 0476:    3a                     clr! A, #0
-0477:    85 28 02               ld AL, [B + 0x0002]
-047a:    28                     inc! AL, #1
+0477:    85 28 02               ld AL, [B + 0x0002]	 ; A = new_entry_idx = fs_metadata_current_entry.payload & 0x00FF
+047a:    28                     inc! AL, #1	 ; If A equals to 0x00FF, it's a critical failure, halt the machine.
 047b:    14 20                  bz Stop
 047d:    29                     dec! AL, #1
 047e:    5d                     mov B, A
 047f:    3d                     sll! A, #1
-0480:    58                     add! B, A
+0480:    58                     add! B, A	 ; B = new_entry_idx * 3
 0481:    93 1f                  ld A, [LoadBuffer1|+0x1f]
-0483:    58                     add! B, A
-0484:    94 ce                  ld A, @[pc + -0x32]
-0486:    f3 cc                  st B, [pc + -0x34]
+0483:    58                     add! B, A	 ; new_fs_metadata_current_entry = LoadBuffer1 + new_entry_idx * 3
+0484:    94 ce                  ld A, @[pc + -0x32]	 ; A = old_link = fs_metadata_current_entry.entry_type
+0486:    f3 cc                  st B, [pc + -0x34]	 ; fs_metadata_current_entry = new_fs_metadata_current_entry
 0488:    3b                     not! A, #0
-0489:    60 57 79               ld X, #0x5779
-048c:    50 04                  add X, A
-048e:    7b 20                  call [LoadSector|+0x20]
-0490:    01                     nop
-0491:    63 c1                  ld X, [pc + -0x3f]
-0493:    65 48 01               ld X, [X + 0x0001]
+0489:    60 57 79               ld X, #0x5779	 ; fs_metadata_start_sector, this location is patched
+048c:    50 04                  add X, A	 ; X = fs_metadata_start_sector + ~old_link
+048e:    7b 20                  call [LoadSector|+0x20]	 ; Load filesystem metadata sector X
+0490:    01                     nop	 ; Use LoadBuffer1
+0491:    63 c1                  ld X, [pc + -0x3f]	 ; X = fs_metadata_current_entry
+0493:    65 48 01               ld X, [X + 0x0001]	 ; X = fs_metadata_current_entry.payload
 
-L_0496:
-0496:    7b 18                  call [LoadSector|+0x18]
-0498:    00                     HALT
-0499:    65 a1                  ld X, [S++]
-049b:    73 a3                  jmp [L_0440|-0x5d]
+LoadDataSector:
+0496:    7b 18                  call [LoadSector|+0x18]	 ; Load sector X into LoadBuffer0, this is file data sector
+0498:    00                     HALT	 ; Z = address of the loaded data on return
+0499:    65 a1                  ld X, [S++]	 ; Restore X
+049b:    73 a3                  jmp [ParseSection|-0x5d]	 ; Sector we've loaded contains load commands
 
 Stop:
 049d:    00                     HALT
@@ -609,17 +654,17 @@ SetDmaForSectorLoad:
 
 LoadSector:
     ; This function loads one sector from the drive.
-    ; CHS address of the sector to read needs to be placed into X (RT) register
+    ; CHS address of the sector to read needs to be placed into X register
     ; in HAWK native format (CCCCCCCC CCCHSSSS) before calling this function.
     ; This routine uses two buffers, whose addresses are stored in two
     ; variables above. The buffer to use is chosen by the literal byte
-    ; argument: 0 or 1. Address of the buffer is returned in EX.
+    ; argument: 0 or 1. Address of the buffer is returned in Z.
 04b0:    90 f1 40               ld A, #0xf140
-04b3:    5e                     mov Z, A	 ; EX = DSK_BASE
-04b4:    93 ea                  ld A, [LoadBuffer0|-0x16]	 ; AX = LoadBuffer0
+04b3:    5e                     mov Z, A	 ; Z = DSK_BASE
+04b4:    93 ea                  ld A, [LoadBuffer0|-0x16]	 ; A = LoadBuffer0
 04b6:    c5 41                  ld BL, [X++]
 04b8:    14 02                  bz L_04bc	 ; If literal argument is not 0...
-04ba:    93 e6                  ld A, [LoadBuffer1|-0x1a]	 ; .. then AX = LoadBuffer1
+04ba:    93 e6                  ld A, [LoadBuffer1|-0x1a]	 ; .. then A = LoadBuffer1
 
 L_04bc:
 04bc:    b3 10                  st A, [pc + 0x10]	 ; Preserve loading address (patch instruction at 04cd)
@@ -628,10 +673,11 @@ L_04bc:
 04c2:    80 00                  ld AL, #0x00
 04c4:    a5 88 08               st AL, [Z + 0x0008]	 ; READ command
 04c7:    7b 2c                  call [WaitForDataReady|+0x2c]
-    ; Upon completion status register value will be in AX
+
+    ; Upon completion status register value will be in A
 04c9:    24 00                  srl AH, #1	 ; Check HAWK_STATUS & 0x0100
 04cb:    15 05                  bnz L_04d2	 ; If bit set, recalibrate, seek and retry (read error)
-04cd:    90 7d 55               ld A, #0x7d55	 ; AX = loading address (this insn is patched)
+04cd:    90 7d 55               ld A, #0x7d55	 ; A = loading address (this insn is patched)
 04d0:    5e                     mov Z, A
 04d1:    09                     ret
 
@@ -641,7 +687,7 @@ L_04d2:
 04d7:    7b 22                  call [WaitForHawkCmdCompletion|+0x22]
 04d9:    8c                     ld AL, [Z]
 04da:    a5 88 0b               st AL, [Z + 0x000b]
-04dd:    93 ef                  ld A, [pc + -0x11]	 ; AX = loading address (from the patched insn)
+04dd:    93 ef                  ld A, [pc + -0x11]	 ; A = loading address (from the patched insn)
 04df:    73 db                  jmp [L_04bc|-0x25]	 ; Retry
 
 SeekToTrack:
@@ -672,40 +718,40 @@ WaitForHawkCmdCompletion:
 0505:    09                     ret
 0506:    00
 
-memcpy:
+CopyMem:
     ; This is the end of a fragment, which gets copied to top of RAM.
-    ; This function preserves DX and EX
+    ; This function preserves Y and Z
 0507:    95 41                  ld A, [X++]	 ; length = arg[0, 1]
-                                           	 ; I completely fail to understand these two instructions. I mean - i understand what they mean,
-                                           	 ; but what's the real purpose of this fragment here ? In pristine on-disk WIPL it looks the same.
-                                           	 ; Is this patched during installation ?
-0509:    5d                     mov B, A
+0509:    5d                     mov B, A	 ; I completely fail to understand this fragment with checking length.
+                                        	 ; I mean - i understand what instructions mean,
+                                        	 ; but what's the real purpose of this fragment here ? In pristine on-disk WIPL it looks the same.
+                                        	 ; Is this patched during installation ?
 050a:    71 05 0d               jmp [L_050d|0x050d]
 
 L_050d:
 050d:    f5 a2                  st B, [--S]	 ; push length
-050f:    59                     sub! B, A	 ; length = min(AX, BX)
+050f:    59                     sub! B, A	 ; length = min(A, B)
 0510:    19 21                  ble L_0533
 0512:    da                     ld B, [X]	 ; arg[2, 3]
 0513:    79 06 9a               call [L_069a|0x069a]
 0516:    a0 ' '
 
 L_0517:
-0517:    dd                     ld B, [S]	 ; BX = length
-0518:    55 60                  mov A, Y	 ; Preserve DX
+0517:    dd                     ld B, [S]	 ; B = length
+0518:    55 60                  mov A, Y	 ; Preserve Y
 051a:    bd                     st A, [S]
 051b:    95 41                  ld A, [X++]	 ; dest
 051d:    5c                     mov Y, A
 051e:    95 41                  ld A, [X++]	 ; src
-0520:    6d a2                  st X, [--S]	 ; push RT, will use as back counter
-0522:    55 24                  mov X, B	 ; RT = length
+0520:    6d a2                  st X, [--S]	 ; push X, will use as back counter
+0522:    55 24                  mov X, B	 ; X = length
 
 L_0524:
-    ; Copy RT bytes from (AX) to (DX)
+    ; Copy X bytes from (A) to (Y)
 0524:    3f                     dec X
 0525:    17 06                  bp L_052d
-0527:    65 a1                  ld X, [S++]	 ; pop RT
-0529:    95 a1                  ld A, [S++]	 ; pop DX
+0527:    65 a1                  ld X, [S++]	 ; pop X
+0529:    95 a1                  ld A, [S++]	 ; pop Y
 052b:    5c                     mov Y, A
 052c:    09                     ret
 
@@ -888,8 +934,8 @@ ReadLine:
 0613:    6d a2                  st X, [--S]
 0615:    38                     inc! A, #1
 0616:    5b                     mov X, A
-0617:    80 bd                  ld AL, #0xbd
-0619:    79 05 64               call [PrintChar|0x0564]
+0617:    80 bd                  ld AL, #0xbd	 ; '='
+0619:    79 05 64               call [PrintChar|0x0564]	 ; This signals a prompt
 
 L_061c:
 061c:    7b a6                  call [L_05c4|-0x5a]

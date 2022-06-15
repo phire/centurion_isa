@@ -1,3 +1,5 @@
+0x105 , label,		DiskCodeValue
+0x105 , >H
 0x1ce ,  >H
 0x1d7 , >H
 0x1bb, label,		BackToPrompt
@@ -11,6 +13,8 @@
 0x23c , label,		BackToPrompt_tramp
 0x256 , >B
 0x261 ,	>H
+0x265 , label,		CheckCodeFlag
+0x265 , >B
 0x28e , >H
 0x2a8 , >B
 0x2b4 , >H
@@ -20,14 +24,32 @@
 0x34e ,	 pstring16
 0x354 ,	 pstring16
 0x35a ,	 pstring16
+0x363 ,  >H
+0x363 ,  label,		NameBuffer
+0x365 ,  label,		NameBufferStr
 0x373 ,  >B
+0x374 ,	 label,		DiskBuffer
+0x374 ,	 >H
 0x376 ,	 >H
+0x378 ,	 label,		CodeBuffer
+0x378 ,	 >H
+0x37a ,	 label,		CodeBufferStr
 0x37f ,	 pstring16
 0x39f ,	 pstring16
 0x33c ,	 label,		CallHighMem
-0x3bd ,	 label,		AsciiToHex
+0x3bd ,	 label,		AsciiToDecimal
 0x3c9 ,  label,		StrToNum
 0x3ec ,  code,		RelocatablePart
+0x411 ,  label,		LoadBinaryLoop
+0x417 ,  label,		HandleFixupSection
+0x424 ,	 label,		ReadChecksum
+0x428 ,  label,		ClusterSize
+0x428 , >H
+0x42a ,  label,		HandleDataSection
+0x43a ,  label,		JumpToBinary
+0x440 ,  label,		ParseSection
+0x451 ,  label,		LoadNextFileSector
+0x496 ,	 label,		LoadDataSector
 0x49d ,	 label,		Stop
 0x4a0 ,	 >H
 0x4a0 ,	 label,		LoadBuffer0
@@ -38,7 +60,7 @@
 0x4e1 ,  label,		SeekToTrack
 0x4f5 ,	 label,		WaitForDataReady
 0x4fb ,	 label,		WaitForHawkCmdCompletion
-0x507 ,  label,		memcpy
+0x507 ,  label,		CopyMem
 0x536 ,	 label,		PrintString
 0x564 ,	 label,		PrintChar
 0x595 ,	 label,		RawPrintChar

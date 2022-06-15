@@ -6,7 +6,7 @@
 0x120 ,	comment	; Initialize stack
 0x124 ,	comment	; This sends RTZ command to our disks.
 0x138,	pre_comment 	; We go here if sense1 switch is set (DIAG board is present)
-0x138 ,	comment	; RT = (0x001a) - 20
+0x138 ,	comment	; X = (0x001a) - 20
 0x13b ,	comment	; Looks like DIAG overrides our mem test and tells us
 0x13f ,	comment	; size of RAM to use
 0x141,	pre_comment 	; Self-modifying code ahead!!!
@@ -28,30 +28,36 @@
 0x162 ,	comment	; Wait for command_reg & 0x30 == 0x30; this indicates drive ready
 0x16b ,	comment	; Next unit, down to 0
 0x16f,	pre_comment 	; Continuation of boot process
-0x173 ,	comment	; DX = 4096
+0x173 ,	comment	; Y = 4096
 0x174,	pre_comment 	; This locates end of RAM, effectively probing how much RAM we've got
-0x174 ,	comment	; Preserve original (RT) value
+0x174 ,	comment	; Preserve original (X) value
 0x175 ,	comment	; Try to store 0xff
 0x178 ,	comment	; Load it back
 0x179 ,	comment	; Exit if we got zero (failed to store)
 0x17b ,	comment	; Put original value back
-0x17c ,	comment	; RT += 4096 (page size ?)
+0x17c ,	comment	; X += 4096 (page size ?)
 0x17e ,	comment	; Reached 0xf000 ?
 0x183 ,	comment	; Repeat until we reach 0xf000
 0x185 ,	comment	; Store final address of our RAM
-0x1a1 ,	comment	; BX = top of RAM - 283
+0x18a ,	comment	; B = ram_top - 683
+0x18e ,	comment	; Set up buffers for sector I/O
+0x191 ,	comment	; B = buffer0 - 400
+0x198 ,	comment	; Set stack at buffer1 - 400
+0x1a1 ,	comment	; B = top of RAM - 283
 0x1a3 ,	comment	; This will be address of our trampoline code
+0x1a6 ,	comment	; '='
+0x1a8 ,	comment	; This sets up prompt character, i wonder why...
+0x1b1 ,	comment	; '1'
+0x1b3 ,	comment	; This sets default boot disk to "01" or "00"
+0x1b5 ,	comment	; depending on Sense4 value
+0x1b6 ,	comment	; Store to disk_buffer[4]
+0x1b9 ,	comment	; Bypass the prompt and try to boot with preset default values
 0x1bb,	pre_comment 	; The code jumps here when for instance empty string was entered on CODE prompt
 	 	; According to known behavior, thus jumps back to WIPL prompt, effectively
 	 	; restarting it
-0x1bc,	pre_comment 	; We don't currently understand what 47 instruction really does, but this
-	 	; is the only reference to 0x0265, where a "skip code check" flag is stored.
-	 	; And we also know that in pristine WIPL, obtained from disk dump, the respective
-	 	; location contains zero; while in this one, which has been extracted by dumping
-	 	; from the TOS after it hit the "Stop" loop and the machine has been restarted,
-	 	; we see a 0xff. So, apparently, this sequence stores an 0xFF at 0x0265
-0x1bc ,	comment	; fill
-0x1c2 ,	comment	; fill (0x365), 0xa0, 10
+0x1bc,	pre_comment 	; This forces the user to enter the disk code and boot file name
+0x1bc ,	comment	; This sets CheckCodeFlag to 0xFF (true)
+0x1c2 ,	comment	; Pre-fill buffer for NAME= with spaces
 0x1ce ,	comment	; WIPL version string
 0x1d7 ,	comment	; "NAME"
 0x1dc ,	comment	; name_buffer
@@ -77,38 +83,29 @@
 0x23f ,	comment	; This writes Hawk unit select register
 0x242 ,	comment	; code_buffer
 0x246 ,	comment	; Check string length
-0x24d,	pre_comment 	; EX points at the first non-numeric character after the code
-0x24d ,	comment	; Store entered_disk_code
+0x248 ,	comment	; If zero, use the default code
+0x24d,	pre_comment 	; Z points at the first non-numeric character after the code
+0x24d ,	comment	; DiskCodeValue = StrToNum(CodeBuffer + 2)
 0x250 ,	comment	; Track 0 side 0 sector 15
-0x257,	pre_comment 	; EX is an address of the loaded sector
+0x257,	pre_comment 	; Z is an address of the loaded sector
 0x257 ,	comment	; Disk format flag
 0x25a ,	comment	; Must be equal to 0xff
 0x25b ,	comment	; Proceed to disk code checking
 0x261 ,	comment	; Incorrect disk format
 0x265 ,	comment	; This is a "check disk code" flag. If zero, the check will be bypassed.
 		; In pristine bootloader, read from the disk image, there's a 00 at this location.
-		; So, it is patched at runtime. This means there should be a way to bypass the check,
-		; but i don't know how and didn't search for it since we now have code recovery tool.
-		; Some more info from KenR, which may explain things we see:
-		;
-		; The [ Code = ] when booting from the disk was just a simple password to be allowed to read from the disk.
-		; It was just a one time security check at boot time.  The [ Code = ] was an added feature to the Centurion
-		; system sometime in around 1981.  Why I recall this is because I got hung up with a bug in the first release
-		; of the new "Code" feature. Bug was the code value was set to a value the customer picked during disk format
-		; and worked fine until the system was rebooted then the code value set no longer worked...!   Yes... what fun
-		; this bug was.  The OPSYS system programmer was able to figure out a work around so the customer could get back
-		; into the system till the bug was fixed.
+		; It is set to 0xff (true) when the prompt is issued for the first time.
 0x266 ,	comment	; Disk code is derived from this value
-0x26a ,	comment	; This whole thing rotates AX right WITHOUT carry
+0x26a ,	comment	; This whole thing rotates A right WITHOUT carry
 0x273 ,	comment	; Some more obfuscation
-0x278 ,	comment	; BX is the final expected value here
+0x278 ,	comment	; B is the final expected value here
 0x27a ,	comment	; This is "request check" flag. We don't know how/where it's set.
 0x27d ,	comment	; If not zero, the check is required
-0x27f ,	comment	; entered_disk_code = expected_entered_disk_code
+0x27f ,	comment	; DiskCodeValue = expected_code
 0x282 ,	comment	; Bypass
-0x284,	pre_comment 	; Check the disk code
-0x284 ,	comment	; AX - entered_disk_code
-0x287 ,	comment	; BX = expected_disk_code
+0x284,	pre_comment 	; Check the disk code. Expected value is in B.
+0x284 ,	comment	; A = DiskCodeValue
+0x287 ,	comment	; B = expected_disk_code
 0x288 ,	comment	; Proceed if there's a match
 0x28e ,	comment	; Incorrect disk code
 0x293,	pre_comment 	; Disk code is correct. Now we read what we'll call a "boot directory".
@@ -116,10 +113,12 @@
 	 	; form. The disk code is used to unscramble it.
 0x293 ,	comment	; sector_base + 4
 0x298 ,	comment	; The same magic constant as used for making the code
-0x29d ,	comment	; entered_disk_code, which we now know is correct
-0x2a0 ,	comment	; AX = track number here
+0x29d ,	comment	; DiskCodeValue, which we now know is correct
+0x2a0 ,	comment	; A = track number here
 0x2a4 ,	comment	; sector = track * 16 (sectors per track)
-0x2a9 ,	comment	; EX is still sector address
+0x2a5 ,	comment	; This should be the first sector of volume's filesystem
+0x2a9 ,	comment	; Z is address of the loaded sector
+0x2ac ,	comment	; fs_metadata_start_sector - filesystem metadata starts here
 0x2af,	pre_comment 	; And here we start searching for a bootable file (let's say so).
 	 	; The boot directory (let's say so) is composed of 16-byte entries.
 	 	; Each entry contains exactly 10 characters of a file name and 6 bytes of some
@@ -142,13 +141,28 @@
 0x2b8 ,	comment	; source
 0x2ba,	pre_comment 	; Here we are trying to find our "name" on the disk
 	 	; Names are stored in a series of entries, 16 bytes each.
-	 	; Each name is exactly 10 characters long, padded up with spaces. Remaining 6
-	 	; bytes probably specify file location on the disk.
-	 	; Entries proceed to following sectors until the table terminated with a word of 0x848d.
-	 	; This is probably disk's root directory.
+	 	; struct {
+	 	; char name[10];
+	 	; uint8_t metadata_entry;
+	 	; uint16_t metadata_sector;
+	 	; uint8_t file_type;
+	 	; }
+	 	; name is exactly 10 characters long, padded up with spaces.
+	 	; metadata_sector specifies a sector in the filesystem metadata area, from which
+	 	; reading starts. metadata_entry is an index of a 3-byte entry within that sector,
+	 	; from which the file starts.
+	 	; All the metadata sector numbers are relative to fs_metadata_start_sector, fetched
+	 	; from the volume header.
+	 	; Metadata consists of 3-byte structures:
+	 	; struct {
+	 	; uint8_t entry_type;
+	 	; uint16_t payload;
+	 	; }
+	 	; The actual meaning of these fields varies depending on the situation,
+	 	; see the code below.
 0x2ba ,	comment	; Check if we hit the terminator
 0x2bf ,	comment	; Go back to the prompt if so
-0x2c7 ,	comment	; DX = name_buffer + 2 - start of entered NAME string, skip over length
+0x2c7 ,	comment	; Y = name_buffer + 2 - start of entered NAME string, skip over length
 0x2c8 ,	comment	; AH = 10 - maximum length
 0x2cb ,	comment	; c1 = *entered_name++
 0x2cd ,	comment	; length--
@@ -157,30 +171,56 @@
 0x2d4 ,	comment	; If matches, go chech the next char
 0x2d6 ,	comment	; Mismatch
 0x2da ,	comment	; name_on_disk += length (remaining) - this skips past the string
-0x2dc ,	comment	; EX = EX + 6 - this skips over to the next entry
-0x2e0 ,	comment	; BX = LoadBuffer0 - sector address
-0x2e3 ,	comment	; This makes sense as add BX, BX, 400 - point at the end of sector
+0x2dc ,	comment	; Z = Z + 6 - this skips over to the next entry
+0x2e0 ,	comment	; B = LoadBuffer0 - sector address
+0x2e3 ,	comment	; This makes sense as add B, B, 400 - point at the end of sector
 0x2e9 ,	comment	; Check the next entry if not reached the end
 0x2eb ,	comment	; Go to the next sector
 0x2ef ,	comment	; Call (end_of_ram - 87) = LoadSector
 0x2f2 ,	comment	; Restart the search from the beginning.
-		; EX will point at the beginning of the sector this time!!!
-0x2f4,	pre_comment 	; NAME found. EX points right after the string in the loaded sector.
+		; Z will point at the beginning of the sector this time!!!
+0x2f4,	pre_comment 	; NAME found. Z points right after the string in the loaded sector.
 	 	; Since length of the name is exactly 10 bytes, we have three words,
 	 	; specifying something. The code below reads them.
+0x2f5 ,	comment	; A = (unsigned short)dirent.metadata_entry
+0x2f9 ,	comment	; B = metadata_entry * 3
+0x2fd ,	comment	; B = fs_metadata_start_entry = LoadBuffer1 + metadata_entry * 3
+0x2fe ,	comment	; Push fs_metadata_start_entry
+0x300 ,	comment	; sector_offset = dirent.metadata_sector
+0x302 ,	comment	; X = fs_metadata_start_sector
+0x305 ,	comment	; sector_to_read = fs_metadata_start_sector + sector_offset
+0x307 ,	comment	; dirent.file_type
+0x309 ,	comment	; push file_type
 0x30e ,	comment	; Call (end_of_ram - 87) = LoadSector
-0x328 ,	comment	; Here we check something else.
+0x310 ,	comment	; Load the metadata sector into buffer #1
+0x311,	pre_comment 	; The first two metadata entries constitute a header. We know nothing of
+	 	; the first entry, payload of the second entry yields file cluster size
+	 	; by doing 1 << payload
+0x311 ,	comment	; B = fs_metadata_start_entry
+0x315 ,	comment	; A = fs_metadata_start_entry[1].payload
+0x318 ,	comment	; X = fs_metadata_start_entry[1].payload
+0x319 ,	comment	; A = 1
+0x31b ,	comment	; This loop does A = 1 << fs_metadata_start_entry[1].payload
+0x321 ,	comment	; file_type
+0x322 ,	comment	; [S] is now 1 << fs_metadata_start_entry[1].payload, this will become ClusterSize
+0x325 ,	comment	; file_type & 0x0f
+0x328 ,	comment	; Should be equal to 4. That's why i think it's a file type
 0x329 ,	comment	; If the check fails, we will jump back to the IPL prompt
-0x337 ,	comment	; Call (end_of_ram - 283) - boot the file ???
-0x33c ,	comment	; BX = end of RAM, patched in the beginning
-0x363 ,	comment	; name_buffer
+0x32e ,	comment	; B = ram_top
+0x331 ,	comment	; Set 0x00fe ram_top - 1; i don't get why.
+0x337 ,	comment	; Call (end_of_ram - 283) = RelocatablePart
+0x33c ,	comment	; B = ram_top, patched in the beginning
+0x363 ,	comment	; Length of entered NAME will be set here
 0x374 ,	comment	; disk_buffer
 0x378 ,	comment	; code_buffer
-0x3bd,	pre_comment 	; This function converts one hexadecimal digit from its ASCII representation
+0x3bd,	pre_comment 	; This function converts one decimal digit from its ASCII representation
 	 	; to value. Result is returned in BL.
-0x3c2 ,	comment	; -1 is returned on error
-0x3c9,	pre_comment 	; Parses a numeric string, pointed to by EX, and returns the
-	 	; parsed value in AX. EX is updated to point at the first non-digit character
+0x3bd ,	comment	; '9'
+0x3c2 ,	comment	; -1 is returned on invalid character
+0x3c5 ,	comment	; '0'
+0x3c7 ,	comment	; BL = AL - '0'
+0x3c9,	pre_comment 	; Parses a numeric string, pointed to by Z, and returns the
+	 	; parsed value in A. Z is updated to point at the first non-digit character
 0x3c9 ,	comment	; Check the first character
 0x3ce ,	comment	; The character is invalid
 0x3d1,	pre_comment 	; A correcr digit has been entered
@@ -189,35 +229,130 @@
 0x3da ,	comment	; Invalid character, restore the pointer
 		; It now points behind our number
 0x3dc ,	comment	; return value
-0x3df ,	comment	; AX = value
+0x3df ,	comment	; A = value
 0x3e0 ,	comment	; (SP) = digit
-0x3e2 ,	comment	; BX = value << 1
-0x3e5 ,	comment	; BX = (value << 1) + (value << 3) = value * 10
-0x3e6 ,	comment	; AX = digit
-0x3e8 ,	comment	; BX += digit
+0x3e2 ,	comment	; B = value << 1
+0x3e5 ,	comment	; B = (value << 1) + (value << 3) = value * 10
+0x3e6 ,	comment	; A = digit
+0x3e8 ,	comment	; B += digit
 0x3e9 ,	comment	; value = value * 10 + digit
 0x3ec,	pre_comment 	; This code is copied to high RAM (top - 283) and operates from there
 	 	; Note that it includes Hawk disk driver. The code is apparently fully relocatable
+	 	; This is the actual file loading procedure
+0x3ec ,	comment	; Remove saved X from the stack, we aren't going to return
+0x3ee ,	comment	; pop ClusterSize
+0x3f2 ,	comment	; pop fs_metadata_start_entry
+0x3f4 ,	comment	; This skips over header (two 3-byte entries, see above)
+0x3f6 ,	comment	; fs_metadata_current_entry = fs_metadata_start_entry + 6
+0x3fa ,	comment	; Preset sector_in_cluster to -1, it's preincremented
+0x3fc ,	comment	; This should load the first data sector of the file,
+		; locate and parse the first section
+		; A will hold relative address of the section on return
+0x3fe ,	comment	; If A equals to 0x004c, we're doing something interesting
+0x402 ,	comment	; This assumes the first section is always data
+0x404 ,	comment	; Apparently the data in this section is a header, which holds
+		; loading address of the file at offset 27
+0x407 ,	comment	; set load_base
+0x409 ,	comment	; Skip over this section
+0x40b ,	comment	; Skip over checksum byte
+0x40d ,	comment	; The next section after the header will be ignored, but we may load next sector(s)
+0x40f ,	comment	; Skip over checksum (is body going to have zero length ?)
+0x417,	pre_comment 	; Y = start address of the binary being loaded
+	 	; Z = pointer to section's data
+	 	; X = section length in bytes
+0x419 ,	comment	; load_base
+0x41b ,	comment	; load_base + offset
+0x41f ,	comment	; *(load_base + offset) = *(load_base + offset) + Y
+0x420 ,	comment	; length -= 2
+0x424 ,	comment	; AL = checksum
+0x426 ,	comment	; But it seems to be ignored by the destination of this jump
+0x42a,	pre_comment 	; Y = start address of the binary being loaded
+	 	; Z = pointer to section's data
+	 	; X = section length in bytes
+0x42a ,	comment	; If length == 0, loading process has ended
+0x430 ,	comment	; A - size - 1
+0x431 ,	comment	; This must be memcpy of A+1 bytes from (Z) to (Y)
+0x434 ,	comment	; Move our source and destination pointers
+0x43a,	pre_comment 	; Jump to the loaded file
+0x43a ,	comment	; Set up some arguments
+0x43e ,	comment	; Y (section's address) is our entry point
+0x440,	pre_comment 	; Parse and interpret a single segment of the binary file
+	 	; Z points to a buffer, where segment header is located
+	 	; Returns Y = destination address for the segment
+	 	; BL = section type
+	 	; X = section size
+	 	; Z = section data pointer
+0x440 ,	comment	; Section type
+0x442 ,	comment	; if less than zero, proceed to next sector
+		; @LOAD file we know that the actual value is 0x80
+0x445 ,	comment	; Section size
+0x447 ,	comment	; This will end up in X on return
+0x448 ,	comment	; load_base (inline variable)
+0x44c ,	comment	; Section address
+0x44e ,	comment	; Y = load_base + addr
+0x451,	pre_comment 	; At this point fs_metadata_current_entry points at a 3-byte entry, presumably
+	 	; inside filesystem's metadata. Let's refresh on entry format:
+	 	; struct {
+	 	; uint8_t entry_type;
+	 	; uint16_t payload;
+	 	; }
+	 	; if entry_type > 0, payload specifies starting sector of the cluster (absolute).
+	 	; if entry_type < 0, ~entry_type is a number of the next metadata sector, relative to
+	 	; fs_metadata_start_sector, and payload's LSB specifies an index of the starting
+	 	; 3-byte entry in that sector
+0x451 ,	comment	; Preserve X
+0x453 ,	comment	; A = fs_metadata_current_entry (inline variable)
+0x456 ,	comment	; X = fs_metadata_current_entry.payload
+0x459 ,	comment	; sector_in_cluster, inline variable
+0x45d ,	comment	; sector_in_cluster += 1 - preincrement because we start from -1
+0x45f ,	comment	; X = fs_metadata_current_entry.payload + sector_in_cluster
+0x464 ,	comment	; If sector_in_cluster <= ClusterSize , load data sector X and start parsing it
+0x467 ,	comment	; sector_in_cluster = 0
+0x469 ,	comment	; fs_metadata_current_entry += 3 - go to next entry
+0x46f ,	comment	; X = fs_metadata_current_entry.payload
+0x472 ,	comment	; B = fs_metadata_current_entry
+0x473 ,	comment	; A = fs_metadata_current_entry.entry_type
+0x474 ,	comment	; if (fs_metadata_current_entry.entry_type > 0) then proceed to loading data sector
+0x476,	pre_comment 	; fs_metadata_current_entry.link < 0
+	 	; This tells us to load the next medatata sector and start decoding it
+	 	; from the offset of (fs_metadata_current_entry.payload & 0x00FF) * 3
+	 	; Number of the next sector is: fs_metadata_start_sector + ~fs_metadata_current_entry.entry_type
+0x477 ,	comment	; A = new_entry_idx = fs_metadata_current_entry.payload & 0x00FF
+0x47a ,	comment	; If A equals to 0x00FF, it's a critical failure, halt the machine.
+0x480 ,	comment	; B = new_entry_idx * 3
+0x483 ,	comment	; new_fs_metadata_current_entry = LoadBuffer1 + new_entry_idx * 3
+0x484 ,	comment	; A = old_link = fs_metadata_current_entry.entry_type
+0x486 ,	comment	; fs_metadata_current_entry = new_fs_metadata_current_entry
+0x489 ,	comment	; fs_metadata_start_sector, this location is patched
+0x48c ,	comment	; X = fs_metadata_start_sector + ~old_link
+0x48e ,	comment	; Load filesystem metadata sector X
+0x490 ,	comment	; Use LoadBuffer1
+0x491 ,	comment	; X = fs_metadata_current_entry
+0x493 ,	comment	; X = fs_metadata_current_entry.payload
+0x496 ,	comment	; Load sector X into LoadBuffer0, this is file data sector
+0x498 ,	comment	; Z = address of the loaded data on return
+0x499 ,	comment	; Restore X
+0x49b ,	comment	; Sector we've loaded contains load commands
 0x4a6 ,	comment	; 400 bytes == 1 sector
 0x4b0,	pre_comment 	; This function loads one sector from the drive.
-	 	; CHS address of the sector to read needs to be placed into X (RT) register
+	 	; CHS address of the sector to read needs to be placed into X register
 	 	; in HAWK native format (CCCCCCCC CCCHSSSS) before calling this function.
 	 	; This routine uses two buffers, whose addresses are stored in two
 	 	; variables above. The buffer to use is chosen by the literal byte
-	 	; argument: 0 or 1. Address of the buffer is returned in EX.
-0x4b3 ,	comment	; EX = DSK_BASE
-0x4b4 ,	comment	; AX = LoadBuffer0
+	 	; argument: 0 or 1. Address of the buffer is returned in Z.
+0x4b3 ,	comment	; Z = DSK_BASE
+0x4b4 ,	comment	; A = LoadBuffer0
 0x4b8 ,	comment	; If literal argument is not 0...
-0x4ba ,	comment	; .. then AX = LoadBuffer1
+0x4ba ,	comment	; .. then A = LoadBuffer1
 0x4bc ,	comment	; Preserve loading address (patch instruction at 04cd)
 0x4be ,	comment	; Setup DMA to read
 0x4c4 ,	comment	; READ command
-0x4c9,	pre_comment 	; Upon completion status register value will be in AX
+0x4c9,	pre_comment 	; Upon completion status register value will be in A
 0x4c9 ,	comment	; Check HAWK_STATUS & 0x0100
 0x4cb ,	comment	; If bit set, recalibrate, seek and retry (read error)
-0x4cd ,	comment	; AX = loading address (this insn is patched)
+0x4cd ,	comment	; A = loading address (this insn is patched)
 0x4d4 ,	comment	; RTZ command
-0x4dd ,	comment	; AX = loading address (from the patched insn)
+0x4dd ,	comment	; A = loading address (from the patched insn)
 0x4df ,	comment	; Retry
 0x4ea ,	comment	; Write sector address register
 0x4ed ,	comment	; SEEK command
@@ -229,23 +364,24 @@
 0x4fb ,	comment	; HAWK status
 0x4fe ,	comment	; Wait for STATUS & 0x30 == 0x30
 0x507,	pre_comment 	; This is the end of a fragment, which gets copied to top of RAM.
-	 	; This function preserves DX and EX
+	 	; This function preserves Y and Z
 0x507 ,	comment	; length = arg[0, 1]
-		; I completely fail to understand these two instructions. I mean - i understand what they mean,
+0x509 ,	comment	; I completely fail to understand this fragment with checking length.
+		; I mean - i understand what instructions mean,
 		; but what's the real purpose of this fragment here ? In pristine on-disk WIPL it looks the same.
 		; Is this patched during installation ?
 0x50d ,	comment	; push length
-0x50f ,	comment	; length = min(AX, BX)
+0x50f ,	comment	; length = min(A, B)
 0x512 ,	comment	; arg[2, 3]
-0x517 ,	comment	; BX = length
-0x518 ,	comment	; Preserve DX
+0x517 ,	comment	; B = length
+0x518 ,	comment	; Preserve Y
 0x51b ,	comment	; dest
 0x51e ,	comment	; src
-0x520 ,	comment	; push RT, will use as back counter
-0x522 ,	comment	; RT = length
-0x524,	pre_comment 	; Copy RT bytes from (AX) to (DX)
-0x527 ,	comment	; pop RT
-0x529 ,	comment	; pop DX
+0x520 ,	comment	; push X, will use as back counter
+0x522 ,	comment	; X = length
+0x524,	pre_comment 	; Copy X bytes from (A) to (Y)
+0x527 ,	comment	; pop X
+0x529 ,	comment	; pop Y
 0x566 ,	comment	; Serisl port 0 base address
 0x56d ,	comment	; Set up baud rate ?
 0x574 ,	comment	; If character is 0x0c (form feed)...
@@ -260,3 +396,5 @@
 	 	; It is also supposed to be padded with spaces (0xA0) up to a certain
 	 	; fixed length of at least 10 chars. NAME comparison wouldn't work without
 	 	; it as it compares exactly 10 characters.
+0x617 ,	comment	; '='
+0x619 ,	comment	; This signals a prompt
