@@ -1,25 +1,80 @@
+0x1eb ,	comment	; Current open file? Number open files?
 0x43e,	pre_comment 	; Null terminated list of Device objects to early-initialize at boot
+0x8073,	pre_comment 	; LongCall?
 0x839c ,	comment	; Calculate syscall table offset
 0x839d ,	comment	; read function ptr
 0x83a0 ,	comment	; modify jump instruction below
 0x83a2 ,	comment	; restore registers
 0x83a4 ,	comment	; jump to syscall
+0x85c5 ,	comment	; 1eb
+0x860a ,	comment	; Is this yield?
+0x863c ,	comment	; Clear CurrentProcess
+0x863e ,	comment	; Setup Temporary stack
 0x8aa6,	pre_comment 	; Not entirely sure
 	 	; Seems to gets the device instance struct corrosponding to byte at [B + 1]
+	 	; Result in B
 0x8aaf ,	comment	; 0x81
 0x8ab2 ,	comment	; if B < 0x80
 0x8ab5 ,	comment	; Remove top bit
+0x8b26,	pre_comment 	; B is a FileOp struct
 0x8b28 ,	comment	; Assert B is System Pointer
 0x8b2e ,	comment	; Assert [B + 0x0006] is System pointer
+0x8b3e ,	comment	; FileOp+01, device type?
+0x8b45 ,	comment	; if FileOP+01 == 4
+0x8b47 ,	comment	; pop DeviceInstance
+0x8b49 ,	comment	; B = FileOP struct
+0x8b4b ,	comment	; Special case?
+0xaa27 ,	comment	; move stack down
+0xaa30 ,	comment	; rearange our stack
+0xaa33 ,	comment	; store X
+0xabf0 ,	comment	; Return value via PC?
 0xadc8 ,	comment	; Setup StackPointer
+0xaedd ,	comment	; Rewrite IL0's program counter to R_aeed
+0xaee0 ,	comment	; clearing IL0's context register presumably also changes it's Page Table Base
+0xaee2 ,	comment	; Patch ld A, #0x0000 at 0xaf16
+0xaf11 ,	comment	; Opsys Aborted
+0xaf16 ,	comment	; B should be SystemInfoPtr, 01ea
+0xaf27 ,	comment	; Load error device (defaults to Device_CRT0)
+0xaf2b ,	comment	; Get DeviceObj
+0xaf2e ,	comment	; Get Write function (default, CrtDevice_Write)
+0xaf31 ,	comment	; tranfer execution to write funtion
+		; Problematic, becuase this abort function hasn't set Y at all
+		; and CrtDevice_Write does a lot with Y
+0xaf39 ,	comment	; Abort string
 0xb2d1,	pre_comment 	; Checks if A is a pointer within the kernel memory range (0x8000 to 0xefff)
 	 	; Aborts if not
 0xb2d7 ,	comment	; Check A is below 0x8000
 0xb2e9 ,	comment	; SystemInfo_TopOfMemory
 0xb2ed ,	comment	; A is above 0xefff
+0xb44b ,	comment	; Setup stack at the end of this Init function
+		; We don't need it anymore, so overwrite it
+0xb461,	pre_comment 	; I suspect this is the timer interrupt
+	 	; So this is probally doing process switching
+0xb470 ,	comment	; Not entirely sure that this is an abort
+0xb473 ,	comment	; Decrement Timeslice counter
+0xb474 ,	comment	; store at 0x0141
+0xb483,	pre_comment 	; Update Clock
+0xb4c9 ,	comment	; X before call
+0xb4f8,	pre_comment 	; Is hardcoded to assume Error device is a mux port
+0xb500 ,	comment	; B = string
+0xb506 ,	comment	; Error device
+0xb509 ,	comment	; MMIO address 0xf200
+0xb523 ,	comment	; Wait for UART to be ready
+0xbb4f ,	comment	; Patch PrintStringToErrorDevice arg
+0xbb77 ,	comment	; " FAIL:  X XXXX XXXX\x07\r"
+0xc085 ,	comment	; "EC:XX CP:XX CMDS: "
+0xc27e,	pre_comment 	; X is the CRT device
+	 	; Z is the WriteStruct (file operation object?)
+	 	; Y is ????
+0xc280 ,	comment	; Lock?
+0xc290 ,	comment	; Overwrites string????
+0xc2de ,	comment	; "ATTN PRINT\n\r"
 0xc5a7 ,	comment	; Set exception handler's S register
 		; Doesn't actually get used as a Stack
 0xc5ac ,	comment	; Install exception handler
+0xca1f ,	comment	; "EC:XX CMDS: "
+0xcc0d ,	comment	; fixme: bad encoding?
+0xcc80,	pre_comment 	; SystemInfo + 0x32 = 8
 0xcd4d,	pre_comment 	; Looks like this function converts a 16bit word to hex and writes
 	 	; it to the ascii buffer specified at [X]
 0xcdd1,	pre_comment 	; This is the entry point where WIPL transfers control
@@ -38,11 +93,40 @@
 0xcebf,	pre_comment 	; This initilizes all devices in the null-terminated EarlyInitDevices array
 	 	; Which in this case is just CrtDevice_Init
 0xcecc,	pre_comment 	; LOS Prompt:
-	 	; Asks for NAME, DISK and CODE
 0xcecd ,	comment	; "LOS 6.05 - B"
+0xcee0 ,	comment	; Check if we should autoboot
+0xcee5,	pre_comment 	; Asks for NAME, DISK and CODE
 0xcee5 ,	comment	; "NAME="
 0xcf2a ,	comment	; "DISK="
 0xcf74 ,	comment	; "CODE="
+0xcfd6 ,	comment	; patch the length(?) byte of the unkblk2 instruction
+0xcfd8 ,	comment	; Copy to R_e351, scanning for dot
+0xcfe2 ,	comment	; space
+0xcfe4 ,	comment	; Might be repacing '.' with ' '?
+0xcfe5 ,	comment	; Y now points after the '.'
+0xcfe7 ,	comment	; This looks like it overwrites other variables?
+0xcff0 ,	comment	; filename
+0xcff3 ,	comment	; Open file?
+0xd019 ,	comment	; Filename
+0xd074 ,	comment	; might be a single byte copy? But why have a special blk instruction for that?
+0xd08e ,	comment	; arg4
+0xd0c0,	pre_comment 	; Read configuration dataset
+0xd0d8 ,	comment	; "SYSTEM"
+0xd0f9 ,	comment	; "TIB   "
+0xd10a ,	comment	; "DISK  "
+0xd11b ,	comment	; "CRT   "
+0xd12c ,	comment	; "PRR   "
+0xd13d ,	comment	; "SPOOL "
+0xd14e ,	comment	; "LINE  "
+0xd15f ,	comment	; "SPEC  "
+0xd170 ,	comment	; "INVALID CONFIGURATION DATA SET\r\n"
+0xd255,	pre_comment 	; Writes a string to CRT0
+	 	; String is in Y, should be pointing 2 bytes into a pascal style string
+0xd277 ,	comment	; set disknum
+0xd9da ,	comment	; "OPSYS OVERSIZE-LOAD PROCESS DISCONTINUED\r\n"
+0xe2b2 ,	comment	; DeviceType?
+0xe311 ,	comment	; <esc><fs><ff> (escape, file seperator, form feed)
+0xe35c,	pre_comment 	; This string is used as both a pascal string and a C string.
 0xe49b ,	comment	; Setup CRT0 to 9600 baud
 0xe4a1 ,	comment	; "*"
 0xe4ac ,	comment	; "("

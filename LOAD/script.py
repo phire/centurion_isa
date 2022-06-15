@@ -2,9 +2,43 @@ import struct
 from generic import entry_points, memory_addr_info, FunctionInfo
 
 Syscalls = {
-    0x08: ("Read?", {"op_struct": "ptr"}),
-    0x09: ("Abort", None),
-    0x10: ("Write?", None),
+    0x02: ("02", {"arg1": "byte", "arg2": "ptr"}),
+    0x04: ("04", {"arg1": "ptr", "arg2": "ptr", "arg3": "byte"}),
+    0x05: ("05", {"arg1": "byte"}), # fixme, can't follow whole function. probally wrong
+    0x06: ("06", {"arg1": "byte"}), # same as 12, but takes arg on X
+    0x07: ("Yield", None),
+    0x08: ("Flush", {"op_struct": "ptr"}),
+    0x09: ("Abort", {"abort_code": "byte"}),
+    0x0c: ("0c", None),
+    0x0e: ("OpenFile?", {"arg1" : "ptr"}),
+    0x10: ("DoFileOp", None),
+    0x12: ("12", None), # same as 06, but takes arg in A
+    0x16: ("16", {"arg1": "word", "out": "word"}),
+    0x17: ("17", {"arg1": "word"}),
+    #19
+    0x1a: ("1a", None),
+
+
+    0x4c: ("4c", {
+        "arg1" : "word",
+        "arg2" : "word",
+        "disknum" : "byte",
+        "arg4" : "word",
+        "arg5" : "ptr",
+        "arg6" : "byte"}),
+    0x4f: ("4f", {"arg1" : "word", "arg2" : "ptr" }),
+    0x55: ("55", {"arg1" : "word" }),
+    0x57: ("57", {"arg1" : "word", "arg2" : "word", "arg3" : "byte" }),
+    0x59: ("59", None),
+    0x5a: ("5a", None),
+    0x64: ("64", {"arg1" : "word", "arg2" : "word"}),
+    0x65: ("65", {"arg1" : "word"}),
+    0x6b: ("AbortAL", None), # Same as 09 Abort, but abort_code is passed via AL
+
+    # These aren't used within @LOAD
+
+    0x2b: ("divide", None),
+    0x2c: ("multiply", None),
 }
 
 syscall_map = {}
@@ -30,6 +64,8 @@ for num, addr in enumerate(range(0x88cc, 0x89ac, 2)):
 
 memory.syscall_map = syscall_map
 
+
+
 def add_device(addr):
     name = bytes([c&0x7f for c in memory[addr+7:addr+13]]).decode("ascii").strip()
     memory_addr_info[addr].label = f"Device_{name}"
@@ -39,7 +75,7 @@ def add_device(addr):
     memory_addr_info[addr+5].type = "fnptr"
     memory_addr_info[addr+5].label = f"Device_{name}_Obj"
     memory_addr_info[addr+7].type = 'char[6]'
-    memory_addr_info[addr+15].type = "fnptr"
+    memory_addr_info[addr+15].type = "ptr"
 
 # Devices table (might be special files?)
 table_start = 0x01ba
@@ -58,7 +94,32 @@ while True:
     add_device(device_addr)
     device_num += 1
 
-memory.info(0xcd4d).func_info = FunctionInfo({"dest": "ptr"})
+def func(addr, name, xargs):
+    if name:
+        memory_addr_info[addr].label = name
+    if xargs:
+        memory_addr_info[addr].func_info = FunctionInfo(xargs)
 
 
-#memory_addr_info[]
+func(0x85fa, "FlushFn", {"fileop": "ptr"})
+func(0xcd4d, None, {"dest": "ptr"})
+func(0xb4f8, "PrintStringToErrorDevice", {"string": "ptr"})
+func(0x85b9, None, {"arg1": "byte"})
+func(0xb5f2, None, {
+    "arg1": "ptr",
+    "arg2": "ptr",
+    "arg3": "byte",
+    "arg4": "ptr",
+    "arg5": "ptr",
+    "arg6": "byte",
+})
+
+
+for i in range(0xdb30, 0xdca0, 21):
+    memory_addr_info[i].type = "char[21]"
+
+for i in range(0xdd2f, 0xde00, 21):
+    memory_addr_info[i].type = "char[21]"
+
+for i in range(0xde72, 0xdf00, 21):
+    memory_addr_info[i].type = "char[21]"

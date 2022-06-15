@@ -2,8 +2,8 @@
 SyscallVector:
 0100:    71 80 00               jmp [R_8000|0x8000]
 
-SystemInfoPtr:
-0103:    01 ea                  SystemInfo
+CurrentProcess:
+0103:    01 ea                  StartProcess
 0105:    01
 0106:    19
 0107:    01
@@ -64,6 +64,8 @@ EarlyInitDevicesPtr:
 015e:    01
 015f:    a1 '!'
 0160:    3c
+
+PageTableOne:
 0161:    1f
 0162:    01
 0163:    02
@@ -96,6 +98,8 @@ EarlyInitDevicesPtr:
 017e:    1d
 017f:    7e
 0180:    7f
+
+PageTableTwo:
 0181:    1f
 0182:    01
 0183:    02
@@ -186,22 +190,23 @@ R_01e4:
 01e8:    00
 01e9:    00
 
-SystemInfo:
+StartProcess:
 01ea:    01                     nop
-01eb:    00                     HALT
+01eb:    00                     HALT	 ; Current open file? Number open files?
 01ec:    00                     HALT
 01ed:    00                     HALT
 
-SystemInfo_File?:
+StartProcess_File?:
 01ee:    04 45                  R_0445
 01f0:    04
 01f1:    13
-01f2:    02
-01f3:    46
+
+StartProcess_ErrorDevice:
+01f2:    02 46                  Device_CRT0
 01f4:    00
 01f5:    00
 
-SystemInfo_TopOfMemory:
+StartProcess_TopOfMemory:
 01f6:    ef ff                  (0xefff)
 01f8:    ef                     st BL, [P]
 01f9:    ff                     st B, [P]
@@ -280,25 +285,28 @@ Device_CRT0_Obj:
 0259:    00                     HALT
 025a:    00                     HALT
 025b:    00                     HALT
-025c:    00                     HALT
-025d:    83 18                  ld AL, [pc + 0x18]
-025f:    c5 00                  ld BL, [A]
-0261:    00                     HALT
-0262:    00                     HALT
-0263:    b6                     unknown
-0264:    56                     unknown
-0265:    00                     HALT
-0266:    00                     HALT
-0267:    00                     HALT
-0268:    00                     HALT
-0269:    00                     HALT
-026a:    00                     HALT
-026b:    ff                     st B, [P]
-026c:    ff                     st B, [P]
-026d:    ff                     st B, [P]
-026e:    ff                     st B, [P]
-026f:    ff                     st B, [P]
-0270:    ff                     st B, [P]
+
+Device_CRT0_Lock:
+025c:    00                     (0x0)
+025d:    83
+025e:    18
+025f:    c5 'E'
+0260:    00
+0261:    00
+0262:    00
+0263:    b6 56                  R_b656
+0265:    00
+0266:    00
+0267:    00
+0268:    00
+0269:    00
+026a:    00
+026b:    ff
+026c:    ff
+026d:    ff
+026e:    ff
+026f:    ff
+0270:    ff
 
 Device_DISK0:
 0271:    57                     "W"
@@ -993,19 +1001,19 @@ R_8048:
 
 L_804c:
 804c:    c6                     unknown
-804d:    2e 0c 78 01 81         wpf #0x78, [0x0181]
+804d:    2e 0c 78 01 81         wpf #0x78, [PageTableTwo|0x0181]
 
 L_8052:
 8052:    09                     ret
 
 L_8053:
-8053:    2e 0c 78 01 61         wpf #0x78, [0x0161]
+8053:    2e 0c 78 01 61         wpf #0x78, [PageTableOne|0x0161]
 8058:    b6                     unknown
 8059:    09                     ret
 
 R_805a:
 805a:    b3 14                  st A, [pc + 0x14]
-805c:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+805c:    91 01 03               ld A, [CurrentProcess|0x0103]
 805f:    2e 0d f8 00 36         wpf #0xf8, [A + 0x0036]
 8064:    3a                     clr! A, #0
 8065:    7e 01                  push {A}
@@ -1019,10 +1027,11 @@ R_806f:
 8072:    09                     ret
 
 L_8073:
+    ; LongCall?
 8073:    b3 1b                  st A, [pc + 0x1b]
-8075:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+8075:    91 01 03               ld A, [CurrentProcess|0x0103]
 8078:    2e 0d fb 00 36         wpf #0xfb, [A + 0x0036]
-807d:    2e 0c 7b 01 81         wpf #0x7b, [0x0181]
+807d:    2e 0c 7b 01 81         wpf #0x7b, [PageTableTwo|0x0181]
 8082:    90 00 03               ld A, #0x0003
 8085:    7e 01                  push {A}
 8087:    7e 41                  push {X}
@@ -1154,9 +1163,7 @@ R_833f:
 835f:    4a                     and! BL, AL
 8360:    21 33                  dec BL, #4
 8362:    16 27                  blt L_838b
-8364:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
-
-L_8367:
+8364:    d1 01 03               ld B, [CurrentProcess|0x0103]
 8367:    c5 28 59               ld BL, [B + 0x0059]
 836a:    e6 a8                  mov A, IL10(Z)
 836c:    49                     sub! BL, AL
@@ -1168,7 +1175,7 @@ L_8373:
 8373:    d4 f0                  ld B, @[pc + -0x10]
 8375:    85 28 02               ld AL, [B + 0x0002]
 8378:    17 0d                  bp L_8387
-837a:    79 86 12               call [R_8612|0x8612]
+837a:    79 86 12               call [Yield|0x8612]
 837d:    e6 a8                  mov A, IL10(Z)
 837f:    d4 e4                  ld B, @[pc + -0x1c]
 8381:    a5 28 59               st AL, [B + 0x0059]
@@ -1212,7 +1219,7 @@ L_83ba:
 83ba:    90 00 00               ld A, #0x0000
 83bd:    55 42                  mov B, X
 83bf:    79 84 e4               call [Syscall_Abort|0x84e4]
-83c2:    09                     ret
+83c2:    09                         abort_code = (0x9)
 
 Syscall_68:
 83c3:    90 9c 32               ld A, R_9c32|#0x9c32
@@ -1273,10 +1280,12 @@ Syscall_6a:
 
 L_8418:
 8418:    79 84 e4               call [Syscall_Abort|0x84e4]
-841b:    1f b3                  b?F L_83d0
-841d:    c6                     unknown
+841b:    1f                         abort_code = (0x1f)
+
+Syscall_6e:
+841c:    b3 c6                  st A, [pc + -0x3a]
 841e:    95 a8 01               ld A, [S + 0x0001]
-8421:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
+8421:    d1 01 03               ld B, [CurrentProcess|0x0103]
 8424:    b5 28 5a               st A, [B + 0x005a]
 8427:    91 01 5a               ld A, [0x015a]
 842a:    2e 4d 87 20 46         wpf32 #0x87, [B + 0x0046]
@@ -1294,7 +1303,7 @@ Syscall_6f:
 8445:    6e                     unknown
 8446:    84 58                  ld AL, @[pc + 0x58]
 8448:    65 a8 01               ld X, [S + 0x0001]
-844b:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+844b:    91 01 03               ld A, [CurrentProcess|0x0103]
 844e:    95 08 5a               ld A, [A + 0x005a]
 8451:    b5 a8 01               st A, [S + 0x0001]
 8454:    80 04                  ld AL, #0x04
@@ -1395,7 +1404,7 @@ L_84d6:
 84da:    79 ad 88               call [R_ad88|0xad88]
 84dd:    09                     ret
 
-Syscall_6b:
+Syscall_AbortAL:
 84de:    7e 09                  push {A, B, X, Y, Z}
 84e0:    45 31                  mov AL, BL
 84e2:    73 03                  jmp [L_84e7|+0x3]
@@ -1411,7 +1420,7 @@ L_84e7:
 84ee:    f1 80 d8               st B, [R_80d8|0x80d8]
 84f1:    79 b5 54               call [R_b554|0xb554]
 84f4:    80 da                  ld AL, #0xda
-84f6:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+84f6:    91 01 03               ld A, [CurrentProcess|0x0103]
 84f9:    5e                     mov Z, A
 84fa:    3a                     clr! A, #0
 84fb:    a1 01 25               st AL, [0x0125]
@@ -1431,7 +1440,7 @@ L_84e7:
 851e:    90 80 d0               ld A, R_80d0|#0x80d0
 8521:    b1 80 b7               st A, [R_80b7|0x80b7]
 8524:    d0 80 b1               ld B, R_80b1|#0x80b1
-8527:    79 8b 33               call [R_8b33|0x8b33]
+8527:    79 8b 33               call [DoFileOpInner|0x8b33]
 
 L_852a:
 852a:    81 80 b1               ld AL, [R_80b1|0x80b1]
@@ -1440,7 +1449,7 @@ L_852a:
 
 L_8532:
 8532:    16 fe                  blt L_8532
-8534:    61 01 03               ld X, [SystemInfoPtr|0x0103]
+8534:    61 01 03               ld X, [CurrentProcess|0x0103]
 8537:    14 2a                  bz L_8563
 8539:    79 88 05               call [R_8805|0x8805]
 853c:    89                     ld AL, [B]
@@ -1461,7 +1470,7 @@ L_8546:
 8558:    7f 09                  pop {A, B, X, Y, Z}
 855a:    65 a1                  ld X, [S++]
 855c:    66 05                  jsys Syscall_05
-855e:    06                     sl
+855e:    06                         arg1 = (0x6)
 855f:    00                     HALT
 8560:    00                     HALT
 8561:    00                     HALT
@@ -1474,7 +1483,7 @@ L_8563:
 
 Syscall_6c:
 8568:    32 20                  clr B, #0
-856a:    55 89 01 03            mov Z, Z, [SystemInfoPtr|0x0103]
+856a:    55 89 01 03            mov Z, Z, [CurrentProcess|0x0103]
 856e:    45 11                  mov AL, AL
 8570:    73 07                  jmp [L_8579|+0x7]
 
@@ -1482,7 +1491,7 @@ Syscall_0a:
 8572:    c0 00                  ld BL, #0x00
 
 L_8574:
-8574:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+8574:    91 01 03               ld A, [CurrentProcess|0x0103]
 8577:    5e                     mov Z, A
 8578:    8a                     ld AL, [X]
 
@@ -1537,8 +1546,8 @@ L_85bc:
 85bc:    d0 01 00               ld B, #0x0100
 85bf:    58                     add! B, A
 85c0:    f5 a2                  st B, [--S]
-85c2:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
-85c5:    c5 28 01               ld BL, [B + 0x0001]
+85c2:    d1 01 03               ld B, [CurrentProcess|0x0103]
+85c5:    c5 28 01               ld BL, [B + 0x0001]	 ; 1eb
 85c8:    85 a4                  ld AL, @[S]
 85ca:    49                     sub! BL, AL
 85cb:    15 05                  bnz L_85d2
@@ -1546,12 +1555,12 @@ L_85bc:
 85cf:    09                     ret
 
 L_85d0:
-85d0:    7b 40                  call [R_8612|+0x40]
+85d0:    7b 40                  call [Yield|+0x40]
 
 L_85d2:
 85d2:    85 a4                  ld AL, @[S]
 85d4:    17 fa                  bp L_85d0
-85d6:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+85d6:    91 01 03               ld A, [CurrentProcess|0x0103]
 85d9:    85 08 01               ld AL, [A + 0x0001]
 85dc:    d5 a1                  ld B, [S++]
 85de:    a9                     st AL, [B]
@@ -1572,12 +1581,12 @@ L_85ef:
 85f2:    7b c8                  call [L_85bc|-0x38]
 85f4:    0f                     rsys
 
-Syscall_Read?:
+Syscall_Flush:
 85f5:    95 41                  ld A, [X++]
 85f7:    7b 03                  call [L_85fc|+0x3]
 85f9:    0f                     rsys
 
-R_85fa:
+FlushFn:
 85fa:    95 41                  ld A, [X++]
 
 L_85fc:
@@ -1586,10 +1595,10 @@ L_85fc:
 L_85fe:
 85fe:    85 a4                  ld AL, @[S]
 8600:    17 0c                  bp L_860e
-8602:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+8602:    91 01 03               ld A, [CurrentProcess|0x0103]
 8605:    95 08 32               ld A, [A + 0x0032]
 8608:    14 04                  bz L_860e
-860a:    7b 06                  call [R_8612|+0x6]
+860a:    7b 06                  call [Yield|+0x6]	 ; Is this yield?
 860c:    73 f0                  jmp [L_85fe|-0x10]
 
 L_860e:
@@ -1597,7 +1606,7 @@ L_860e:
 8610:    4d                     mov! BL, AL
 8611:    09                     ret
 
-R_8612:
+Yield:
 8612:    2a                     clr! AL, #0
 8613:    a1 01 41               st AL, [0x0141]
 8616:    81 01 25               ld AL, [0x0125]
@@ -1619,8 +1628,8 @@ R_8612:
 L_8629:
 8629:    09                     ret
 
-Syscall_07:
-862a:    7b e6                  call [R_8612|-0x1a]
+Syscall_Yield:
+862a:    7b e6                  call [Yield|-0x1a]
 862c:    0f                     rsys
 
 Syscall_0b:
@@ -1628,13 +1637,13 @@ Syscall_0b:
 8630:    0f                     rsys
 
 R_8631:
-8631:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
+8631:    d1 01 03               ld B, [CurrentProcess|0x0103]
 8634:    7e 45                  push {X, Y, Z}
 8636:    55 a0                  mov A, S
 8638:    b5 28 10               st A, [B + 0x0010]
 863b:    3a                     clr! A, #0
-863c:    b4 f4                  st A, @[pc + -0xc]
-863e:    55 ba 88 52            mov S, S, R_8852|#0x8852
+863c:    b4 f4                  st A, @[pc + -0xc]	 ; Clear CurrentProcess
+863e:    55 ba 88 52            mov S, S, R_8852|#0x8852	 ; Setup Temporary stack
 
 R_8642:
 8642:    60 88 25               ld X, R_8825|#0x8825
@@ -1662,7 +1671,7 @@ L_8660:
 8667:    14 dc                  bz L_8645
 8669:    42 23                  and BL, BH
 866b:    15 d8                  bnz L_8645
-866d:    b1 01 03               st A, [SystemInfoPtr|0x0103]
+866d:    b1 01 03               st A, [CurrentProcess|0x0103]
 8670:    79 86 f5               call [R_86f5|0x86f5]
 8673:    95 88 10               ld A, [Z + 0x0010]
 8676:    15 03                  bnz L_867b
@@ -1715,7 +1724,7 @@ L_86b8:
 86bc:    71 87 3c               jmp [R_873c|0x873c]
 
 L_86bf:
-86bf:    b1 01 03               st A, [SystemInfoPtr|0x0103]
+86bf:    b1 01 03               st A, [CurrentProcess|0x0103]
 86c2:    5e                     mov Z, A
 86c3:    95 88 08               ld A, [Z + 0x0008]
 86c6:    51 20                  sub A, B
@@ -1747,10 +1756,10 @@ R_86f1:
 86f4:    ff                     st B, [P]
 
 R_86f5:
-86f5:    47 41 0f 01 61 80 36   memcpy #0x10, [0x0161], [Z + 0x0036]
+86f5:    47 41 0f 01 61 80 36   memcpy #0x10, [PageTableOne|0x0161], [Z + 0x0036]
 86fc:    2e 0d f8 80 36         wpf #0xf8, [Z + 0x0036]
 8701:    2e 0d fb 80 36         wpf #0xfb, [Z + 0x0036]
-8706:    2e 0c 7b 01 81         wpf #0x7b, [0x0181]
+8706:    2e 0c 7b 01 81         wpf #0x7b, [PageTableTwo|0x0181]
 870b:    2e 0d fd 80 36         wpf #0xfd, [Z + 0x0036]
 8710:    2e 4d 84 80 46         wpf32 #0x84, [Z + 0x0046]
 8715:    91 01 39               ld A, [0x0139]
@@ -1863,7 +1872,7 @@ L_8792:
 87cb:    e5 61                  st BL, [Y++]
 87cd:    b5 61                  st A, [Y++]
 87cf:    55 80                  mov A, Z
-87d1:    b1 01 03               st A, [SystemInfoPtr|0x0103]
+87d1:    b1 01 03               st A, [CurrentProcess|0x0103]
 87d4:    71 86 d0               jmp [R_86d0|0x86d0]
 
 R_87d7:
@@ -1895,7 +1904,7 @@ L_87fe:
 8802:    71 86 7f               jmp [R_867f|0x867f]
 
 R_8805:
-8805:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
+8805:    d1 01 03               ld B, [CurrentProcess|0x0103]
 8808:    3a                     clr! A, #0
 8809:    85 28 01               ld AL, [B + 0x0001]
 880c:    d0 88 72               ld B, R_8872|#0x8872
@@ -1905,7 +1914,7 @@ R_8805:
 R_8811:
 8811:    55 ba 88 cc            mov S, S, SyscallTable|#0x88cc
 8815:    79 85 b9               call [R_85b9|0x85b9]
-8818:    3b                     not! A, #0
+8818:    3b                         arg1 = (0x3b)
 8819:    55 ba 82 34            mov S, S, R_8234|#0x8234
 881d:    7b e6                  call [R_8805|-0x1a]
 881f:    80 02                  ld AL, #0x02
@@ -1914,11 +1923,9 @@ R_8811:
 8823:    66 04                  jsys Syscall_04
 
 R_8825:
-8825:    00                     HALT
-8826:    00                     HALT
-8827:    00                     HALT
-8828:    ad                     st AL, [S]
-8829:    c8                     ld BL, [A]
+8825:    00 00                      arg1 = L_0000
+8827:    00 ad                      arg2 = L_00ad
+8829:    c8                         arg3 = (0xc8)
 882a:    <null bytes>
 
 
@@ -2026,16 +2033,16 @@ SyscallTable:
 
 L_88d8:
 88d8:    85 e0                  Syscall_06
-88da:    86 2a                  Syscall_07
-88dc:    85 f5                  Syscall_Read?
+88da:    86 2a                  Syscall_Yield
+88dc:    85 f5                  Syscall_Flush
 88de:    84 e4                  Syscall_Abort
 88e0:    85 72                  Syscall_0a
 88e2:    86 2d                  Syscall_0b
 88e4:    8a 9a                  Syscall_0c
 88e6:    84 00                  Syscall_0d
-88e8:    8f 8f                  Syscall_0e
+88e8:    8f 8f                  Syscall_OpenFile?
 88ea:    8a fa                  Syscall_0f
-88ec:    8b 26                  Syscall_Write?
+88ec:    8b 26                  Syscall_DoFileOp
 88ee:    ab 87                  Syscall_11
 88f0:    85 e2                  Syscall_12
 88f2:    ab f3                  Syscall_13
@@ -2062,8 +2069,8 @@ L_88d8:
 891c:    96 9d                  Syscall_28
 891e:    96 bf                  Syscall_29
 8920:    98 12                  Syscall_2a
-8922:    b5 3f                  Syscall_2b
-8924:    b5 45                  Syscall_2c
+8922:    b5 3f                  Syscall_divide
+8924:    b5 45                  Syscall_multiply
 8926:    b5 4b                  Syscall_2e
 8928:    b5 4b                  Syscall_2e
 892a:    98 4c                  Syscall_2f
@@ -2128,7 +2135,7 @@ L_8938:
 899c:    83 c3                  Syscall_68
 899e:    b2 f3                  Syscall_69
 89a0:    84 0c                  Syscall_6a
-89a2:    84 de                  Syscall_6b
+89a2:    84 de                  Syscall_AbortAL
 89a4:    85 68                  Syscall_6c
 89a6:    8e d8                  Syscall_6d
 89a8:    84 1c                  Syscall_6e
@@ -2142,7 +2149,8 @@ Syscall_19:
 89ae:    39                     dec! A, #1
 89af:    7e 03                  push {A, B}
 89b1:    79 85 b9               call [R_85b9|0x85b9]
-89b4:    1c 3a                  bs3 L_89f0
+89b4:    1c                         arg1 = (0x1c)
+89b5:    3a                     clr! A, #0
 89b6:    71 aa 25               jmp [R_aa25|0xaa25]
 
 Syscall_66:
@@ -2168,8 +2176,7 @@ L_89ca:
 89cf:    3a                     clr! A, #0
 89d0:    39                     dec! A, #1
 89d1:    66 65                  jsys Syscall_65
-89d3:    00                     HALT
-89d4:    00                     HALT
+89d3:    00 00                      arg1 = (0x0)
 89d5:    55 22                  mov B, B
 89d7:    15 0e                  bnz L_89e7
 89d9:    30 a1                  inc S, #2
@@ -2180,7 +2187,7 @@ L_89db:
 89df:    98                     ld A, [A]
 89e0:    d0 ff ff               ld B, #0xffff
 89e3:    79 84 e4               call [Syscall_Abort|0x84e4]
-89e6:    0a                     reti
+89e6:    0a                         abort_code = (0xa)
 
 L_89e7:
 89e7:    d5 a1                  ld B, [S++]
@@ -2188,18 +2195,15 @@ L_89e7:
 89ea:    14 4a                  bz L_8a36
 89ec:    3a                     clr! A, #0
 89ed:    d5 a8 02               ld B, [S + 0x0002]
-
-L_89f0:
 89f0:    66 65                  jsys Syscall_65
-89f2:    00                     HALT
-89f3:    00                     HALT
+89f2:    00 00                      arg1 = (0x0)
 89f4:    5d                     mov B, A
 89f5:    14 e4                  bz L_89db
 89f7:    d5 a8 02               ld B, [S + 0x0002]
 89fa:    b5 a2                  st A, [--S]
 89fc:    3a                     clr! A, #0
 89fd:    85 28 01               ld AL, [B + 0x0001]
-8a00:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
+8a00:    d1 01 03               ld B, [CurrentProcess|0x0103]
 8a03:    c5 28 06               ld BL, [B + 0x0006]
 8a06:    2d                     sll! AL, #1
 8a07:    2c                     srl! AL, #1
@@ -2220,8 +2224,7 @@ L_8a0c:
 8a1e:    47 45 18 20 02 00 02   memcpy #0x19, [B + 0x0002], [A + 0x0002]
 8a25:    47 9d 00 7e 00 ff      memset #0x01, #0x7e, [A + -0x001]
 8a2b:    66 17                  jsys Syscall_17
-8a2d:    00                     HALT
-8a2e:    00                     HALT
+8a2d:    00 00                      arg1 = (0x0)
 8a2f:    95 a1                  ld A, [S++]
 8a31:    98                     ld A, [A]
 8a32:    dd                     ld B, [S]
@@ -2239,10 +2242,10 @@ Syscall_00:
 8a3d:    79 b2 d1               call [AssertIsSystemPtr|0xb2d1]
 8a40:    95 28 06               ld A, [B + 0x0006]
 8a43:    7c f9                  call @[pc + -0x7]
-8a45:    7b 01                  call [R_8a48|+0x1]
+8a45:    7b 01                  call [Syscall_00_inner|+0x1]
 8a47:    0f                     rsys
 
-R_8a48:
+Syscall_00_inner:
 8a48:    7e 45                  push {X, Y, Z}
 8a4a:    55 28                  mov Z, B
 8a4c:    7b 58                  call [LookupDeviceInstance|+0x58]
@@ -2251,7 +2254,7 @@ R_8a48:
 8a51:    95 48 05               ld A, [X + 0x0005]
 8a54:    15 04                  bnz R_8a5a
 8a56:    79 84 e4               call [Syscall_Abort|0x84e4]
-8a59:    14
+8a59:    14                         abort_code = (0x14)
 
 R_8a5a:
 8a5a:    79 80 14               call [R_8014|0x8014]
@@ -2260,7 +2263,7 @@ R_8a5a:
 8a62:    14 05                  bz L_8a69
 
 L_8a64:
-8a64:    79 86 12               call [R_8612|0x8612]
+8a64:    79 86 12               call [Yield|0x8612]
 8a67:    73 f1                  jmp [R_8a5a|-0xf]
 
 L_8a69:
@@ -2272,7 +2275,7 @@ L_8a69:
 8a74:    15 1c                  bnz L_8a92
 8a76:    f3 15                  st B, [pc + 0x15]
 8a78:    14 18                  bz L_8a92
-8a7a:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+8a7a:    91 01 03               ld A, [CurrentProcess|0x0103]
 8a7d:    85 08 01               ld AL, [A + 0x0001]
 8a80:    28                     inc! AL, #1
 8a81:    79 80 0c               call [R_800c|0x800c]
@@ -2287,18 +2290,23 @@ L_8a92:
 8a92:    9c                     ld A, [Z]
 8a93:    d0 00 00               ld B, #0x0000
 8a96:    79 84 e4               call [Syscall_Abort|0x84e4]
-8a99:    23 51                  not XL, #1
-8a9b:    50 7f ff 10            add P, [Y + #0xff10]
-8a9f:    03                     rf
+8a99:    23                         abort_code = (0x23)
+
+Syscall_0c:
+8a9a:    51 50 7f ff            sub A, X, #0x7fff
+8a9e:    10 03                  bc L_8aa3
 8aa0:    79 83 a7               call [R_83a7|0x83a7]
+
+L_8aa3:
 8aa3:    7b 01                  call [LookupDeviceInstance|+0x1]
 8aa5:    0f                     rsys
 
 LookupDeviceInstance:
     ; Not entirely sure
     ; Seems to gets the device instance struct corrosponding to byte at [B + 1]
+    ; Result in B
 8aa6:    6d a2                  st X, [--S]
-8aa8:    61 01 03               ld X, [SystemInfoPtr|0x0103]
+8aa8:    61 01 03               ld X, [CurrentProcess|0x0103]
 8aab:    99                     ld A, [B]
 8aac:    b3 0f                  st A, [R_8abd|+0xf]
 8aae:    3a                     clr! A, #0
@@ -2310,11 +2318,11 @@ LookupDeviceInstance:
 8ab9:    49                     sub! BL, AL
 8aba:    16 0f                  blt L_8acb
 
-R_8abc:
+abort_code0A:
 8abc:    90 00 00               ld A, #0x0000
 8abf:    d0 ff ff               ld B, #0xffff
 8ac2:    79 84 e4               call [Syscall_Abort|0x84e4]
-8ac5:    0a                     reti
+8ac5:    0a                         abort_code = (0xa)
 
 L_8ac6:
 8ac6:    c5 48 06               ld BL, [X + 0x0006]
@@ -2323,24 +2331,22 @@ L_8ac6:
 L_8acb:
 8acb:    c5 48 07               ld BL, [X + 0x0007]
 8ace:    49                     sub! BL, AL
-8acf:    18 eb                  bgt R_8abc
+8acf:    18 eb                  bgt abort_code0A
 8ad1:    5d                     mov B, A
 8ad2:    3d                     sll! A, #1
 8ad3:    58                     add! B, A
-
-L_8ad4:
 8ad4:    65 48 04               ld X, [X + 0x0004]
 8ad7:    50 24                  add X, B
 8ad9:    3a                     clr! A, #0
 8ada:    85 41                  ld AL, [X++]
-8adc:    16 de                  blt R_8abc
+8adc:    16 de                  blt abort_code0A
 8ade:    3d                     sll! A, #1
 8adf:    d1 01 09               ld B, [DevicesPtr|0x0109]
 8ae2:    58                     add! B, A
 8ae3:    d9                     ld B, [B]
 8ae4:    f5 a2                  st B, [--S]
 8ae6:    89                     ld AL, [B]
-8ae7:    14 d3                  bz R_8abc
+8ae7:    14 d3                  bz abort_code0A
 8ae9:    d0 00 10               ld B, #0x0010
 8aec:    4a                     and! BL, AL
 8aed:    14 06                  bz L_8af5
@@ -2371,7 +2377,7 @@ R_8b00:
 8b0b:    55 40                  mov A, X
 8b0d:    d0 ff ff               ld B, #0xffff
 8b10:    79 84 e4               call [Syscall_Abort|0x84e4]
-8b13:    0b                     rim
+8b13:    0b                         abort_code = (0xb)
 
 L_8b14:
 8b14:    85 48 11               ld AL, [X + 0x0011]
@@ -2384,27 +2390,28 @@ L_8b14:
 L_8b23:
 8b23:    71 8a 5a               jmp [R_8a5a|0x8a5a]
 
-Syscall_Write?:
+Syscall_DoFileOp:
+    ; B is a FileOp struct
 8b26:    55 20                  mov A, B
 8b28:    79 b2 d1               call [AssertIsSystemPtr|0xb2d1]	 ; Assert B is System Pointer
 8b2b:    95 28 06               ld A, [B + 0x0006]
 8b2e:    7c f9                  call @[pc + -0x7]	 ; Assert [B + 0x0006] is System pointer
-8b30:    7b 01                  call [R_8b33|+0x1]
+8b30:    7b 01                  call [DoFileOpInner|+0x1]
 8b32:    0f                     rsys
 
-R_8b33:
+DoFileOpInner:
 8b33:    f5 a2                  st B, [--S]
 8b35:    99                     ld A, [B]
 8b36:    b1 8a bd               st A, [R_8abd|0x8abd]
 8b39:    79 8a a6               call [LookupDeviceInstance|0x8aa6]
 8b3c:    f5 a2                  st B, [--S]
-8b3e:    d5 08 01               ld B, [A + 0x0001]
+8b3e:    d5 08 01               ld B, [A + 0x0001]	 ; FileOp+01, device type?
 8b41:    c0 04                  ld BL, #0x04
 8b43:    41 23                  sub BL, BH
-8b45:    14 07                  bz L_8b4e
-8b47:    d5 a1                  ld B, [S++]
-8b49:    d5 a1                  ld B, [S++]
-8b4b:    71 8a 48               jmp [R_8a48|0x8a48]
+8b45:    14 07                  bz L_8b4e	 ; if FileOP+01 == 4
+8b47:    d5 a1                  ld B, [S++]	 ; pop DeviceInstance
+8b49:    d5 a1                  ld B, [S++]	 ; B = FileOP struct
+8b4b:    71 8a 48               jmp [Syscall_00_inner|0x8a48]	 ; Special case?
 
 L_8b4e:
 8b4e:    79 8d e4               call [R_8de4|0x8de4]
@@ -2412,7 +2419,7 @@ L_8b4e:
 8b54:    e1 8c 13               st BL, [R_8c13|0x8c13]
 8b57:    9d                     ld A, [S]
 8b58:    15 03                  bnz L_8b5d
-8b5a:    71 8a bc               jmp [R_8abc|0x8abc]
+8b5a:    71 8a bc               jmp [abort_code0A|0x8abc]
 
 L_8b5d:
 8b5d:    b1 8c 0f               st A, [R_8c0f|0x8c0f]
@@ -2447,7 +2454,7 @@ L_8b93:
 8b93:    9c                     ld A, [Z]
 8b94:    d0 00 00               ld B, #0x0000
 8b97:    79 84 e4               call [Syscall_Abort|0x84e4]
-8b9a:    0c                     unknown
+8b9a:    0c                         abort_code = (0xc)
 
 L_8b9b:
 8b9b:    7b 7d                  call [L_8c1a|+0x7d]
@@ -2527,14 +2534,14 @@ L_8c03:
 8c0c:    79 b5 f2               call [R_b5f2|0xb5f2]
 
 R_8c0f:
-8c0f:    00                     HALT
-8c10:    00                     HALT
-8c11:    01                     nop
-8c12:    90 00 00               ld A, #0x0000
-8c15:    00                     HALT
-8c16:    00                     HALT
-8c17:    00                     HALT
-8c18:    00                     HALT
+8c0f:    00 00                      arg1 = L_0000
+8c11:    01 90                      arg2 = L_0190
+
+R_8c13:
+8c13:    00                         arg3 = (0x0)
+8c14:    00 00                      arg4 = L_0000
+8c16:    00 00                      arg5 = L_0000
+8c18:    00                         arg6 = (0x0)
 8c19:    09                     ret
 
 L_8c1a:
@@ -2640,7 +2647,7 @@ L_8cb4:
 8cc2:    55 40                  mov A, X
 8cc4:    d0 ff ff               ld B, #0xffff
 8cc7:    79 84 e4               call [Syscall_Abort|0x84e4]
-8cca:    64
+8cca:    64                         abort_code = (0x64)
 
 L_8ccb:
 8ccb:    d5 41                  ld B, [X++]
@@ -2674,7 +2681,7 @@ L_8cee:
 8cee:    90 00 00               ld A, #0x0000
 8cf1:    d0 ff ff               ld B, #0xffff
 8cf4:    79 84 e4               call [Syscall_Abort|0x84e4]
-8cf7:    07                     rl
+8cf7:    07                         abort_code = (0x7)
 
 Syscall_57:
 8cf8:    d1 01 1a               ld B, [0x011a]
@@ -2715,25 +2722,23 @@ L_8d27:
 8d33:    85 41                  ld AL, [X++]
 8d35:    a3 35                  st AL, [pc + 0x35]
 8d37:    17 17                  bp L_8d50
-8d39:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+8d39:    91 01 03               ld A, [CurrentProcess|0x0103]
 8d3c:    d5 41                  ld B, [X++]
 8d3e:    f3 0a                  st B, [pc + 0x0a]
 8d40:    d5 08 1c               ld B, [A + 0x001c]
 8d43:    85 08 1b               ld AL, [A + 0x001b]
 8d46:    a3 24                  st AL, [pc + 0x24]
 8d48:    66 64                  jsys Syscall_64
-8d4a:    00                     HALT
-8d4b:    00                     HALT
-8d4c:    00                     HALT
-8d4d:    00                     HALT
+8d4a:    00 00                      arg1 = (0x0)
+8d4c:    00 00                      arg2 = (0x0)
 8d4e:    73 06                  jmp [L_8d56|+0x6]
 
 L_8d50:
 8d50:    d5 41                  ld B, [X++]
-8d52:    66 0e                  jsys Syscall_0e
+8d52:    66 0e                  jsys Syscall_OpenFile?
 
 Syscall_02_Singleton:
-8d54:    00 00                  (0x0)
+8d54:    00 00                      arg1 = L_0000
 
 L_8d56:
 8d56:    15 09                  bnz L_8d61
@@ -2795,7 +2800,7 @@ L_8da4:
 8dad:    e3 74                  st BL, [R_8e23|+0x74]
 8daf:    f0 00 00               st B, #0x0000
 8db2:    7e 63                  push {Y, Z}
-8db4:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+8db4:    91 01 03               ld A, [CurrentProcess|0x0103]
 8db7:    5c                     mov Y, A
 8db8:    95 68 0c               ld A, [Y + 0x000c]
 8dbb:    c3 f3                  ld BL, [R_8db0|-0xd]
@@ -2814,9 +2819,8 @@ Syscall_5b:
 8dd1:    85 41                  ld AL, [X++]
 8dd3:    a5 a2                  st AL, [--S]
 8dd5:    d5 41                  ld B, [X++]
-8dd7:    66 0e                  jsys Syscall_0e
-8dd9:    00                     HALT
-8dda:    00                     HALT
+8dd7:    66 0e                  jsys Syscall_OpenFile?
+8dd9:    00 00                      arg1 = L_0000
 8ddb:    14 10                  bz R_8ded
 8ddd:    d0 01 00               ld B, #0x0100
 8de0:    c5 a1                  ld BL, [S++]
@@ -2825,7 +2829,7 @@ Syscall_5b:
 R_8de4:
 8de4:    7e 03                  push {A, B}
 8de6:    79 85 b9               call [R_85b9|0x85b9]
-8de9:    3b                     not! A, #0
+8de9:    3b                         arg1 = (0x3b)
 8dea:    7f 03                  pop {A, B}
 8dec:    09                     ret
 
@@ -2834,7 +2838,7 @@ R_8ded:
 8dee:    39                     dec! A, #1
 8def:    5d                     mov B, A
 8df0:    79 84 e4               call [Syscall_Abort|0x84e4]
-8df3:    03                     rf
+8df3:    03                         abort_code = (0x3)
 
 L_8df4:
 8df4:    d5 68 0a               ld B, [Y + 0x000a]
@@ -2850,7 +2854,7 @@ L_8dfc:
 
 R_8e03:
 8e03:    79 84 e4               call [Syscall_Abort|0x84e4]
-8e06:    04                     ei
+8e06:    04                         abort_code = (0x4)
 
 L_8e07:
 8e07:    5d                     mov B, A
@@ -2872,16 +2876,18 @@ R_8e15:
 8e1c:    79 b5 f2               call [R_b5f2|0xb5f2]
 
 R_8e1f:
-8e1f:    00                     HALT
-8e20:    00                     HALT
-8e21:    01                     nop
-8e22:    90 00 00               ld A, #0x0000
-8e25:    00                     HALT
+8e1f:    00 00                      arg1 = L_0000
+8e21:    01 90                      arg2 = L_0190
+
+R_8e23:
+8e23:    00                         arg3 = (0x0)
+
+R_8e24:
+8e24:    00 00                      arg4 = L_0000
 
 R_8e26:
-8e26:    00                     HALT
-8e27:    00                     HALT
-8e28:    01                     nop
+8e26:    00 00                      arg5 = L_0000
+8e28:    01                         arg6 = (0x1)
 8e29:    30 10 8e 24            inc [R_8e24|0x8e24], #1
 8e2d:    93 f7                  ld A, [R_8e26|-0x9]
 8e2f:    5e                     mov Z, A
@@ -2913,7 +2919,7 @@ L_8e5e:
 8e63:    15 cb                  bnz L_8e30
 8e65:    13 06                  bnn L_8e6d
 8e67:    66 09                  jsys Syscall_Abort
-8e69:    03                     rf
+8e69:    03                         abort_code = (0x3)
 
 R_8e6a:
 8e6a:    00                     HALT
@@ -2934,8 +2940,7 @@ L_8e6f:
 8e79:    66 17                  jsys Syscall_17
 
 R_8e7b:
-8e7b:    00                     HALT
-8e7c:    00                     HALT
+8e7b:    00 00                      arg1 = (0x0)
 
 L_8e7d:
 8e7d:    93 d9                  ld A, [R_8e58|-0x27]
@@ -2987,7 +2992,7 @@ L_8ec5:
 8ec5:    93 0f                  ld A, [R_8ed6|+0xf]
 8ec7:    b3 89                  st A, [R_8e52|-0x77]
 8ec9:    7e 21                  push {B}
-8ecb:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+8ecb:    91 01 03               ld A, [CurrentProcess|0x0103]
 8ece:    66 59                  jsys Syscall_59
 8ed0:    7f 21                  pop {B}
 8ed2:    71 8e 50               jmp [R_8e50|0x8e50]
@@ -3007,7 +3012,7 @@ Syscall_6d:
 8ee1:    b3 2d                  st A, [pc + 0x2d]
 8ee3:    39                     dec! A, #1
 8ee4:    a3 aa                  st AL, [R_8e90|-0x56]
-8ee6:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+8ee6:    91 01 03               ld A, [CurrentProcess|0x0103]
 8ee9:    5c                     mov Y, A
 8eea:    85 08 31               ld AL, [A + 0x0031]
 8eed:    a5 a2                  st AL, [--S]
@@ -3019,11 +3024,10 @@ Syscall_6d:
 8efa:    a9                     st AL, [B]
 8efb:    8d                     ld AL, [S]
 8efc:    d0 00 00               ld B, #0x0000
-8eff:    66 0e                  jsys Syscall_0e
+8eff:    66 0e                  jsys Syscall_OpenFile?
 
 R_8f01:
-8f01:    00                     HALT
-8f02:    00                     HALT
+8f01:    00 00                      arg1 = L_0000
 8f03:    14 54                  bz L_8f59
 8f05:    b3 18                  st A, [pc + 0x18]
 8f07:    b3 07                  st A, [pc + 0x07]
@@ -3031,20 +3035,17 @@ R_8f01:
 8f0b:    d5 41                  ld B, [X++]
 8f0d:    8d                     ld AL, [S]
 8f0e:    66 4f                  jsys Syscall_4f
-8f10:    00                     HALT
-8f11:    00                     HALT
+8f10:    00 00                      arg1 = (0x0)
 
 R_8f12:
-8f12:    00                     HALT
-8f13:    00                     HALT
+8f12:    00 00                      arg2 = L_0000
 8f14:    14 3f                  bz L_8f55
 8f16:    b5 a2                  st A, [--S]
 8f18:    79 88 05               call [R_8805|0x8805]
 8f1b:    2a                     clr! AL, #0
 8f1c:    a9                     st AL, [B]
 8f1d:    66 17                  jsys Syscall_17
-8f1f:    00                     HALT
-8f20:    00                     HALT
+8f1f:    00 00                      arg1 = (0x0)
 8f21:    95 a1                  ld A, [S++]
 8f23:    73 0e                  jmp [L_8f33|+0xe]
 
@@ -3053,12 +3054,10 @@ L_8f25:
 8f27:    f3 04                  st B, [pc + 0x04]
 8f29:    32 20                  clr B, #0
 8f2b:    66 64                  jsys Syscall_64
-8f2d:    00                     HALT
-8f2e:    00                     HALT
+8f2d:    00 00                      arg1 = (0x0)
 
 R_8f2f:
-8f2f:    00                     HALT
-8f30:    00                     HALT
+8f2f:    00 00                      arg2 = (0x0)
 8f31:    14 2b                  bz L_8f5e
 
 L_8f33:
@@ -3077,8 +3076,7 @@ L_8f33:
 
 L_8f55:
 8f55:    66 17                  jsys Syscall_17
-8f57:    00                     HALT
-8f58:    00                     HALT
+8f57:    00 00                      arg1 = (0x0)
 
 L_8f59:
 8f59:    79 88 05               call [R_8805|0x8805]
@@ -3115,7 +3113,7 @@ L_8f84:
 8f8d:    3a                     clr! A, #0
 8f8e:    0f                     rsys
 
-Syscall_0e:
+Syscall_OpenFile?:
 8f8f:    f5 a2                  st B, [--S]
 8f91:    a5 a2                  st AL, [--S]
 8f93:    7c 7e                  call @[pc + 0x7e]
@@ -3195,7 +3193,7 @@ Syscall_65:
 900e:    f5 a2                  st B, [--S]
 9010:    a5 a2                  st AL, [--S]
 9012:    79 85 b9               call [R_85b9|0x85b9]
-9015:    3c                     srl! A, #1
+9015:    3c                         arg1 = (0x3c)
 9016:    85 a1                  ld AL, [S++]
 9018:    a1 92 89               st AL, [R_9289|0x9289]
 901b:    dd                     ld B, [S]
@@ -3303,8 +3301,8 @@ L_909f:
 
 R_90bd:
 90bd:    66 16                  jsys Syscall_16
-90bf:    01                     nop
-90c0:    90 00 00               ld A, #0x0000
+90bf:    01 90                      arg1 = (0x190)
+90c1:    00 00                      out = (0x0)
 90c3:    93 fc                  ld A, [pc + -0x4]
 90c5:    b1 92 bd               st A, [R_92bd|0x92bd]
 
@@ -3346,7 +3344,7 @@ R_910c:
 911b:    28                     inc! AL, #1
 911c:    14 04                  bz L_9122
 911e:    79 84 e4               call [Syscall_Abort|0x84e4]
-9121:    2f
+9121:    2f                         abort_code = (0x2f)
 
 L_9122:
 9122:    95 68 06               ld A, [Y + 0x0006]
@@ -3368,7 +3366,7 @@ L_912f:
 913c:    39                     dec! A, #1
 913d:    5d                     mov B, A
 913e:    79 84 e4               call [Syscall_Abort|0x84e4]
-9141:    30
+9141:    30                         abort_code = (0x30)
 
 L_9142:
 9142:    95 68 04               ld A, [Y + 0x0004]
@@ -3409,8 +3407,6 @@ L_916d:
 918a:    55 24                  mov X, B
 918c:    79 92 45               call [R_9245|0x9245]
 918f:    9a                     ld A, [X]
-
-L_9190:
 9190:    14 20                  bz L_91b2
 9192:    55 67 91 bb            mov Y, Y, [R_91bb|0x91bb]
 9196:    15 58                  bnz L_91f0
@@ -3487,7 +3483,7 @@ L_91f0:
 
 L_91fb:
 91fb:    79 84 e4               call [Syscall_Abort|0x84e4]
-91fe:    12
+91fe:    12                         abort_code = (0x12)
 
 L_91ff:
 91ff:    90 00 00               ld A, #0x0000
@@ -3529,20 +3525,20 @@ R_9245:
 9245:    79 b5 f2               call [R_b5f2|0xb5f2]
 
 R_9248:
-9248:    00                     HALT
-9249:    00                     HALT
-924a:    01                     nop
-924b:    90 00 00               ld A, #0x0000
+9248:    00 00                      arg1 = L_0000
+924a:    01 90                      arg2 = L_0190
 
-R_924e:
-924e:    00                     HALT
+R_924c:
+924c:    00                         arg3 = (0x0)
+
+R_924d:
+924d:    00 00                      arg4 = L_0000
 
 R_924f:
-924f:    00                     HALT
-9250:    00                     HALT
+924f:    00 00                      arg5 = L_0000
 
 R_9251:
-9251:    01                     nop
+9251:    01                         arg6 = (0x1)
 9252:    09                     ret
 
 R_9253:
@@ -3612,8 +3608,7 @@ L_92a6:
 92af:    14 06                  bz L_92b7
 92b1:    b3 02                  st A, [pc + 0x02]
 92b3:    66 17                  jsys Syscall_17
-92b5:    00                     HALT
-92b6:    00                     HALT
+92b5:    00 00                      arg1 = (0x0)
 
 L_92b7:
 92b7:    93 04                  ld A, [R_92bd|+0x4]
@@ -3621,8 +3616,7 @@ L_92b7:
 92bb:    66 17                  jsys Syscall_17
 
 R_92bd:
-92bd:    00                     HALT
-92be:    00                     HALT
+92bd:    00 00                      arg1 = (0x0)
 
 L_92bf:
 92bf:    3a                     clr! A, #0
@@ -3650,10 +3644,10 @@ Syscall_67:
 92e4:    79 b2 d1               call [AssertIsSystemPtr|0xb2d1]
 92e7:    b5 a2                  st A, [--S]
 92e9:    79 85 b9               call [R_85b9|0x85b9]
-92ec:    3c                     srl! A, #1
+92ec:    3c                         arg1 = (0x3c)
 92ed:    66 16                  jsys Syscall_16
-92ef:    01                     nop
-92f0:    90 00 00               ld A, #0x0000
+92ef:    01 90                      arg1 = (0x190)
+92f1:    00 00                      out = (0x0)
 92f3:    93 fc                  ld A, [pc + -0x4]
 92f5:    b3 44                  st A, [pc + 0x44]
 92f7:    b1 92 4f               st A, [R_924f|0x924f]
@@ -3684,8 +3678,7 @@ R_932b:
 9332:    d1 92 4f               ld B, [R_924f|0x924f]
 9335:    47 4a 09 20            memcpy #0x0a, [B], [A]
 9339:    66 17                  jsys Syscall_17
-933b:    00                     HALT
-933c:    00                     HALT
+933b:    00 00                      arg1 = (0x0)
 933d:    3a                     clr! A, #0
 933e:    39                     dec! A, #1
 933f:    a1 01 3c               st AL, [0x013c]
@@ -3708,7 +3701,7 @@ R_9347:
 9362:    58                     add! B, A
 9363:    55 26                  mov Y, B
 9365:    79 92 45               call [R_9245|0x9245]
-9368:    71 00 00               jmp [0x0000]
+9368:    71 00 00               jmp [L_0000|0x0000]
 
 R_936b:
 936b:    69 94 4a               st X, [R_944a|0x944a]
@@ -3741,12 +3734,10 @@ L_9397:
 939e:    58                     add! B, A
 939f:    f3 02                  st B, [pc + 0x02]
 93a1:    66 16                  jsys Syscall_16
-93a3:    00                     HALT
-93a4:    00                     HALT
+93a3:    00 00                      arg1 = (0x0)
 
 R_93a5:
-93a5:    00                     HALT
-93a6:    00                     HALT
+93a5:    00 00                      out = (0x0)
 
 L_93a7:
 93a7:    63 fc                  ld X, [R_93a5|-0x4]
@@ -3837,7 +3828,7 @@ L_9440:
 9442:    b5 41                  st A, [X++]
 9444:    a5 41                  st AL, [X++]
 9446:    68 00 00               st X, #0x0000
-9449:    71 00 00               jmp [0x0000]
+9449:    71 00 00               jmp [L_0000|0x0000]
 
 R_944c:
 944c:    <null bytes>
@@ -3873,7 +3864,7 @@ L_9476:
 947c:    17 f8                  bp L_9476
 947e:    3b                     not! A, #0
 947f:    15 ec                  bnz L_946d
-9481:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+9481:    91 01 03               ld A, [CurrentProcess|0x0103]
 9484:    95 08 01               ld A, [A + 0x0001]
 9487:    83 18                  ld AL, [pc + 0x18]
 9489:    b5 22                  st A, [--B]
@@ -3888,7 +3879,7 @@ L_9497:
 9497:    95 a8 0f               ld A, [S + 0x000f]
 949a:    d5 a8 12               ld B, [S + 0x0012]
 949d:    66 09                  jsys Syscall_Abort
-949f:    0e                     dly
+949f:    0e                         abort_code = (0xe)
 
 L_94a0:
 94a0:    a0 00                  st AL, #0x00
@@ -3933,7 +3924,7 @@ Syscall_4e:
 94d5:    7b c9                  call [L_94a0|-0x37]
 94d7:    14 be                  bz L_9497
 94d9:    b5 a2                  st A, [--S]
-94db:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+94db:    91 01 03               ld A, [CurrentProcess|0x0103]
 94de:    d5 08 01               ld B, [A + 0x0001]
 94e1:    95 a1                  ld A, [S++]
 94e3:    c5 08 fe               ld BL, [A + -0x002]
@@ -4036,8 +4027,8 @@ R_9592:
 9594:    65 a1                  ld X, [S++]
 9596:    79 b2 cb               call [R_b2cb|0xb2cb]
 9599:    5d                     mov B, A
-959a:    91 01 03               ld A, [SystemInfoPtr|0x0103]
-959d:    71 00 00               jmp [0x0000]
+959a:    91 01 03               ld A, [CurrentProcess|0x0103]
+959d:    71 00 00               jmp [L_0000|0x0000]
 
 R_95a0:
 95a0:    6b 1f                  st X, [pc + 0x1f]
@@ -4059,8 +4050,8 @@ L_95bb:
 95bb:    7c da                  call @[pc + -0x26]
 
 L_95bd:
-95bd:    91 01 03               ld A, [SystemInfoPtr|0x0103]
-95c0:    71 00 00               jmp [0x0000]
+95bd:    91 01 03               ld A, [CurrentProcess|0x0103]
+95c0:    71 00 00               jmp [L_0000|0x0000]
 
 R_95c3:
 95c3:    00                     HALT
@@ -4324,8 +4315,7 @@ R_9717:
 971a:    67                     unknown
 971b:    2a                     clr! AL, #0
 971c:    66 55                  jsys Syscall_55
-971e:    89                     ld AL, [B]
-971f:    97                     unknown
+971e:    89 97                      arg1 = (0x8997)
 9720:    b4 73                  st A, @[pc + 0x73]
 9722:    d9                     ld B, [B]
 
@@ -4669,7 +4659,7 @@ R_9921:
 9921:    85 41                  ld AL, [X++]
 
 R_9923:
-9923:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
+9923:    d1 01 03               ld B, [CurrentProcess|0x0103]
 9926:    d5 28 19               ld B, [B + 0x0019]
 9929:    14 03                  bz L_992e
 992b:    a5 28 06               st AL, [B + 0x0006]
@@ -4678,7 +4668,7 @@ L_992e:
 992e:    09                     ret
 
 R_992f:
-992f:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+992f:    91 01 03               ld A, [CurrentProcess|0x0103]
 9932:    95 08 19               ld A, [A + 0x0019]
 9935:    b5 a2                  st A, [--S]
 9937:    51 10 7f ff            sub A, A, #0x7fff
@@ -4695,7 +4685,7 @@ L_994b:
 994b:    95 a1                  ld A, [S++]
 994d:    95 a1                  ld A, [S++]
 994f:    79 84 e4               call [Syscall_Abort|0x84e4]
-9952:    17
+9952:    17                         abort_code = (0x17)
 
 R_9953:
 9953:    b1 9a dd               st A, [R_9add|0x9add]
@@ -4997,8 +4987,6 @@ L_9af4:
 9b0d:    14 cd                  bz L_9adc
 9b0f:    c0 08                  ld BL, #0x08
 9b11:    4a                     and! BL, AL
-
-L_9b12:
 9b12:    14 23                  bz L_9b37
 9b14:    c0 01                  ld BL, #0x01
 9b16:    4a                     and! BL, AL
@@ -5048,7 +5036,7 @@ L_9b58:
 9b58:    d0 ff ff               ld B, #0xffff
 9b5b:    55 80                  mov A, Z
 9b5d:    79 84 e4               call [Syscall_Abort|0x84e4]
-9b60:    17
+9b60:    17                         abort_code = (0x17)
 
 L_9b61:
 9b61:    b0 00 00               st A, #0x0000
@@ -5056,7 +5044,7 @@ L_9b61:
 9b66:    d3 02                  ld B, [R_9b6a|+0x2]
 9b68:    58                     add! B, A
 9b69:    f0 00 00               st B, #0x0000
-9b6c:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+9b6c:    91 01 03               ld A, [CurrentProcess|0x0103]
 9b6f:    95 0c 19               ld A, @[A + 0x0019]
 9b72:    98                     ld A, [A]
 9b73:    59                     sub! B, A
@@ -5111,7 +5099,7 @@ L_9bb6:
 9bb6:    9c                     ld A, [Z]
 9bb7:    d1 9c 65               ld B, [R_9c65|0x9c65]
 9bba:    79 84 e4               call [Syscall_Abort|0x84e4]
-9bbd:    0f                     rsys
+9bbd:    0f                         abort_code = (0xf)
 
 L_9bbe:
 9bbe:    30 10 9c 64            inc [R_9c64|0x9c64], #1
@@ -5212,7 +5200,7 @@ R_9c39:
 9c43:    41 01                  sub AL, AH
 9c45:    15 05                  bnz L_9c4c
 9c47:    55 82                  mov B, Z
-9c49:    79 8a 48               call [R_8a48|0x8a48]
+9c49:    79 8a 48               call [Syscall_00_inner|0x8a48]
 
 L_9c4c:
 9c4c:    85 88 02               ld AL, [Z + 0x0002]
@@ -5298,130 +5286,64 @@ L_9cbe:
 9cbe:    9c                     ld A, [Z]
 9cbf:    d3 a4                  ld B, [R_9c65|-0x5c]
 9cc1:    79 84 e4               call [Syscall_Abort|0x84e4]
-9cc4:    11 80                  bnc L_9d46
-9cc6:    09                     ret
-9cc7:    41
-9cc8:    01
-9cc9:    15
-9cca:    08
-9ccb:    55
-9ccc:    82
-9ccd:    79
-9cce:    8a
-9ccf:    48
-9cd0:    71
-9cd1:    9d
-9cd2:    8c
-9cd3:    90
-9cd4:    03
-9cd5:    00
-9cd6:    b3 '3'
-9cd7:    8d
-9cd8:    80
-9cd9:    00
-9cda:    14
-9cdb:    4c
-9cdc:    7b
-9cdd:    6f
-9cde:    85
-9cdf:    88
-9ce0:    0d
-9ce1:    c0 '@'
-9ce2:    06
-9ce3:    49
-9ce4:    15
-9ce5:    2c
-9ce6:    95
-9ce7:    88
-9ce8:    06
-9ce9:    79
-9cea:    a3 '#'
-9ceb:    0d
-9cec:    47
-9ced:    45
-9cee:    05
-9cef:    00
-9cf0:    02
-9cf1:    80
-9cf2:    1e
-9cf3:    c5 'E'
-9cf4:    08
-9cf5:    02
-9cf6:    15
-9cf7:    11
-9cf8:    46
-9cf9:    22
-9cfa:    34
-9cfb:    00
-9cfc:    02
-9cfd:    9d
-9cfe:    4a
-9cff:    46
-9d00:    22
-9d01:    04
-9d02:    00
-9d03:    0b
-9d04:    9d
-9d05:    4a
-9d06:    c1 'A'
-9d07:    9d
-9d08:    4a
-9d09:    e5 'e'
-9d0a:    88
-9d0b:    31
-9d0c:    95
-9d0d:    08
-9d0e:    05
-9d0f:    b5 '5'
-9d10:    88
-9d11:    1c
-9d12:    95
-9d13:    88
-9d14:    1c
-9d15:    39
-9d16:    78
+9cc4:    11                         abort_code = (0x11)
 
-L_9d17:
-9d17:    12 01                  bn L_9d1a
-9d19:    90
+L_9cc5:
+9cc5:    80 09                  ld AL, #0x09
+9cc7:    41 01                  sub AL, AH
+9cc9:    15 08                  bnz L_9cd3
+9ccb:    55 82                  mov B, Z
+9ccd:    79 8a 48               call [Syscall_00_inner|0x8a48]
+9cd0:    71 9d 8c               jmp [R_9d8c|0x9d8c]
 
-L_9d1a:
+L_9cd3:
+9cd3:    90 03 00               ld A, #0x0300
+9cd6:    b3 8d                  st A, [R_9c65|-0x73]
+9cd8:    80 00                  ld AL, #0x00
+9cda:    14 4c                  bz L_9d28
+9cdc:    7b 6f                  call [R_9d4d|+0x6f]
+9cde:    85 88 0d               ld AL, [Z + 0x000d]
+9ce1:    c0 06                  ld BL, #0x06
+9ce3:    49                     sub! BL, AL
+9ce4:    15 2c                  bnz L_9d12
+9ce6:    95 88 06               ld A, [Z + 0x0006]
+9ce9:    79 a3 0d               call [R_a30d|0xa30d]
+9cec:    47 45 05 00 02 80 1e   memcpy #0x06, [A + 0x0002], [Z + 0x001e]
+9cf3:    c5 08 02               ld BL, [A + 0x0002]
+9cf6:    15 11                  bnz L_9d09
+9cf8:    46 22 34 00 02 9d 4a   unkbig3(2, 2) [A + 0x0002], [R_9d4a|0x9d4a]
+9cff:    46 22 04 00 0b 9d 4a   addbig(2, 2) [A + 0x000b], [R_9d4a|0x9d4a]
+9d06:    c1 9d 4a               ld BL, [R_9d4a|0x9d4a]
+
+L_9d09:
+9d09:    e5 88 31               st BL, [Z + 0x0031]
+9d0c:    95 08 05               ld A, [A + 0x0005]
+9d0f:    b5 88 1c               st A, [Z + 0x001c]
+
+L_9d12:
+9d12:    95 88 1c               ld A, [Z + 0x001c]
+9d15:    39                     dec! A, #1
+9d16:    78 12 01 90            mul B, A, #0x0190
 9d1a:    30 21                  inc B, #2
 9d1c:    77 32 01 90            div B, B, #0x0190
 9d20:    95 88 04               ld A, [Z + 0x0004]
 9d23:    59                     sub! B, A
 9d24:    15 98                  bnz L_9cbe
 9d26:    73 64                  jmp [R_9d8c|+0x64]
-9d28:    85
-9d29:    88
-9d2a:    01
-9d2b:    17
-9d2c:    19
-9d2d:    55
-9d2e:    82
-9d2f:    79
-9d30:    8a
-9d31:    a6 '&'
-9d32:    55
-9d33:    26
-9d34:    14
-9d35:    56
-9d36:    95
-9d37:    68
-9d38:    09
-9d39:    b5 '5'
-9d3a:    88
-9d3b:    12
-9d3c:    b5 '5'
-9d3d:    88
-9d3e:    16
-9d3f:    95
-9d40:    68
-9d41:    0b
-9d42:    7b
-9d43:    21
-9d44:    73
-9d45:    46
+
+L_9d28:
+9d28:    85 88 01               ld AL, [Z + 0x0001]
+9d2b:    17 19                  bp L_9d46
+9d2d:    55 82                  mov B, Z
+9d2f:    79 8a a6               call [LookupDeviceInstance|0x8aa6]
+9d32:    55 26                  mov Y, B
+9d34:    14 56                  bz R_9d8c
+9d36:    95 68 09               ld A, [Y + 0x0009]
+9d39:    b5 88 12               st A, [Z + 0x0012]
+9d3c:    b5 88 16               st A, [Z + 0x0016]
+9d3f:    95 68 0b               ld A, [Y + 0x000b]
+9d42:    7b 21                  call [L_9d65|+0x21]
+9d44:    73 46                  jmp [R_9d8c|+0x46]
 
 L_9d46:
 9d46:    7b 05                  call [R_9d4d|+0x5]
@@ -5443,6 +5365,8 @@ R_9d4d:
 9d5c:    b5 88 16               st A, [Z + 0x0016]
 9d5f:    95 68 02               ld A, [Y + 0x0002]
 9d62:    b5 68 0b               st A, [Y + 0x000b]
+
+L_9d65:
 9d65:    b5 88 14               st A, [Z + 0x0014]
 9d68:    b5 88 18               st A, [Z + 0x0018]
 9d6b:    85 68 06               ld AL, [Y + 0x0006]
@@ -5456,7 +5380,7 @@ R_9d4d:
 9d7a:    45 12                  mov BH, AL
 9d7c:    9c                     ld A, [Z]
 9d7d:    79 84 e4               call [Syscall_Abort|0x84e4]
-9d80:    12
+9d80:    12                         abort_code = (0x12)
 
 L_9d81:
 9d81:    95 88 06               ld A, [Z + 0x0006]
@@ -5495,11 +5419,10 @@ L_9db1:
 
 L_9db3:
 9db3:    d6 89 9d ba            st Z, [R_9dba|0x9dba]
-9db7:    79 85 fa               call [R_85fa|0x85fa]
+9db7:    79 85 fa               call [FlushFn|0x85fa]
 
 R_9dba:
-9dba:    00                     HALT
-9dbb:    00                     HALT
+9dba:    00 00                      fileop = L_0000
 9dbc:    09                     ret
 
 R_9dbd:
@@ -5508,7 +5431,7 @@ R_9dbd:
 
 R_9dc2:
 9dc2:    55 82                  mov B, Z
-9dc4:    79 8a 48               call [R_8a48|0x8a48]
+9dc4:    79 8a 48               call [Syscall_00_inner|0x8a48]
 9dc7:    7b ea                  call [L_9db3|-0x16]
 9dc9:    09                     ret
 
@@ -5529,7 +5452,7 @@ L_9dd0:
 9de2:    55 82                  mov B, Z
 9de4:    7f 45                  pop {X, Y, Z}
 9de6:    f5 a2                  st B, [--S]
-9de8:    79 8b 33               call [R_8b33|0x8b33]
+9de8:    79 8b 33               call [DoFileOpInner|0x8b33]
 9deb:    d5 a1                  ld B, [S++]
 9ded:    7e 81                  push {Z}
 9def:    55 28                  mov Z, B
@@ -5980,7 +5903,7 @@ a0c5:    10 35                  bc L_a0fc
 a0c7:    59                     sub! B, A
 a0c8:    f5 a2                  st B, [--S]
 a0ca:    79 85 b9               call [R_85b9|0x85b9]
-a0cd:    3b                     not! A, #0
+a0cd:    3b                         arg1 = (0x3b)
 a0ce:    d5 88 06               ld B, [Z + 0x0006]
 a0d1:    9d                     ld A, [S]
 a0d2:    fd                     st B, [S]
@@ -6088,7 +6011,7 @@ a177:    14 ef                  bz L_a168
 a179:    95 a8 09               ld A, [S + 0x0009]
 a17c:    d5 48 0c               ld B, [X + 0x000c]
 a17f:    66 09                  jsys Syscall_Abort
-a181:    0e                     dly
+a181:    0e                         abort_code = (0xe)
 
 R_a182:
 a182:    79 a0 09               call [R_a009|0xa009]
@@ -6121,7 +6044,7 @@ a1a5:    14 c1                  bz L_a168
 a1a7:    95 a8 0d               ld A, [S + 0x000d]
 a1aa:    d5 a8 10               ld B, [S + 0x0010]
 a1ad:    66 09                  jsys Syscall_Abort
-a1af:    0e                     dly
+a1af:    0e                         abort_code = (0xe)
 
 L_a1b0:
 a1b0:    e3 1e                  st BL, [R_a1d0|+0x1e]
@@ -6269,13 +6192,9 @@ a27c:    15 18                  bnz L_a296
 a27e:    95 88 16               ld A, [Z + 0x0016]
 a281:    b5 88 12               st A, [Z + 0x0012]
 a284:    38                     inc! A, #1
-a285:    b5 '5'
-a286:    88
-
-L_a287:
-a287:    16 55                  blt L_a2de
-a289:    82 79 89               ld AL, @[0x7989]
-a28c:    bc                     st A, [Z]
+a285:    b5 88 16               st A, [Z + 0x0016]
+a288:    55 82                  mov B, Z
+a28a:    79 89 bc               call [R_89bc|0x89bc]
 a28d:    14 07                  bz L_a296
 a28f:    55 82                  mov B, Z
 a291:    66 19                  jsys Syscall_19
@@ -6342,7 +6261,7 @@ a2eb:    14 09                  bz L_a2f6
 a2ed:    d3 08                  ld B, [pc + 0x08]
 a2ef:    95 a8 02               ld A, [S + 0x0002]
 a2f2:    79 84 e4               call [Syscall_Abort|0x84e4]
-a2f5:    17
+a2f5:    17                         abort_code = (0x17)
 
 L_a2f6:
 a2f6:    90 00 00               ld A, #0x0000
@@ -6378,11 +6297,8 @@ a328:    21 31                  dec BL, #2
 a32a:    14 07                  bz L_a333
 a32c:    5d                     mov B, A
 a32d:    55 80                  mov A, Z
-a32f:    79
-a330:    84
-
-L_a331:
-a331:    e4 17                  st BL, @[pc + 0x17]
+a32f:    79 84 e4               call [Syscall_Abort|0x84e4]
+a332:    17                         abort_code = (0x17)
 
 L_a333:
 a333:    09                     ret
@@ -6878,7 +6794,7 @@ a666:    39                     dec! A, #1
 a667:    5d                     mov B, A
 a668:    9b                     ld A, [Y]
 a669:    79 84 e4               call [Syscall_Abort|0x84e4]
-a66c:    10
+a66c:    10                         abort_code = (0x10)
 
 L_a66d:
 a66d:    55 80                  mov A, Z
@@ -6939,8 +6855,6 @@ a6bb:    ab                     st AL, [Y]
 a6bc:    95 68 32               ld A, [Y + 0x0032]
 a6bf:    5f                     mov S, A
 a6c0:    95 68 34               ld A, [Y + 0x0034]
-
-L_a6c3:
 a6c3:    5e                     mov Z, A
 a6c4:    71 9d 8c               jmp [R_9d8c|0x9d8c]
 
@@ -7117,7 +7031,7 @@ a80e:    85 68 30               ld AL, [Y + 0x0030]
 a811:    14 10                  bz R_a823
 
 L_a813:
-a813:    79 86 12               call [R_8612|0x8612]
+a813:    79 86 12               call [Yield|0x8612]
 a816:    55 62                  mov B, Y
 a818:    80 07                  ld AL, #0x07
 a81a:    a5 28 03               st AL, [B + 0x0003]
@@ -7298,7 +7212,7 @@ a990:    b5 68 0e               st A, [Y + 0x000e]
 a993:    b5 68 36               st A, [Y + 0x0036]
 
 L_a996:
-a996:    79 86 12               call [R_8612|0x8612]
+a996:    79 86 12               call [Yield|0x8612]
 a999:    55 62                  mov B, Y
 a99b:    32 07                  clr A, #7
 a99d:    a5 28 03               st AL, [B + 0x0003]
@@ -7374,11 +7288,11 @@ aa23:    45 31                  mov AL, BL
 
 R_aa25:
 aa25:    31 a1                  dec S, #2
-aa27:    47 46 08 a0 02 0a      memcpy #0x09, [S + 0x0002], [S]
+aa27:    47 46 08 a0 02 0a      memcpy #0x09, [S + 0x0002], [S]	 ; move stack down
 aa2d:    d5 a8 05               ld B, [S + 0x0005]
-aa30:    f5 a8 09               st B, [S + 0x0009]
-aa33:    6d a8 05               st X, [S + 0x0005]
-aa36:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
+aa30:    f5 a8 09               st B, [S + 0x0009]	 ; rearange our stack
+aa33:    6d a8 05               st X, [S + 0x0005]	 ; store X
+aa36:    d1 01 03               ld B, [CurrentProcess|0x0103]
 aa39:    47 45 00 a0 08 20 29   memcpy #0x01, [S + 0x0008], [B + 0x0029]
 aa40:    c0 00                  ld BL, #0x00
 aa42:    e5 a8 08               st BL, [S + 0x0008]
@@ -7388,7 +7302,7 @@ aa45:    c1 b6 b4               ld BL, [R_b6b4|0xb6b4]
 aa48:    49                     sub! BL, AL
 aa49:    11 04                  bnc L_aa4f
 aa4b:    79 84 e4               call [Syscall_Abort|0x84e4]
-aa4e:    1e
+aa4e:    1e                         abort_code = (0x1e)
 
 L_aa4f:
 aa4f:    3d                     sll! A, #1
@@ -7398,7 +7312,7 @@ aa53:    58                     add! B, A
 aa54:    99                     ld A, [B]
 aa55:    b5 a2                  st A, [--S]
 aa57:    79 85 b9               call [R_85b9|0x85b9]
-aa5a:    3d                     sll! A, #1
+aa5a:    3d                         arg1 = (0x3d)
 aa5b:    9d                     ld A, [S]
 aa5c:    d0 00 00               ld B, #0x0000
 aa5f:    59                     sub! B, A
@@ -7407,9 +7321,9 @@ aa62:    71 aa f0               jmp [R_aaf0|0xaaf0]
 
 L_aa65:
 aa65:    79 85 b9               call [R_85b9|0x85b9]
-aa68:    3b                     not! A, #0
+aa68:    3b                         arg1 = (0x3b)
 aa69:    79 ab 11               call [R_ab11|0xab11]
-aa6c:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
+aa6c:    d1 01 03               ld B, [CurrentProcess|0x0103]
 aa6f:    c5 28 01               ld BL, [B + 0x0001]
 aa72:    e1 ab 12               st BL, [R_ab12|0xab12]
 aa75:    d0 ad c6               ld B, R_adc6|#0xadc6
@@ -7426,8 +7340,6 @@ aa86:    3a                     clr! A, #0
 aa87:    39                     dec! A, #1
 aa88:    b3 d3                  st A, [R_aa5d|-0x2d]
 aa8a:    79 ac cf               call [R_accf|0xaccf]
-
-L_aa8d:
 aa8d:    7b 72                  call [L_ab01|+0x72]
 
 L_aa8f:
@@ -7451,11 +7363,9 @@ aaae:    58                     add! B, A
 aaaf:    f3 05                  st B, [pc + 0x05]
 aab1:    9d                     ld A, [S]
 aab2:    66 57                  jsys Syscall_57
-aab4:    00                     HALT
-aab5:    00                     HALT
-aab6:    00                     HALT
-aab7:    00                     HALT
-aab8:    01                     nop
+aab4:    00 00                      arg1 = (0x0)
+aab6:    00 00                      arg2 = (0x0)
+aab8:    01                         arg3 = (0x1)
 aab9:    f3 43                  st B, [pc + 0x43]
 aabb:    15 24                  bnz L_aae1
 aabd:    92 ab d8               ld A, @[R_abd8|0xabd8]
@@ -7468,11 +7378,11 @@ aac8:    14 c5                  bz L_aa8f
 aaca:    2a                     clr! AL, #0
 aacb:    29                     dec! AL, #1
 aacc:    a3 44                  st AL, [R_ab12|+0x44]
-aace:    79 86 12               call [R_8612|0x8612]
+aace:    79 86 12               call [Yield|0x8612]
 aad1:    79 85 b9               call [R_85b9|0x85b9]
-aad4:    3b                     not! A, #0
+aad4:    3b                         arg1 = (0x3b)
 aad5:    7b 3a                  call [R_ab11|+0x3a]
-aad7:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
+aad7:    d1 01 03               ld B, [CurrentProcess|0x0103]
 aada:    c5 28 01               ld BL, [B + 0x0001]
 aadd:    e3 33                  st BL, [R_ab12|+0x33]
 aadf:    73 ae                  jmp [L_aa8f|-0x52]
@@ -7503,7 +7413,7 @@ L_ab01:
 ab01:    79 88 05               call [R_8805|0x8805]
 ab04:    89                     ld AL, [B]
 ab05:    47 4e 00 02 02         memcpy #0x01, #0x02, [B]
-ab0a:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
+ab0a:    d1 01 03               ld B, [CurrentProcess|0x0103]
 ab0d:    a5 28 2a               st AL, [B + 0x002a]
 ab10:    09                     ret
 
@@ -7513,7 +7423,7 @@ ab13:    17 01                  bp L_ab16
 ab15:    09                     ret
 
 L_ab16:
-ab16:    79 86 12               call [R_8612|0x8612]
+ab16:    79 86 12               call [Yield|0x8612]
 ab19:    73 f6                  jmp [R_ab11|-0xa]
 
 Syscall_01:
@@ -7528,16 +7438,16 @@ ab28:    5d                     mov B, A
 ab29:    38                     inc! A, #1
 ab2a:    31 20                  dec B, #1
 ab2c:    79 84 e4               call [Syscall_Abort|0x84e4]
-ab2f:    09                     ret
+ab2f:    09                         abort_code = (0x9)
 
 L_ab30:
 ab30:    79 88 05               call [R_8805|0x8805]
-ab33:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+ab33:    91 01 03               ld A, [CurrentProcess|0x0103]
 ab36:    95 08 29               ld A, [A + 0x0029]
 ab39:    a9                     st AL, [B]
 ab3a:    45 01                  mov AL, AH
 ab3c:    a3 31                  st AL, [pc + 0x31]
-ab3e:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+ab3e:    91 01 03               ld A, [CurrentProcess|0x0103]
 ab41:    95 08 01               ld A, [A + 0x0001]
 ab44:    81 01 3d               ld AL, [0x013d]
 ab47:    41 01                  sub AL, AH
@@ -7557,7 +7467,7 @@ ab5c:    80 02                  ld AL, #0x02
 ab5e:    a9                     st AL, [B]
 
 L_ab5f:
-ab5f:    61 01 03               ld X, [SystemInfoPtr|0x0103]
+ab5f:    61 01 03               ld X, [CurrentProcess|0x0103]
 ab62:    65 48 08               ld X, [X + 0x0008]
 ab65:    47 5d 00 7f 40 13      unkblk5 #0x01, #0x7f, [X + 0x0013]
 ab6b:    d5 a8 07               ld B, [S + 0x0007]
@@ -7570,17 +7480,15 @@ ab7b:    65 a9 01               ld X, [S++ + 0x0001]
 ab7e:    0f                     rsys
 
 L_ab7f:
-ab7f:    79 86 12               call [R_8612|0x8612]
+ab7f:    79 86 12               call [Yield|0x8612]
 ab82:    55 40                  mov A, X
 ab84:    71 aa 45               jmp [R_aa45|0xaa45]
 
 Syscall_11:
 ab87:    f3 02                  st B, [pc + 0x02]
 ab89:    66 16                  jsys Syscall_16
-ab8b:    00                     HALT
-ab8c:    00                     HALT
-ab8d:    00                     HALT
-ab8e:    00                     HALT
+ab8b:    00 00                      arg1 = (0x0)
+ab8d:    00 00                      out = (0x0)
 ab8f:    93 fc                  ld A, [pc + -0x4]
 ab91:    0f                     rsys
 
@@ -7628,7 +7536,7 @@ L_abc8:
 abc8:    79 ac 83               call [R_ac83|0xac83]
 abcb:    14 cd                  bz L_ab9a
 abcd:    65 a1                  ld X, [S++]
-abcf:    79 86 12               call [R_8612|0x8612]
+abcf:    79 86 12               call [Yield|0x8612]
 abd2:    73 be                  jmp [Syscall_16|-0x42]
 
 L_abd4:
@@ -7640,12 +7548,12 @@ abdb:    5b                     mov X, A
 abdc:    79 ad 26               call [R_ad26|0xad26]
 abdf:    55 40                  mov A, X
 abe1:    65 a1                  ld X, [S++]
-abe3:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
+abe3:    d1 01 03               ld B, [CurrentProcess|0x0103]
 abe6:    c5 28 01               ld BL, [B + 0x0001]
 abe9:    e5 08 04               st BL, [A + 0x0004]
 abec:    30 04                  inc A, #5
 abee:    30 41                  inc X, #2
-abf0:    b5 41                  st A, [X++]
+abf0:    b5 41                  st A, [X++]	 ; Return value via PC?
 abf2:    0f                     rsys
 
 Syscall_13:
@@ -7673,7 +7581,7 @@ ac11:    15 f5                  bnz L_ac08
 ac13:    79 ac cf               call [R_accf|0xaccf]
 
 L_ac16:
-ac16:    47 20 0f fd 01 61 01 61 memchr #0x10, #0xfd, [0x0161], [0x0161]
+ac16:    47 20 0f fd 01 61 01 61 memchr #0x10, #0xfd, [PageTableOne|0x0161], [PageTableOne|0x0161]
 ac1e:    31 80                  dec Z, #1
 ac20:    51 90 01 61            sub A, Z, #0x0161
 ac24:    33 02                  not A, #2
@@ -7731,11 +7639,12 @@ ac7e:    09                     ret
 
 L_ac7f:
 ac7f:    79 84 e4               call [Syscall_Abort|0x84e4]
-ac82:    20 7e                  inc YL, #15
-ac84:    45 55                  mov XL, XL
-ac86:    76                     unknown
-ac87:    01                     nop
-ac88:    61 32 40               ld X, [0x3240]
+ac82:    20                         abort_code = (0x20)
+
+R_ac83:
+ac83:    7e 45                  push {X, Y, Z}
+ac85:    55 76 01 61            mov Y, Y, #0x0161
+ac89:    32 40                  clr X, #0
 ac8b:    3f                     dec X
 
 L_ac8c:
@@ -7760,7 +7669,7 @@ aca8:    79 af d7               call [R_afd7|0xafd7]
 acab:    16 e6                  blt L_ac93
 acad:    ab                     st AL, [Y]
 acae:    a5 68 20               st AL, [Y + 0x0020]
-acb1:    55 89 01 03            mov Z, Z, [SystemInfoPtr|0x0103]
+acb1:    55 89 01 03            mov Z, Z, [CurrentProcess|0x0103]
 acb5:    79 86 f5               call [R_86f5|0x86f5]
 acb8:    35 4a                  sll X, #11
 acba:    90 08 00               ld A, #0x0800
@@ -7936,18 +7845,18 @@ AbortHandler:
 adc8:    55 ba af 96            mov S, S, Syscall_59|#0xaf96	 ; Setup StackPointer
 adcc:    55 82                  mov B, Z
 adce:    32 80                  clr Z, #0
-add0:    7b 03                  call [R_add5|+0x3]
+add0:    7b 03                  call [AbortHandlerInner|+0x3]
 add2:    0a                     reti
 add3:    73 f3                  jmp [AbortHandler|-0xd]
 
-R_add5:
+AbortHandlerInner:
 add5:    2e 2c 00 af 83         wpf1 #0x00, [R_af83|0xaf83]
 adda:    7e 41                  push {X}
 addc:    f1 af 43               st B, [R_af43|0xaf43]
 addf:    a1 af 3e               st AL, [Abort_CD|0xaf3e]
 ade2:    21 14                  dec AL, #5
 ade4:    15 12                  bnz L_adf8
-ade6:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+ade6:    91 01 03               ld A, [CurrentProcess|0x0103]
 ade9:    14 0d                  bz L_adf8
 adeb:    d5 08 19               ld B, [A + 0x0019]
 adee:    14 08                  bz L_adf8
@@ -8013,7 +7922,7 @@ ae8d:    80 02                  ld AL, #0x02
 ae8f:    46 80 90 af 4b af 3e   baseconv(8, 0) [AbortString_CD|0xaf4b], [Abort_CD|0xaf3e]
 ae96:    81 af 3d               ld AL, [Abort_LVL|0xaf3d]
 ae99:    15 05                  bnz L_aea0
-ae9b:    61 01 03               ld X, [SystemInfoPtr|0x0103]
+ae9b:    61 01 03               ld X, [CurrentProcess|0x0103]
 ae9e:    15 1a                  bnz L_aeba
 
 L_aea0:
@@ -8032,7 +7941,7 @@ aeb7:    59                     sub! B, A
 aeb8:    19 2d                  ble L_aee7
 
 L_aeba:
-aeba:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
+aeba:    d1 01 03               ld B, [CurrentProcess|0x0103]
 aebd:    51 42                  sub B, X
 aebf:    14 17                  bz L_aed8
 aec1:    95 48 10               ld A, [X + 0x0010]
@@ -8054,12 +7963,12 @@ aed8:    90 ae ed               ld A, R_aeed|#0xaeed
 
 L_aedb:
 aedb:    32 c0                  clr C, #0
-aedd:    d7 0e                  mov A, IL0(P)
+aedd:    d7 0e                  mov A, IL0(P)	 ; Rewrite IL0's program counter to R_aeed
 aedf:    3a                     clr! A, #0
-aee0:    d7 0c                  mov A, IL0(C)
+aee0:    d7 0c                  mov A, IL0(C)	 ; clearing IL0's context register presumably also changes it's Page Table Base
 
 L_aee2:
-aee2:    6b 33                  st X, [pc + 0x33]
+aee2:    6b 33                  st X, [pc + 0x33]	 ; Patch ld A, #0x0000 at 0xaf16
 
 R_aee4:
 aee4:    7f 41                  pop {X}
@@ -8071,7 +7980,7 @@ aee8:    90 af 03               ld A, R_af03|#0xaf03
 aeeb:    73 ee                  jmp [L_aedb|-0x12]
 
 R_aeed:
-aeed:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+aeed:    91 01 03               ld A, [CurrentProcess|0x0103]
 aef0:    95 08 0c               ld A, [A + 0x000c]
 aef3:    14 01                  bz L_aef6
 aef5:    5f                     mov S, A
@@ -8084,40 +7993,44 @@ aefd:    3a                     clr! A, #0
 aefe:    39                     dec! A, #1
 aeff:    5d                     mov B, A
 af00:    66 09                  jsys Syscall_Abort
-af02:    21 55                  dec XL, #6
-af04:    ba                     st A, [X]
-af05:    af                     st AL, [P]
-af06:    96                     unknown
+af02:    21                         abort_code = (0x21)
+
+R_af03:
+af03:    55 ba af 96            mov S, S, Syscall_59|#0xaf96
 af07:    80 01                  ld AL, #0x01
 af09:    a1 01 25               st AL, [0x0125]
 af0c:    7b 08                  call [L_af16|+0x8]
-af0e:    79 b4 f8               call [R_b4f8|0xb4f8]
-af11:    af                     st AL, [P]
-af12:    74 05                  jmp @[pc + 0x05]
-af14:    73
-af15:    fe '~'
+af0e:    79 b4 f8               call [PrintStringToErrorDevice|0xb4f8]
+af11:    af 74                      string = R_af74	 ; Opsys Aborted
+af13:    05                     di
+
+L_af14:
+af14:    73 fe                  jmp [L_af14|-0x2]
 
 L_af16:
-af16:    d0 00 00               ld B, #0x0000
+af16:    d0 00 00               ld B, #0x0000	 ; B should be SystemInfoPtr, 01ea
 af19:    80 80                  ld AL, #0x80
-af1b:    a3 16                  st AL, [R_af33|+0x16]
+af1b:    a3 16                  st AL, [AbortWriteStruct|+0x16]
 af1d:    7e 81                  push {Z}
 af1f:    7e 61                  push {Y}
 af21:    7e 41                  push {X}
-af23:    55 98 af 33            mov Z, Z, R_af33|#0xaf33
-af27:    95 28 08               ld A, [B + 0x0008]
+af23:    55 98 af 33            mov Z, Z, AbortWriteStruct|#0xaf33
+af27:    95 28 08               ld A, [B + 0x0008]	 ; Load error device (defaults to Device_CRT0)
 af2a:    5b                     mov X, A
-af2b:    95 48 05               ld A, [X + 0x0005]
-af2e:    95 08 0a               ld A, [A + 0x000a]
-af31:    75 00                  jmp [A]
+af2b:    95 48 05               ld A, [X + 0x0005]	 ; Get DeviceObj
+af2e:    95 08 0a               ld A, [A + 0x000a]	 ; Get Write function (default, CrtDevice_Write)
+af31:    75 00                  jmp [A]	 ; tranfer execution to write funtion
+                                       	 ; Problematic, becuase this abort function hasn't set Y at all
+                                       	 ; and CrtDevice_Write does a lot with Y
 
-R_af33:
-af33:    00                     HALT
-af34:    82 00 02               ld AL, @[0x0002]
-af37:    00                     HALT
-af38:    00                     HALT
-af39:    af                     st AL, [P]
-af3a:    46
+AbortWriteStruct:
+af33:    00                     (0x0)
+af34:    82                     (0x82)
+af35:    00                     (0x0)
+af36:    02                     (0x2)
+af37:    00                     (0x0)
+af38:    00                     (0x0)
+af39:    af 46                  AbortString	 ; Abort string
 af3b:    <null bytes>
 
 
@@ -8162,7 +8075,7 @@ Syscall_59:
 af96:    80 01                  ld AL, #0x01
 
 L_af98:
-af98:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
+af98:    d1 01 03               ld B, [CurrentProcess|0x0103]
 af9b:    7b 01                  call [R_af9e|+0x1]
 af9d:    0f                     rsys
 
@@ -8178,7 +8091,7 @@ afb2:    79 b0 a2               call [R_b0a2|0xb0a2]
 
 R_afb5:
 afb5:    79 84 e4               call [Syscall_Abort|0x84e4]
-afb8:    2c                     srl! AL, #1
+afb8:    2c                         abort_code = (0x2c)
 
 L_afb9:
 afb9:    ac                     st AL, [Z]
@@ -8255,12 +8168,12 @@ b01d:    89                     ld AL, [B]
 b01e:    21 11                  dec AL, #2
 b020:    14 0d                  bz L_b02f
 b022:    79 84 e4               call [Syscall_Abort|0x84e4]
-b025:    09                     ret
+b025:    09                         abort_code = (0x9)
 
 Syscall_5a:
 b026:    7e 45                  push {X, Y, Z}
 b028:    b3 0e                  st A, [pc + 0x0e]
-b02a:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+b02a:    91 01 03               ld A, [CurrentProcess|0x0103]
 b02d:    b3 21                  st A, [R_b050|+0x21]
 
 L_b02f:
@@ -8320,7 +8233,7 @@ b091:    93 bd                  ld A, [R_b050|-0x43]
 b093:    32 20                  clr B, #0
 b095:    e8                     st BL, [A]
 b096:    f1 01 25               st B, [0x0125]
-b099:    79 86 12               call [R_8612|0x8612]
+b099:    79 86 12               call [Yield|0x8612]
 
 L_b09c:
 b09c:    95 a1                  ld A, [S++]
@@ -8351,14 +8264,14 @@ b0c4:    09                     ret
 
 R_b0c5:
 b0c5:    7e 63                  push {Y, Z}
-b0c7:    55 67 01 03            mov Y, Y, [SystemInfoPtr|0x0103]
+b0c7:    55 67 01 03            mov Y, Y, [CurrentProcess|0x0103]
 b0cb:    8b                     ld AL, [Y]
 b0cc:    c0 10                  ld BL, #0x10
 b0ce:    4a                     and! BL, AL
 b0cf:    15 06                  bnz L_b0d7
 b0d1:    55 42                  mov B, X
 b0d3:    79 84 e4               call [Syscall_Abort|0x84e4]
-b0d6:    2e
+b0d6:    2e                         abort_code = (0x2e)
 
 L_b0d7:
 b0d7:    c0 ff                  ld BL, #0xff
@@ -8419,10 +8332,10 @@ L_b132:
 b132:    80 ff                  ld AL, #0xff
 b134:    14 04                  bz L_b13a
 b136:    79 84 e4               call [Syscall_Abort|0x84e4]
-b139:    31
+b139:    31                         abort_code = (0x31)
 
 L_b13a:
-b13a:    55 67 01 03            mov Y, Y, [SystemInfoPtr|0x0103]
+b13a:    55 67 01 03            mov Y, Y, [CurrentProcess|0x0103]
 b13e:    80 ff                  ld AL, #0xff
 b140:    15 0d                  bnz L_b14f
 b142:    80 00                  ld AL, #0x00
@@ -8442,8 +8355,8 @@ b15b:    a3 e2                  st AL, [pc + -0x1e]
 b15d:    95 68 08               ld A, [Y + 0x0008]
 b160:    d0 80 bb               ld B, R_80bb|#0x80bb
 b163:    79 8b 00               call [R_8b00|0x8b00]
-b166:    79 85 fa               call [R_85fa|0x85fa]
-b169:    80 bb                  ld AL, #0xbb
+b166:    79 85 fa               call [FlushFn|0x85fa]
+b169:    80 bb                      fileop = R_80bb
 b16b:    83 d6                  ld AL, [pc + -0x2a]
 b16d:    29                     dec! AL, #1
 b16e:    a3 d3                  st AL, [pc + -0x2d]
@@ -8453,7 +8366,7 @@ L_b172:
 b172:    2a                     clr! AL, #0
 b173:    29                     dec! AL, #1
 b174:    a3 c9                  st AL, [pc + -0x37]
-b176:    79 86 12               call [R_8612|0x8612]
+b176:    79 86 12               call [Yield|0x8612]
 
 L_b179:
 b179:    7f 63                  pop {Y, Z}
@@ -8517,7 +8430,7 @@ b1bb:    44 0f                  xor PL, AH
 L_b1bd:
 b1bd:    90 b3 30               ld A, R_b330|#0xb330
 b1c0:    79 b2 6b               call [R_b26b|0xb26b]
-b1c3:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
+b1c3:    d1 01 03               ld B, [CurrentProcess|0x0103]
 b1c6:    73 e1                  jmp [L_b1a9|-0x1f]
 
 L_b1c8:
@@ -8562,8 +8475,11 @@ b209:    7f 43                  pop {X, Y}
 b20b:    d5 48 01               ld B, [X + 0x0001]
 b20e:    55 40                  mov A, X
 b210:    79 84 e4               call [Syscall_Abort|0x84e4]
-b213:    15 7e                  bnz L_b293
-b215:    43 3a                  or SH, BL
+b213:    15                         abort_code = (0x15)
+
+Syscall_5d:
+b214:    7e 43                  push {X, Y}
+b216:    3a                     clr! A, #0
 b217:    85 41                  ld AL, [X++]
 b219:    14 05                  bz L_b220
 b21b:    39                     dec! A, #1
@@ -8575,7 +8491,7 @@ b220:    90 b3 38               ld A, R_b338|#0xb338
 b223:    7b 46                  call [R_b26b|+0x46]
 b225:    79 b2 cb               call [R_b2cb|0xb2cb]
 b228:    5d                     mov B, A
-b229:    61 01 03               ld X, [SystemInfoPtr|0x0103]
+b229:    61 01 03               ld X, [CurrentProcess|0x0103]
 b22c:    50 45 b1 ab            add X, X, [R_b1ab|0xb1ab]
 b230:    71 b1 b1               jmp [R_b1b1|0xb1b1]
 
@@ -8629,8 +8545,6 @@ b287:    6b 3a                  st X, [pc + 0x3a]
 b289:    78 10 00 08            mul A, A, #0x0008
 b28d:    50 62                  add B, Y
 b28f:    50 23 b1 ab            add B, B, [R_b1ab|0xb1ab]
-
-L_b293:
 b293:    3a                     clr! A, #0
 b294:    8b                     ld AL, [Y]
 b295:    50 60                  add A, Y
@@ -8658,8 +8572,6 @@ L_b2b3:
 b2b3:    31 20                  dec B, #1
 b2b5:    16 0b                  blt L_b2c2
 b2b7:    07                     rl
-
-L_b2b8:
 b2b8:    3d                     sll! A, #1
 b2b9:    10 0d                  bc L_b2c8
 b2bb:    3f                     dec X
@@ -8669,7 +8581,7 @@ b2c0:    73 ee                  jmp [L_b2b0|-0x12]
 
 L_b2c2:
 b2c2:    60 00 00               ld X, #0x0000
-b2c5:    71 00 00               jmp [0x0000]
+b2c5:    71 00 00               jmp [L_0000|0x0000]
 
 L_b2c8:
 b2c8:    71 b2 09               jmp [R_b209|0xb209]
@@ -8692,10 +8604,10 @@ b2de:    17 06                  bp L_b2e6
 b2e0:    5d                     mov B, A
 b2e1:    9d                     ld A, [S]
 b2e2:    79 84 e4               call [Syscall_Abort|0x84e4]
-b2e5:    17
+b2e5:    17                         abort_code = (0x17)
 
 L_b2e6:
-b2e6:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
+b2e6:    d1 01 03               ld B, [CurrentProcess|0x0103]
 b2e9:    d5 28 0c               ld B, [B + 0x000c]	 ; SystemInfo_TopOfMemory
 b2ec:    59                     sub! B, A
 b2ed:    10 ea                  bc L_b2d9	 ; A is above 0xefff
@@ -8800,7 +8712,7 @@ b368:    21 30                  dec BL, #1
 b36a:    16 2b                  blt L_b397
 b36c:    79 b2 cb               call [R_b2cb|0xb2cb]
 b36f:    5c                     mov Y, A
-b370:    61 01 03               ld X, [SystemInfoPtr|0x0103]
+b370:    61 01 03               ld X, [CurrentProcess|0x0103]
 b373:    3a                     clr! A, #0
 b374:    85 48 16               ld AL, [X + 0x0016]
 b377:    51 20                  sub A, B
@@ -8810,12 +8722,12 @@ b37e:    77 32 00 0a            div B, B, #0x000a
 b382:    50 42                  add B, X
 
 L_b384:
-b384:    71 00 00               jmp [0x0000]
+b384:    71 00 00               jmp [L_0000|0x0000]
 
 L_b387:
 b387:    79 b2 cb               call [R_b2cb|0xb2cb]
 b38a:    5c                     mov Y, A
-b38b:    61 01 03               ld X, [SystemInfoPtr|0x0103]
+b38b:    61 01 03               ld X, [CurrentProcess|0x0103]
 b38e:    65 48 17               ld X, [X + 0x0017]
 b391:    31 49                  dec X, #10
 b393:    55 42                  mov B, X
@@ -8827,7 +8739,7 @@ b399:    32 20                  clr B, #0
 b39b:    ca                     ld BL, [X]
 b39c:    55 40                  mov A, X
 b39e:    79 84 e4               call [Syscall_Abort|0x84e4]
-b3a1:    2d                     sll! AL, #1
+b3a1:    2d                         abort_code = (0x2d)
 
 Syscall_1b:
 b3a2:    7b 20                  call [R_b3c4|+0x20]
@@ -8914,12 +8826,12 @@ b423:    14 01                  bz L_b426
 b425:    0f                     rsys
 
 L_b426:
-b426:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+b426:    91 01 03               ld A, [CurrentProcess|0x0103]
 b429:    d0 04 00               ld B, #0x0400
 b42c:    c8                     ld BL, [A]
 b42d:    43 23                  or BL, BH
 b42f:    e8                     st BL, [A]
-b430:    79 86 12               call [R_8612|0x8612]
+b430:    79 86 12               call [Yield|0x8612]
 b433:    0f                     rsys
 
 Syscall_4b:
@@ -8927,19 +8839,20 @@ b434:    79 b4 3f               call [R_b43f|0xb43f]
 b437:    0f                     rsys
 
 R_b438:
-b438:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
+b438:    d1 01 03               ld B, [CurrentProcess|0x0103]
 b43b:    b5 28 32               st A, [B + 0x0032]
 b43e:    09                     ret
 
 R_b43f:
-b43f:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+b43f:    91 01 03               ld A, [CurrentProcess|0x0103]
 b442:    95 08 32               ld A, [A + 0x0032]
 b445:    09                     ret
 
-R_b446:
-b446:    90 b4 61               ld A, R_b461|#0xb461
+InitLevel10Device:
+b446:    90 b4 61               ld A, Level10_InterruptHandler|#0xb461
 b449:    d7 ae                  mov A, IL10(P)
-b44b:    90 b4 56               ld A, R_b456|#0xb456
+b44b:    90 b4 56               ld A, R_b456|#0xb456	 ; Setup stack at the end of this Init function
+                                                    	 ; We don't need it anymore, so overwrite it
 b44e:    d7 aa                  mov A, IL10(S)
 b450:    90 00 ff               ld A, #0x00ff
 b453:    d7 a8                  mov A, IL10(Z)
@@ -8952,7 +8865,9 @@ b45c:    40 19                  add ZL, AL
 b45e:    16 16                  blt L_b476
 b460:    0a                     reti
 
-R_b461:
+Level10_InterruptHandler:
+    ; I suspect this is the timer interrupt
+    ; So this is probally doing process switching
 b461:    81 01 41               ld AL, [0x0141]
 b464:    14 0d                  bz L_b473
 b466:    80 f0                  ld AL, #0xf0
@@ -8960,11 +8875,11 @@ b468:    42 c1                  and AL, CH
 b46a:    15 07                  bnz L_b473
 b46c:    32 20                  clr B, #0
 b46e:    80 08                  ld AL, #0x08
-b470:    79 ad d5               call [R_add5|0xadd5]
+b470:    79 ad d5               call [AbortHandlerInner|0xadd5]	 ; Not entirely sure that this is an abort
 
 L_b473:
-b473:    29                     dec! AL, #1
-b474:    a4 ec                  st AL, @[pc + -0x14]
+b473:    29                     dec! AL, #1	 ; Decrement Timeslice counter
+b474:    a4 ec                  st AL, @[pc + -0x14]	 ; store at 0x0141
 
 L_b476:
 b476:    50 76 00 0a            add Y, Y, #0x000a
@@ -8977,6 +8892,7 @@ b47f:    7b 55                  call [L_b4d6|+0x55]
 b481:    73 d3                  jmp [R_b456|-0x2d]
 
 L_b483:
+    ; Update Clock
 b483:    6d a2                  st X, [--S]
 b485:    91 01 36               ld A, [0x0136]
 b488:    60 b6 b0               ld X, #0xb6b0
@@ -9015,7 +8931,7 @@ b4c4:    d0 00 f6               ld B, #0x00f6
 b4c7:    50 20                  add A, B
 
 L_b4c9:
-b4c9:    dd                     ld B, [S]
+b4c9:    dd                     ld B, [S]	 ; X before call
 b4ca:    59                     sub! B, A
 b4cb:    16 05                  blt L_b4d2
 b4cd:    90 b0 b0               ld A, #0xb0b0
@@ -9047,17 +8963,18 @@ L_b4f4:
 b4f4:    60 00 00               ld X, #0x0000
 b4f7:    09                     ret
 
-R_b4f8:
-b4f8:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+PrintStringToErrorDevice:
+    ; Is hardcoded to assume Error device is a mux port
+b4f8:    91 01 03               ld A, [CurrentProcess|0x0103]
 b4fb:    15 03                  bnz R_b500
 b4fd:    92 01 07               ld A, @[0x0107]
 
 R_b500:
-b500:    d5 41                  ld B, [X++]
+b500:    d5 41                  ld B, [X++]	 ; B = string
 b502:    7e 45                  push {X, Y, Z}
 b504:    65 21                  ld X, [B++]
-b506:    95 08 08               ld A, [A + 0x0008]
-b509:    55 17 00 0f            mov Y, [A + #0x000f]
+b506:    95 08 08               ld A, [A + 0x0008]	 ; Error device
+b509:    55 17 00 0f            mov Y, [A + #0x000f]	 ; MMIO address 0xf200
 
 L_b50d:
 b50d:    55 98 01 f4            mov Z, Z, #0x01f4
@@ -9070,7 +8987,7 @@ b516:    14 24                  bz L_b53c
 b518:    f6 16 00               ld AL, +0x0(Y)
 b51b:    52 10 00 02            and A, A, #0x0002
 b51f:    54 10 00 02            xor A, A, #0x0002
-b523:    15 ef                  bnz L_b514
+b523:    15 ef                  bnz L_b514	 ; Wait for UART to be ready
 b525:    80 8d                  ld AL, #0x8d
 b527:    45 10                  mov AH, AL
 b529:    85 21                  ld AL, [B++]
@@ -9089,14 +9006,14 @@ L_b53c:
 b53c:    7f 45                  pop {X, Y, Z}
 b53e:    09                     ret
 
-Syscall_2b:
+Syscall_divide:
 b53f:    77 20                  div A, B
 b541:    0f                     rsys
 b542:    77
 b543:    20
 b544:    09
 
-Syscall_2c:
+Syscall_multiply:
 b545:    78 20                  mul A, B
 b547:    0f                     rsys
 b548:    78
@@ -9173,18 +9090,14 @@ b5ac:    f3 0d                  st B, [pc + 0x0d]
 b5ae:    47 48 05 40 b5 bd      memcpy #0x06, [X], [R_b5bd|0xb5bd]
 b5b4:    30 45                  inc X, #6
 b5b6:    79 b5 f2               call [R_b5f2|0xb5f2]
-b5b9:    00                     HALT
-b5ba:    00                     HALT
-b5bb:    00                     HALT
-b5bc:    00                     HALT
+b5b9:    00 00                      arg1 = L_0000
+b5bb:    00 00                      arg2 = L_0000
 
 R_b5bd:
-b5bd:    ff                     st B, [P]
-b5be:    00                     HALT
-b5bf:    00                     HALT
-b5c0:    00                     HALT
-b5c1:    00                     HALT
-b5c2:    00                     HALT
+b5bd:    ff                         arg3 = (0xff)
+b5be:    00 00                      arg4 = L_0000
+b5c0:    00 00                      arg5 = L_0000
+b5c2:    00                         arg6 = (0x0)
 b5c3:    0f                     rsys
 
 Syscall_14:
@@ -9211,7 +9124,8 @@ b5de:    0f                     rsys
 Syscall_53:
 b5df:    79 83 a7               call [R_83a7|0x83a7]
 b5e2:    79 85 b9               call [R_85b9|0x85b9]
-b5e5:    1f 9a                  b?F L_b581
+b5e5:    1f                         arg1 = (0x1f)
+b5e6:    9a                     ld A, [X]
 b5e7:    95 08 05               ld A, [A + 0x0005]
 b5ea:    50 10 00 0e            add A, A, #0x000e
 b5ee:    79 80 42               call [R_8042|0x8042]
@@ -9227,12 +9141,10 @@ b5fc:    85 41                  ld AL, [X++]
 b5fe:    79 cd a8               call [R_cda8|0xcda8]
 b601:    15 03                  bnz L_b606
 b603:    66 09                  jsys Syscall_Abort
-b605:    06                     sl
+b605:    06                         abort_code = (0x6)
 
 L_b606:
 b606:    85 68 13               ld AL, [Y + 0x0013]
-
-L_b609:
 b609:    a5 a2                  st AL, [--S]
 b60b:    95 41                  ld A, [X++]
 b60d:    b5 a2                  st A, [--S]
@@ -9252,7 +9164,7 @@ b622:    a5 a2                  st AL, [--S]
 b624:    21 11                  dec AL, #2
 b626:    19 03                  ble L_b62b
 b628:    66 09                  jsys Syscall_Abort
-b62a:    08                     cl
+b62a:    08                         abort_code = (0x8)
 
 L_b62b:
 b62b:    80 04                  ld AL, #0x04
@@ -9260,10 +9172,8 @@ b62b:    80 04                  ld AL, #0x04
 L_b62d:
 b62d:    a5 a2                  st AL, [--S]
 b62f:    66 06                  jsys Syscall_06
-b631:    1f d6                  b?F L_b609
-b633:    67                     unknown
-b634:    01                     nop
-b635:    3f                     dec X
+b631:    1f                         arg1 = (0x1f)
+b632:    d6 67 01 3f            st Y, [0x013f]
 b636:    3a                     clr! A, #0
 b637:    85 a1                  ld AL, [S++]
 b639:    71 80 3b               jmp [R_803b|0x803b]
@@ -9334,7 +9244,7 @@ b680:    91 00 5a               ld A, [0x005a]
 b683:    95 08 5e               ld A, [A + 0x005e]
 b686:    c5 08 0b               ld BL, [A + 0x000b]
 b689:    14 04                  bz L_b68f
-b68b:    66 07                  jsys Syscall_07
+b68b:    66 07                  jsys Syscall_Yield
 b68d:    73 f1                  jmp [L_b680|-0xf]
 
 L_b68f:
@@ -9402,9 +9312,9 @@ b6f6:    d7 28                  mov A, IL2(Z)
 b6f8:    f6 31 0f               st BL, +0xf(A)
 b6fb:    95 a1                  ld A, [S++]
 b6fd:    b1 b7 a7               st A, [R_b7a7|0xb7a7]
-b700:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+b700:    91 01 03               ld A, [CurrentProcess|0x0103]
 b703:    2e 0d fa 00 36         wpf #0xfa, [A + 0x0036]
-b708:    2e 0c 7a 01 81         wpf #0x7a, [0x0181]
+b708:    2e 0c 7a 01 81         wpf #0x7a, [PageTableTwo|0x0181]
 b70d:    c0 02                  ld BL, #0x02
 b70f:    2f 28                  ld_isr B
 b711:    6d a2                  st X, [--S]
@@ -9488,7 +9398,7 @@ L_b798:
 b798:    93 0f                  ld A, [R_b7a9|+0xf]
 b79a:    d0 ff ff               ld B, #0xffff
 b79d:    c0 05                  ld BL, #0x05
-b79f:    66 6b                  jsys Syscall_6b
+b79f:    66 6b                  jsys Syscall_AbortAL
 
 R_b7a1:
 b7a1:    <null bytes>
@@ -9591,7 +9501,7 @@ b817:    3a                     clr! A, #0
 b818:    83 99                  ld AL, [R_b7b3|-0x67]
 b81a:    d3 8d                  ld B, [R_b7a9|-0x73]
 b81c:    c0 1d                  ld BL, #0x1d
-b81e:    66 6b                  jsys Syscall_6b
+b81e:    66 6b                  jsys Syscall_AbortAL
 
 L_b820:
 b820:    79 cc 97               call [R_cc97|0xcc97]
@@ -9656,9 +9566,9 @@ b88a:    09                     ret
 HawkDevice_Init:
 b88b:    7e 45                  push {X, Y, Z}
 b88d:    65 a8 08               ld X, [S + 0x0008]
-b890:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+b890:    91 01 03               ld A, [CurrentProcess|0x0103]
 b893:    2e 0d fa 00 36         wpf #0xfa, [A + 0x0036]
-b898:    2e 0c 7a 01 81         wpf #0x7a, [0x0181]
+b898:    2e 0c 7a 01 81         wpf #0x7a, [PageTableTwo|0x0181]
 b89d:    c0 02                  ld BL, #0x02
 b89f:    2f 28                  ld_isr B
 b8a1:    95 41                  ld A, [X++]
@@ -10082,18 +9992,17 @@ bb4a:    15 fc                  bnz L_bb48
 bb4c:    71 b9 2d               jmp [R_b92d|0xb92d]
 
 R_bb4f:
-bb4f:    93 0c                  ld A, [pc + 0x0c]
+bb4f:    93 0c                  ld A, [pc + 0x0c]	 ; Patch PrintStringToErrorDevice arg
 bb51:    15 07                  bnz L_bb5a
 bb53:    3a                     clr! A, #0
 bb54:    39                     dec! A, #1
 bb55:    5d                     mov B, A
 bb56:    c0 1c                  ld BL, #0x1c
-bb58:    66 6b                  jsys Syscall_6b
+bb58:    66 6b                  jsys Syscall_AbortAL
 
 L_bb5a:
-bb5a:    79 b4 f8               call [R_b4f8|0xb4f8]
-bb5d:    00                     HALT
-bb5e:    00                     HALT
+bb5a:    79 b4 f8               call [PrintStringToErrorDevice|0xb4f8]
+bb5d:    00 00                      string = L_0000
 bb5f:    91 ba 6e               ld A, [R_ba6e|0xba6e]
 bb62:    79 cd 4d               call [FormatHexWord|0xcd4d]
 bb65:    bc 1b                      dest = R_bc1b
@@ -10102,14 +10011,13 @@ bb69:    b1 bc 13               st A, [R_bc13|0xbc13]
 bb6c:    91 ba 68               ld A, [R_ba68|0xba68]
 bb6f:    79 cd 4d               call [FormatHexWord|0xcd4d]
 bb72:    bc 16                      dest = R_bc16
-bb74:    79 b4 f8               call [R_b4f8|0xb4f8]
-bb77:    bc                     st A, [Z]
-bb78:    0a                     reti
+bb74:    79 b4 f8               call [PrintStringToErrorDevice|0xb4f8]
+bb77:    bc 0a                      string = R_bc0a	 ; " FAIL:  X XXXX XXXX\x07\r"
 bb79:    3a                     clr! A, #0
 bb7a:    39                     dec! A, #1
 bb7b:    5d                     mov B, A
 bb7c:    c0 0d                  ld BL, #0x0d
-bb7e:    66 6b                  jsys Syscall_6b
+bb7e:    66 6b                  jsys Syscall_AbortAL
 
 L_bb80:
 bb80:    3a                     clr! A, #0
@@ -10534,9 +10442,9 @@ bf08:    95 68 0f               ld A, [Y + 0x000f]
 bf0b:    5e                     mov Z, A
 bf0c:    2a                     clr! AL, #0
 bf0d:    a1 c0 3b               st AL, [R_c03b|0xc03b]
-bf10:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+bf10:    91 01 03               ld A, [CurrentProcess|0x0103]
 bf13:    2e 0d fa 00 36         wpf #0xfa, [A + 0x0036]
-bf18:    2e 0c 7a 01 81         wpf #0x7a, [0x0181]
+bf18:    2e 0c 7a 01 81         wpf #0x7a, [PageTableTwo|0x0181]
 bf1d:    c0 02                  ld BL, #0x02
 bf1f:    2f 28                  ld_isr B
 
@@ -10689,7 +10597,7 @@ c012:    c1 99 60               ld BL, [0x9960]
 c015:    13 88                  bnn L_bf9f
 
 L_c017:
-c017:    66 07                  jsys Syscall_07
+c017:    66 07                  jsys Syscall_Yield
 c019:    3f                     dec X
 c01a:    18 fb                  bgt L_c017
 
@@ -10755,9 +10663,10 @@ c07c:    c1 54 7c               ld BL, [0x547c]
 c07f:    03                     rf
 c080:    00                     HALT
 c081:    00                     HALT
-c082:    79 b4 f8               call [R_b4f8|0xb4f8]
-c085:    c1 cb 95               ld BL, [0xcb95]
-c088:    a4 5c                  st AL, @[pc + 0x5c]
+c082:    79 b4 f8               call [PrintStringToErrorDevice|0xb4f8]
+c085:    c1 cb                      string = R_c1cb	 ; "EC:XX CP:XX CMDS: "
+c087:    95 a4                  ld A, @[S]
+c089:    5c                     mov Y, A
 c08a:    3a                     clr! A, #0
 c08b:    85 68 02               ld AL, [Y + 0x0002]
 c08e:    30 02                  inc A, #3
@@ -10778,7 +10687,7 @@ c0ad:    a1 be 0c               st AL, [R_be0c|0xbe0c]
 c0b0:    39                     dec! A, #1
 c0b1:    5d                     mov B, A
 c0b2:    c0 0d                  ld BL, #0x0d
-c0b4:    66 6b                  jsys Syscall_6b
+c0b4:    66 6b                  jsys Syscall_AbortAL
 
 L_c0b6:
 c0b6:    83 9a                  ld AL, [R_c052|-0x66]
@@ -10872,7 +10781,7 @@ c139:    00                     HALT
 c13a:    2a                     clr! AL, #0
 c13b:    a1 be 0c               st AL, [R_be0c|0xbe0c]
 c13e:    c0 0d                  ld BL, #0x0d
-c140:    66 6b                  jsys Syscall_6b
+c140:    66 6b                  jsys Syscall_AbortAL
 
 R_c142:
 c142:    95 41                  ld A, [X++]
@@ -10930,7 +10839,7 @@ c221:    cc a0                  R_cca0
 c223:    c2 2f                  R_c22f
 c225:    c2 76                  R_c276
 c227:    00 00                  L_0000
-c229:    c2 7e                  R_c27e
+c229:    c2 7e                  CrtDevice_Write
 c22b:    00 00                  L_0000
 c22d:    c5 a4                  CrtDevice_Init
 
@@ -10945,7 +10854,7 @@ c23c:    3a                     clr! A, #0
 c23d:    b5 8c 06               st A, @[Z + 0x0006]
 c240:    28                     inc! AL, #1
 c241:    a5 68 11               st AL, [Y + 0x0011]
-c244:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+c244:    91 01 03               ld A, [CurrentProcess|0x0103]
 c247:    b5 68 0d               st A, [Y + 0x000d]
 c24a:    d0 08 00               ld B, #0x0800
 c24d:    c8                     ld BL, [A]
@@ -10972,7 +10881,7 @@ c26f:    15 01                  bnz L_c272
 c271:    09                     ret
 
 L_c272:
-c272:    66 07                  jsys Syscall_07
+c272:    66 07                  jsys Syscall_Yield
 c274:    73 f6                  jmp [L_c26c|-0xa]
 
 R_c276:
@@ -10981,10 +10890,13 @@ c278:    3a                     clr! A, #0
 c279:    a5 6c 05               st AL, @[Y + 0x0005]
 c27c:    7b ee                  call [L_c26c|-0x12]
 
-R_c27e:
+CrtDevice_Write:
+    ; X is the CRT device
+    ; Z is the WriteStruct (file operation object?)
+    ; Y is ????
 c27e:    3a                     clr! A, #0
 c27f:    29                     dec! AL, #1
-c280:    a5 68 11               st AL, [Y + 0x0011]
+c280:    a5 68 11               st AL, [Y + 0x0011]	 ; Lock?
 c283:    95 68 1d               ld A, [Y + 0x001d]
 c286:    14 02                  bz L_c28a
 c288:    7d 00                  call [A]
@@ -10993,7 +10905,7 @@ L_c28a:
 c28a:    55 80                  mov A, Z
 c28c:    b5 68 14               st A, [Y + 0x0014]
 c28f:    3a                     clr! A, #0
-c290:    b5 88 08               st A, [Z + 0x0008]
+c290:    b5 88 08               st A, [Z + 0x0008]	 ; Overwrites string????
 c293:    79 c3 19               call [R_c319|0xc319]
 c296:    20 30                  inc BL, #1
 c298:    f6 31 08               st BL, +0x8(A)
@@ -11010,7 +10922,7 @@ c2ad:    73 ef                  jmp [L_c29e|-0x11]
 
 L_c2af:
 c2af:    79 cc 80               call [R_cc80|0xcc80]
-c2b2:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+c2b2:    91 01 03               ld A, [CurrentProcess|0x0103]
 c2b5:    b5 68 0d               st A, [Y + 0x000d]
 
 L_c2b8:
@@ -11028,7 +10940,7 @@ c2c9:    14 25                  bz L_c2f0
 c2cb:    8c                     ld AL, [Z]
 c2cc:    2d                     sll! AL, #1
 c2cd:    15 07                  bnz L_c2d6
-c2cf:    66 07                  jsys Syscall_07
+c2cf:    66 07                  jsys Syscall_Yield
 c2d1:    79 cc 80               call [R_cc80|0xcc80]
 c2d4:    73 ed                  jmp [L_c2c3|-0x13]
 
@@ -11037,9 +10949,9 @@ c2d6:    79 cc 89               call [R_cc89|0xcc89]
 c2d9:    14 dd                  bz L_c2b8
 
 L_c2db:
-c2db:    79 b4 f8               call [R_b4f8|0xb4f8]
-c2de:    c2 e2 73               ld BL, @[0xe273]
-c2e1:    cd                     ld BL, [S]
+c2db:    79 b4 f8               call [PrintStringToErrorDevice|0xb4f8]
+c2de:    c2 e2                      string = R_c2e2	 ; "ATTN PRINT\n\r"
+c2e0:    73 cd                  jmp [L_c2af|-0x33]
 
 R_c2e2:
 c2e2:    12, "ATTN PRINT\n\r"
@@ -11112,7 +11024,7 @@ c351:    71 c4 02               jmp [CrtDevice_InterruptHandler_End|0xc402]
 L_c354:
 c354:    95 68 0d               ld A, [Y + 0x000d]
 c357:    14 13                  bz L_c36c
-c359:    47 40 0f 01 81 c3 7f   memcpy #0x10, [0x0181], [R_c37f|0xc37f]
+c359:    47 40 0f 01 81 c3 7f   memcpy #0x10, [PageTableTwo|0x0181], [R_c37f|0xc37f]
 c360:    47 44 0f 00 46 c3 8f   memcpy #0x10, [A + 0x0046], [R_c38f|0xc38f]
 c367:    2e 0c f9 c3 7f         wpf #0xf9, [R_c37f|0xc37f]
 
@@ -11571,7 +11483,7 @@ c652:    90 03 37               ld A, #0x0337
 c655:    51 20                  sub A, B
 c657:    16 04                  blt L_c65d
 c659:    c0 05                  ld BL, #0x05
-c65b:    66 6b                  jsys Syscall_6b
+c65b:    66 6b                  jsys Syscall_AbortAL
 
 L_c65d:
 c65d:    91 c7 0d               ld A, [R_c70d|0xc70d]
@@ -11828,9 +11740,9 @@ c866:    55 a0                  mov A, S
 c868:    b1 c8 f2               st A, [R_c8f2|0xc8f2]
 c86b:    95 68 0f               ld A, [Y + 0x000f]
 c86e:    5e                     mov Z, A
-c86f:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+c86f:    91 01 03               ld A, [CurrentProcess|0x0103]
 c872:    2e 0d fa 00 36         wpf #0xfa, [A + 0x0036]
-c877:    2e 0c 7a 01 81         wpf #0x7a, [0x0181]
+c877:    2e 0c 7a 01 81         wpf #0x7a, [PageTableTwo|0x0181]
 c87c:    c0 02                  ld BL, #0x02
 c87e:    2f 28                  ld_isr B
 
@@ -11939,8 +11851,6 @@ c90f:    d5 68 0f               ld B, [Y + 0x000f]
 c912:    f6 32 01               ld BL, +0x1(B)
 c915:    8d                     ld AL, [S]
 c916:    4a                     and! BL, AL
-
-L_c917:
 c917:    49                     sub! BL, AL
 c918:    14 0c                  bz L_c926
 c91a:    79 cc 89               call [R_cc89|0xcc89]
@@ -12010,13 +11920,12 @@ c978:    90 c0 c0               ld A, #0xc0c0
 c97b:    b1 cb 3d               st A, [R_cb3d|0xcb3d]
 c97e:    80 02                  ld AL, #0x02
 c980:    46 80 91 cb 3d 60 02   baseconv(8, 0) [R_cb3d|0xcb3d], [Y + 0x0002]
-c987:    79 b4 f8               call [R_b4f8|0xb4f8]
-c98a:    cb                     ld BL, [Y]
-c98b:    37 60                  rlc Y, #1
-c98d:    13 88                  bnn L_c917
+c987:    79 b4 f8               call [PrintStringToErrorDevice|0xb4f8]
+c98a:    cb 37                      string = R_cb37
+c98c:    60 13 88               ld X, #0x1388
 
 L_c98f:
-c98f:    66 07                  jsys Syscall_07
+c98f:    66 07                  jsys Syscall_Yield
 c991:    3f                     dec X
 c992:    18 fb                  bgt L_c98f
 
@@ -12116,13 +12025,9 @@ ca19:    03                     rf
 R_ca1a:
 ca1a:    00                     HALT
 ca1b:    00                     HALT
-ca1c:    79 b4 f8               call [R_b4f8|0xb4f8]
-ca1f:    cb                     ld BL, [Y]
-ca20:    75 90                  jmp [Z]
-
-R_ca22:
-ca22:    c7                     unknown
-ca23:    05                     di
+ca1c:    79 b4 f8               call [PrintStringToErrorDevice|0xb4f8]
+ca1f:    cb 75                      string = R_cb75	 ; "EC:XX CMDS: "
+ca21:    90 c7 05               ld A, R_c705|#0xc705
 ca24:    5c                     mov Y, A
 ca25:    3a                     clr! A, #0
 ca26:    85 68 02               ld AL, [Y + 0x0002]
@@ -12151,13 +12056,9 @@ ca4e:    00                     HALT
 
 R_ca4f:
 ca4f:    00                     HALT
-ca50:    d0 'P'
-
-R_ca51:
-ca51:    00                     HALT
-ca52:    00                     HALT
+ca50:    d0 00 00               ld B, #0x0000
 ca53:    c0 0d                  ld BL, #0x0d
-ca55:    66 6b                  jsys Syscall_6b
+ca55:    66 6b                  jsys Syscall_AbortAL
 
 R_ca57:
 ca57:    a3 35                  st AL, [pc + 0x35]
@@ -12300,7 +12201,7 @@ cbd9:    15 04                  bnz L_cbdf
 
 L_cbdb:
 cbdb:    c0 06                  ld BL, #0x06
-cbdd:    66 6b                  jsys Syscall_6b
+cbdd:    66 6b                  jsys Syscall_AbortAL
 
 L_cbdf:
 cbdf:    85 68 13               ld AL, [Y + 0x0013]
@@ -12325,14 +12226,14 @@ cbfb:    a5 a2                  st AL, [--S]
 cbfd:    21 11                  dec AL, #2
 cbff:    19 04                  ble L_cc05
 cc01:    c0 08                  ld BL, #0x08
-cc03:    66 6b                  jsys Syscall_6b
+cc03:    66 6b                  jsys Syscall_AbortAL
 
 L_cc05:
 cc05:    80 04                  ld AL, #0x04
 cc07:    a5 a2                  st AL, [--S]
 cc09:    80 1f                  ld AL, #0x1f
 cc0b:    66 12                  jsys Syscall_12
-cc0d:    d6 67 01 3f            st Y, [0x013f]
+cc0d:    d6 67 01 3f            st Y, [0x013f]	 ; fixme: bad encoding?
 cc11:    3a                     clr! A, #0
 cc12:    85 a1                  ld AL, [S++]
 cc14:    3d                     sll! A, #1
@@ -12403,14 +12304,15 @@ cc7d:    2a                     clr! AL, #0
 cc7e:    73 d5                  jmp [L_cc55|-0x2b]
 
 R_cc80:
+    ; SystemInfo + 0x32 = 8
 cc80:    32 08                  clr A, #8
-cc82:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
+cc82:    d1 01 03               ld B, [CurrentProcess|0x0103]
 cc85:    b5 28 32               st A, [B + 0x0032]
 cc88:    09                     ret
 
 R_cc89:
-cc89:    66 07                  jsys Syscall_07
-cc8b:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
+cc89:    66 07                  jsys Syscall_Yield
+cc8b:    d1 01 03               ld B, [CurrentProcess|0x0103]
 cc8e:    95 28 32               ld A, [B + 0x0032]
 cc91:    14 02                  bz L_cc95
 cc93:    3a                     clr! A, #0
@@ -12421,7 +12323,7 @@ cc95:    38                     inc! A, #1
 cc96:    09                     ret
 
 R_cc97:
-cc97:    d1 01 03               ld B, [SystemInfoPtr|0x0103]
+cc97:    d1 01 03               ld B, [CurrentProcess|0x0103]
 cc9a:    3a                     clr! A, #0
 cc9b:    39                     dec! A, #1
 cc9c:    b5 28 32               st A, [B + 0x0032]
@@ -12557,7 +12459,7 @@ cd6e:    51 20                  sub A, B
 cd70:    10 06                  bc L_cd78
 cd72:    7f 01                  pop {A}
 cd74:    c0 24                  ld BL, #0x24
-cd76:    66 6b                  jsys Syscall_6b
+cd76:    66 6b                  jsys Syscall_AbortAL
 
 L_cd78:
 cd78:    7f 01                  pop {A}
@@ -12662,10 +12564,10 @@ ce05:    1d 02                  bs4 L_ce09
 ce07:    21 30                  dec BL, #1
 
 L_ce09:
-ce09:    e1 db 19               st BL, [R_db19|0xdb19]	 ; BL should now be the DISK number.
-                                                      	 ; 0/1 for Hawk, 10/11 for Finch, 20/21 for Phoenix
+ce09:    e1 db 19               st BL, [DiskNum|0xdb19]	 ; BL should now be the DISK number.
+                                                       	 ; 0/1 for Hawk, 10/11 for Finch, 20/21 for Phoenix
 ce0c:    1b 06                  bs2 L_ce14
-ce0e:    47 4c 00 00 e3 45      memcpy #0x01, #0x00, [R_e345|0xe345]
+ce0e:    47 4c 00 00 e3 45      memcpy #0x01, #0x00, [DoAutoboot|0xe345]
 
 L_ce14:
 ce14:    d2 01 09               ld B, @[DevicesPtr|0x0109]
@@ -12696,7 +12598,7 @@ ce62:    47 4c 04 78 00 07 f0 ff 78 05 memcpy #0x05, #0x780007f0ff, [0x7805]
 ce6c:    92 01 07               ld A, @[0x0107]
 ce6f:    2e 0d f9 00 36         wpf #0xf9, [A + 0x0036]
 ce74:    2e 0d fb 00 36         wpf #0xfb, [A + 0x0036]
-ce79:    47 44 0f 00 36 01 81   memcpy #0x10, [A + 0x0036], [0x0181]
+ce79:    47 44 0f 00 36 01 81   memcpy #0x10, [A + 0x0036], [PageTableTwo|0x0181]
 ce80:    90 00 01               ld A, #0x0001
 ce83:    d7 6c                  mov A, IL6(C)
 ce85:    60 ff ff               ld X, #0xffff
@@ -12728,7 +12630,7 @@ L_ceb4:
 ceb4:    2e 2c f8 e1 20         wpf1 #0xf8, [R_e120|0xe120]
 
 R_ceb9:
-ceb9:    79 b4 46               call [R_b446|0xb446]
+ceb9:    79 b4 46               call [InitLevel10Device|0xb446]
 cebc:    61 01 26               ld X, [EarlyInitDevicesPtr|0x0126]
 
 L_cebf:
@@ -12743,29 +12645,29 @@ ceca:    73 f3                  jmp [L_cebf|-0xd]
 
 L_cecc:
     ; LOS Prompt:
-    ; Asks for NAME, DISK and CODE
 cecc:    04                     ei
-cecd:    47 4c 01 e2 fe e2 b7   memcpy #0x02, R_e2fe|#0xe2fe, [R_e2b7|0xe2b7]	 ; "LOS 6.05 - B"
-ced4:    d0 e2 b1               ld B, R_e2b1|#0xe2b1
-ced7:    66 10                  jsys Syscall_Write?
-ced9:    66 08                  jsys Syscall_Read?
-cedb:    e2 b1                      op_struct = R_e2b1
-cedd:    81 e3 45               ld AL, [R_e345|0xe345]
-cee0:    14 03                  bz R_cee5
+cecd:    47 4c 01 e2 fe e2 b7   memcpy #0x02, R_e2fe|#0xe2fe, [CRT0_Write_String|0xe2b7]	 ; "LOS 6.05 - B"
+ced4:    d0 e2 b1               ld B, CRT0_WriteStruct|#0xe2b1
+ced7:    66 10                  jsys Syscall_DoFileOp
+ced9:    66 08                  jsys Syscall_Flush
+cedb:    e2 b1                      op_struct = CRT0_WriteStruct
+cedd:    81 e3 45               ld AL, [DoAutoboot|0xe345]
+cee0:    14 03                  bz DiskPrompt	 ; Check if we should autoboot
 cee2:    71 cf b4               jmp [R_cfb4|0xcfb4]
 
-R_cee5:
-cee5:    47 4c 01 e2 cc e2 b7   memcpy #0x02, R_e2cc|#0xe2cc, [R_e2b7|0xe2b7]	 ; "NAME="
-ceec:    d0 e2 b1               ld B, R_e2b1|#0xe2b1
-ceef:    66 10                  jsys Syscall_Write?
-cef1:    66 08                  jsys Syscall_Read?
-cef3:    e2 b1                      op_struct = R_e2b1
-cef5:    d0 e2 bb               ld B, R_e2bb|#0xe2bb
-cef8:    66 10                  jsys Syscall_Write?
-cefa:    66 08                  jsys Syscall_Read?
-cefc:    e2 bb                      op_struct = R_e2bb
-cefe:    47 40 16 e1 21 e3 5c   memcpy #0x17, [R_e121|0xe121], [R_e35c|0xe35c]
-cf05:    55 76 e3 5e            mov Y, Y, R_e35e|#0xe35e
+DiskPrompt:
+    ; Asks for NAME, DISK and CODE
+cee5:    47 4c 01 e2 cc e2 b7   memcpy #0x02, R_e2cc|#0xe2cc, [CRT0_Write_String|0xe2b7]	 ; "NAME="
+ceec:    d0 e2 b1               ld B, CRT0_WriteStruct|#0xe2b1
+ceef:    66 10                  jsys Syscall_DoFileOp
+cef1:    66 08                  jsys Syscall_Flush
+cef3:    e2 b1                      op_struct = CRT0_WriteStruct
+cef5:    d0 e2 bb               ld B, CRT0_ReadStruct|#0xe2bb
+cef8:    66 10                  jsys Syscall_DoFileOp
+cefa:    66 08                  jsys Syscall_Flush
+cefc:    e2 bb                      op_struct = CRT0_ReadStruct
+cefe:    47 40 16 e1 21 e3 5c   memcpy #0x17, [ReadBuffer|0xe121], [BootNameLen|0xe35c]
+cf05:    55 76 e3 5e            mov Y, Y, BootName|#0xe35e
 cf09:    d0 00 15               ld B, #0x0015
 
 L_cf0c:
@@ -12783,57 +12685,57 @@ cf23:    a5 68 ff               st AL, [Y + -0x001]
 L_cf26:
 cf26:    21 30                  dec BL, #1
 cf28:    18 e2                  bgt L_cf0c
-cf2a:    47 4c 01 e2 d5 e2 b7   memcpy #0x02, R_e2d5|#0xe2d5, [R_e2b7|0xe2b7]	 ; "DISK="
-cf31:    d0 e2 b1               ld B, R_e2b1|#0xe2b1
-cf34:    66 10                  jsys Syscall_Write?
-cf36:    66 08                  jsys Syscall_Read?
-cf38:    e2 b1                      op_struct = R_e2b1
-cf3a:    d0 e2 bb               ld B, R_e2bb|#0xe2bb
-cf3d:    66 10                  jsys Syscall_Write?
-cf3f:    66 08                  jsys Syscall_Read?
-cf41:    e2 bb                      op_struct = R_e2bb
-cf43:    91 e1 21               ld A, [R_e121|0xe121]
-cf46:    46 80 80 e1 23 e3 44   unkbig8(8, 0) [R_e123|0xe123], [R_e344|0xe344]
-cf4d:    12 96                  bn R_cee5
-cf4f:    46 00 2c 14 db 19      unkbig2(0, 0) #0x14, [R_db19|0xdb19]
+cf2a:    47 4c 01 e2 d5 e2 b7   memcpy #0x02, R_e2d5|#0xe2d5, [CRT0_Write_String|0xe2b7]	 ; "DISK="
+cf31:    d0 e2 b1               ld B, CRT0_WriteStruct|#0xe2b1
+cf34:    66 10                  jsys Syscall_DoFileOp
+cf36:    66 08                  jsys Syscall_Flush
+cf38:    e2 b1                      op_struct = CRT0_WriteStruct
+cf3a:    d0 e2 bb               ld B, CRT0_ReadStruct|#0xe2bb
+cf3d:    66 10                  jsys Syscall_DoFileOp
+cf3f:    66 08                  jsys Syscall_Flush
+cf41:    e2 bb                      op_struct = CRT0_ReadStruct
+cf43:    91 e1 21               ld A, [ReadBuffer|0xe121]
+cf46:    46 80 80 e1 23 e3 44   unkbig8(8, 0) [R_e123|0xe123], [UserDiskNum|0xe344]
+cf4d:    12 96                  bn DiskPrompt
+cf4f:    46 00 2c 14 db 19      unkbig2(0, 0) #0x14, [DiskNum|0xdb19]
 cf55:    16 0a                  blt L_cf61
 cf57:    30 19 e3 43            inc [R_e343|0xe343], #10
 cf5b:    30 19 e3 43            inc [R_e343|0xe343], #10
 cf5f:    73 0c                  jmp [L_cf6d|+0xc]
 
 L_cf61:
-cf61:    46 00 2c 0a db 19      unkbig2(0, 0) #0x0a, [R_db19|0xdb19]
+cf61:    46 00 2c 0a db 19      unkbig2(0, 0) #0x0a, [DiskNum|0xdb19]
 cf67:    16 04                  blt L_cf6d
 cf69:    30 19 e3 43            inc [R_e343|0xe343], #10
 
 L_cf6d:
-cf6d:    47 40 00 e3 44 db 19   memcpy #0x01, [R_e344|0xe344], [R_db19|0xdb19]
-cf74:    47 4c 01 e2 c5 e2 b7   memcpy #0x02, R_e2c5|#0xe2c5, [R_e2b7|0xe2b7]	 ; "CODE="
-cf7b:    d0 e2 b1               ld B, R_e2b1|#0xe2b1
-cf7e:    66 10                  jsys Syscall_Write?
-cf80:    66 08                  jsys Syscall_Read?
-cf82:    e2 b1                      op_struct = R_e2b1
+cf6d:    47 40 00 e3 44 db 19   memcpy #0x01, [UserDiskNum|0xe344], [DiskNum|0xdb19]
+cf74:    47 4c 01 e2 c5 e2 b7   memcpy #0x02, R_e2c5|#0xe2c5, [CRT0_Write_String|0xe2b7]	 ; "CODE="
+cf7b:    d0 e2 b1               ld B, CRT0_WriteStruct|#0xe2b1
+cf7e:    66 10                  jsys Syscall_DoFileOp
+cf80:    66 08                  jsys Syscall_Flush
+cf82:    e2 b1                      op_struct = CRT0_WriteStruct
 cf84:    92 01 09               ld A, @[DevicesPtr|0x0109]
 cf87:    c8                     ld BL, [A]
 cf88:    55 26                  mov Y, B
 cf8a:    c0 08                  ld BL, #0x08
 cf8c:    43 73                  or BL, YL
 cf8e:    e8                     st BL, [A]
-cf8f:    d0 e2 bb               ld B, R_e2bb|#0xe2bb
-cf92:    66 10                  jsys Syscall_Write?
-cf94:    66 08                  jsys Syscall_Read?
-cf96:    e2 bb                      op_struct = R_e2bb
+cf8f:    d0 e2 bb               ld B, CRT0_ReadStruct|#0xe2bb
+cf92:    66 10                  jsys Syscall_DoFileOp
+cf94:    66 08                  jsys Syscall_Flush
+cf96:    e2 bb                      op_struct = CRT0_ReadStruct
 cf98:    92 01 09               ld A, @[DevicesPtr|0x0109]
 cf9b:    c8                     ld BL, [A]
 cf9c:    55 26                  mov Y, B
 cf9e:    c0 f7                  ld BL, #0xf7
 cfa0:    42 73                  and BL, YL
 cfa2:    e8                     st BL, [A]
-cfa3:    91 e1 21               ld A, [R_e121|0xe121]
+cfa3:    91 e1 21               ld A, [ReadBuffer|0xe121]
 cfa6:    14 0c                  bz R_cfb4
 cfa8:    46 81 80 e1 23 e3 42   unkbig8(8, 1) [R_e123|0xe123], [R_e342|0xe342]
 cfaf:    13 03                  bnn R_cfb4
-cfb1:    71 ce e5               jmp [R_cee5|0xcee5]
+cfb1:    71 ce e5               jmp [DiskPrompt|0xcee5]
 
 R_cfb4:
 cfb4:    55 89 01 09            mov Z, Z, [DevicesPtr|0x0109]
@@ -12842,114 +12744,89 @@ cfb8:    30 81                  inc Z, #2
 L_cfba:
 cfba:    95 81                  ld A, [Z++]
 cfbc:    15 03                  bnz L_cfc1
-cfbe:    71 ce e5               jmp [R_cee5|0xcee5]
+cfbe:    71 ce e5               jmp [DiskPrompt|0xcee5]
 
 L_cfc1:
 cfc1:    c5 08 02               ld BL, [A + 0x0002]
 cfc4:    45 32                  mov BH, BL
-cfc6:    c1 db 19               ld BL, [R_db19|0xdb19]
+cfc6:    c1 db 19               ld BL, [DiskNum|0xdb19]
 cfc9:    41 32                  sub BH, BL
 cfcb:    15 ed                  bnz L_cfba
 cfcd:    d1 e3 42               ld B, [R_e342|0xe342]
 cfd0:    f5 08 17               st B, [A + 0x0017]
-cfd3:    91 e3 5c               ld A, [R_e35c|0xe35c]
-cfd6:    a3 02                  st AL, [pc + 0x02]
-cfd8:    47 20 00 ae e3 5e e3 51 memchr #0x01, #0xae, [R_e35e|0xe35e], [R_e351|0xe351]
+cfd3:    91 e3 5c               ld A, [BootNameLen|0xe35c]
+cfd6:    a3 02                  st AL, [pc + 0x02]	 ; patch the length(?) byte of the unkblk2 instruction
+cfd8:    47 20 00 ae e3 5e e3 51 memchr #0x01, #0xae, [BootName|0xe35e], [R_e351|0xe351]	 ; Copy to R_e351, scanning for dot
 cfe0:    12 37                  bn L_d019
-cfe2:    80 a0                  ld AL, #0xa0
-cfe4:    ac                     st AL, [Z]
-cfe5:    30 60                  inc Y, #1
-cfe7:    47 48 09 60 e3 46      memcpy #0x0a, [Y], [R_e346|0xe346]
-cfed:    81 db 19               ld AL, [R_db19|0xdb19]
-cff0:    d0 e3 51               ld B, R_e351|#0xe351
-cff3:    66 0e                  jsys Syscall_0e
-cff5:    e1 21 15               st BL, [0x2115]
-cff8:    03                     rf
-cff9:    71 ce e5               jmp [R_cee5|0xcee5]
-cffc:    b3 '3'
-cffd:    15
-cffe:    85
-cfff:    08
-d000:    06
-d001:    c0 '@'
-d002:    0f
-d003:    4a
-d004:    21
-d005:    34
-d006:    14
-d007:    03
-d008:    71
-d009:    ce 'N'
-d00a:    e5 'e'
-d00b:    81
-d00c:    db '['
-d00d:    19
-d00e:    d0 'P'
-d00f:    e3 'c'
-d010:    46
-d011:    66
-d012:    4f
-d013:    00
-d014:    00
-d015:    e1 'a'
-d016:    21
-d017:    73
-d018:    0f
+cfe2:    80 a0                  ld AL, #0xa0	 ; space
+cfe4:    ac                     st AL, [Z]	 ; Might be repacing '.' with ' '?
+cfe5:    30 60                  inc Y, #1	 ; Y now points after the '.'
+cfe7:    47 48 09 60 e3 46      memcpy #0x0a, [Y], [R_e346|0xe346]	 ; This looks like it overwrites other variables?
+cfed:    81 db 19               ld AL, [DiskNum|0xdb19]
+cff0:    d0 e3 51               ld B, R_e351|#0xe351	 ; filename
+cff3:    66 0e                  jsys Syscall_OpenFile?	 ; Open file?
+cff5:    e1 21                      arg1 = ReadBuffer
+cff7:    15 03                  bnz L_cffc
+cff9:    71 ce e5               jmp [DiskPrompt|0xcee5]
+
+L_cffc:
+cffc:    b3 15                  st A, [pc + 0x15]
+cffe:    85 08 06               ld AL, [A + 0x0006]
+d001:    c0 0f                  ld BL, #0x0f
+d003:    4a                     and! BL, AL
+d004:    21 34                  dec BL, #5
+d006:    14 03                  bz L_d00b
+d008:    71 ce e5               jmp [DiskPrompt|0xcee5]
+
+L_d00b:
+d00b:    81 db 19               ld AL, [DiskNum|0xdb19]
+d00e:    d0 e3 46               ld B, R_e346|#0xe346
+d011:    66 4f                  jsys Syscall_4f
+d013:    00 00                      arg1 = (0x0)
+d015:    e1 21                      arg2 = ReadBuffer
+d017:    73 0f                  jmp [L_d028|+0xf]
 
 L_d019:
-d019:    d0 e3 51               ld B, R_e351|#0xe351
-d01c:    81 db 19               ld AL, [R_db19|0xdb19]
-d01f:    66 0e                  jsys Syscall_0e
-d021:    e1 21 15               st BL, [0x2115]
-d024:    03                     rf
-d025:    71 ce e5               jmp [R_cee5|0xcee5]
-d028:    b1 '1'
-d029:    d2 'R'
-d02a:    82
-d02b:    85
-d02c:    08
-d02d:    06
-d02e:    c0 '@'
-d02f:    0f
-d030:    4a
-d031:    21
-d032:    30
-d033:    15
-d034:    03
-d035:    71
-d036:    d0 'P'
-d037:    c0 '@'
-d038:    21
-d039:    32
-d03a:    14
-d03b:    03
-d03c:    71
-d03d:    ce 'N'
-d03e:    e5 'e'
-d03f:    81
-d040:    db '['
-d041:    19
-d042:    a3 '#'
-d043:    10
-d044:    91
-d045:    d2 'R'
-d046:    82
-d047:    b3 '3'
-d048:    09
+d019:    d0 e3 51               ld B, R_e351|#0xe351	 ; Filename
+d01c:    81 db 19               ld AL, [DiskNum|0xdb19]
+d01f:    66 0e                  jsys Syscall_OpenFile?
+d021:    e1 21                      arg1 = ReadBuffer
+d023:    15 03                  bnz L_d028
+d025:    71 ce e5               jmp [DiskPrompt|0xcee5]
+
+L_d028:
+d028:    b1 d2 82               st A, [R_d282|0xd282]
+d02b:    85 08 06               ld AL, [A + 0x0006]
+d02e:    c0 0f                  ld BL, #0x0f
+d030:    4a                     and! BL, AL
+d031:    21 30                  dec BL, #1
+d033:    15 03                  bnz L_d038
+d035:    71 d0 c0               jmp [R_d0c0|0xd0c0]
+
+L_d038:
+d038:    21 32                  dec BL, #3
+d03a:    14 03                  bz L_d03f
+d03c:    71 ce e5               jmp [DiskPrompt|0xcee5]
+
+L_d03f:
+d03f:    81 db 19               ld AL, [DiskNum|0xdb19]
+d042:    a3 10                  st AL, [pc + 0x10]
+d044:    91 d2 82               ld A, [R_d282|0xd282]
+d047:    b3 09                  st A, [pc + 0x09]
 
 L_d049:
 d049:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
 d04e:    66 4c                  jsys Syscall_4c
-d050:    01                     nop
-d051:    90 00 00               ld A, #0x0000
-d054:    00                     HALT
+d050:    01 90                      arg1 = (0x190)
+d052:    00 00                      arg2 = (0x0)
+d054:    00                         disknum = (0x0)
 
 R_d055:
-d055:    00                     HALT
-d056:    00                     HALT
-d057:    e1 21 01               st BL, [0x2101]
+d055:    00 00                      arg4 = (0x0)
+d057:    e1 21                      arg5 = ReadBuffer
+d059:    01                         arg6 = (0x1)
 d05a:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
-d05f:    55 98 e1 21            mov Z, Z, R_e121|#0xe121
+d05f:    55 98 e1 21            mov Z, Z, ReadBuffer|#0xe121
 d063:    95 88 02               ld A, [Z + 0x0002]
 d066:    d0 00 4c               ld B, #0x004c
 d069:    59                     sub! B, A
@@ -12959,7 +12836,7 @@ d06f:    b1 e1 1b               st A, [R_e11b|0xe11b]
 d072:    73 1a                  jmp [L_d08e|+0x1a]
 
 L_d074:
-d074:    47 02 e1 1b 08         unkblk0 [R_e11b|0xe11b], [Z]
+d074:    47 02 e1 1b 08         unkblk0 [R_e11b|0xe11b], [Z]	 ; might be a single byte copy? But why have a special blk instruction for that?
 d079:    13 03                  bnn L_d07e
 d07b:    71 cd d1               jmp [Start|0xcdd1]
 
@@ -12971,7 +12848,7 @@ d087:    47 8e 00 80 08         memcmp #0x01, #0x80, [Z]
 d08c:    15 e6                  bnz L_d074
 
 L_d08e:
-d08e:    30 10 d0 55            inc [R_d055|0xd055], #1
+d08e:    30 10 d0 55            inc [R_d055|0xd055], #1	 ; arg4
 d092:    73 b5                  jmp [L_d049|-0x4b]
 
 L_d094:
@@ -12994,14 +12871,15 @@ d0bb:    91 e1 1d               ld A, [R_e11d|0xe11d]
 d0be:    75 60                  jmp [Y]
 
 R_d0c0:
-d0c0:    47 4c 01 e3 11 e2 b7   memcpy #0x02, R_e311|#0xe311, [R_e2b7|0xe2b7]
-d0c7:    d0 e2 b1               ld B, R_e2b1|#0xe2b1
-d0ca:    66 10                  jsys Syscall_Write?
-d0cc:    66 08                  jsys Syscall_Read?
-d0ce:    e2 b1                      op_struct = R_e2b1
+    ; Read configuration dataset
+d0c0:    47 4c 01 e3 11 e2 b7   memcpy #0x02, ClearScreen|#0xe311, [CRT0_Write_String|0xe2b7]
+d0c7:    d0 e2 b1               ld B, CRT0_WriteStruct|#0xe2b1
+d0ca:    66 10                  jsys Syscall_DoFileOp
+d0cc:    66 08                  jsys Syscall_Flush
+d0ce:    e2 b1                      op_struct = CRT0_WriteStruct
 d0d0:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
 d0d5:    79 d2 74               call [R_d274|0xd274]
-d0d8:    47 8e 05 d3 d9 d3 d4 c5 cd 06 memcmp #0x06, #0xd3d9d3d4c5cd, [Y]
+d0d8:    47 8e 05 d3 d9 d3 d4 c5 cd 06 memcmp #0x06, #0xd3d9d3d4c5cd, [Y]	 ; "SYSTEM"
 d0e2:    14 03                  bz L_d0e7
 d0e4:    71 d1 70               jmp [R_d170|0xd170]
 
@@ -13013,55 +12891,55 @@ d0f3:    79 d1 88               call [R_d188|0xd188]
 
 R_d0f6:
 d0f6:    79 d2 93               call [R_d293|0xd293]
-d0f9:    47 8e 05 d4 c9 c2 a0 a0 a0 06 memcmp #0x06, #0xd4c9c2a0a0a0, [Y]
+d0f9:    47 8e 05 d4 c9 c2 a0 a0 a0 06 memcmp #0x06, #0xd4c9c2a0a0a0, [Y]	 ; "TIB   "
 d103:    15 05                  bnz L_d10a
 d105:    30 65                  inc Y, #6
 d107:    71 d2 b5               jmp [R_d2b5|0xd2b5]
 
 L_d10a:
-d10a:    47 8e 05 c4 c9 d3 cb a0 a0 06 memcmp #0x06, #0xc4c9d3cba0a0, [Y]
+d10a:    47 8e 05 c4 c9 d3 cb a0 a0 06 memcmp #0x06, #0xc4c9d3cba0a0, [Y]	 ; "DISK  "
 d114:    15 05                  bnz L_d11b
 d116:    30 65                  inc Y, #6
 d118:    71 d3 b3               jmp [R_d3b3|0xd3b3]
 
 L_d11b:
-d11b:    47 8e 05 c3 d2 d4 a0 a0 a0 06 memcmp #0x06, #0xc3d2d4a0a0a0, [Y]
+d11b:    47 8e 05 c3 d2 d4 a0 a0 a0 06 memcmp #0x06, #0xc3d2d4a0a0a0, [Y]	 ; "CRT   "
 d125:    15 05                  bnz L_d12c
 d127:    30 65                  inc Y, #6
 d129:    71 d5 35               jmp [R_d535|0xd535]
 
 L_d12c:
-d12c:    47 8e 05 d0 d2 d4 a0 a0 a0 06 memcmp #0x06, #0xd0d2d4a0a0a0, [Y]
+d12c:    47 8e 05 d0 d2 d4 a0 a0 a0 06 memcmp #0x06, #0xd0d2d4a0a0a0, [Y]	 ; "PRR   "
 d136:    15 05                  bnz L_d13d
 d138:    30 65                  inc Y, #6
 d13a:    71 d5 fc               jmp [R_d5fc|0xd5fc]
 
 L_d13d:
-d13d:    47 8e 05 d3 d0 cf cf cc a0 06 memcmp #0x06, #0xd3d0cfcfcca0, [Y]
+d13d:    47 8e 05 d3 d0 cf cf cc a0 06 memcmp #0x06, #0xd3d0cfcfcca0, [Y]	 ; "SPOOL "
 d147:    15 05                  bnz L_d14e
 d149:    30 65                  inc Y, #6
 d14b:    71 d7 23               jmp [R_d723|0xd723]
 
 L_d14e:
-d14e:    47 8e 05 cc c9 ce c5 a0 a0 06 memcmp #0x06, #0xccc9cec5a0a0, [Y]
+d14e:    47 8e 05 cc c9 ce c5 a0 a0 06 memcmp #0x06, #0xccc9cec5a0a0, [Y]	 ; "LINE  "
 d158:    15 05                  bnz L_d15f
 d15a:    30 65                  inc Y, #6
 d15c:    71 d7 7e               jmp [R_d77e|0xd77e]
 
 L_d15f:
-d15f:    47 8e 05 d3 d0 c5 c3 a0 a0 06 memcmp #0x06, #0xd3d0c5c3a0a0, [Y]
+d15f:    47 8e 05 d3 d0 c5 c3 a0 a0 06 memcmp #0x06, #0xd3d0c5c3a0a0, [Y]	 ; "SPEC  "
 d169:    15 05                  bnz R_d170
 d16b:    30 65                  inc Y, #6
 d16d:    71 d7 97               jmp [R_d797|0xd797]
 
 R_d170:
-d170:    47 4c 01 e2 dc e2 b7   memcpy #0x02, R_e2dc|#0xe2dc, [R_e2b7|0xe2b7]
-d177:    d0 e2 b1               ld B, R_e2b1|#0xe2b1
+d170:    47 4c 01 e2 dc e2 b7   memcpy #0x02, R_e2dc|#0xe2dc, [CRT0_Write_String|0xe2b7]	 ; "INVALID CONFIGURATION DATA SET\r\n"
+d177:    d0 e2 b1               ld B, CRT0_WriteStruct|#0xe2b1
 d17a:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
-d17f:    66 10                  jsys Syscall_Write?
-d181:    66 08                  jsys Syscall_Read?
-d183:    e2 b1                      op_struct = R_e2b1
-d185:    71 ce e5               jmp [R_cee5|0xcee5]
+d17f:    66 10                  jsys Syscall_DoFileOp
+d181:    66 08                  jsys Syscall_Flush
+d183:    e2 b1                      op_struct = CRT0_WriteStruct
+d185:    71 ce e5               jmp [DiskPrompt|0xcee5]
 
 R_d188:
 d188:    81 e0 81               ld AL, [R_e081|0xe081]
@@ -13087,7 +12965,7 @@ d1cf:    47 40 00 e0 82 01 60   memcpy #0x01, [R_e082|0xe082], [0x0160]
 d1d6:    47 4c 00 2c 01 15      memcpy #0x01, #0x2c, [0x0115]
 d1dc:    47 4c 01 01 91 01 56   memcpy #0x02, #0x0191, [0x0156]
 d1e3:    47 4c 01 01 b1 01 5a   memcpy #0x02, #0x01b1, [0x015a]
-d1ea:    47 9c 6f fd 01 61      memset #0x70, #0xfd, [0x0161]
+d1ea:    47 9c 6f fd 01 61      memset #0x70, #0xfd, [PageTableOne|0x0161]
 d1f0:    3a                     clr! A, #0
 d1f1:    81 e0 7a               ld AL, [R_e07a|0xe07a]
 d1f4:    3d                     sll! A, #1
@@ -13128,39 +13006,39 @@ d250:    50 98 00 5a            add Z, Z, #0x005a
 d254:    09                     ret
 
 R_d255:
+    ; Writes a string to CRT0
+    ; String is in Y, should be pointing 2 bytes into a pascal style string
 d255:    55 60                  mov A, Y
 d257:    31 01                  dec A, #2
-d259:    b1 e2 b7               st A, [R_e2b7|0xe2b7]
-d25c:    d0 e2 b1               ld B, R_e2b1|#0xe2b1
+d259:    b1 e2 b7               st A, [CRT0_Write_String|0xe2b7]
+d25c:    d0 e2 b1               ld B, CRT0_WriteStruct|#0xe2b1
 d25f:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
-d264:    66 10                  jsys Syscall_Write?
-d266:    66 08                  jsys Syscall_Read?
-d268:    e2 b1                      op_struct = R_e2b1
+d264:    66 10                  jsys Syscall_DoFileOp
+d266:    66 08                  jsys Syscall_Flush
+d268:    e2 b1                      op_struct = CRT0_WriteStruct
 d26a:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
 d26f:    50 76 00 50            add Y, Y, #0x0050
 d273:    09                     ret
 
 R_d274:
-d274:    81 db 19               ld AL, [R_db19|0xdb19]
-d277:    a3 0b                  st AL, [pc + 0x0b]
+d274:    81 db 19               ld AL, [DiskNum|0xdb19]
+d277:    a3 0b                  st AL, [pc + 0x0b]	 ; set disknum
 
 L_d279:
 d279:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
 d27e:    66 4c                  jsys Syscall_4c
-d280:    01                     nop
-d281:    90
+d280:    01 90                      arg1 = (0x190)
 
 R_d282:
-d282:    00                     HALT
-d283:    00                     HALT
-d284:    00                     HALT
+d282:    00 00                      arg2 = (0x0)
+d284:    00                         disknum = (0x0)
 
 R_d285:
-d285:    00                     HALT
-d286:    00                     HALT
-d287:    e1 21 01               st BL, [0x2101]
+d285:    00 00                      arg4 = (0x0)
+d287:    e1 21                      arg5 = ReadBuffer
+d289:    01                         arg6 = (0x1)
 d28a:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
-d28f:    55 76 e1 21            mov Y, Y, R_e121|#0xe121
+d28f:    55 76 e1 21            mov Y, Y, ReadBuffer|#0xe121
 
 R_d293:
 d293:    2a                     clr! AL, #0
@@ -13593,14 +13471,14 @@ d7ae:    79 d2 93               call [R_d293|0xd293]
 d7b1:    47 48 33 60 e0 e4      memcpy #0x34, [Y], [R_e0e4|0xe0e4]
 d7b7:    50 76 00 34            add Y, Y, #0x0034
 d7bb:    7e 63                  push {Y, Z}
-d7bd:    47 40 00 db 19 d7 cf   memcpy #0x01, [R_db19|0xdb19], [R_d7cf|0xd7cf]
+d7bd:    47 40 00 db 19 d7 cf   memcpy #0x01, [DiskNum|0xdb19], [R_d7cf|0xd7cf]
 d7c4:    d6 89 d7 d2            st Z, [R_d7d2|0xd7d2]
 d7c8:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
 d7cd:    66 02                  jsys Syscall_02
 
 R_d7cf:
-d7cf:    00                     HALT
-d7d0:    e0 ea                  st BL, #0xea
+d7cf:    00                         arg1 = (0x0)
+d7d0:    e0 ea                      arg2 = R_e0ea
 
 R_d7d2:
 d7d2:    00                     HALT
@@ -13619,14 +13497,14 @@ d7e5:    d6 93 00 05            ld Z, [[0x0005] + B]
 d7e9:    91 e0 ff               ld A, [R_e0ff|0xe0ff]
 d7ec:    14 2f                  bz L_d81d
 d7ee:    7e 63                  push {Y, Z}
-d7f0:    47 40 00 db 19 d8 02   memcpy #0x01, [R_db19|0xdb19], [R_d802|0xd802]
+d7f0:    47 40 00 db 19 d8 02   memcpy #0x01, [DiskNum|0xdb19], [R_d802|0xd802]
 d7f7:    d6 89 d8 05            st Z, [R_d805|0xd805]
 d7fb:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
 d800:    66 02                  jsys Syscall_02
 
 R_d802:
-d802:    00                     HALT
-d803:    e0 ff                  st BL, #0xff
+d802:    00                         arg1 = (0x0)
+d803:    e0 ff                      arg2 = R_e0ff
 
 R_d805:
 d805:    00                     HALT
@@ -13807,7 +13685,7 @@ d993:    d1 e3 8f               ld B, [R_e38f|0xe38f]
 d996:    51 20                  sub A, B
 d998:    b2 01 0b               st A, @[0x010b]
 d99b:    92 01 07               ld A, @[0x0107]
-d99e:    b1 01 03               st A, [SystemInfoPtr|0x0103]
+d99e:    b1 01 03               st A, [CurrentProcess|0x0103]
 d9a1:    91 01 07               ld A, [0x0107]
 
 L_d9a4:
@@ -13836,10 +13714,10 @@ d9d6:    50 80                  add A, Z
 d9d8:    16 14                  blt L_d9ee
 
 R_d9da:
-d9da:    47 4c 01 e3 16 e2 b7   memcpy #0x02, R_e316|#0xe316, [R_e2b7|0xe2b7]
-d9e1:    d0 e2 b1               ld B, R_e2b1|#0xe2b1
+d9da:    47 4c 01 e3 16 e2 b7   memcpy #0x02, R_e316|#0xe316, [CRT0_Write_String|0xe2b7]	 ; "OPSYS OVERSIZE-LOAD PROCESS DISCONTINUED\r\n"
+d9e1:    d0 e2 b1               ld B, CRT0_WriteStruct|#0xe2b1
 d9e4:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
-d9e9:    66 10                  jsys Syscall_Write?
+d9e9:    66 10                  jsys Syscall_DoFileOp
 d9eb:    05                     di
 
 L_d9ec:
@@ -13848,20 +13726,20 @@ d9ec:    73 fe                  jmp [L_d9ec|-0x2]
 L_d9ee:
 d9ee:    d6 89 01 01            st Z, [0x0101]
 d9f2:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
-d9f7:    81 db 19               ld AL, [R_db19|0xdb19]
+d9f7:    81 db 19               ld AL, [DiskNum|0xdb19]
 d9fa:    a3 06                  st AL, [pc + 0x06]
 d9fc:    55 80                  mov A, Z
 d9fe:    b3 05                  st A, [pc + 0x05]
 da00:    66 02                  jsys Syscall_02
-da02:    00                     HALT
-da03:    e3 76                  st BL, [pc + 0x76]
+da02:    00                         arg1 = (0x0)
+da03:    e3 76                      arg2 = R_e376
 da05:    00                     HALT
 da06:    00                     HALT
 da07:    01                     nop
 da08:    b1 e0 6b               st A, [R_e06b|0xe06b]
 da0b:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
-da10:    2e 1c f8 01 61         rpf #0xf8, [0x0161]
-da15:    2e 1c f8 01 81         rpf #0xf8, [0x0181]
+da10:    2e 1c f8 01 61         rpf #0xf8, [PageTableOne|0x0161]
+da15:    2e 1c f8 01 81         rpf #0xf8, [PageTableTwo|0x0181]
 da1a:    47 9c 0b ff 01 48      memset #0x0c, #0xff, [0x0148]
 da20:    81 e1 1f               ld AL, [R_e11f|0xe11f]
 da23:    24 12                  srl AL, #3
@@ -13918,7 +13796,7 @@ da7d:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
 da82:    47 4d 00 1e 10 01 81   memcpy #0x01, #0x1e, [A + 0x0181]
 da89:    47 4d 00 1e 10 01 61   memcpy #0x01, #0x1e, [A + 0x0161]
 da90:    d2 01 07               ld B, @[0x0107]
-da93:    47 41 1f 01 61 20 36   memcpy #0x20, [0x0161], [B + 0x0036]
+da93:    47 41 1f 01 61 20 36   memcpy #0x20, [PageTableOne|0x0161], [B + 0x0036]
 
 L_da9a:
 da9a:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
@@ -13959,11 +13837,23 @@ dad7:    16 53                  blt L_db2c
 dad9:    51 70 00 11            sub A, Y, #0x0011
 dadd:    16 4d                  blt L_db2c
 dadf:    35 60                  sll Y, #1
-dae1:    50 74 dc aa            add X, Y, R_dcaa|#0xdcaa
-dae5:    55 55 00 00            mov X, [X + #0x0000]
-dae9:    14 06                  bz L_daf1
-daeb:    d6 35 00 05            ld B, [[0x0005] + X]
-daef:    73 3b                  jmp [L_db2c|+0x3b]
+dae1:    50
+
+L_dae2:
+dae2:    74 dc                  jmp @[pc + -0x24]
+dae4:    aa '*'
+dae5:    55
+dae6:    55
+dae7:    00
+dae8:    00
+dae9:    14
+daea:    06
+daeb:    d6 'V'
+daec:    35
+daed:    00
+daee:    05
+daef:    73
+daf0:    3b
 
 L_daf1:
 daf1:    d6 39 00 05            ld B, [[0x0005] + Z]
@@ -13971,15 +13861,27 @@ daf5:    50 74 dc aa            add X, Y, R_dcaa|#0xdcaa
 daf9:    d6 59 00 00            ld X, [Z]
 dafd:    34 60                  srl Y, #1
 daff:    77 76 00 15            div Y, Y, #0x0015
-db03:    50 76 db 30            add Y, Y, R_db30|#0xdb30
-db07:    d6 89 db 1c            st Z, [R_db1c|0xdb1c]
-db0b:    d6 67 db 1a            st Y, [R_db1a|0xdb1a]
-db0f:    79 df 1a               call [R_df1a|0xdf1a]
-db12:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
-db17:    66 02                  jsys Syscall_02
+db03:    50
+db04:    76
+db05:    db '['
 
-R_db19:
-db19:    01                     nop
+L_db06:
+db06:    30 d6 89 db            inc [C + [0x89db]], #7
+db0a:    1c d6                  bs3 L_dae2
+
+L_db0c:
+db0c:    67                     unknown
+db0d:    db                     ld B, [Y]
+db0e:    1a 79                  bs1 L_db89
+db10:    df                     ld B, [P]
+db11:    1a 2e                  bs1 L_db41
+db13:    2c                     srl! AL, #1
+db14:    00                     HALT
+db15:    e1 1a 66               st BL, [0x1a66]
+db18:    02                     sf
+
+DiskNum:
+db19:    01                     (0x1)
 
 R_db1a:
 db1a:    00                     HALT
@@ -13991,7 +13893,7 @@ db1d:    00                     HALT
 db1e:    01                     nop
 db1f:    5e                     mov Z, A
 db20:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
-db25:    2e 0c 70 01 61         wpf #0x70, [0x0161]
+db25:    2e 0c 70 01 61         wpf #0x70, [PageTableOne|0x0161]
 db2a:    30 80                  inc Z, #1
 
 L_db2c:
@@ -13999,209 +13901,27 @@ db2c:    7f 01                  pop {A}
 db2e:    73 98                  jmp [L_dac8|-0x68]
 
 R_db30:
-db30:    c0 d3                  ld BL, #0xd3
-db32:    d9                     ld B, [B]
-db33:    d3 ae                  ld B, [pc + -0x52]
-db35:    c0 c9                  ld BL, #0xc9
-db37:    cf                     ld BL, [P]
-db38:    c4 d1                  ld BL, @[pc + -0x2f]
-db3a:    a0 a0                  st AL, #0xa0
-db3c:    a0 a0                  st AL, #0xa0
-db3e:    a0 a0                  st AL, #0xa0
-db40:    a0 a0                  st AL, #0xa0
-db42:    a0 a0                  st AL, #0xa0
-db44:    a0 c0                  st AL, #0xc0
-db46:    d3 d9                  ld B, [pc + -0x27]
-db48:    d3 ae                  ld B, [pc + -0x52]
-db4a:    c0 c9                  ld BL, #0xc9
-db4c:    cf                     ld BL, [P]
-db4d:    c4 b1                  ld BL, @[pc + -0x4f]
-db4f:    a0 a0                  st AL, #0xa0
-db51:    a0 a0                  st AL, #0xa0
-db53:    a0 a0                  st AL, #0xa0
-db55:    a0 a0                  st AL, #0xa0
-db57:    a0 a0                  st AL, #0xa0
-db59:    a0 c0                  st AL, #0xc0
-db5b:    d3 d9                  ld B, [pc + -0x27]
-db5d:    d3 ae                  ld B, [pc + -0x52]
-db5f:    c0 c9                  ld BL, #0xc9
-db61:    cf                     ld BL, [P]
-db62:    c4 b6                  ld BL, @[R_db1a|-0x4a]
-db64:    a0 a0                  st AL, #0xa0
-db66:    a0 a0                  st AL, #0xa0
-db68:    a0 a0                  st AL, #0xa0
-db6a:    a0 a0                  st AL, #0xa0
-db6c:    a0 a0                  st AL, #0xa0
-db6e:    a0 c0                  st AL, #0xc0
-db70:    d3 d9                  ld B, [pc + -0x27]
-db72:    d3 ae                  ld B, [pc + -0x52]
-db74:    c0 c9                  ld BL, #0xc9
-db76:    cf                     ld BL, [P]
-db77:    c4 b2                  ld BL, @[pc + -0x4e]
-db79:    a0 a0                  st AL, #0xa0
-db7b:    a0 a0                  st AL, #0xa0
-db7d:    a0 a0                  st AL, #0xa0
-db7f:    a0 a0                  st AL, #0xa0
-db81:    a0 a0                  st AL, #0xa0
-db83:    a0 c0                  st AL, #0xc0
-db85:    d3 d9                  ld B, [pc + -0x27]
-db87:    d3 ae                  ld B, [pc + -0x52]
+db30:    c0 d3 d9 d3 ae c0 c9 cf c4 d1 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@IODQ           "
+db45:    c0 d3 d9 d3 ae c0 c9 cf c4 b1 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@IOD1           "
+db5a:    c0 d3 d9 d3 ae c0 c9 cf c4 b6 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@IOD6           "
+db6f:    c0 d3 d9 d3 ae c0 c9 cf c4 b2 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@IOD2           "
+db84:    c0 d3 d9 d3 ae c0 c9 cf c4 cd a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@IODM           "
+db99:    c0 d3 d9 d3 ae c0 c9 cf c4 b3 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@IOD3           "
+dbae:    c0 d3 d9 d3 ae c0 c9 cf c4 c4 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@IODD           "
+dbc3:    c0 d3 d9 d3 ae c0 c9 cf c4 c5 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@IODE           "
+dbd8:    c0 d3 d9 d3 ae c0 c9 cf c4 c6 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@IODF           "
+dbed:    c0 d3 d9 d3 ae c0 c9 cf c4 c8 c8 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@IODHH          "
+dc02:    c0 d3 d9 d3 ae c0 c9 cf c4 c8 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@IODH           "
+dc17:    c0 d3 d9 d3 ae c0 c9 cf c4 c9 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@IODI           "
+dc2c:    c0 d3 d9 d3 ae c0 c9 cf c4 c1 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@IODA           "
+dc41:    c0 d3 d9 d3 ae c0 c9 cf c4 cb a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@IODK           "
+dc56:    c0 d3 d9 d3 ae c0 c9 cf c4 b0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@IOD0           "
+dc6b:    c0 d3 d9 d3 ae c0 c9 cf c4 b7 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@IOD7           "
+dc80:    c0 d3 d9 d3 ae c0 c9 cf c4 b8 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@IOD8           "
+dc95:    c0 d3 d9 d3 ae c0 c9 cf c4 b9 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@IOD9           "
 
-L_db89:
-db89:    c0 c9                  ld BL, #0xc9
-db8b:    cf                     ld BL, [P]
-db8c:    c4 cd                  ld BL, @[pc + -0x33]
-db8e:    a0 a0                  st AL, #0xa0
-db90:    a0 a0                  st AL, #0xa0
-db92:    a0 a0                  st AL, #0xa0
-db94:    a0 a0                  st AL, #0xa0
-db96:    a0 a0                  st AL, #0xa0
-db98:    a0 c0                  st AL, #0xc0
-db9a:    d3 d9                  ld B, [pc + -0x27]
-db9c:    d3 ae                  ld B, [pc + -0x52]
-db9e:    c0 c9                  ld BL, #0xc9
-dba0:    cf                     ld BL, [P]
-dba1:    c4 b3                  ld BL, @[pc + -0x4d]
-dba3:    a0 a0                  st AL, #0xa0
-dba5:    a0 a0                  st AL, #0xa0
-dba7:    a0 a0                  st AL, #0xa0
-dba9:    a0 a0                  st AL, #0xa0
-dbab:    a0 a0                  st AL, #0xa0
-dbad:    a0 c0                  st AL, #0xc0
-dbaf:    d3 d9                  ld B, [pc + -0x27]
-dbb1:    d3 ae                  ld B, [pc + -0x52]
-dbb3:    c0 c9                  ld BL, #0xc9
-dbb5:    cf                     ld BL, [P]
-dbb6:    c4 c4                  ld BL, @[pc + -0x3c]
-dbb8:    a0 a0                  st AL, #0xa0
-dbba:    a0 a0                  st AL, #0xa0
-dbbc:    a0 a0                  st AL, #0xa0
-dbbe:    a0 a0                  st AL, #0xa0
-dbc0:    a0 a0                  st AL, #0xa0
-dbc2:    a0 c0                  st AL, #0xc0
-dbc4:    d3 d9                  ld B, [pc + -0x27]
-dbc6:    d3 ae                  ld B, [pc + -0x52]
-dbc8:    c0 c9                  ld BL, #0xc9
-dbca:    cf                     ld BL, [P]
-dbcb:    c4 c5                  ld BL, @[pc + -0x3b]
-dbcd:    a0 a0                  st AL, #0xa0
-dbcf:    a0 a0                  st AL, #0xa0
-dbd1:    a0 a0                  st AL, #0xa0
-dbd3:    a0 a0                  st AL, #0xa0
-dbd5:    a0 a0                  st AL, #0xa0
-dbd7:    a0 c0                  st AL, #0xc0
-dbd9:    d3 d9                  ld B, [pc + -0x27]
-dbdb:    d3 ae                  ld B, [pc + -0x52]
-dbdd:    c0 c9                  ld BL, #0xc9
-dbdf:    cf                     ld BL, [P]
-dbe0:    c4 c6                  ld BL, @[pc + -0x3a]
-dbe2:    a0 a0                  st AL, #0xa0
-dbe4:    a0 a0                  st AL, #0xa0
-dbe6:    a0 a0                  st AL, #0xa0
-dbe8:    a0 a0                  st AL, #0xa0
-dbea:    a0 a0                  st AL, #0xa0
-dbec:    a0 c0                  st AL, #0xc0
-dbee:    d3 d9                  ld B, [pc + -0x27]
-dbf0:    d3 ae                  ld B, [pc + -0x52]
-dbf2:    c0 c9                  ld BL, #0xc9
-dbf4:    cf                     ld BL, [P]
-dbf5:    c4 c8                  ld BL, @[pc + -0x38]
-dbf7:    c8                     ld BL, [A]
-dbf8:    a0 a0                  st AL, #0xa0
-dbfa:    a0 a0                  st AL, #0xa0
-dbfc:    a0 a0                  st AL, #0xa0
-dbfe:    a0 a0                  st AL, #0xa0
-dc00:    a0 a0                  st AL, #0xa0
-dc02:    c0 d3                  ld BL, #0xd3
-dc04:    d9                     ld B, [B]
-dc05:    d3 ae                  ld B, [pc + -0x52]
-dc07:    c0 c9                  ld BL, #0xc9
-dc09:    cf                     ld BL, [P]
-dc0a:    c4 c8                  ld BL, @[pc + -0x38]
-dc0c:    a0 a0                  st AL, #0xa0
-dc0e:    a0 a0                  st AL, #0xa0
-dc10:    a0 a0                  st AL, #0xa0
-dc12:    a0 a0                  st AL, #0xa0
-dc14:    a0 a0                  st AL, #0xa0
-dc16:    a0 c0                  st AL, #0xc0
-dc18:    d3 d9                  ld B, [pc + -0x27]
-dc1a:    d3 ae                  ld B, [pc + -0x52]
-dc1c:    c0 c9                  ld BL, #0xc9
-dc1e:    cf                     ld BL, [P]
-dc1f:    c4 c9                  ld BL, @[pc + -0x37]
-dc21:    a0 a0                  st AL, #0xa0
-dc23:    a0 a0                  st AL, #0xa0
-dc25:    a0 a0                  st AL, #0xa0
-dc27:    a0 a0                  st AL, #0xa0
-dc29:    a0 a0                  st AL, #0xa0
-dc2b:    a0 c0                  st AL, #0xc0
-dc2d:    d3 d9                  ld B, [pc + -0x27]
-dc2f:    d3 ae                  ld B, [pc + -0x52]
-dc31:    c0 c9                  ld BL, #0xc9
-dc33:    cf                     ld BL, [P]
-dc34:    c4 c1                  ld BL, @[pc + -0x3f]
-dc36:    a0 a0                  st AL, #0xa0
-dc38:    a0 a0                  st AL, #0xa0
-dc3a:    a0 a0                  st AL, #0xa0
-dc3c:    a0 a0                  st AL, #0xa0
-dc3e:    a0 a0                  st AL, #0xa0
-dc40:    a0 c0                  st AL, #0xc0
-dc42:    d3 d9                  ld B, [pc + -0x27]
-dc44:    d3 ae                  ld B, [pc + -0x52]
-dc46:    c0 c9                  ld BL, #0xc9
-dc48:    cf                     ld BL, [P]
-dc49:    c4 cb                  ld BL, @[pc + -0x35]
-dc4b:    a0 a0                  st AL, #0xa0
-dc4d:    a0 a0                  st AL, #0xa0
-dc4f:    a0 a0                  st AL, #0xa0
-dc51:    a0 a0                  st AL, #0xa0
-dc53:    a0 a0                  st AL, #0xa0
-dc55:    a0 c0                  st AL, #0xc0
-dc57:    d3 d9                  ld B, [pc + -0x27]
-dc59:    d3 ae                  ld B, [pc + -0x52]
-dc5b:    c0 c9                  ld BL, #0xc9
-dc5d:    cf                     ld BL, [P]
-dc5e:    c4 b0                  ld BL, @[pc + -0x50]
-dc60:    a0 a0                  st AL, #0xa0
-dc62:    a0 a0                  st AL, #0xa0
-dc64:    a0 a0                  st AL, #0xa0
-dc66:    a0 a0                  st AL, #0xa0
-dc68:    a0 a0                  st AL, #0xa0
-dc6a:    a0 c0                  st AL, #0xc0
-dc6c:    d3 d9                  ld B, [pc + -0x27]
-dc6e:    d3 ae                  ld B, [pc + -0x52]
-dc70:    c0 c9                  ld BL, #0xc9
-dc72:    cf                     ld BL, [P]
-dc73:    c4 b7                  ld BL, @[pc + -0x49]
-dc75:    a0 a0                  st AL, #0xa0
-dc77:    a0 a0                  st AL, #0xa0
-dc79:    a0 a0                  st AL, #0xa0
-dc7b:    a0 a0                  st AL, #0xa0
-dc7d:    a0 a0                  st AL, #0xa0
-dc7f:    a0 c0                  st AL, #0xc0
-dc81:    d3 d9                  ld B, [pc + -0x27]
-dc83:    d3 ae                  ld B, [pc + -0x52]
-dc85:    c0 c9                  ld BL, #0xc9
-dc87:    cf                     ld BL, [P]
-dc88:    c4 b8                  ld BL, @[pc + -0x48]
-dc8a:    a0 a0                  st AL, #0xa0
-dc8c:    a0 a0                  st AL, #0xa0
-dc8e:    a0 a0                  st AL, #0xa0
-dc90:    a0 a0                  st AL, #0xa0
-dc92:    a0 a0                  st AL, #0xa0
-dc94:    a0 c0                  st AL, #0xc0
-dc96:    d3 d9                  ld B, [pc + -0x27]
-dc98:    d3 ae                  ld B, [pc + -0x52]
-dc9a:    c0 c9                  ld BL, #0xc9
-dc9c:    cf                     ld BL, [P]
-dc9d:    c4 b9                  ld BL, @[pc + -0x47]
-dc9f:    a0 a0                  st AL, #0xa0
-dca1:    a0 a0                  st AL, #0xa0
-dca3:    a0 a0                  st AL, #0xa0
-dca5:    a0 a0                  st AL, #0xa0
-dca7:    a0 a0                  st AL, #0xa0
-dca9:    a0 00                  st AL, #0x00
-dcab:    <null bytes>
+R_dcaa:
+dcaa:    <null bytes>
 
 
 R_dcd2:
@@ -14237,11 +13957,10 @@ dd11:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
 dd16:    66 02                  jsys Syscall_02
 
 R_dd18:
-dd18:    01                     nop
+dd18:    01                         arg1 = (0x1)
 
 R_dd19:
-dd19:    00                     HALT
-dd1a:    00                     HALT
+dd19:    00 00                      arg2 = L_0000
 
 R_dd1b:
 dd1b:    00                     HALT
@@ -14249,7 +13968,7 @@ dd1c:    00                     HALT
 dd1d:    01                     nop
 dd1e:    5e                     mov Z, A
 dd1f:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
-dd24:    2e 0c 70 01 61         wpf #0x70, [0x0161]
+dd24:    2e 0c 70 01 61         wpf #0x70, [PageTableOne|0x0161]
 dd29:    30 80                  inc Z, #1
 
 L_dd2b:
@@ -14257,114 +13976,16 @@ dd2b:    7f 01                  pop {A}
 dd2d:    73 a8                  jmp [L_dcd7|-0x58]
 
 R_dd2f:
-dd2f:    c0 d3                  ld BL, #0xd3
-dd31:    d9                     ld B, [B]
-dd32:    d3 ae                  ld B, [L_dce2|-0x52]
-dd34:    c0 c9                  ld BL, #0xc9
-dd36:    d3 d2                  ld B, [pc + -0x2e]
-dd38:    b0 a0 a0               st A, #0xa0a0
-dd3b:    a0 a0                  st AL, #0xa0
-dd3d:    a0 a0                  st AL, #0xa0
-dd3f:    a0 a0                  st AL, #0xa0
-dd41:    a0 a0                  st AL, #0xa0
-dd43:    a0 c0                  st AL, #0xc0
-dd45:    d3 d9                  ld B, [pc + -0x27]
-dd47:    d3 ae                  ld B, [pc + -0x52]
-dd49:    c0 c9                  ld BL, #0xc9
-dd4b:    d3 d2                  ld B, [pc + -0x2e]
-dd4d:    b1 a0 a0               st A, [0xa0a0]
-dd50:    a0 a0                  st AL, #0xa0
-dd52:    a0 a0                  st AL, #0xa0
-dd54:    a0 a0                  st AL, #0xa0
-dd56:    a0 a0                  st AL, #0xa0
-dd58:    a0 c0                  st AL, #0xc0
-dd5a:    d3 d9                  ld B, [pc + -0x27]
-dd5c:    d3 ae                  ld B, [pc + -0x52]
-dd5e:    c0 c9                  ld BL, #0xc9
-dd60:    d3 d2                  ld B, [pc + -0x2e]
-dd62:    b2 a0 a0               st A, @[0xa0a0]
-dd65:    a0 a0                  st AL, #0xa0
-dd67:    a0 a0                  st AL, #0xa0
-dd69:    a0 a0                  st AL, #0xa0
-dd6b:    a0 a0                  st AL, #0xa0
-dd6d:    a0 c0                  st AL, #0xc0
-dd6f:    d3 d9                  ld B, [pc + -0x27]
-dd71:    d3 ae                  ld B, [pc + -0x52]
-dd73:    c0 c9                  ld BL, #0xc9
-dd75:    d3 d2                  ld B, [pc + -0x2e]
-dd77:    b3 a0                  st A, [R_dd19|-0x60]
-dd79:    a0 a0                  st AL, #0xa0
-dd7b:    a0 a0                  st AL, #0xa0
-dd7d:    a0 a0                  st AL, #0xa0
-dd7f:    a0 a0                  st AL, #0xa0
-dd81:    a0 a0                  st AL, #0xa0
-dd83:    c0 d3                  ld BL, #0xd3
-dd85:    d9                     ld B, [B]
-dd86:    d3 ae                  ld B, [pc + -0x52]
-dd88:    c0 c9                  ld BL, #0xc9
-dd8a:    d3 d2                  ld B, [pc + -0x2e]
-dd8c:    b4 a0                  st A, @[pc + -0x60]
-dd8e:    a0 a0                  st AL, #0xa0
-dd90:    a0 a0                  st AL, #0xa0
-dd92:    a0 a0                  st AL, #0xa0
-dd94:    a0 a0                  st AL, #0xa0
-dd96:    a0 a0                  st AL, #0xa0
-dd98:    c0 d3                  ld BL, #0xd3
-dd9a:    d9                     ld B, [B]
-dd9b:    d3 ae                  ld B, [pc + -0x52]
-dd9d:    c0 c9                  ld BL, #0xc9
-dd9f:    d3 d2                  ld B, [pc + -0x2e]
-dda1:    b5 a0                  st A, [S]
-dda3:    a0 a0                  st AL, #0xa0
-dda5:    a0 a0                  st AL, #0xa0
-dda7:    a0 a0                  st AL, #0xa0
-dda9:    a0 a0                  st AL, #0xa0
-ddab:    a0 a0                  st AL, #0xa0
-ddad:    c0 d3                  ld BL, #0xd3
-ddaf:    d9                     ld B, [B]
-ddb0:    d3 ae                  ld B, [pc + -0x52]
-ddb2:    c0 c9                  ld BL, #0xc9
-ddb4:    d3 d2                  ld B, [pc + -0x2e]
-ddb6:    b6                     unknown
-ddb7:    a0 a0                  st AL, #0xa0
-ddb9:    a0 a0                  st AL, #0xa0
-ddbb:    a0 a0                  st AL, #0xa0
-ddbd:    a0 a0                  st AL, #0xa0
-ddbf:    a0 a0                  st AL, #0xa0
-ddc1:    a0 c0                  st AL, #0xc0
-ddc3:    d3 d9                  ld B, [pc + -0x27]
-ddc5:    d3 ae                  ld B, [pc + -0x52]
-ddc7:    c0 c9                  ld BL, #0xc9
-ddc9:    d3 d2                  ld B, [pc + -0x2e]
-ddcb:    b7                     unknown
-ddcc:    a0 a0                  st AL, #0xa0
-ddce:    a0 a0                  st AL, #0xa0
-ddd0:    a0 a0                  st AL, #0xa0
-ddd2:    a0 a0                  st AL, #0xa0
-ddd4:    a0 a0                  st AL, #0xa0
-ddd6:    a0 c0                  st AL, #0xc0
-ddd8:    d3 d9                  ld B, [pc + -0x27]
-ddda:    d3 ae                  ld B, [pc + -0x52]
-dddc:    c0 c9                  ld BL, #0xc9
-ddde:    d3 d2                  ld B, [pc + -0x2e]
-dde0:    b8                     st A, [A]
-dde1:    a0 a0                  st AL, #0xa0
-dde3:    a0 a0                  st AL, #0xa0
-dde5:    a0 a0                  st AL, #0xa0
-dde7:    a0 a0                  st AL, #0xa0
-dde9:    a0 a0                  st AL, #0xa0
-ddeb:    a0 c0                  st AL, #0xc0
-dded:    d3 d9                  ld B, [pc + -0x27]
-ddef:    d3 ae                  ld B, [pc + -0x52]
-ddf1:    c0 c9                  ld BL, #0xc9
-ddf3:    d3 d2                  ld B, [pc + -0x2e]
-ddf5:    b9                     st A, [B]
-ddf6:    a0 a0                  st AL, #0xa0
-ddf8:    a0 a0                  st AL, #0xa0
-ddfa:    a0 a0                  st AL, #0xa0
-ddfc:    a0 a0                  st AL, #0xa0
-ddfe:    a0 a0                  st AL, #0xa0
-de00:    a0 ' '
+dd2f:    c0 d3 d9 d3 ae c0 c9 d3 d2 b0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@ISR0           "
+dd44:    c0 d3 d9 d3 ae c0 c9 d3 d2 b1 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@ISR1           "
+dd59:    c0 d3 d9 d3 ae c0 c9 d3 d2 b2 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@ISR2           "
+dd6e:    c0 d3 d9 d3 ae c0 c9 d3 d2 b3 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@ISR3           "
+dd83:    c0 d3 d9 d3 ae c0 c9 d3 d2 b4 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@ISR4           "
+dd98:    c0 d3 d9 d3 ae c0 c9 d3 d2 b5 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@ISR5           "
+ddad:    c0 d3 d9 d3 ae c0 c9 d3 d2 b6 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@ISR6           "
+ddc2:    c0 d3 d9 d3 ae c0 c9 d3 d2 b7 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@ISR7           "
+ddd7:    c0 d3 d9 d3 ae c0 c9 d3 d2 b8 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@ISR8           "
+ddec:    c0 d3 d9 d3 ae c0 c9 d3 d2 b9 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@ISR9           "
 
 R_de01:
 de01:    91 01 0b               ld A, [0x010b]
@@ -14404,11 +14025,10 @@ de54:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
 de59:    66 02                  jsys Syscall_02
 
 R_de5b:
-de5b:    01                     nop
+de5b:    01                         arg1 = (0x1)
 
 R_de5c:
-de5c:    00                     HALT
-de5d:    00                     HALT
+de5c:    00 00                      arg2 = L_0000
 
 R_de5e:
 de5e:    00                     HALT
@@ -14416,7 +14036,7 @@ de5f:    00                     HALT
 de60:    01                     nop
 de61:    5e                     mov Z, A
 de62:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
-de67:    2e 0c 70 01 61         wpf #0x70, [0x0161]
+de67:    2e 0c 70 01 61         wpf #0x70, [PageTableOne|0x0161]
 de6c:    30 80                  inc Z, #1
 
 L_de6e:
@@ -14424,77 +14044,13 @@ de6e:    7f 01                  pop {A}
 de70:    73 94                  jmp [L_de06|-0x6c]
 
 R_de72:
-de72:    c0 d3                  ld BL, #0xd3
-de74:    d9                     ld B, [B]
-de75:    d3 ae                  ld B, [pc + -0x52]
-de77:    c0 d0                  ld BL, #0xd0
-de79:    c4 b0                  ld BL, @[pc + -0x50]
-de7b:    b0 b0 a0               st A, #0xb0a0
-de7e:    a0 a0                  st AL, #0xa0
-de80:    a0 a0                  st AL, #0xa0
-de82:    a0 a0                  st AL, #0xa0
-de84:    a0 a0                  st AL, #0xa0
-de86:    a0 c0                  st AL, #0xc0
-de88:    d3 d9                  ld B, [pc + -0x27]
-de8a:    d3 ae                  ld B, [pc + -0x52]
-de8c:    c0 d0                  ld BL, #0xd0
-de8e:    c4 b0                  ld BL, @[pc + -0x50]
-de90:    b0 b1 a0               st A, #0xb1a0
-de93:    a0 a0                  st AL, #0xa0
-de95:    a0 a0                  st AL, #0xa0
-de97:    a0 a0                  st AL, #0xa0
-de99:    a0 a0                  st AL, #0xa0
-de9b:    a0 c0                  st AL, #0xc0
-de9d:    d3 d9                  ld B, [pc + -0x27]
-de9f:    d3 ae                  ld B, [pc + -0x52]
-dea1:    c0 d0                  ld BL, #0xd0
-dea3:    c4 b0                  ld BL, @[pc + -0x50]
-dea5:    b0 b2 a0               st A, #0xb2a0
-dea8:    a0 a0                  st AL, #0xa0
-deaa:    a0 a0                  st AL, #0xa0
-deac:    a0 a0                  st AL, #0xa0
-deae:    a0 a0                  st AL, #0xa0
-deb0:    a0 c0                  st AL, #0xc0
-deb2:    d3 d9                  ld B, [pc + -0x27]
-deb4:    d3 ae                  ld B, [pc + -0x52]
-deb6:    c0 d0                  ld BL, #0xd0
-deb8:    c4 b0                  ld BL, @[pc + -0x50]
-deba:    b0 b3 a0               st A, #0xb3a0
-debd:    a0 a0                  st AL, #0xa0
-debf:    a0 a0                  st AL, #0xa0
-dec1:    a0 a0                  st AL, #0xa0
-dec3:    a0 a0                  st AL, #0xa0
-dec5:    a0 c0                  st AL, #0xc0
-dec7:    d3 d9                  ld B, [pc + -0x27]
-dec9:    d3 ae                  ld B, [pc + -0x52]
-decb:    c0 d0                  ld BL, #0xd0
-decd:    c4 b0                  ld BL, @[pc + -0x50]
-decf:    b0 b4 a0               st A, #0xb4a0
-ded2:    a0 a0                  st AL, #0xa0
-ded4:    a0 a0                  st AL, #0xa0
-ded6:    a0 a0                  st AL, #0xa0
-ded8:    a0 a0                  st AL, #0xa0
-deda:    a0 c0                  st AL, #0xc0
-dedc:    d3 d9                  ld B, [pc + -0x27]
-dede:    d3 ae                  ld B, [pc + -0x52]
-dee0:    c0 d0                  ld BL, #0xd0
-dee2:    c4 b0                  ld BL, @[pc + -0x50]
-dee4:    b0 b5 a0               st A, #0xb5a0
-dee7:    a0 a0                  st AL, #0xa0
-dee9:    a0 a0                  st AL, #0xa0
-deeb:    a0 a0                  st AL, #0xa0
-deed:    a0 a0                  st AL, #0xa0
-deef:    a0 c0                  st AL, #0xc0
-def1:    d3 d9                  ld B, [pc + -0x27]
-def3:    d3 ae                  ld B, [pc + -0x52]
-def5:    c0 d0                  ld BL, #0xd0
-def7:    c4 b0                  ld BL, @[pc + -0x50]
-def9:    b0 b6 a0               st A, #0xb6a0
-defc:    a0 a0                  st AL, #0xa0
-defe:    a0 a0                  st AL, #0xa0
-df00:    a0 a0                  st AL, #0xa0
-df02:    a0 a0                  st AL, #0xa0
-df04:    a0 ' '
+de72:    c0 d3 d9 d3 ae c0 d0 c4 b0 b0 b0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@PD000          "
+de87:    c0 d3 d9 d3 ae c0 d0 c4 b0 b0 b1 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@PD001          "
+de9c:    c0 d3 d9 d3 ae c0 d0 c4 b0 b0 b2 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@PD002          "
+deb1:    c0 d3 d9 d3 ae c0 d0 c4 b0 b0 b3 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@PD003          "
+dec6:    c0 d3 d9 d3 ae c0 d0 c4 b0 b0 b4 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@PD004          "
+dedb:    c0 d3 d9 d3 ae c0 d0 c4 b0 b0 b5 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@PD005          "
+def0:    c0 d3 d9 d3 ae c0 d0 c4 b0 b0 b6 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "@SYS.@PD006          "
 
 R_df05:
 df05:    <null bytes>
@@ -14554,7 +14110,7 @@ df65:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
 df6a:    e8                     st BL, [A]
 df6b:    e5 08 e0               st BL, [A + -0x020]
 df6e:    92 01 07               ld A, @[0x0107]
-df71:    47 41 1f 01 61 00 36   memcpy #0x20, [0x0161], [A + 0x0036]
+df71:    47 41 1f 01 61 00 36   memcpy #0x20, [PageTableOne|0x0161], [A + 0x0036]
 df78:    80 80                  ld AL, #0x80
 df7a:    07                     rl
 
@@ -14569,7 +14125,7 @@ df82:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
 df87:    cb                     ld BL, [Y]
 df88:    43 13                  or BL, AL
 df8a:    eb                     st BL, [Y]
-df8b:    2e 0c 70 01 81         wpf #0x70, [0x0181]
+df8b:    2e 0c 70 01 81         wpf #0x70, [PageTableTwo|0x0181]
 
 L_df90:
 df90:    95 a1                  ld A, [S++]
@@ -14593,13 +14149,13 @@ dfa9:    7f 27                  pop {B, X, Y, Z}
 dfab:    09                     ret
 
 R_dfac:
-dfac:    91 01 03               ld A, [SystemInfoPtr|0x0103]
+dfac:    91 01 03               ld A, [CurrentProcess|0x0103]
 dfaf:    95 08 08               ld A, [A + 0x0008]
 dfb2:    95 08 05               ld A, [A + 0x0005]
 dfb5:    b2 01 26               st A, @[EarlyInitDevicesPtr|0x0126]
 dfb8:    91 01 5e               ld A, [0x015e]
 dfbb:    47 42 14 df 05 00      memcpy #0x15, [R_df05|0xdf05], [A]
-dfc1:    2e 0c 70 01 81         wpf #0x70, [0x0181]
+dfc1:    2e 0c 70 01 81         wpf #0x70, [PageTableTwo|0x0181]
 dfc6:    61 01 09               ld X, [DevicesPtr|0x0109]
 
 L_dfc9:
@@ -14624,7 +14180,7 @@ dfea:    50 08                  add Z, A
 dfec:    73 db                  jmp [L_dfc9|-0x25]
 
 L_dfee:
-dfee:    2e 0c 78 01 61         wpf #0x78, [0x0161]
+dfee:    2e 0c 78 01 61         wpf #0x78, [PageTableOne|0x0161]
 dff3:    2e 2c 02 e1 18         wpf1 #0x02, [R_e118|0xe118]
 dff8:    2e 2c 03 e1 18         wpf1 #0x03, [R_e118|0xe118]
 dffd:    91 01 44               ld A, [0x0144]
@@ -14892,234 +14448,37 @@ e11d:    00                     HALT
 e11e:    00                     HALT
 
 R_e11f:
-e11f:    1e 7f                  b?E L_e1a0
+e11f:    1e                     (0x1e)
 
-R_e121:
-e121:    a0 a0                  st AL, #0xa0
+R_e120:
+e120:    7f                     (0x7f)
 
-R_e123:
-e123:    a0 a0                  st AL, #0xa0
-e125:    a0 a0                  st AL, #0xa0
-e127:    a0 a0                  st AL, #0xa0
-e129:    a0 a0                  st AL, #0xa0
-e12b:    a0 a0                  st AL, #0xa0
-e12d:    a0 a0                  st AL, #0xa0
-e12f:    a0 a0                  st AL, #0xa0
-e131:    a0 a0                  st AL, #0xa0
-e133:    a0 a0                  st AL, #0xa0
-e135:    a0 a0                  st AL, #0xa0
-e137:    a0 a0                  st AL, #0xa0
-e139:    a0 a0                  st AL, #0xa0
-e13b:    a0 a0                  st AL, #0xa0
-e13d:    a0 a0                  st AL, #0xa0
-e13f:    a0 a0                  st AL, #0xa0
-e141:    a0 a0                  st AL, #0xa0
-e143:    a0 a0                  st AL, #0xa0
-e145:    a0 a0                  st AL, #0xa0
-e147:    a0 a0                  st AL, #0xa0
-e149:    a0 a0                  st AL, #0xa0
-e14b:    a0 a0                  st AL, #0xa0
-e14d:    a0 a0                  st AL, #0xa0
-e14f:    a0 a0                  st AL, #0xa0
-e151:    a0 a0                  st AL, #0xa0
-e153:    a0 a0                  st AL, #0xa0
-e155:    a0 a0                  st AL, #0xa0
-e157:    a0 a0                  st AL, #0xa0
-e159:    a0 a0                  st AL, #0xa0
-e15b:    a0 a0                  st AL, #0xa0
-e15d:    a0 a0                  st AL, #0xa0
-e15f:    a0 a0                  st AL, #0xa0
-e161:    a0 a0                  st AL, #0xa0
-e163:    a0 a0                  st AL, #0xa0
-e165:    a0 a0                  st AL, #0xa0
-e167:    a0 a0                  st AL, #0xa0
-e169:    a0 a0                  st AL, #0xa0
-e16b:    a0 a0                  st AL, #0xa0
-e16d:    a0 a0                  st AL, #0xa0
-e16f:    a0 a0                  st AL, #0xa0
-e171:    a0 a0                  st AL, #0xa0
-e173:    a0 a0                  st AL, #0xa0
-e175:    a0 a0                  st AL, #0xa0
-e177:    a0 a0                  st AL, #0xa0
-e179:    a0 a0                  st AL, #0xa0
-e17b:    a0 a0                  st AL, #0xa0
-e17d:    a0 a0                  st AL, #0xa0
-e17f:    a0 a0                  st AL, #0xa0
-e181:    a0 a0                  st AL, #0xa0
-e183:    a0 a0                  st AL, #0xa0
-e185:    a0 a0                  st AL, #0xa0
-e187:    a0 a0                  st AL, #0xa0
-e189:    a0 a0                  st AL, #0xa0
-e18b:    a0 a0                  st AL, #0xa0
-e18d:    a0 a0                  st AL, #0xa0
-e18f:    a0 a0                  st AL, #0xa0
-e191:    a0 a0                  st AL, #0xa0
-e193:    a0 a0                  st AL, #0xa0
-e195:    a0 a0                  st AL, #0xa0
-e197:    a0 a0                  st AL, #0xa0
-e199:    a0 a0                  st AL, #0xa0
-e19b:    a0 a0                  st AL, #0xa0
-e19d:    a0 a0                  st AL, #0xa0
-e19f:    a0 ' '
+ReadBuffer:
+e121:    a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 a0 "                                                                                                                                                                                                                                                                                                                                                                                                                "
 
-L_e1a0:
-e1a0:    a0 a0                  st AL, #0xa0
-e1a2:    a0 a0                  st AL, #0xa0
-e1a4:    a0 a0                  st AL, #0xa0
-e1a6:    a0 a0                  st AL, #0xa0
-e1a8:    a0 a0                  st AL, #0xa0
-e1aa:    a0 a0                  st AL, #0xa0
-e1ac:    a0 a0                  st AL, #0xa0
-e1ae:    a0 a0                  st AL, #0xa0
-e1b0:    a0 a0                  st AL, #0xa0
-e1b2:    a0 a0                  st AL, #0xa0
-e1b4:    a0 a0                  st AL, #0xa0
-e1b6:    a0 a0                  st AL, #0xa0
-e1b8:    a0 a0                  st AL, #0xa0
-e1ba:    a0 a0                  st AL, #0xa0
-e1bc:    a0 a0                  st AL, #0xa0
-e1be:    a0 a0                  st AL, #0xa0
-e1c0:    a0 a0                  st AL, #0xa0
-e1c2:    a0 a0                  st AL, #0xa0
-e1c4:    a0 a0                  st AL, #0xa0
-e1c6:    a0 a0                  st AL, #0xa0
-e1c8:    a0 a0                  st AL, #0xa0
-e1ca:    a0 a0                  st AL, #0xa0
-e1cc:    a0 a0                  st AL, #0xa0
-e1ce:    a0 a0                  st AL, #0xa0
-e1d0:    a0 a0                  st AL, #0xa0
-e1d2:    a0 a0                  st AL, #0xa0
-e1d4:    a0 a0                  st AL, #0xa0
-e1d6:    a0 a0                  st AL, #0xa0
-e1d8:    a0 a0                  st AL, #0xa0
-e1da:    a0 a0                  st AL, #0xa0
-e1dc:    a0 a0                  st AL, #0xa0
-e1de:    a0 a0                  st AL, #0xa0
-e1e0:    a0 a0                  st AL, #0xa0
-e1e2:    a0 a0                  st AL, #0xa0
-e1e4:    a0 a0                  st AL, #0xa0
-e1e6:    a0 a0                  st AL, #0xa0
-e1e8:    a0 a0                  st AL, #0xa0
-e1ea:    a0 a0                  st AL, #0xa0
-e1ec:    a0 a0                  st AL, #0xa0
-e1ee:    a0 a0                  st AL, #0xa0
-e1f0:    a0 a0                  st AL, #0xa0
-e1f2:    a0 a0                  st AL, #0xa0
-e1f4:    a0 a0                  st AL, #0xa0
-e1f6:    a0 a0                  st AL, #0xa0
-e1f8:    a0 a0                  st AL, #0xa0
-e1fa:    a0 a0                  st AL, #0xa0
-e1fc:    a0 a0                  st AL, #0xa0
-e1fe:    a0 a0                  st AL, #0xa0
-e200:    a0 a0                  st AL, #0xa0
-e202:    a0 a0                  st AL, #0xa0
-e204:    a0 a0                  st AL, #0xa0
-e206:    a0 a0                  st AL, #0xa0
-e208:    a0 a0                  st AL, #0xa0
-e20a:    a0 a0                  st AL, #0xa0
-e20c:    a0 a0                  st AL, #0xa0
-e20e:    a0 a0                  st AL, #0xa0
-e210:    a0 a0                  st AL, #0xa0
-e212:    a0 a0                  st AL, #0xa0
-e214:    a0 a0                  st AL, #0xa0
-e216:    a0 a0                  st AL, #0xa0
-e218:    a0 a0                  st AL, #0xa0
-e21a:    a0 a0                  st AL, #0xa0
-e21c:    a0 a0                  st AL, #0xa0
-e21e:    a0 a0                  st AL, #0xa0
-e220:    a0 a0                  st AL, #0xa0
-e222:    a0 a0                  st AL, #0xa0
-e224:    a0 a0                  st AL, #0xa0
-e226:    a0 a0                  st AL, #0xa0
-e228:    a0 a0                  st AL, #0xa0
-e22a:    a0 a0                  st AL, #0xa0
-e22c:    a0 a0                  st AL, #0xa0
-e22e:    a0 a0                  st AL, #0xa0
-e230:    a0 a0                  st AL, #0xa0
-e232:    a0 a0                  st AL, #0xa0
-e234:    a0 a0                  st AL, #0xa0
-e236:    a0 a0                  st AL, #0xa0
-e238:    a0 a0                  st AL, #0xa0
-e23a:    a0 a0                  st AL, #0xa0
-e23c:    a0 a0                  st AL, #0xa0
-e23e:    a0 a0                  st AL, #0xa0
-e240:    a0 a0                  st AL, #0xa0
-e242:    a0 a0                  st AL, #0xa0
-e244:    a0 a0                  st AL, #0xa0
-e246:    a0 a0                  st AL, #0xa0
-e248:    a0 a0                  st AL, #0xa0
-e24a:    a0 a0                  st AL, #0xa0
-e24c:    a0 a0                  st AL, #0xa0
-e24e:    a0 a0                  st AL, #0xa0
-e250:    a0 a0                  st AL, #0xa0
-e252:    a0 a0                  st AL, #0xa0
-e254:    a0 a0                  st AL, #0xa0
-e256:    a0 a0                  st AL, #0xa0
-e258:    a0 a0                  st AL, #0xa0
-e25a:    a0 a0                  st AL, #0xa0
-e25c:    a0 a0                  st AL, #0xa0
-e25e:    a0 a0                  st AL, #0xa0
-e260:    a0 a0                  st AL, #0xa0
-e262:    a0 a0                  st AL, #0xa0
-e264:    a0 a0                  st AL, #0xa0
-e266:    a0 a0                  st AL, #0xa0
-e268:    a0 a0                  st AL, #0xa0
-e26a:    a0 a0                  st AL, #0xa0
-e26c:    a0 a0                  st AL, #0xa0
-e26e:    a0 a0                  st AL, #0xa0
-e270:    a0 a0                  st AL, #0xa0
-e272:    a0 a0                  st AL, #0xa0
-e274:    a0 a0                  st AL, #0xa0
-e276:    a0 a0                  st AL, #0xa0
-e278:    a0 a0                  st AL, #0xa0
-e27a:    a0 a0                  st AL, #0xa0
-e27c:    a0 a0                  st AL, #0xa0
-e27e:    a0 a0                  st AL, #0xa0
-e280:    a0 a0                  st AL, #0xa0
-e282:    a0 a0                  st AL, #0xa0
-e284:    a0 a0                  st AL, #0xa0
-e286:    a0 a0                  st AL, #0xa0
-e288:    a0 a0                  st AL, #0xa0
-e28a:    a0 a0                  st AL, #0xa0
-e28c:    a0 a0                  st AL, #0xa0
-e28e:    a0 a0                  st AL, #0xa0
-e290:    a0 a0                  st AL, #0xa0
-e292:    a0 a0                  st AL, #0xa0
-e294:    a0 a0                  st AL, #0xa0
-e296:    a0 a0                  st AL, #0xa0
-e298:    a0 a0                  st AL, #0xa0
-e29a:    a0 a0                  st AL, #0xa0
-e29c:    a0 a0                  st AL, #0xa0
-e29e:    a0 a0                  st AL, #0xa0
-e2a0:    a0 a0                  st AL, #0xa0
-e2a2:    a0 a0                  st AL, #0xa0
-e2a4:    a0 a0                  st AL, #0xa0
-e2a6:    a0 a0                  st AL, #0xa0
-e2a8:    a0 a0                  st AL, #0xa0
-e2aa:    a0 a0                  st AL, #0xa0
-e2ac:    a0 a0                  st AL, #0xa0
-e2ae:    a0 a0                  st AL, #0xa0
-e2b0:    a0 ' '
-
-R_e2b1:
+CRT0_WriteStruct:
 e2b1:    00                     (0x0)
-e2b2:    81                     (0x81)
-e2b3:    00                     HALT
-e2b4:    02                     sf
-e2b5:    00                     HALT
-e2b6:    51
+e2b2:    81                     (0x81)	 ; DeviceType?
+e2b3:    00                     (0x0)
+e2b4:    02                     (0x2)
+e2b5:    00                     (0x0)
+e2b6:    51                     (0x51)
 
-R_e2b7:
-e2b7:    e1 21                  (0xe121)
-e2b9:    00                     HALT
-e2ba:    00                     HALT
+CRT0_Write_String:
+e2b7:    e1 21                  ReadBuffer
+e2b9:    00 00                  (0x0)
 
-R_e2bb:
-e2bb:    00                     HALT
-e2bc:    81 00 01               ld AL, [0x0001]
-e2bf:    00                     HALT
-e2c0:    50 e1 21 00            add A, P, [0x2100]
-e2c4:    00                     HALT
+CRT0_ReadStruct:
+e2bb:    00                     (0x0)
+e2bc:    81                     (0x81)
+e2bd:    00                     (0x0)
+e2be:    01                     (0x1)
+e2bf:    00                     (0x0)
+e2c0:    50                     (0x50)
+
+CRT0_Read_String:
+e2c1:    e1 21                  ReadBuffer
+e2c3:    00 00                  (0x0)
 
 R_e2c5:
 e2c5:    5, "CODE="
@@ -15136,8 +14495,8 @@ e2dc:    32, "INVALID CONFIGURATION DATA SET\r\n"
 R_e2fe:
 e2fe:    17, "\x0c\x1b\x1cLOS 6.05 - B\r\n"
 
-R_e311:
-e311:    3, "\x1b\x1c\x0c"
+ClearScreen:
+e311:    3, "\x1b\x1c\x0c"	 ; <esc><fs><ff> (escape, file seperator, form feed)
 
 R_e316:
 e316:    42, "OPSYS OVERSIZE-LOAD PROCESS DISCONTINUED\r\n"
@@ -15148,59 +14507,27 @@ e342:    00                     HALT
 R_e343:
 e343:    64
 
-R_e344:
+UserDiskNum:
 e344:    01                     nop
 
-R_e345:
-e345:    ff                     st B, [P]
+DoAutoboot:
+e345:    ff                     (0xff)
 
 R_e346:
-e346:    a0 a0                  st AL, #0xa0
-e348:    a0 a0                  st AL, #0xa0
-e34a:    a0 a0                  st AL, #0xa0
-e34c:    a0 a0                  st AL, #0xa0
-e34e:    a0 a0                  st AL, #0xa0
-e350:    00                     HALT
+e346:    "          \0"
 
 R_e351:
-e351:    a0 a0                  st AL, #0xa0
-e353:    a0 a0                  st AL, #0xa0
-e355:    a0 a0                  st AL, #0xa0
-e357:    a0 a0                  st AL, #0xa0
-e359:    a0 a0                  st AL, #0xa0
-e35b:    00                     HALT
+e351:    "          \0"
 
-R_e35c:
-e35c:    00                     HALT
-e35d:    04                     ei
+BootNameLen:
+    ; This string is used as both a pascal string and a C string.
+e35c:    00 04                  (0x4)
 
-R_e35e:
-e35e:    c0 cf                  ld BL, #0xcf
-e360:    d3 ce                  ld B, [pc + -0x32]
-e362:    a0 a0                  st AL, #0xa0
-e364:    a0 a0                  st AL, #0xa0
-e366:    a0 a0                  st AL, #0xa0
-e368:    a0 a0                  st AL, #0xa0
-e36a:    a0 a0                  st AL, #0xa0
-e36c:    a0 a0                  st AL, #0xa0
-e36e:    a0 a0                  st AL, #0xa0
-e370:    a0 a0                  st AL, #0xa0
-e372:    a0 a0                  st AL, #0xa0
-e374:    a0 00                  st AL, #0x00
+BootName:
+e35e:    "@OSN                   \0"
 
 R_e376:
-e376:    c0 d3                  ld BL, #0xd3
-e378:    d9                     ld B, [B]
-e379:    d3 ae                  ld B, [pc + -0x52]
-e37b:    cf                     ld BL, [P]
-e37c:    d3 ce                  ld B, [pc + -0x32]
-e37e:    a0 a0                  st AL, #0xa0
-e380:    a0 a0                  st AL, #0xa0
-e382:    a0 a0                  st AL, #0xa0
-e384:    a0 a0                  st AL, #0xa0
-e386:    a0 a0                  st AL, #0xa0
-e388:    a0 a0                  st AL, #0xa0
-e38a:    a0 00                  st AL, #0x00
+e376:    "@SYS.OSN             \0"
 
 R_e38c:
 e38c:    <null bytes>

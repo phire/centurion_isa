@@ -1,5 +1,5 @@
 0x0100, label, SyscallVector
-0x0103, label, SystemInfoPtr
+0x0103, label, CurrentProcess
 0x0103, ptr
 0x0109, label, DevicesPtr
 0x0109, ptr
@@ -7,11 +7,18 @@
 0x011d, fnptr
 0x0126, label, EarlyInitDevicesPtr
 0x0126, ptr
-0x01ea, label, SystemInfo
-0x01ee, label, SystemInfo_File?
+0x0161, label, PageTableOne
+0x0181, label, PageTableTwo
+0x01ea, label, StartProcess
+0x01ee, label, StartProcess_File?
 0x01ee, ptr
-0x01f6, label, SystemInfo_TopOfMemory
+0x01f2, label, StartProcess_ErrorDevice
+0x01f2, ptr
+0x01f6, label, StartProcess_TopOfMemory
 0x01f6, >H
+0x025c, B
+0x025c, label, Device_CRT0_Lock
+0x0263, fnptr
 0x043e, ptr
 0x043e, label, EarlyInitDevices
 0x045b, label, CenturionVI_String
@@ -36,13 +43,27 @@
 0x832c, cstring
 0x8333, cstring
 0x8338, cstring
+0x8612, label, Yield
 0x88cc, label, SyscallTable
 0x89ac, label, NumSyscalls
 0x89ac, B
+0x8a48, label, Syscall_00_inner
+0x8abc, label, abort_code0A
 0x8aa6, label, LookupDeviceInstance
+0x8b33, label, DoFileOpInner
 0x8d54, label, Syscall_02_Singleton
 0x8d54, >H
 0xadc8, code, AbortHandler
+0xadd5, label, AbortHandlerInner
+0xaf33, label, AbortWriteStruct
+0xaf33, B
+0xaf34, B
+0xaf35, B
+0xaf36, B
+0xaf37, B
+0xaf38, B
+0xaf39, ptr
+0xaf3b, >H
 0xaf3e, label, Abort_CD
 0xaf3e, <B
 0xaf3d, label, Abort_LVL
@@ -60,6 +81,8 @@
 0xaf6d, label, AbortString_EAD
 0xaf74, pstring16
 0xb2d1, label, AssertIsSystemPtr
+0xb446, label, InitLevel10Device
+0xb461, code, Level10_InterruptHandler
 0xb6b6, label, HawkDeviceObj
 0xb6b6, >H
 0xb6b8, fnptr
@@ -116,7 +139,7 @@
 0xc22d, fnptr
 #0xc22f, code
 #0xc276, code
-#0xc27e, code
+0xc27e, label, CrtDevice_Write
 0xc2e2, pstring16
 0xc322, code, CrtDevice_InterruptHandler
 0xc402, label, CrtDevice_InterruptHandler_End
@@ -150,16 +173,51 @@
 0xcbaa, pstring16
 0xcbbc, pstring16
 0xcdd1, code, Start
-0xe2b1, >B
-0xe2b2, >B
-0xe2b7, >H
+0xcee5, label, DiskPrompt
+0xdb19, label, DiskNum
+0xdb19, B
+0xe11f, B
+0xe120, B
+0xe121, char[400]
+0xe121, label, ReadBuffer
+0xe2b1, label, CRT0_WriteStruct
+0xe2b1, B
+0xe2b2, B
+0xe2b3, B
+0xe2b4, B
+0xe2b5, B
+0xe2b6, B
+0xe2b7, label, CRT0_Write_String
+0xe2b7, ptr
+0xe2b9, >H
+0xe2bb, label, CRT0_ReadStruct
+0xe2bb, B
+0xe2bc, B
+0xe2bd, B
+0xe2be, B
+0xe2bf, B
+0xe2c0, B
+0xe2c1, label, CRT0_Read_String
+0xe2c1, ptr
+0xe2c3, >H
 0xe2c5, pstring16
 0xe2cc, pstring16
 0xe2d5, pstring16
 0xe2dc, pstring16
 0xe2fe, pstring16
 0xe311, pstring16
+0xe311, label, ClearScreen
 0xe316, pstring16
+0xe344, label, UserDiskNum
+0xe346, cstring
+0xe351, cstring
+0xe35c, label, BootNameLen
+0xe35c, >H
+0xe35e, label, BootName
+0xe35e, cstring
+0xe376, cstring
+0xe345, label, DoAutoboot
+0xe345, B
 0xe399, label, Debugger_Entry
 0xe39b, label, Debugger_Return
 0xe526, label, Debug_Regs_A
