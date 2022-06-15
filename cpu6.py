@@ -178,10 +178,11 @@ def Match46(pc, mem):
     bytes = mem[orig_pc:pc]
     return InstructionMatch(orig_pc, BasicCpu6Inst(f"{ops[op]}({a_size:x}, {b_size:x})", a_ref, b_ref), bytes, {})
 
-# Implements 47 "block" instructions
-def Match47(pc, mem):
+# Implements 47 and 67 "block" instructions
+def MatchBlock(pc, mem):
     orig_pc = pc
 
+    inst = mem[pc]
     op = mem[pc+1] >> 4
     a_mode = (mem[pc+1] >> 2) & 0x3
     b_mode = mem[pc+1] & 0x3
@@ -193,9 +194,12 @@ def Match47(pc, mem):
     blk_len = 1
     args = []
     if op != 0:
-        blk_len = mem[pc] + 1
-        args += [LiteralRef(blk_len, 1)]
-        pc += 1
+        if inst == 0x47: # 47 gets it's length as a byte immediate
+            blk_len = mem[pc] + 1
+            args += [LiteralRef(blk_len, 1)]
+            pc += 1
+        elif inst == 0x67:  # 67 gets it's length from implicit A
+            args += [Reg16Ref(0)]
 
     if op == 2:
         args += [LiteralRef(mem[pc], 1)]
@@ -419,7 +423,7 @@ def disassemble_instruction(mem, pc):
                 case 0x46:
                     return Match46(pc, mem)
                 case 0x47:
-                    return Match47(pc, mem)
+                    return MatchBlock(pc, mem)
                 case 0x5b:
                     pass
                 # case 0x55:
@@ -438,6 +442,8 @@ def disassemble_instruction(mem, pc):
             return MatchMul(pc, mem)
         case 0x66: # jsys aka Syscall
             return InstructionMatch(pc, SyscallInst(mem[pc+1]), mem[pc:pc+2], mem=mem)
+        case 0x67:
+            return MatchBlock(pc, mem)
         case 0x7e | 0x7f:
             return MatchPushPop(pc, mem)
         case 0xd6:

@@ -1855,9 +1855,7 @@ L_8792:
 87ac:    55 20                  mov A, B
 87ae:    39                     dec! A, #1
 87af:    d5 88 17               ld B, [Z + 0x0017]
-87b2:    67                     unknown
-87b3:    9e                     ld A, [C]
-87b4:    a0 02                  st AL, #0x02
+87b2:    67 9e a0 02            memset A, #0xa0, [B]
 87b6:    95 88 04               ld A, [Z + 0x0004]
 87b9:    5c                     mov Y, A
 87ba:    c1 86 b0               ld BL, [R_86b0|0x86b0]
@@ -2596,9 +2594,8 @@ L_8c6e:
 8c6e:    65 a1                  ld X, [S++]
 8c70:    95 61                  ld A, [Y++]
 8c72:    39                     dec! A, #1
-8c73:    67                     unknown
-8c74:    4a                     and! BL, AL
-8c75:    64 38                  ld X, @[pc + 0x38]
+8c73:    67 4a 64               memcpy A, [Y], [X]
+8c76:    38                     inc! A, #1
 8c77:    50 04                  add X, A
 8c79:    c0 8d                  ld BL, #0x8d
 8c7b:    ea                     st BL, [X]
@@ -4312,10 +4309,9 @@ L_9714:
 R_9717:
 9717:    39                     dec! A, #1
 9718:    16 e2                  blt L_96fc
-971a:    67                     unknown
-971b:    2a                     clr! AL, #0
-971c:    66 55                  jsys Syscall_55
-971e:    89 97                      arg1 = (0x8997)
+971a:    67 2a 66 55            memchr A, #0x66, [X], [X]
+971e:    89                     ld AL, [B]
+971f:    97                     unknown
 9720:    b4 73                  st A, @[pc + 0x73]
 9722:    d9                     ld B, [B]
 
@@ -4323,15 +4319,12 @@ R_9723:
 9723:    39                     dec! A, #1
 9724:    16 d6                  blt L_96fc
 9726:    55 82                  mov B, Z
-9728:    67                     unknown
-9729:    2a                     clr! AL, #0
-972a:    68 12 0c               st X, #0x120c
+9728:    67 2a 68 12            memchr A, #0x68, [A], [B]
+972c:    0c                     unknown
 972d:    51 82                  sub B, Z
 972f:    59                     sub! B, A
 9730:    55 20                  mov A, B
-9732:    67                     unknown
-9733:    9e                     ld A, [C]
-9734:    a0 08                  st AL, #0x08
+9732:    67 9e a0 08            memset A, #0xa0, [Z]
 9736:    38                     inc! A, #1
 9737:    50 08                  add Z, A
 9739:    2a                     clr! AL, #0
@@ -4739,9 +4732,7 @@ L_998a:
 9999:    b5 61                  st A, [Y++]
 999b:    55 68                  mov Z, Y
 999d:    39                     dec! A, #1
-999e:    67                     unknown
-999f:    9e                     ld A, [C]
-99a0:    a0 08                  st AL, #0x08
+999e:    67 9e a0 08            memset A, #0xa0, [Z]
 
 L_99a2:
 99a2:    95 41                  ld A, [X++]
@@ -4841,11 +4832,10 @@ R_9a1d:
 R_9a21:
 9a21:    39                     dec! A, #1
 9a22:    55 62                  mov B, Y
-9a24:    67                     unknown
-9a25:    2a                     clr! AL, #0
-9a26:    86                     unknown
-9a27:    6f 97 e0               stcc [0x97e0]
-9a2a:    55 86                  mov Y, Z
+9a24:    67 2a 86 6f            memchr A, #0x86, [Y], [P]
+9a28:    97                     unknown
+9a29:    e0 55                  st BL, #0x55
+9a2b:    86                     unknown
 9a2c:    6e                     unknown
 9a2d:    97                     unknown
 9a2e:    e0 12                  st BL, #0x12
@@ -4853,9 +4843,7 @@ R_9a21:
 9a31:    51 62                  sub B, Y
 9a33:    59                     sub! B, A
 9a34:    55 20                  mov A, B
-9a36:    67                     unknown
-9a37:    9e                     ld A, [C]
-9a38:    a0 06                  st AL, #0x06
+9a36:    67 9e a0 06            memset A, #0xa0, [Y]
 9a3a:    38                     inc! A, #1
 9a3b:    50 06                  add Y, A
 9a3d:    71 99 a6               jmp [R_99a6|0x99a6]
@@ -5545,9 +5533,11 @@ L_9e68:
 L_9e80:
 9e80:    95 41                  ld A, [X++]
 9e82:    39                     dec! A, #1
-9e83:    67                     unknown
-9e84:    4a                     and! BL, AL
-9e85:    46 38 50 06 80 8d ab   unkbig5(3, 8) [0x0680], [0x8dab]
+9e83:    67 4a 46               memcpy A, [X], [Y]
+9e86:    38                     inc! A, #1
+9e87:    50 06                  add Y, A
+9e89:    80 8d                  ld AL, #0x8d
+9e8b:    ab                     st AL, [Y]
 9e8c:    2a                     clr! AL, #0
 9e8d:    73 c0                  jmp [R_9e4f|-0x40]
 
@@ -6551,10 +6541,7 @@ a493:    79 a7 54               call [R_a754|0xa754]
 a496:    3a                     clr! A, #0
 a497:    85 68 23               ld AL, [Y + 0x0023]
 a49a:    39                     dec! A, #1
-a49b:    67                     unknown
-a49c:    49                     sub! BL, AL
-a49d:    80 60                  ld AL, #0x60
-a49f:    3e                     inc X
+a49b:    67 49 80 60 3e         memcpy A, [Z], [Y + 0x003e]
 a4a0:    47 45 02 60 2d 60 38   memcpy #0x03, [Y + 0x002d], [Y + 0x0038]
 a4a7:    47 9d 02 00 60 3b      memset #0x03, #0x00, [Y + 0x003b]
 a4ad:    79 a7 e8               call [R_a7e8|0xa7e8]
@@ -6973,9 +6960,7 @@ L_a7a3:
 a7a3:    d5 a1                  ld B, [S++]
 a7a5:    85 68 23               ld AL, [Y + 0x0023]
 a7a8:    29                     dec! AL, #1
-a7a9:    67                     unknown
-a7aa:    4a                     and! BL, AL
-a7ab:    28                     inc! AL, #1
+a7a9:    67 4a 28               memcpy A, [B], [Z]
 a7ac:    7f 61                  pop {Y}
 a7ae:    09                     ret
 
@@ -7105,6 +7090,8 @@ R_a892:
 a892:    6d a2                  st X, [--S]
 a894:    95 a8 04               ld A, [S + 0x0004]
 a897:    79 a6 eb               call [R_a6eb|0xa6eb]
+
+L_a89a:
 a89a:    79 a7 b6               call [R_a7b6|0xa7b6]
 a89d:    47 45 02 60 38 60 2d   memcpy #0x03, [Y + 0x0038], [Y + 0x002d]
 a8a4:    14 35                  bz L_a8db
@@ -7120,30 +7107,16 @@ a8b9:    5d                     mov B, A
 a8ba:    79 a7 54               call [R_a754|0xa754]
 a8bd:    55 40                  mov A, X
 a8bf:    39                     dec! A, #1
-a8c0:    67                     unknown
-a8c1:    88                     ld AL, [A]
-a8c2:    80 a8                  ld AL, #0xa8
-a8c4:    e0 15                  st BL, #0x15
-a8c6:    04                     ei
+a8c0:    67 88 80 a8 e0         memcmp A, [Z], [R_a8e0|0xa8e0]
+a8c5:    15 04                  bnz L_a8cb
 a8c7:    65 a1                  ld X, [S++]
 a8c9:    3a                     clr! A, #0
 a8ca:    09                     ret
-a8cb:    47
-a8cc:    45
-a8cd:    02
-a8ce:    60
-a8cf:    24
-a8d0:    60
-a8d1:    27
-a8d2:    47
-a8d3:    45
-a8d4:    02
-a8d5:    60
-a8d6:    3b
-a8d7:    60
-a8d8:    24
-a8d9:    15
-a8da:    bf '?'
+
+L_a8cb:
+a8cb:    47 45 02 60 24 60 27   memcpy #0x03, [Y + 0x0024], [Y + 0x0027]
+a8d2:    47 45 02 60 3b 60 24   memcpy #0x03, [Y + 0x003b], [Y + 0x0024]
+a8d9:    15 bf                  bnz L_a89a
 
 L_a8db:
 a8db:    65 a1                  ld X, [S++]
@@ -7268,10 +7241,8 @@ aa08:    dd                     ld B, [S]
 aa09:    3a                     clr! A, #0
 aa0a:    85 68 23               ld AL, [Y + 0x0023]
 aa0d:    39                     dec! A, #1
-aa0e:    67                     unknown
-aa0f:    46 60 3e 02 79         unkbig3(6, 0) #0x02, [Z]
-aa14:    a6                     unknown
-aa15:    a9                     st AL, [B]
+aa0e:    67 46 60 3e 02         memcpy A, [Y + 0x003e], [B]
+aa13:    79 a6 a9               call [R_a6a9|0xa6a9]
 aa16:    00                     HALT
 
 Syscall_05:
@@ -8421,11 +8392,10 @@ b1b0:    5b                     mov X, A
 R_b1b1:
 b1b1:    90 00 00               ld A, #0x0000
 b1b4:    39                     dec! A, #1
-b1b5:    67                     unknown
-b1b6:    4a                     and! BL, AL
-b1b7:    24 7f                  srl YL, #16
-b1b9:    43 30                  or AH, BL
-b1bb:    44 0f                  xor PL, AH
+b1b5:    67 4a 24               memcpy A, [B], [X]
+b1b8:    7f 43                  pop {X, Y}
+b1ba:    30 44                  inc X, #5
+b1bc:    0f                     rsys
 
 L_b1bd:
 b1bd:    90 b3 30               ld A, R_b330|#0xb330
@@ -12994,10 +12964,7 @@ d239:    3a                     clr! A, #0
 d23a:    81 e0 7c               ld AL, [R_e07c|0xe07c]
 d23d:    20 1e                  inc AL, #15
 d23f:    2d                     sll! AL, #1
-d240:    67                     unknown
-d241:    9e                     ld A, [C]
-d242:    00                     HALT
-d243:    08                     cl
+d240:    67 9e 00 08            memset A, #0x00, [Z]
 d244:    50 08                  add Z, A
 d246:    55 80                  mov A, Z
 d248:    b1 01 16               st A, [0x0116]
@@ -13489,10 +13456,7 @@ d7da:    7f 63                  pop {Y, Z}
 d7dc:    38                     inc! A, #1
 d7dd:    5e                     mov Z, A
 d7de:    81 e1 17               ld AL, [R_e117|0xe117]
-d7e1:    67                     unknown
-d7e2:    9e                     ld A, [C]
-d7e3:    00                     HALT
-d7e4:    08                     cl
+d7e1:    67 9e 00 08            memset A, #0x00, [Z]
 d7e5:    d6 93 00 05            ld Z, [[0x0005] + B]
 d7e9:    91 e0 ff               ld A, [R_e0ff|0xe0ff]
 d7ec:    14 2f                  bz L_d81d
@@ -13554,10 +13518,7 @@ R_d867:
 d867:    91 e3 93               ld A, [R_e393|0xe393]
 d86a:    b3 20                  st A, [pc + 0x20]
 d86c:    39                     dec! A, #1
-d86d:    67                     unknown
-d86e:    9e                     ld A, [C]
-d86f:    00                     HALT
-d870:    08                     cl
+d86d:    67 9e 00 08            memset A, #0x00, [Z]
 d871:    91 01 09               ld A, [DevicesPtr|0x0109]
 
 L_d874:
@@ -13575,10 +13536,7 @@ d88a:    50 98 00 00            add Z, Z, #0x0000
 d88e:    d6 89 01 26            st Z, [EarlyInitDevicesPtr|0x0126]
 d892:    93 c9                  ld A, [R_d85d|-0x37]
 d894:    14 08                  bz L_d89e
-d896:    67                     unknown
-d897:    41 d8                  sub ZH, CL
-d899:    5f                     mov S, A
-d89a:    80 02                  ld AL, #0x02
+d896:    67 41 d8 5f 80 02      memcpy A, [R_d85f|0xd85f], [Z + 0x0002]
 d89c:    50 08                  add Z, A
 
 L_d89e:
@@ -13590,10 +13548,7 @@ d8ac:    91 01 07               ld A, [0x0107]
 d8af:    51 20                  sub A, B
 d8b1:    3c                     srl! A, #1
 d8b2:    39                     dec! A, #1
-d8b3:    67                     unknown
-d8b4:    9e                     ld A, [C]
-d8b5:    ff                     st B, [P]
-d8b6:    08                     cl
+d8b3:    67 9e ff 08            memset A, #0xff, [Z]
 d8b7:    38                     inc! A, #1
 d8b8:    50 08                  add Z, A
 d8ba:    d6 89 01 20            st Z, [0x0120]
@@ -13638,10 +13593,7 @@ d928:    31 02                  dec A, #3
 d92a:    77 10 00 03            div A, A, #0x0003
 d92e:    55 20                  mov A, B
 d930:    39                     dec! A, #1
-d931:    67                     unknown
-d932:    9e                     ld A, [C]
-d933:    ff                     st B, [P]
-d934:    08                     cl
+d931:    67 9e ff 08            memset A, #0xff, [Z]
 d935:    38                     inc! A, #1
 d936:    50 08                  add Z, A
 d938:    d0 e3 98               ld B, R_e398|#0xe398
@@ -13666,9 +13618,7 @@ d963:    22 00                  clr AH, #0
 d965:    77 10 00 0a            div A, A, #0x000a
 d969:    55 20                  mov A, B
 d96b:    39                     dec! A, #1
-d96c:    67                     unknown
-d96d:    9e                     ld A, [C]
-d96e:    a0 08                  st AL, #0x08
+d96c:    67 9e a0 08            memset A, #0xa0, [Z]
 d970:    50 08                  add Z, A
 d972:    30 80                  inc Z, #1
 d974:    73 d9                  jmp [L_d94f|-0x27]
@@ -13744,16 +13694,9 @@ da1a:    47 9c 0b ff 01 48      memset #0x0c, #0xff, [0x0148]
 da20:    81 e1 1f               ld AL, [R_e11f|0xe11f]
 da23:    24 12                  srl AL, #3
 da25:    29                     dec! AL, #1
-da26:    67                     unknown
-da27:    9c                     ld A, [Z]
-da28:    00                     HALT
-da29:    01                     nop
-da2a:    44 81                  xor AL, ZH
-da2c:    e1 1f 52               st BL, [0x1f52]
-da2f:    10 00                  bc L_da31
-
-L_da31:
-da31:    07                     rl
+da26:    67 9c 00 01 44         memset A, #0x00, [0x0144]
+da2b:    81 e1 1f               ld AL, [R_e11f|0xe11f]
+da2e:    52 10 00 07            and A, A, #0x0007
 da32:    14 14                  bz L_da48
 da34:    5b                     mov X, A
 da35:    81 e1 1f               ld AL, [R_e11f|0xe11f]
@@ -13797,31 +13740,16 @@ da82:    47 4d 00 1e 10 01 81   memcpy #0x01, #0x1e, [A + 0x0181]
 da89:    47 4d 00 1e 10 01 61   memcpy #0x01, #0x1e, [A + 0x0161]
 da90:    d2 01 07               ld B, @[0x0107]
 da93:    47 41 1f 01 61 20 36   memcpy #0x20, [PageTableOne|0x0161], [B + 0x0036]
-
-L_da9a:
 da9a:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
 da9f:    5d                     mov B, A
 daa0:    51 10 00 1c            sub A, A, #0x001c
-daa4:    67                     unknown
-daa5:    9d                     ld A, [S]
-daa6:    fd                     st B, [S]
-daa7:    30 01                  inc A, #2
-daa9:    82 95 a1               ld AL, @[0x95a1]
+daa4:    67 9d fd 30 01 82      memset A, #0xfd, [B + 0x0182]
+daaa:    95 a1                  ld A, [S++]
 daac:    5d                     mov B, A
 daad:    51 10 00 1c            sub A, A, #0x001c
-dab1:    67                     unknown
-dab2:    9d                     ld A, [S]
-dab3:    fd                     st B, [S]
-dab4:    30 01                  inc A, #2
-dab6:    62 47 40               ld X, @[0x4740]
-dab9:    00                     HALT
-daba:    db                     ld B, [Y]
-dabb:    19 dd                  ble L_da9a
-dabd:    18 47                  bgt L_db06
-dabf:    40 00                  add AH, AH
-dac1:    db                     ld B, [Y]
-dac2:    19 de                  ble L_daa2
-dac4:    5b                     mov X, A
+dab1:    67 9d fd 30 01 62      memset A, #0xfd, [B + 0x0162]
+dab7:    47 40 00 db 19 dd 18   memcpy #0x01, [DiskNum|0xdb19], [R_dd18|0xdd18]
+dabe:    47 40 00 db 19 de 5b   memcpy #0x01, [DiskNum|0xdb19], [R_de5b|0xde5b]
 dac5:    91 01 09               ld A, [DevicesPtr|0x0109]
 
 L_dac8:
@@ -13837,23 +13765,11 @@ dad7:    16 53                  blt L_db2c
 dad9:    51 70 00 11            sub A, Y, #0x0011
 dadd:    16 4d                  blt L_db2c
 dadf:    35 60                  sll Y, #1
-dae1:    50
-
-L_dae2:
-dae2:    74 dc                  jmp @[pc + -0x24]
-dae4:    aa '*'
-dae5:    55
-dae6:    55
-dae7:    00
-dae8:    00
-dae9:    14
-daea:    06
-daeb:    d6 'V'
-daec:    35
-daed:    00
-daee:    05
-daef:    73
-daf0:    3b
+dae1:    50 74 dc aa            add X, Y, R_dcaa|#0xdcaa
+dae5:    55 55 00 00            mov X, [X + #0x0000]
+dae9:    14 06                  bz L_daf1
+daeb:    d6 35 00 05            ld B, [[0x0005] + X]
+daef:    73 3b                  jmp [L_db2c|+0x3b]
 
 L_daf1:
 daf1:    d6 39 00 05            ld B, [[0x0005] + Z]
@@ -13861,31 +13777,18 @@ daf5:    50 74 dc aa            add X, Y, R_dcaa|#0xdcaa
 daf9:    d6 59 00 00            ld X, [Z]
 dafd:    34 60                  srl Y, #1
 daff:    77 76 00 15            div Y, Y, #0x0015
-db03:    50
-db04:    76
-db05:    db '['
-
-L_db06:
-db06:    30 d6 89 db            inc [C + [0x89db]], #7
-db0a:    1c d6                  bs3 L_dae2
-
-L_db0c:
-db0c:    67                     unknown
-db0d:    db                     ld B, [Y]
-db0e:    1a 79                  bs1 L_db89
-db10:    df                     ld B, [P]
-db11:    1a 2e                  bs1 L_db41
-db13:    2c                     srl! AL, #1
-db14:    00                     HALT
-db15:    e1 1a 66               st BL, [0x1a66]
-db18:    02                     sf
+db03:    50 76 db 30            add Y, Y, R_db30|#0xdb30
+db07:    d6 89 db 1c            st Z, [R_db1c|0xdb1c]
+db0b:    d6 67 db 1a            st Y, [R_db1a|0xdb1a]
+db0f:    79 df 1a               call [R_df1a|0xdf1a]
+db12:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
+db17:    66 02                  jsys Syscall_02
 
 DiskNum:
-db19:    01                     (0x1)
+db19:    01                         arg1 = (0x1)
 
 R_db1a:
-db1a:    00                     HALT
-db1b:    00                     HALT
+db1a:    00 00                      arg2 = L_0000
 
 R_db1c:
 db1c:    00                     HALT
@@ -14170,10 +14073,7 @@ dfd8:    d6 39 00 14            ld B, [[0x0014] + Z]
 dfdc:    79 df 1a               call [R_df1a|0xdf1a]
 dfdf:    85 28 16               ld AL, [B + 0x0016]
 dfe2:    29                     dec! AL, #1
-dfe3:    67                     unknown
-dfe4:    9e                     ld A, [C]
-dfe5:    ff                     st B, [P]
-dfe6:    08                     cl
+dfe3:    67 9e ff 08            memset A, #0xff, [Z]
 dfe7:    28                     inc! AL, #1
 dfe8:    22 00                  clr AH, #0
 dfea:    50 08                  add Z, A
