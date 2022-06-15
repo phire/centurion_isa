@@ -154,6 +154,10 @@ def disassemble(memory):
             print(f"\n{info.label}:")
 
         if info.pre_comment:
+            # Make sure an empty line is present in front of pre_comment
+            # This aids proper parsing it back by extract_comments.py
+            if not info.label:
+                print("")
             lines = info.pre_comment.split("\n")
             for line in lines:
                 print(f"    ; {line}")
