@@ -400,13 +400,6 @@ instructions  = [
     I("00111110", "inc {RegNames16[2]}"),
     I("00111111", "dec {RegNames16[2]}"),
 
-# 48
-    # Special cases that don't match the general ALU pattern
-    I("01011100", "mov {RegNames16[3]}, {RegNames16[0]}"),
-    I("01011101", "mov {RegNames16[1]}, {RegNames16[0]}"),
-    I("01011110", "mov {RegNames16[4]}, {RegNames16[0]}"),
-    I("01011111", "mov {RegNames16[5]}, {RegNames16[0]}"),
-
     I("11110111", "?F7?"),
     I("01101111 NNNNNNNN NNNNNNNN", "stcc [{N:#06x}]"),
 
@@ -432,12 +425,11 @@ def disassemble_instruction(mem, pc):
                     return Match46(pc, mem)
                 case 0x47:
                     return MatchBlock(pc, mem)
-                case 0x5b:
-                    pass
-                # case 0x55:
-                #     pass
-                # case n if n & 0x40 and n & 0xf > 0xa:
-                #     pass
+                case n if n & 0x40 and n & 0xf > 0xa:
+                    # Single-byte transfers instructions
+                    r = [4, 6, 2, 8, 10][(n & 0xf) - 0xb]
+                    dst, src = (Reg16Ref(r), Reg16Ref(0)) if n & 0x10 else (Reg8Ref(r+1), Reg8Ref(1))
+                    return InstructionMatch(pc, BasicCpu6Inst("mov", dst, src), mem[pc: pc+1])
                 case _:
                     if alu := AluMatch(pc, mem):
                         return alu
