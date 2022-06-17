@@ -12505,10 +12505,10 @@ L_cdd5:
     ; The code is careful to not trample too many registers before the debugger runs
     ; But it does trample B.
 cdd5:    d0 cd e4               ld B, R_cde4|#0xcde4	 ; Save return address for the debugger to exit to
-cdd8:    f1 e3 9b               st B, [Debugger_Return|0xe39b]
-cddb:    d0 e3 99               ld B, Debugger_Entry|#0xe399
+cdd8:    f1 e3 9b               st B, [Tos_Return|0xe39b]
+cddb:    d0 e3 99               ld B, Tos_Entry|#0xe399
 cdde:    f1 00 1a               st B, [0x001a]
-cde1:    71 e3 99               jmp [Debugger_Entry|0xe399]	 ; Transfer exection
+cde1:    71 e3 99               jmp [Tos_Entry|0xe399]	 ; Transfer exection
 
 R_cde4:
 cde4:    32 c0                  clr C, #0	 ; Clear context register
@@ -12554,7 +12554,7 @@ ce30:    55 26                  mov Y, B
 ce32:    32 20                  clr B, #0
 ce34:    90 07 ff               ld A, #0x07ff
 ce37:    f7                     ?F7?
-ce38:    47 4c 01 e3 99 00 1a   memcpy #0x02, Debugger_Entry|#0xe399, [0x001a]
+ce38:    47 4c 01 e3 99 00 1a   memcpy #0x02, Tos_Entry|#0xe399, [0x001a]
 ce3f:    2e 2c 78 e1 19         wpf1 #0x78, [R_e119|0xe119]
 ce44:    d0 01 00               ld B, #0x0100
 ce47:    55 26                  mov Y, B
@@ -14461,10 +14461,10 @@ e397:    00                     HALT
 R_e398:
 e398:    00                     HALT
 
-Debugger_Entry:
+Tos_Entry:
 e399:    73 2c                  jmp [R_e3c7|+0x2c]
 
-Debugger_Return:
+Tos_Return:
 e39b:    00                     HALT
 e39c:    00                     HALT
 e39d:    73 28                  jmp [R_e3c7|+0x28]
@@ -14494,10 +14494,10 @@ e3ef:    e6 0e                  mov A, IL0(P)
 e3f1:    d1 e5 ce               ld B, [R_e5ce|0xe5ce]
 e3f4:    59                     sub! B, A
 e3f5:    14 23                  bz L_e41a
-e3f7:    d0 e3 99               ld B, Debugger_Entry|#0xe399
+e3f7:    d0 e3 99               ld B, Tos_Entry|#0xe399
 e3fa:    59                     sub! B, A
 e3fb:    11 08                  bnc L_e405
-e3fd:    d0 e9 69               ld B, R_e969|#0xe969
+e3fd:    d0 e9 69               ld B, TopOfLoad|#0xe969
 e400:    59                     sub! B, A
 e401:    10 02                  bc L_e405
 e403:    73 15                  jmp [L_e41a|+0x15]
@@ -14533,11 +14533,11 @@ e43b:    d6 cd e5 32            st C, [Debug_Regs_C|0xe532]
 e43f:    d6 ef e5 34            st P, [Debug_Regs_P|0xe534]
 e443:    e6 a8                  mov A, IL10(Z)
 e445:    b1 e5 39               st A, [R_e539|0xe539]
-e448:    91 e3 9b               ld A, [Debugger_Return|0xe39b]
+e448:    91 e3 9b               ld A, [Tos_Return|0xe39b]
 e44b:    14 07                  bz L_e454
 e44d:    b1 e5 36               st A, [Debug_Regs_PC|0xe536]
 e450:    3a                     clr! A, #0
-e451:    b1 e3 9b               st A, [Debugger_Return|0xe39b]
+e451:    b1 e3 9b               st A, [Tos_Return|0xe39b]
 
 L_e454:
 e454:    81 e5 38               ld AL, [CCR_Value|0xe538]
@@ -14615,35 +14615,37 @@ e4cd:    79 e5 dd               call [Mux0_WriteHexWord|0xe5dd]
 e4d0:    51 50 e5 36            sub A, X, Debug_Regs_PC|#0xe536
 e4d4:    15 f5                  bnz L_e4cb
 
-R_e4d6:
+TosPrompt:
 e4d6:    79 e6 32               call [Mux0_EchoByte|0xe632]
 e4d9:    80 dc                  ld AL, #0xdc	 ; '\\'
-e4db:    79 e6 3e               call [Mux0_WriteByte|0xe63e]
-e4de:    79 e6 10               call [Mux0_ReadByte|0xe610]
-e4e1:    c0 da                  ld BL, #0xda
+e4db:    79 e6 3e               call [Mux0_WriteByte|0xe63e]	 ; Show prompt
+e4de:    79 e6 10               call [Mux0_ReadByte|0xe610]	 ; Get command
+e4e1:    c0 da                  ld BL, #0xda	 ; 'Z'
 e4e3:    49                     sub! BL, AL
-e4e4:    18 f0                  bgt R_e4d6
-e4e6:    d0 00 c1               ld B, #0x00c1
+e4e4:    18 f0                  bgt TosPrompt
+e4e6:    d0 00 c1               ld B, #0x00c1	 ; 'A'
 e4e9:    49                     sub! BL, AL
-e4ea:    16 ea                  blt R_e4d6
+e4ea:    16 ea                  blt TosPrompt
 e4ec:    35 20                  sll B, #1
-e4ee:    90 e3 99               ld A, Debugger_Entry|#0xe399
-e4f1:    60 e9 35               ld X, R_e935|#0xe935
+e4ee:    90 e3 99               ld A, Tos_Entry|#0xe399	 ; Pointers are relative to Entry
+e4f1:    60 e9 35               ld X, R_e935|#0xe935	 ; Pointer Offset Table
 e4f4:    50 24                  add X, B
 e4f6:    da                     ld B, [X]
-e4f7:    14 dd                  bz R_e4d6
+e4f7:    14 dd                  bz TosPrompt
 e4f9:    16 05                  blt L_e500
-e4fb:    58                     add! B, A
-e4fc:    f3 24                  st B, [pc + 0x24]
+e4fb:    58                     add! B, A	 ; Pointer is positive, we just add it to Entry, and jump to it with A = 0
+e4fc:    f3 24                  st B, [pc + 0x24]	 ; Patch jmp at e521
 e4fe:    73 20                  jmp [L_e520|+0x20]
 
 L_e500:
-e500:    59                     sub! B, A
-e501:    f3 1f                  st B, [pc + 0x1f]
+    ; Pointer is negative
+    ; These commands take arguments which this dispatcher should read.
+e500:    59                     sub! B, A	 ; Subtract it from Entry to get a postive offset
+e501:    f3 1f                  st B, [pc + 0x1f]	 ; Patch jmp at e512
 e503:    3a                     clr! A, #0
 e504:    5b                     mov X, A
 e505:    5c                     mov Y, A
-e506:    5e                     mov Z, A
+e506:    5e                     mov Z, A	 ; Clear X, Y and Z
 e507:    79 e6 67               call [Mux0_ReadHex|0xe667]
 e50a:    55 26                  mov Y, B
 e50c:    c0 ac                  ld BL, #0xac
@@ -14708,6 +14710,8 @@ e538:    00                     (0x0)
 R_e539:
 e539:    00                     HALT
 e53a:    00                     HALT
+
+TOS_CommandG:
 e53b:    55 60                  mov A, Y
 e53d:    15 02                  bnz L_e541
 e53f:    93 f5                  ld A, [Debug_Regs_PC|-0xb]
@@ -14735,16 +14739,17 @@ e56d:    0e                     dly
 e56e:    90 f2 01               ld A, #0xf201
 e571:    f6 30 00               ld BL, +0x0(A)
 e574:    e6 6e                  mov A, IL6(P)
-e576:    b3 08                  st A, [pc + 0x08]
-e578:    90 e5 86               ld A, R_e586|#0xe586
+e576:    b3 08                  st A, [pc + 0x08]	 ; save IL6's current Handler
+e578:    90 e5 86               ld A, R_e586|#0xe586	 ; load a new one
 e57b:    d7 6e                  mov IL6(P), A
-e57d:    04                     ei
-e57e:    0e                     dly
+e57d:    04                     ei	 ; Allow interrupt to trigger
+e57e:    0e                     dly	 ; wait
 e57f:    90 00 00               ld A, #0x0000
 e582:    d7 6e                  mov IL6(P), A
 e584:    73 0a                  jmp [L_e590|+0xa]
 
 R_e586:
+    ; Temporary IL6 interrupt handler
 e586:    05                     di
 e587:    90 f2 0f               ld A, #0xf20f
 e58a:    f6 30 00               ld BL, +0x0(A)
@@ -14949,7 +14954,7 @@ e68f:    49                     sub! BL, AL
 e690:    18 0f                  bgt L_e6a1
 e692:    c0 c1                  ld BL, #0xc1
 e694:    49                     sub! BL, AL
-e695:    16 0a                  blt L_e6a1
+e695:    16 0a                  blt L_e6a1	 ; Check in range a
 e697:    80 0a                  ld AL, #0x0a
 e699:    48                     add! BL, AL
 e69a:    73 e5                  jmp [L_e681|-0x1b]
@@ -14995,7 +15000,9 @@ e6ce:    c0 8d                  ld BL, #0x8d
 e6d0:    49                     sub! BL, AL
 e6d1:    14 17                  bz L_e6ea
 e6d3:    65 a1                  ld X, [S++]
-e6d5:    71 e4 d6               jmp [R_e4d6|0xe4d6]
+
+L_e6d5:
+e6d5:    71 e4 d6               jmp [TosPrompt|0xe4d6]
 
 L_e6d8:
 e6d8:    a3 c6                  st AL, [pc + -0x3a]
@@ -15020,301 +15027,225 @@ e6f0:    30 41                  inc X, #2
 L_e6f2:
 e6f2:    83 bb                  ld AL, [pc + -0x45]
 e6f4:    09                     ret
-e6f5:    55
-e6f6:    60
-e6f7:    79
-e6f8:    e5 'e'
-e6f9:    dd ']'
-e6fa:    73
-e6fb:    d9 'Y'
-e6fc:    8b
-e6fd:    79
-e6fe:    e5 'e'
-e6ff:    d6 'V'
-e700:    80
-e701:    ad '-'
-e702:    79
-e703:    e6 'f'
-e704:    3e
-e705:    79
-e706:    e6 'f'
-e707:    67
-e708:    eb 'k'
-e709:    01
-e70a:    30
-e70b:    60
-e70c:    c0 '@'
-e70d:    8d
-e70e:    49
-e70f:    14
-e710:    c4 'D'
-e711:    c0 '@'
-e712:    ac ','
-e713:    49
-e714:    14
-e715:    ef 'o'
-e716:    73
-e717:    e4 'd'
-e718:    f6 'v'
-e719:    16
-e71a:    00
-e71b:    79
-e71c:    e5 'e'
-e71d:    d6 'V'
-e71e:    80
-e71f:    ad '-'
-e720:    79
-e721:    e6 'f'
-e722:    3e
-e723:    79
-e724:    e6 'f'
-e725:    67
-e726:    73
-e727:    0e
-e728:    30
-e729:    60
-e72a:    c0 '@'
-e72b:    8d
-e72c:    49
-e72d:    14
-e72e:    a6 '&'
-e72f:    c0 '@'
-e730:    ac ','
-e731:    49
-e732:    14
-e733:    ef 'o'
-e734:    73
-e735:    e2 'b'
-e736:    f6 'v'
-e737:    37
-e738:    00
-e739:    73
-e73a:    ed 'm'
-e73b:    39
-e73c:    39
-e73d:    39
-e73e:    39
-e73f:    39
-e740:    39
-e741:    39
-e742:    39
-e743:    5b
-e744:    3f
-e745:    3d
-e746:    50
-e747:    12
-e748:    e5 'e'
-e749:    34
-e74a:    55
-e74b:    26
-e74c:    9b
-e74d:    79
-e74e:    e5 'e'
-e74f:    dd ']'
-e750:    80
-e751:    ad '-'
-e752:    79
-e753:    e6 'f'
-e754:    3e
-e755:    79
-e756:    e6 'f'
-e757:    67
-e758:    fb '{'
-e759:    01
-e75a:    d5 'U'
-e75b:    61
-e75c:    3e
-e75d:    18
-e75e:    64
-e75f:    c0 '@'
-e760:    8d
-e761:    49
-e762:    14
-e763:    5f
-e764:    c0 '@'
-e765:    ac ','
-e766:    49
-e767:    14
-e768:    ec 'l'
-e769:    73
-e76a:    e1 'a'
-e76b:    79
-e76c:    e6 'f'
-e76d:    32
-e76e:    55
-e76f:    60
-e770:    79
-e771:    e5 'e'
-e772:    dd ']'
-e773:    55
-e774:    64
-e775:    6b
-e776:    2f
-e777:    d0 'P'
-e778:    00
-e779:    0f
-e77a:    52
-e77b:    24
-e77c:    6b
-e77d:    1d
-e77e:    55
-e77f:    42
-e780:    50
-e781:    44
-e782:    50
-e783:    24
-e784:    80
-e785:    a0 ' '
-e786:    79
-e787:    e6 'f'
-e788:    3e
-e789:    3f
-e78a:    17
-e78b:    f8 'x'
-e78c:    85
-e78d:    61
-e78e:    79
-e78f:    e5 'e'
-e790:    d6 'V'
-e791:    55
-e792:    64
-e793:    d0 'P'
-e794:    00
-e795:    0f
-e796:    52
-e797:    24
-e798:    15
-e799:    f2 'r'
-e79a:    60
-e79b:    00
-e79c:    00
-e79d:    80
-e79e:    a0 ' '
-e79f:    79
-e7a0:    e6 'f'
-e7a1:    3e
-e7a2:    3f
-e7a3:    17
-e7a4:    f8 'x'
-e7a5:    90
-e7a6:    00
-e7a7:    00
-e7a8:    5c
-e7a9:    85
-e7aa:    61
-e7ab:    53
-e7ac:    10
-e7ad:    00
-e7ae:    80
-e7af:    28
-e7b0:    14
-e7b1:    06
-e7b2:    29
-e7b3:    c0 '@'
-e7b4:    a0 ' '
-e7b5:    49
-e7b6:    10
-e7b7:    02
-e7b8:    80
-e7b9:    ae '.'
-e7ba:    79
-e7bb:    e6 'f'
-e7bc:    3e
-e7bd:    55
-e7be:    60
-e7bf:    51
-e7c0:    80
-e7c1:    17
-e7c2:    03
-e7c3:    71
-e7c4:    e4 'd'
-e7c5:    d6 'V'
-e7c6:    55
-e7c7:    64
-e7c8:    d0 'P'
-e7c9:    00
-e7ca:    0f
-e7cb:    52
-e7cc:    24
-e7cd:    15
-e7ce:    da 'Z'
-e7cf:    73
-e7d0:    9a
-e7d1:    55
-e7d2:    40
-e7d3:    55
-e7d4:    62
-e7d5:    51
-e7d6:    82
-e7d7:    16
-e7d8:    e8 'h'
-e7d9:    a5 '%'
-e7da:    61
-e7db:    73
-e7dc:    f6 'v'
-e7dd:    55
-e7de:    60
-e7df:    51
-e7e0:    80
-e7e1:    16
-e7e2:    de '^'
-e7e3:    c5 'E'
-e7e4:    61
-e7e5:    e5 'e'
-e7e6:    41
-e7e7:    73
-e7e8:    f4 't'
-e7e9:    91
-e7ea:    e5 'e'
-e7eb:    30
-e7ec:    5f
-e7ed:    79
-e7ee:    e6 'f'
-e7ef:    32
-e7f0:    04
-e7f1:    66
-e7f2:    09
-e7f3:    01
-e7f4:    c6 'F'
-e7f5:    05
-e7f6:    32
-e7f7:    c0 '@'
-e7f8:    2e
-e7f9:    2c
-e7fa:    00
-e7fb:    e8 'h'
-e7fc:    30
-e7fd:    3a
-e7fe:    d7 'W'
-e7ff:    0c
-e800:    2f
-e801:    08
-e802:    90
-e803:    01
-e804:    00
-e805:    d7 'W'
-e806:    0e
-e807:    47
-e808:    40
-e809:    16
-e80a:    e8 'h'
-e80b:    19
-e80c:    01
-e80d:    00
-e80e:    47
-e80f:    40
-e810:    1f
-e811:    e8 'h'
-e812:    30
-e813:    01
-e814:    40
-e815:    0a
-e816:    71
-e817:    01
-e818:    00
+
+TOS_CommandH:
+e6f5:    55 60                  mov A, Y
+e6f7:    79 e5 dd               call [Mux0_WriteHexWord|0xe5dd]
+e6fa:    73 d9                  jmp [L_e6d5|-0x27]
+
+TOS_CommandM:
+e6fc:    8b                     ld AL, [Y]
+e6fd:    79 e5 d6               call [Mux0_WriteHexByte|0xe5d6]
+e700:    80 ad                  ld AL, #0xad	 ; ']'
+e702:    79 e6 3e               call [Mux0_WriteByte|0xe63e]
+
+L_e705:
+e705:    79 e6 67               call [Mux0_ReadHex|0xe667]
+e708:    eb                     st BL, [Y]
+e709:    01                     nop
+e70a:    30 60                  inc Y, #1
+e70c:    c0 8d                  ld BL, #0x8d
+e70e:    49                     sub! BL, AL
+e70f:    14 c4                  bz L_e6d5
+e711:    c0 ac                  ld BL, #0xac
+e713:    49                     sub! BL, AL
+e714:    14 ef                  bz L_e705
+e716:    73 e4                  jmp [TOS_CommandM|-0x1c]
+
+TOS_CommandI:
+e718:    f6 16 00               ld AL, +0x0(Y)
+e71b:    79 e5 d6               call [Mux0_WriteHexByte|0xe5d6]
+e71e:    80 ad                  ld AL, #0xad
+e720:    79 e6 3e               call [Mux0_WriteByte|0xe63e]
+
+L_e723:
+e723:    79 e6 67               call [Mux0_ReadHex|0xe667]
+e726:    73 0e                  jmp [L_e736|+0xe]
+
+L_e728:
+e728:    30 60                  inc Y, #1
+e72a:    c0 8d                  ld BL, #0x8d
+e72c:    49                     sub! BL, AL
+e72d:    14 a6                  bz L_e6d5
+e72f:    c0 ac                  ld BL, #0xac
+e731:    49                     sub! BL, AL
+e732:    14 ef                  bz L_e723
+e734:    73 e2                  jmp [TOS_CommandI|-0x1e]
+
+L_e736:
+e736:    f6 37 00               st BL, +0x0(Y)
+e739:    73 ed                  jmp [L_e728|-0x13]
+
+TosCmd_editregV:
+e73b:    39                     dec! A, #1
+
+TosCmd_editregA:
+e73c:    39                     dec! A, #1
+
+TosCmd_editregB:
+e73d:    39                     dec! A, #1
+
+TosCmd_editregX:
+e73e:    39                     dec! A, #1
+
+TosCmd_editregY:
+e73f:    39                     dec! A, #1
+
+TosCmd_editregZ:
+e740:    39                     dec! A, #1
+
+TosCmd_editregS:
+e741:    39                     dec! A, #1
+
+TosCmd_editregC:
+e742:    39                     dec! A, #1
+
+TosCmd_editregP:
+e743:    5b                     mov X, A
+e744:    3f                     dec X
+e745:    3d                     sll! A, #1
+e746:    50 12 e5 34            add B, A, Debug_Regs_P|#0xe534
+e74a:    55 26                  mov Y, B
+
+L_e74c:
+e74c:    9b                     ld A, [Y]
+e74d:    79 e5 dd               call [Mux0_WriteHexWord|0xe5dd]	 ; Print current register value
+e750:    80 ad                  ld AL, #0xad	 ; ]
+e752:    79 e6 3e               call [Mux0_WriteByte|0xe63e]
+
+L_e755:
+e755:    79 e6 67               call [Mux0_ReadHex|0xe667]
+e758:    fb                     st B, [Y]
+e759:    01                     nop
+e75a:    d5 61                  ld B, [Y++]
+e75c:    3e                     inc X
+e75d:    18 64                  bgt L_e7c3
+e75f:    c0 8d                  ld BL, #0x8d
+e761:    49                     sub! BL, AL
+e762:    14 5f                  bz L_e7c3
+e764:    c0 ac                  ld BL, #0xac
+e766:    49                     sub! BL, AL
+e767:    14 ec                  bz L_e755
+e769:    73 e1                  jmp [L_e74c|-0x1f]
+
+TosCmd_hexDump:
+    ; Hexdump
+    ; Y = address
+    ; 
+e76b:    79 e6 32               call [Mux0_EchoByte|0xe632]
+e76e:    55 60                  mov A, Y
+e770:    79 e5 dd               call [Mux0_WriteHexWord|0xe5dd]	 ; Print Address
+e773:    55 64                  mov X, Y
+e775:    6b 2f                  st X, [pc + 0x2f]	 ; start_of_row
+e777:    d0 00 0f               ld B, #0x000f
+e77a:    52 24                  and X, B	 ; number of missing bytes for alignment
+e77c:    6b 1d                  st X, [pc + 0x1d]	 ; align_bytes
+e77e:    55 42                  mov B, X
+e780:    50 44                  add X, X
+e782:    50 24                  add X, B	 ; X = align_bytes * 3
+
+L_e784:
+e784:    80 a0                  ld AL, #0xa0
+e786:    79 e6 3e               call [Mux0_WriteByte|0xe63e]	 ; Pad with spaces
+e789:    3f                     dec X
+e78a:    17 f8                  bp L_e784
+
+L_e78c:
+e78c:    85 61                  ld AL, [Y++]
+e78e:    79 e5 d6               call [Mux0_WriteHexByte|0xe5d6]	 ; Write byte
+e791:    55 64                  mov X, Y
+e793:    d0 00 0f               ld B, #0x000f
+e796:    52 24                  and X, B
+e798:    15 f2                  bnz L_e78c	 ; Continue writing bytes until end of 16 byte row
+e79a:    60 00 00               ld X, #0x0000	 ; <modified> align_bytes
+
+L_e79d:
+e79d:    80 a0                  ld AL, #0xa0
+e79f:    79 e6 3e               call [Mux0_WriteByte|0xe63e]	 ; pad with spaces
+e7a2:    3f                     dec X
+e7a3:    17 f8                  bp L_e79d
+e7a5:    90 00 00               ld A, #0x0000	 ; <modified> start_of_row
+e7a8:    5c                     mov Y, A
+
+L_e7a9:
+e7a9:    85 61                  ld AL, [Y++]
+e7ab:    53 10 00 80            or A, A, #0x0080	 ; Set ascii high bit
+e7af:    28                     inc! AL, #1
+e7b0:    14 06                  bz L_e7b8	 ; Check for DEL
+e7b2:    29                     dec! AL, #1
+e7b3:    c0 a0                  ld BL, #0xa0
+e7b5:    49                     sub! BL, AL	 ; Check for printable
+e7b6:    10 02                  bc L_e7ba
+
+L_e7b8:
+e7b8:    80 ae                  ld AL, #0xae	 ; Replace with '^'
+
+L_e7ba:
+e7ba:    79 e6 3e               call [Mux0_WriteByte|0xe63e]
+e7bd:    55 60                  mov A, Y
+e7bf:    51 80                  sub A, Z
+
+L_e7c1:
+e7c1:    17 03                  bp L_e7c6	 ; Are we past the end?
+
+L_e7c3:
+e7c3:    71 e4 d6               jmp [TosPrompt|0xe4d6]	 ; Next row
+
+L_e7c6:
+e7c6:    55 64                  mov X, Y
+e7c8:    d0 00 0f               ld B, #0x000f
+e7cb:    52 24                  and X, B
+e7cd:    15 da                  bnz L_e7a9
+e7cf:    73 9a                  jmp [TosCmd_hexDump|-0x66]
+
+TOS_CommandF:
+    ; A memset?
+    ; Y = Start
+    ; Z = End
+    ; X = Value
+e7d1:    55 40                  mov A, X
+
+L_e7d3:
+e7d3:    55 62                  mov B, Y
+e7d5:    51 82                  sub B, Z
+e7d7:    16 e8                  blt L_e7c1
+e7d9:    a5 61                  st AL, [Y++]
+e7db:    73 f6                  jmp [L_e7d3|-0xa]
+
+TOS_CommandT:
+e7dd:    55 60                  mov A, Y
+e7df:    51 80                  sub A, Z
+e7e1:    16 de                  blt L_e7c1
+e7e3:    c5 61                  ld BL, [Y++]
+e7e5:    e5 41                  st BL, [X++]
+e7e7:    73 f4                  jmp [TOS_CommandT|-0xc]
+
+TOS_CommandQ:
+e7e9:    91 e5 30               ld A, [Debug_Regs_S|0xe530]
+e7ec:    5f                     mov S, A
+e7ed:    79 e6 32               call [Mux0_EchoByte|0xe632]
+e7f0:    04                     ei
+e7f1:    66 09                  jsys Syscall_Abort
+e7f3:    01                         abort_code = (0x1)
+
+TosCmd_Launch:
+e7f4:    c6                     unknown
+e7f5:    05                     di
+e7f6:    32 c0                  clr C, #0	 ; Clear C, so our return level will be zero
+e7f8:    2e 2c 00 e8 30         wpf1 #0x00, [R_e830|0xe830]
+e7fd:    3a                     clr! A, #0
+e7fe:    d7 0c                  mov IL0(C), A	 ; Clear IL0's C
+e800:    2f 08                  ld_isr A
+e802:    90 01 00               ld A, #0x0100	 ; Start executing at address 0x0100
+e805:    d7 0e                  mov IL0(P), A
+e807:    47 40 16 e8 19 01 00   memcpy #0x17, [R_e819|0xe819], [SyscallVector|0x0100]
+e80e:    47 40 1f e8 30 01 40   memcpy #0x20, [R_e830|0xe830], [0x0140]
+e815:    0a                     reti
+e816:    71 01 00               jmp [SyscallVector|0x0100]
 
 R_e819:
-e819:    2e 0c f8 01 40         wpf #0xf8, [0x0140]
+    ; This gets copied to 0x100 by above command
+e819:    2e 0c f8 01 40         wpf #0xf8, [0x0140]	 ; Load page table (below)
 e81e:    2a                     clr! AL, #0
 e81f:    a1 f2 0d               st AL, [0xf20d]
 e822:    a1 f1 4b               st AL, [0xf14b]
@@ -15327,6 +15258,8 @@ e82c:    5e                     mov Z, A
 e82d:    71 fd 00               jmp [L_fd00|0xfd00]
 
 R_e830:
+    ; Page table
+    ; This gets copied to 0x140 by above command
 e830:    00                     HALT
 e831:    01                     nop
 e832:    02                     sf
@@ -15359,50 +15292,35 @@ e84c:    1c
 e84d:    1d
 e84e:    7e
 e84f:    7f
-e850:    55
-e851:    60
-e852:    15
-e853:    09
-e854:    91
-e855:    00
-e856:    5a
-e857:    95
-e858:    0c
-e859:    07
-e85a:    95
-e85b:    08
-e85c:    0a
+
+TOS_CommandO:
+e850:    55 60                  mov A, Y
+e852:    15 09                  bnz L_e85d
+e854:    91 00 5a               ld A, [0x005a]
+e857:    95 0c 07               ld A, @[A + 0x0007]
+e85a:    95 08 0a               ld A, [A + 0x000a]
+
+L_e85d:
 e85d:    b0 '0'
 
 R_e85e:
 e85e:    00                     HALT
 e85f:    00                     HALT
-e860:    71 e4 d6               jmp [R_e4d6|0xe4d6]
-e863:    55
-e864:    c0 '@'
-e865:    2f
-e866:    08
-e867:    55
-e868:    40
-e869:    35
-e86a:    03
-e86b:    30
-e86c:    03
-e86d:    a3 '#'
-e86e:    01
-e86f:    2f
-e870:    04
-e871:    2f
-e872:    80
-e873:    33
-e874:    60
-e875:    2f
-e876:    62
-e877:    2f
-e878:    06
-e879:    71
-e87a:    e4 'd'
-e87b:    d6 'V'
+e860:    71 e4 d6               jmp [TosPrompt|0xe4d6]
+
+TOS_CommandU:
+e863:    55 c0                  mov A, C
+e865:    2f 08                  ld_isr A
+e867:    55 40                  mov A, X
+e869:    35 03                  sll A, #4
+e86b:    30 03                  inc A, #4
+e86d:    a3 01                  st AL, [pc + 0x01]
+e86f:    2f 04                  ld_dma_mode A
+e871:    2f 80                  ld_dma_addr Z
+e873:    33 60                  not Y, #0
+e875:    2f 62                  ld_dma_count Y
+e877:    2f 06                  enable_dma
+e879:    71 e4 d6               jmp [TosPrompt|0xe4d6]
 
 R_e87c:
 e87c:    85 41                  ld AL, [X++]
@@ -15412,17 +15330,14 @@ e883:    73 f7                  jmp [R_e87c|-0x9]
 
 L_e885:
 e885:    09                     ret
-e886:    80
-e887:    ff
-e888:    a3 '#'
-e889:    58
-e88a:    80
-e88b:    b0 '0'
-e88c:    a3 '#'
-e88d:    16
-e88e:    2a
-e88f:    a3 '#'
-e890:    53
+
+TOS_CommandW:
+e886:    80 ff                  ld AL, #0xff
+e888:    a3 58                  st AL, [pc + 0x58]
+e88a:    80 b0                  ld AL, #0xb0
+e88c:    a3 16                  st AL, [pc + 0x16]
+e88e:    2a                     clr! AL, #0
+e88f:    a3 53                  st AL, [R_e8e4|+0x53]
 
 L_e891:
 e891:    83 4f                  ld AL, [pc + 0x4f]
@@ -15508,69 +15423,48 @@ e915:    00                     HALT
 e916:    2f 09                  st_isr A
 e918:    79 e5 d6               call [Mux0_WriteHexByte|0xe5d6]
 e91b:    79 e6 32               call [Mux0_EchoByte|0xe632]
-e91e:    71 e4 d6               jmp [R_e4d6|0xe4d6]
-e921:    90
-e922:    e3 'c'
-e923:    e3 'c'
-e924:    d7 'W'
-e925:    ee 'n'
-e926:    91
-e927:    e5 'e'
-e928:    36
-e929:    b1 '1'
-e92a:    e5 'e'
-e92b:    ce 'N'
-e92c:    90
-e92d:    ff
-e92e:    ab '+'
-e92f:    f6 'v'
-e930:    11
-e931:    00
-e932:    71
-e933:    e5 'e'
-e934:    6a
+e91e:    71 e4 d6               jmp [TosPrompt|0xe4d6]
+
+TOS_CommandN:
+e921:    90 e3 e3               ld A, R_e3e3|#0xe3e3	 ; Install interrupt handler into IL14
+e924:    d7 ee                  mov IL14(P), A
+e926:    91 e5 36               ld A, [Debug_Regs_PC|0xe536]
+e929:    b1 e5 ce               st A, [R_e5ce|0xe5ce]
+e92c:    90 ff ab               ld A, #0xffab
+e92f:    f6 11 00               st AL, +0x0(A)
+e932:    71 e5 6a               jmp [R_e56a|0xe56a]
 
 R_e935:
-e935:    03                     rf
-e936:    a3 03                  st AL, [pc + 0x03]
-e938:    a4 03                  st AL, @[pc + 0x03]
-e93a:    a9                     st AL, [B]
-e93b:    fc                     st B, [Z]
-e93c:    2e 00 00 fb c8 fe      wpf [0x00fb], [R_c8fe|0xc8fe]
-e942:    5e                     mov Z, A
-e943:    fc                     st B, [Z]
-e944:    a4 fc                  st AL, @[pc + -0x4]
-e946:    81 00 00               ld AL, [L_0000|0x0000]
-e949:    00                     HALT
-e94a:    00                     HALT
-e94b:    04                     ei
-e94c:    5b                     mov X, A
-e94d:    fc                     st B, [Z]
-e94e:    9d                     ld A, [S]
-e94f:    05                     di
-e950:    88                     ld AL, [A]
-e951:    fb                     st B, [Y]
-e952:    49                     sub! BL, AL
-e953:    03                     rf
-e954:    aa                     st AL, [X]
-e955:    04                     ei
-e956:    50 00                  add A, A
-e958:    00                     HALT
-e959:    03                     rf
-e95a:    a8                     st AL, [A]
-e95b:    fb                     st B, [Y]
-e95c:    bc                     st A, [Z]
-e95d:    fb                     st B, [Y]
-e95e:    36 03                  rrc A, #4
-e960:    a2 04 ed               st AL, @[0x04ed]
-e963:    03                     rf
-e964:    a5                     unknown
-e965:    03                     rf
-e966:    a6                     unknown
-e967:    03                     rf
-e968:    a7                     unknown
+e935:    03 a3                  (0x3a3)	 ; Key: A -> TosCmd_editregA
+e937:    03 a4                  (0x3a4)	 ; Key: B -> TosCmd_editregB
+e939:    03 a9                  (0x3a9)	 ; Key: C -> TosCmd_editregC
+e93b:    fc 2e                  (-0x3d2)	 ; Key: D -> TosCmd_hexDump
+e93d:    00 00                  (0x0)
+e93f:    fb c8                  (-0x438)	 ; Key: F -> TOS_CommandF
+e941:    fe 5e                  (-0x1a2)	 ; Key: G -> TOS_CommandG
+e943:    fc a4                  (-0x35c)	 ; Key: H -> TOS_CommandH
+e945:    fc 81                  (-0x37f)	 ; Key: I -> TOS_CommandI
+e947:    00 00                  (0x0)
+e949:    00 00                  (0x0)
+e94b:    04 5b                  (0x45b)	 ; Key: L -> TosCmd_Launch
 
-R_e969:
+TosCmd_editMem:
+e94d:    fc 9d                  (-0x363)	 ; Key: M -> TOS_CommandM
+e94f:    05 88                  (0x588)	 ; Key: N -> TOS_CommandN
+e951:    fb 49                  (-0x4b7)	 ; Key: O -> TOS_CommandO
+e953:    03 aa                  (0x3aa)	 ; Key: P -> TosCmd_editregP
+e955:    04 50                  (0x450)	 ; Key: Q -> TOS_CommandQ
+e957:    00 00                  (0x0)
+e959:    03 a8                  (0x3a8)	 ; Key: S -> TosCmd_editregS
+e95b:    fb bc                  (-0x444)	 ; Key: T -> TOS_CommandT
+e95d:    fb 36                  (-0x4ca)	 ; Key: U -> TOS_CommandU
+e95f:    03 a2                  (0x3a2)	 ; Key: V -> TosCmd_editregV
+e961:    04 ed                  (0x4ed)	 ; Key: W -> TOS_CommandW
+e963:    03 a5                  (0x3a5)	 ; Key: X -> TosCmd_editregX
+e965:    03 a6                  (0x3a6)	 ; Key: Y -> TosCmd_editregY
+e967:    03 a7                  (0x3a7)	 ; Key: Z -> TosCmd_editregZ
+
+TopOfLoad:
 e969:    <null bytes>
 
 

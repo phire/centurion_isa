@@ -123,3 +123,31 @@ for i in range(0xdd2f, 0xde00, 21):
 
 for i in range(0xde72, 0xdf00, 21):
     memory_addr_info[i].type = "char[21]"
+
+# TOS Command table
+# Gets indexed by the letter in the range A-Z
+num = 0
+for i in range(0xe935, 0xe968, 2):
+    key = chr(ord('A') + num)
+    num += 1
+    memory.info(i).type = ">h"
+
+    offset = memory.get_be16(i)
+    if offset == 0:
+        continue
+
+    # not a pointer directly to the function,
+    if offset < 0x7fff:
+        # if it's positive, we add it directly to the offset
+        dest = 0xe399 + offset
+    else:
+        dest = 0xe399 + (0x10000 - offset)
+
+
+    label = memory.get_label(dest)
+    if not label:
+        label = f"TOS_Command{key}"
+        memory.info(dest).label = label
+        memory_addr_info[i].comment = memory.get_label(dest)
+    memory.info(i).comment = f"Key: {key} -> {label}"
+    entry_points += [dest]

@@ -218,8 +218,9 @@
 0xe376, cstring
 0xe345, label, DoAutoboot
 0xe345, B
-0xe399, label, Debugger_Entry
-0xe39b, label, Debugger_Return
+0xe399, label, Tos_Entry
+0xe39b, label, Tos_Return
+0xe4d6, label, TosPrompt
 0xe526, label, Debug_Regs_A
 0xe526, >H
 0xe528, label, Debug_Regs_B
@@ -249,3 +250,16 @@
 0xe63e, label, Mux0_WriteByte
 0xe65c, label, Mux0_ReadyToSend
 0xe667, label, Mux0_ReadHex
+0xe73b, label, TosCmd_editregV
+0xe73c, label, TosCmd_editregA
+0xe73d, label, TosCmd_editregB
+0xe73e, label, TosCmd_editregX
+0xe73f, label, TosCmd_editregY
+0xe740, label, TosCmd_editregZ
+0xe741, label, TosCmd_editregS
+0xe742, label, TosCmd_editregC
+0xe743, label, TosCmd_editregP
+0xe76b, label, TosCmd_hexDump
+0xe7f4, label, TosCmd_Launch
+0xe94d, label, TosCmd_editMem
+0xe969, label, TopOfLoad

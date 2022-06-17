@@ -132,6 +132,24 @@
 0xe4ac ,	comment	; "("
 0xe4c3 ,	comment	; ")"
 0xe4d9 ,	comment	; '\\'
+0xe4db ,	comment	; Show prompt
+0xe4de ,	comment	; Get command
+0xe4e1 ,	comment	; 'Z'
+0xe4e6 ,	comment	; 'A'
+0xe4ee ,	comment	; Pointers are relative to Entry
+0xe4f1 ,	comment	; Pointer Offset Table
+0xe4fb ,	comment	; Pointer is positive, we just add it to Entry, and jump to it with A = 0
+0xe4fc ,	comment	; Patch jmp at e521
+0xe500,	pre_comment 	; Pointer is negative
+	 	; These commands take arguments which this dispatcher should read.
+0xe500 ,	comment	; Subtract it from Entry to get a postive offset
+0xe501 ,	comment	; Patch jmp at e512
+0xe506 ,	comment	; Clear X, Y and Z
+0xe576 ,	comment	; save IL6's current Handler
+0xe578 ,	comment	; load a new one
+0xe57d ,	comment	; Allow interrupt to trigger
+0xe57e ,	comment	; wait
+0xe586,	pre_comment 	; Temporary IL6 interrupt handler
 0xe5d6,	pre_comment 	; Mux0_WriteHexByte
 	 	; Takes a Byte in A, converts to hex and writes to MUX0 with leading space
 0xe5dd,	pre_comment 	; Mux0_WriteHexWord
@@ -151,3 +169,39 @@
 		; B is set to 0xf200 in the above call
 0xe64b ,	comment	; If byte = '\r'
 0xe653 ,	comment	; also print '\n'
+0xe695 ,	comment	; Check in range a
+0xe700 ,	comment	; ']'
+0xe74d ,	comment	; Print current register value
+0xe750 ,	comment	; ]
+0xe76b,	pre_comment 	; Hexdump
+	 	; Y = address
+	 	;
+0xe770 ,	comment	; Print Address
+0xe775 ,	comment	; start_of_row
+0xe77a ,	comment	; number of missing bytes for alignment
+0xe77c ,	comment	; align_bytes
+0xe782 ,	comment	; X = align_bytes * 3
+0xe786 ,	comment	; Pad with spaces
+0xe78e ,	comment	; Write byte
+0xe798 ,	comment	; Continue writing bytes until end of 16 byte row
+0xe79a ,	comment	; <modified> align_bytes
+0xe79f ,	comment	; pad with spaces
+0xe7a5 ,	comment	; <modified> start_of_row
+0xe7ab ,	comment	; Set ascii high bit
+0xe7b0 ,	comment	; Check for DEL
+0xe7b5 ,	comment	; Check for printable
+0xe7b8 ,	comment	; Replace with '^'
+0xe7c1 ,	comment	; Are we past the end?
+0xe7c3 ,	comment	; Next row
+0xe7d1,	pre_comment 	; A memset?
+	 	; Y = Start
+	 	; Z = End
+	 	; X = Value
+0xe7f6 ,	comment	; Clear C, so our return level will be zero
+0xe7fe ,	comment	; Clear IL0's C
+0xe802 ,	comment	; Start executing at address 0x0100
+0xe819,	pre_comment 	; This gets copied to 0x100 by above command
+0xe819 ,	comment	; Load page table (below)
+0xe830,	pre_comment 	; Page table
+	 	; This gets copied to 0x140 by above command
+0xe921 ,	comment	; Install interrupt handler into IL14
