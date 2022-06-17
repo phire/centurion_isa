@@ -24,6 +24,7 @@
 0x8b47 ,	comment	; pop DeviceInstance
 0x8b49 ,	comment	; B = FileOP struct
 0x8b4b ,	comment	; Special case?
+0x8ce1,	pre_comment 	; arg in A, should be postive
 0xaa27 ,	comment	; move stack down
 0xaa30 ,	comment	; rearange our stack
 0xaa33 ,	comment	; store X
@@ -87,9 +88,13 @@
 0xcde4 ,	comment	; Clear context register
 0xcde6 ,	comment	; Memset? all registers in other interrupt levels
 0xcdec ,	comment	; Setup Stack? This isn't a very good stack pointer
+0xcdf0 ,	comment	; Store the A variable that WIPL gives us
 0xce09 ,	comment	; BL should now be the DISK number.
 		; 0/1 for Hawk, 10/11 for Finch, 20/21 for Phoenix
 0xce1d ,	comment	; Install abort handler in interrupt level 15
+0xce28 ,	comment	; Map OPSYS's page 0 to 0x7800
+0xce37 ,	comment	; could this be a memcpy of 0x0000 to 0x7800?
+0xce4c ,	comment	; memcpy
 0xcebf,	pre_comment 	; This initilizes all devices in the null-terminated EarlyInitDevices array
 	 	; Which in this case is just CrtDevice_Init
 0xcecc,	pre_comment 	; LOS Prompt:
@@ -110,7 +115,11 @@
 0xd019 ,	comment	; Filename
 0xd074 ,	comment	; might be a single byte copy? But why have a special blk instruction for that?
 0xd08e ,	comment	; arg4
+0xd0bb ,	comment	; This is the value in A that WIPL gave us
 0xd0c0,	pre_comment 	; Read configuration dataset
+0xd0ca ,	comment	; Clear the screen
+0xd0cc ,	comment	; Wait until screen clear has finished
+0xd0d0 ,	comment	; Switch to LOS's page0
 0xd0d8 ,	comment	; "SYSTEM"
 0xd0f9 ,	comment	; "TIB   "
 0xd10a ,	comment	; "DISK  "

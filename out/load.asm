@@ -2665,6 +2665,7 @@ L_8cdb:
 8ce0:    0f                     rsys
 
 Syscall_04:
+    ; arg in A, should be postive
 8ce1:    b3 0c                  st A, [pc + 0x0c]
 8ce3:    93 6f                  ld A, [Syscall_02_Singleton|+0x6f]
 8ce5:    15 03                  bnz L_8cea
@@ -12514,7 +12515,7 @@ R_cde4:
 cde4:    32 c0                  clr C, #0	 ; Clear context register
 cde6:    47 9c ef 00 00 10      memset #0xf0, #0x00, [0x0010]	 ; Memset? all registers in other interrupt levels
 cdec:    55 ba ce b9            mov S, S, R_ceb9|#0xceb9	 ; Setup Stack? This isn't a very good stack pointer
-cdf0:    b1 e1 1d               st A, [R_e11d|0xe11d]
+cdf0:    b1 e1 1d               st A, [WIPL_A|0xe11d]	 ; Store the A variable that WIPL gives us
 cdf3:    55 88                  mov Z, Z
 cdf5:    14 0c                  bz L_ce03
 cdf7:    31 80                  dec Z, #1
@@ -12548,19 +12549,19 @@ ce1f:    3a                     clr! A, #0
 ce20:    d7 ac                  mov IL10(C), A
 ce22:    90 01 00               ld A, #0x0100
 ce25:    b1 00 5a               st A, [0x005a]
-ce28:    2e 2c 78 e1 1a         wpf1 #0x78, [R_e11a|0xe11a]
+ce28:    2e 2c 78 e1 1a         wpf1 #0x78, [OPSYS_Page0|0xe11a]	 ; Map OPSYS's page 0 to 0x7800
 ce2d:    d0 78 00               ld B, #0x7800
 ce30:    55 26                  mov Y, B
 ce32:    32 20                  clr B, #0
 ce34:    90 07 ff               ld A, #0x07ff
-ce37:    f7                     ?F7?
+ce37:    f7                     ?F7?	 ; could this be a memcpy of 0x0000 to 0x7800?
 ce38:    47 4c 01 e3 99 00 1a   memcpy #0x02, Tos_Entry|#0xe399, [0x001a]
 ce3f:    2e 2c 78 e1 19         wpf1 #0x78, [R_e119|0xe119]
 ce44:    d0 01 00               ld B, #0x0100
 ce47:    55 26                  mov Y, B
 ce49:    90 ee ff               ld A, #0xeeff
-ce4c:    f7                     ?F7?
-ce4d:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
+ce4c:    f7                     ?F7?	 ; memcpy
+ce4d:    2e 2c 00 e1 1a         wpf1 #0x00, [OPSYS_Page0|0xe11a]
 ce52:    90 78 05               ld A, #0x7805
 ce55:    b1 ad c6               st A, [R_adc6|0xadc6]
 ce58:    47 4c 04 00 00 00 05 7f 78 00 memcpy #0x05, #0x000000057f, [0x7800]
@@ -12785,7 +12786,7 @@ d044:    91 d2 82               ld A, [R_d282|0xd282]
 d047:    b3 09                  st A, [pc + 0x09]
 
 L_d049:
-d049:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
+d049:    2e 2c 00 e1 1a         wpf1 #0x00, [OPSYS_Page0|0xe11a]
 d04e:    66 4c                  jsys Syscall_4c
 d050:    01 90                      arg1 = (0x190)
 d052:    00 00                      arg2 = (0x0)
@@ -12795,7 +12796,7 @@ R_d055:
 d055:    00 00                      arg4 = (0x0)
 d057:    e1 21                      arg5 = ReadBuffer
 d059:    01                         arg6 = (0x1)
-d05a:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
+d05a:    2e 2c 00 e1 18         wpf1 #0x00, [LOS_Page0|0xe118]
 d05f:    55 98 e1 21            mov Z, Z, ReadBuffer|#0xe121
 d063:    95 88 02               ld A, [Z + 0x0002]
 d066:    d0 00 4c               ld B, #0x004c
@@ -12824,8 +12825,8 @@ d092:    73 b5                  jmp [L_d049|-0x4b]
 L_d094:
 d094:    05                     di
 d095:    c6                     unknown
-d096:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
-d09b:    2e 2c 78 e1 1a         wpf1 #0x78, [R_e11a|0xe11a]
+d096:    2e 2c 00 e1 18         wpf1 #0x00, [LOS_Page0|0xe118]
+d09b:    2e 2c 78 e1 1a         wpf1 #0x78, [OPSYS_Page0|0xe11a]
 d0a0:    32 20                  clr B, #0
 d0a2:    2f 28                  ld_isr B
 d0a4:    2f 04                  ld_dma_mode A
@@ -12837,17 +12838,17 @@ d0b2:    e1 f2 0f               st BL, [0xf20f]
 d0b5:    31 20                  dec B, #1
 d0b7:    e1 f2 0d               st BL, [0xf20d]
 d0ba:    5c                     mov Y, A
-d0bb:    91 e1 1d               ld A, [R_e11d|0xe11d]
+d0bb:    91 e1 1d               ld A, [WIPL_A|0xe11d]	 ; This is the value in A that WIPL gave us
 d0be:    75 60                  jmp [Y]
 
 R_d0c0:
     ; Read configuration dataset
 d0c0:    47 4c 01 e3 11 e2 b7   memcpy #0x02, ClearScreen|#0xe311, [CRT0_Write_String|0xe2b7]
 d0c7:    d0 e2 b1               ld B, CRT0_WriteStruct|#0xe2b1
-d0ca:    66 10                  jsys Syscall_DoFileOp
-d0cc:    66 08                  jsys Syscall_Flush
+d0ca:    66 10                  jsys Syscall_DoFileOp	 ; Clear the screen
+d0cc:    66 08                  jsys Syscall_Flush	 ; Wait until screen clear has finished
 d0ce:    e2 b1                      op_struct = CRT0_WriteStruct
-d0d0:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
+d0d0:    2e 2c 00 e1 18         wpf1 #0x00, [LOS_Page0|0xe118]	 ; Switch to LOS's page0
 d0d5:    79 d2 74               call [R_d274|0xd274]
 d0d8:    47 8e 05 d3 d9 d3 d4 c5 cd 06 memcmp #0x06, #0xd3d9d3d4c5cd, [Y]	 ; "SYSTEM"
 d0e2:    14 03                  bz L_d0e7
@@ -12905,7 +12906,7 @@ d16d:    71 d7 97               jmp [R_d797|0xd797]
 R_d170:
 d170:    47 4c 01 e2 dc e2 b7   memcpy #0x02, R_e2dc|#0xe2dc, [CRT0_Write_String|0xe2b7]	 ; "INVALID CONFIGURATION DATA SET\r\n"
 d177:    d0 e2 b1               ld B, CRT0_WriteStruct|#0xe2b1
-d17a:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
+d17a:    2e 2c 00 e1 1a         wpf1 #0x00, [OPSYS_Page0|0xe11a]
 d17f:    66 10                  jsys Syscall_DoFileOp
 d181:    66 08                  jsys Syscall_Flush
 d183:    e2 b1                      op_struct = CRT0_WriteStruct
@@ -12979,11 +12980,11 @@ d255:    55 60                  mov A, Y
 d257:    31 01                  dec A, #2
 d259:    b1 e2 b7               st A, [CRT0_Write_String|0xe2b7]
 d25c:    d0 e2 b1               ld B, CRT0_WriteStruct|#0xe2b1
-d25f:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
+d25f:    2e 2c 00 e1 1a         wpf1 #0x00, [OPSYS_Page0|0xe11a]
 d264:    66 10                  jsys Syscall_DoFileOp
 d266:    66 08                  jsys Syscall_Flush
 d268:    e2 b1                      op_struct = CRT0_WriteStruct
-d26a:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
+d26a:    2e 2c 00 e1 18         wpf1 #0x00, [LOS_Page0|0xe118]
 d26f:    50 76 00 50            add Y, Y, #0x0050
 d273:    09                     ret
 
@@ -12992,7 +12993,7 @@ d274:    81 db 19               ld AL, [DiskNum|0xdb19]
 d277:    a3 0b                  st AL, [pc + 0x0b]	 ; set disknum
 
 L_d279:
-d279:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
+d279:    2e 2c 00 e1 1a         wpf1 #0x00, [OPSYS_Page0|0xe11a]
 d27e:    66 4c                  jsys Syscall_4c
 d280:    01 90                      arg1 = (0x190)
 
@@ -13004,7 +13005,7 @@ R_d285:
 d285:    00 00                      arg4 = (0x0)
 d287:    e1 21                      arg5 = ReadBuffer
 d289:    01                         arg6 = (0x1)
-d28a:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
+d28a:    2e 2c 00 e1 18         wpf1 #0x00, [LOS_Page0|0xe118]
 d28f:    55 76 e1 21            mov Y, Y, ReadBuffer|#0xe121
 
 R_d293:
@@ -13440,7 +13441,7 @@ d7b7:    50 76 00 34            add Y, Y, #0x0034
 d7bb:    7e 63                  push {Y, Z}
 d7bd:    47 40 00 db 19 d7 cf   memcpy #0x01, [DiskNum|0xdb19], [R_d7cf|0xd7cf]
 d7c4:    d6 89 d7 d2            st Z, [R_d7d2|0xd7d2]
-d7c8:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
+d7c8:    2e 2c 00 e1 1a         wpf1 #0x00, [OPSYS_Page0|0xe11a]
 d7cd:    66 02                  jsys Syscall_02
 
 R_d7cf:
@@ -13451,7 +13452,7 @@ R_d7d2:
 d7d2:    00                     HALT
 d7d3:    00                     HALT
 d7d4:    01                     nop
-d7d5:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
+d7d5:    2e 2c 00 e1 18         wpf1 #0x00, [LOS_Page0|0xe118]
 d7da:    7f 63                  pop {Y, Z}
 d7dc:    38                     inc! A, #1
 d7dd:    5e                     mov Z, A
@@ -13463,7 +13464,7 @@ d7ec:    14 2f                  bz L_d81d
 d7ee:    7e 63                  push {Y, Z}
 d7f0:    47 40 00 db 19 d8 02   memcpy #0x01, [DiskNum|0xdb19], [R_d802|0xd802]
 d7f7:    d6 89 d8 05            st Z, [R_d805|0xd805]
-d7fb:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
+d7fb:    2e 2c 00 e1 1a         wpf1 #0x00, [OPSYS_Page0|0xe11a]
 d800:    66 02                  jsys Syscall_02
 
 R_d802:
@@ -13474,7 +13475,7 @@ R_d805:
 d805:    00                     HALT
 d806:    00                     HALT
 d807:    01                     nop
-d808:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
+d808:    2e 2c 00 e1 18         wpf1 #0x00, [LOS_Page0|0xe118]
 d80d:    7f 63                  pop {Y, Z}
 d80f:    38                     inc! A, #1
 d810:    5e                     mov Z, A
@@ -13666,7 +13667,7 @@ d9d8:    16 14                  blt L_d9ee
 R_d9da:
 d9da:    47 4c 01 e3 16 e2 b7   memcpy #0x02, R_e316|#0xe316, [CRT0_Write_String|0xe2b7]	 ; "OPSYS OVERSIZE-LOAD PROCESS DISCONTINUED\r\n"
 d9e1:    d0 e2 b1               ld B, CRT0_WriteStruct|#0xe2b1
-d9e4:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
+d9e4:    2e 2c 00 e1 1a         wpf1 #0x00, [OPSYS_Page0|0xe11a]
 d9e9:    66 10                  jsys Syscall_DoFileOp
 d9eb:    05                     di
 
@@ -13675,7 +13676,7 @@ d9ec:    73 fe                  jmp [L_d9ec|-0x2]
 
 L_d9ee:
 d9ee:    d6 89 01 01            st Z, [0x0101]
-d9f2:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
+d9f2:    2e 2c 00 e1 1a         wpf1 #0x00, [OPSYS_Page0|0xe11a]
 d9f7:    81 db 19               ld AL, [DiskNum|0xdb19]
 d9fa:    a3 06                  st AL, [pc + 0x06]
 d9fc:    55 80                  mov A, Z
@@ -13687,7 +13688,7 @@ da05:    00                     HALT
 da06:    00                     HALT
 da07:    01                     nop
 da08:    b1 e0 6b               st A, [R_e06b|0xe06b]
-da0b:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
+da0b:    2e 2c 00 e1 18         wpf1 #0x00, [LOS_Page0|0xe118]
 da10:    2e 1c f8 01 61         rpf #0xf8, [PageTableOne|0x0161]
 da15:    2e 1c f8 01 81         rpf #0xf8, [PageTableTwo|0x0181]
 da1a:    47 9c 0b ff 01 48      memset #0x0c, #0xff, [0x0148]
@@ -13735,12 +13736,12 @@ da6f:    50 10 08 00            add A, A, #0x0800
 da73:    5e                     mov Z, A
 da74:    34 0a                  srl A, #11
 da76:    47 4d 00 1e 10 01 81   memcpy #0x01, #0x1e, [A + 0x0181]
-da7d:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
+da7d:    2e 2c 00 e1 1a         wpf1 #0x00, [OPSYS_Page0|0xe11a]
 da82:    47 4d 00 1e 10 01 81   memcpy #0x01, #0x1e, [A + 0x0181]
 da89:    47 4d 00 1e 10 01 61   memcpy #0x01, #0x1e, [A + 0x0161]
 da90:    d2 01 07               ld B, @[0x0107]
 da93:    47 41 1f 01 61 20 36   memcpy #0x20, [PageTableOne|0x0161], [B + 0x0036]
-da9a:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
+da9a:    2e 2c 00 e1 18         wpf1 #0x00, [LOS_Page0|0xe118]
 da9f:    5d                     mov B, A
 daa0:    51 10 00 1c            sub A, A, #0x001c
 daa4:    67 9d fd 30 01 82      memset A, #0xfd, [B + 0x0182]
@@ -13781,7 +13782,7 @@ db03:    50 76 db 30            add Y, Y, R_db30|#0xdb30
 db07:    d6 89 db 1c            st Z, [R_db1c|0xdb1c]
 db0b:    d6 67 db 1a            st Y, [R_db1a|0xdb1a]
 db0f:    79 df 1a               call [R_df1a|0xdf1a]
-db12:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
+db12:    2e 2c 00 e1 1a         wpf1 #0x00, [OPSYS_Page0|0xe11a]
 db17:    66 02                  jsys Syscall_02
 
 DiskNum:
@@ -13795,7 +13796,7 @@ db1c:    00                     HALT
 db1d:    00                     HALT
 db1e:    01                     nop
 db1f:    5e                     mov Z, A
-db20:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
+db20:    2e 2c 00 e1 18         wpf1 #0x00, [LOS_Page0|0xe118]
 db25:    2e 0c 70 01 61         wpf #0x70, [PageTableOne|0x0161]
 db2a:    30 80                  inc Z, #1
 
@@ -13856,7 +13857,7 @@ dd02:    50 76 dd 2f            add Y, Y, R_dd2f|#0xdd2f
 dd06:    d6 89 dd 1b            st Z, [R_dd1b|0xdd1b]
 dd0a:    d6 67 dd 19            st Y, [R_dd19|0xdd19]
 dd0e:    79 df 1a               call [R_df1a|0xdf1a]
-dd11:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
+dd11:    2e 2c 00 e1 1a         wpf1 #0x00, [OPSYS_Page0|0xe11a]
 dd16:    66 02                  jsys Syscall_02
 
 R_dd18:
@@ -13870,7 +13871,7 @@ dd1b:    00                     HALT
 dd1c:    00                     HALT
 dd1d:    01                     nop
 dd1e:    5e                     mov Z, A
-dd1f:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
+dd1f:    2e 2c 00 e1 18         wpf1 #0x00, [LOS_Page0|0xe118]
 dd24:    2e 0c 70 01 61         wpf #0x70, [PageTableOne|0x0161]
 dd29:    30 80                  inc Z, #1
 
@@ -13924,7 +13925,7 @@ de45:    50 76 de 72            add Y, Y, R_de72|#0xde72
 de49:    d6 89 de 5e            st Z, [R_de5e|0xde5e]
 de4d:    d6 67 de 5c            st Y, [R_de5c|0xde5c]
 de51:    79 df 1a               call [R_df1a|0xdf1a]
-de54:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
+de54:    2e 2c 00 e1 1a         wpf1 #0x00, [OPSYS_Page0|0xe11a]
 de59:    66 02                  jsys Syscall_02
 
 R_de5b:
@@ -13938,7 +13939,7 @@ de5e:    00                     HALT
 de5f:    00                     HALT
 de60:    01                     nop
 de61:    5e                     mov Z, A
-de62:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
+de62:    2e 2c 00 e1 18         wpf1 #0x00, [LOS_Page0|0xe118]
 de67:    2e 0c 70 01 61         wpf #0x70, [PageTableOne|0x0161]
 de6c:    30 80                  inc Z, #1
 
@@ -14009,7 +14010,7 @@ df5e:    35 22                  sll B, #3
 df60:    50 42                  add B, X
 df62:    95 a1                  ld A, [S++]
 df64:    e8                     st BL, [A]
-df65:    2e 2c 00 e1 1a         wpf1 #0x00, [R_e11a|0xe11a]
+df65:    2e 2c 00 e1 1a         wpf1 #0x00, [OPSYS_Page0|0xe11a]
 df6a:    e8                     st BL, [A]
 df6b:    e5 08 e0               st BL, [A + -0x020]
 df6e:    92 01 07               ld A, @[0x0107]
@@ -14024,7 +14025,7 @@ df7e:    26 10                  rrc AL, #1
 df80:    73 f9                  jmp [L_df7b|-0x7]
 
 L_df82:
-df82:    2e 2c 00 e1 18         wpf1 #0x00, [R_e118|0xe118]
+df82:    2e 2c 00 e1 18         wpf1 #0x00, [LOS_Page0|0xe118]
 df87:    cb                     ld BL, [Y]
 df88:    43 13                  or BL, AL
 df8a:    eb                     st BL, [Y]
@@ -14081,8 +14082,8 @@ dfec:    73 db                  jmp [L_dfc9|-0x25]
 
 L_dfee:
 dfee:    2e 0c 78 01 61         wpf #0x78, [PageTableOne|0x0161]
-dff3:    2e 2c 02 e1 18         wpf1 #0x02, [R_e118|0xe118]
-dff8:    2e 2c 03 e1 18         wpf1 #0x03, [R_e118|0xe118]
+dff3:    2e 2c 02 e1 18         wpf1 #0x02, [LOS_Page0|0xe118]
+dff8:    2e 2c 03 e1 18         wpf1 #0x03, [LOS_Page0|0xe118]
 dffd:    91 01 44               ld A, [0x0144]
 e000:    52 10 ff fe            and A, A, #0xfffe
 e004:    b1 01 44               st A, [0x0144]
@@ -14331,21 +14332,21 @@ e116:    00                     HALT
 R_e117:
 e117:    00                     HALT
 
-R_e118:
-e118:    00                     HALT
+LOS_Page0:
+e118:    00                     (0x0)
 
 R_e119:
 e119:    0f                     rsys
 
-R_e11a:
-e11a:    1f 00                  b?F L_e11c
+OPSYS_Page0:
+e11a:    1f                     (0x1f)
 
-L_e11c:
+R_e11b:
+e11b:    00                     HALT
 e11c:    00                     HALT
 
-R_e11d:
-e11d:    00                     HALT
-e11e:    00                     HALT
+WIPL_A:
+e11d:    00 00                  (0x0)
 
 R_e11f:
 e11f:    1e                     (0x1e)
