@@ -103,8 +103,6 @@ def AluMatch(pc, mem):
             case 0x50:
                 dst = Reg16Ref(2)
                 src = Reg16Ref(0)
-
-        mnemonic += '!'
         src2 = None
     else:
         mode = mem[pc]
