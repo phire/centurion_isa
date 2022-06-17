@@ -7934,9 +7934,9 @@ aed8:    90 ae ed               ld A, R_aeed|#0xaeed
 
 L_aedb:
 aedb:    32 c0                  clr C, #0
-aedd:    d7 0e                  mov A, IL0(P)	 ; Rewrite IL0's program counter to R_aeed
+aedd:    d7 0e                  mov IL0(P), A	 ; Rewrite IL0's program counter to R_aeed
 aedf:    3a                     clr! A, #0
-aee0:    d7 0c                  mov A, IL0(C)	 ; clearing IL0's context register presumably also changes it's Page Table Base
+aee0:    d7 0c                  mov IL0(C), A	 ; clearing IL0's context register presumably also changes it's Page Table Base
 
 L_aee2:
 aee2:    6b 33                  st X, [pc + 0x33]	 ; Patch ld A, #0x0000 at 0xaf16
@@ -8820,12 +8820,12 @@ b445:    09                     ret
 
 InitLevel10Device:
 b446:    90 b4 61               ld A, Level10_InterruptHandler|#0xb461
-b449:    d7 ae                  mov A, IL10(P)
+b449:    d7 ae                  mov IL10(P), A
 b44b:    90 b4 56               ld A, R_b456|#0xb456	 ; Setup stack at the end of this Init function
                                                     	 ; We don't need it anymore, so overwrite it
-b44e:    d7 aa                  mov A, IL10(S)
+b44e:    d7 aa                  mov IL10(S), A
 b450:    90 00 ff               ld A, #0x00ff
-b453:    d7 a8                  mov A, IL10(Z)
+b453:    d7 a8                  mov IL10(Z), A
 b455:    09                     ret
 
 R_b456:
@@ -9278,7 +9278,7 @@ b6eb:    a1 b7 b3               st AL, [R_b7b3|0xb7b3]
 b6ee:    95 a1                  ld A, [S++]
 b6f0:    b1 b7 a1               st A, [R_b7a1|0xb7a1]
 b6f3:    95 68 0f               ld A, [Y + 0x000f]
-b6f6:    d7 28                  mov A, IL2(Z)
+b6f6:    d7 28                  mov IL2(Z), A
 b6f8:    f6 31 0f               st BL, +0xf(A)
 b6fb:    95 a1                  ld A, [S++]
 b6fd:    b1 b7 a7               st A, [R_b7a7|0xb7a7]
@@ -9440,7 +9440,7 @@ L_b7dc:
 b7dc:    a1 b9 49               st AL, [R_b949|0xb949]
 b7df:    a3 23                  st AL, [R_b804|+0x23]
 b7e1:    90 b9 3c               ld A, R_b93c|#0xb93c
-b7e4:    d7 2e                  mov A, IL2(P)
+b7e4:    d7 2e                  mov IL2(P), A
 b7e6:    85 68 0f               ld AL, [Y + 0x000f]
 b7e9:    c0 0c                  ld BL, #0x0c
 b7eb:    42 31                  and AL, BL
@@ -9545,7 +9545,7 @@ b8a1:    95 41                  ld A, [X++]
 b8a3:    5c                     mov Y, A
 b8a4:    b1 01 3f               st A, [0x013f]
 b8a7:    95 68 0f               ld A, [Y + 0x000f]
-b8aa:    d7 28                  mov A, IL2(Z)
+b8aa:    d7 28                  mov IL2(Z), A
 b8ac:    f6 11 0f               st AL, +0xf(A)
 b8af:    95 41                  ld A, [X++]
 b8b1:    b1 b7 a9               st A, [R_b7a9|0xb7a9]
@@ -9817,7 +9817,7 @@ ba75:    65 a1                  ld X, [S++]
 
 L_ba77:
 ba77:    3a                     clr! A, #0
-ba78:    d7 12                  mov A, IL1(B)
+ba78:    d7 12                  mov IL1(B), A
 ba7a:    0a                     reti
 ba7b:    f6 19 0f               st AL, +0xf(Z)
 ba7e:    e6 12                  mov A, IL1(B)
@@ -10465,7 +10465,7 @@ bf6d:    09                     ret
 R_bf6e:
 bf6e:    79 cc 80               call [R_cc80|0xcc80]
 bf71:    3a                     clr! A, #0
-bf72:    d7 12                  mov A, IL1(B)
+bf72:    d7 12                  mov IL1(B), A
 
 L_bf74:
 bf74:    d5 68 0f               ld B, [Y + 0x000f]
@@ -10494,7 +10494,7 @@ bf96:    85 41                  ld AL, [X++]
 bf98:    a3 0c                  st AL, [pc + 0x0c]
 bf9a:    7c d3                  call @[pc + -0x2d]
 bf9c:    3a                     clr! A, #0
-bf9d:    d7 12                  mov A, IL1(B)
+bf9d:    d7 12                  mov IL1(B), A
 
 L_bf9f:
 bf9f:    d5 68 0f               ld B, [Y + 0x000f]
@@ -10510,7 +10510,7 @@ bfaf:    73 14                  jmp [R_bfc5|+0x14]
 R_bfb1:
 bfb1:    7c bc                  call @[pc + -0x44]
 bfb3:    3a                     clr! A, #0
-bfb4:    d7 12                  mov A, IL1(B)
+bfb4:    d7 12                  mov IL1(B), A
 
 L_bfb6:
 bfb6:    d5 68 0f               ld B, [Y + 0x000f]
@@ -11355,12 +11355,12 @@ c5a2:    73 cf                  jmp [L_c573|-0x31]
 
 CrtDevice_Init:
 c5a4:    90 c5 ee               ld A, CmdDeviceObj|#0xc5ee
-c5a7:    d7 6a                  mov A, IL6(S)	 ; Set exception handler's S register
+c5a7:    d7 6a                  mov IL6(S), A	 ; Set exception handler's S register
                                              	 ; Doesn't actually get used as a Stack
 c5a9:    90 c3 22               ld A, CrtDevice_InterruptHandler|#0xc322
 
 L_c5ac:
-c5ac:    d7 6e                  mov A, IL6(P)	 ; Install exception handler
+c5ac:    d7 6e                  mov IL6(P), A	 ; Install exception handler
 c5ae:    55 60                  mov A, Y
 c5b0:    b5 a2                  st A, [--S]
 c5b2:    6d a2                  st X, [--S]
@@ -12074,7 +12074,7 @@ ca9b:    2f 06                  enable_dma
 ca9d:    59                     sub! B, A
 ca9e:    f0 00 00               st B, #0x0000
 caa1:    3a                     clr! A, #0
-caa2:    d7 12                  mov A, IL1(B)
+caa2:    d7 12                  mov IL1(B), A
 caa4:    09                     ret
 
 R_caa5:
@@ -12543,9 +12543,9 @@ L_ce14:
 ce14:    d2 01 09               ld B, @[DevicesPtr|0x0109]
 ce17:    a5 28 19               st AL, [B + 0x0019]
 ce1a:    90 ad c8               ld A, AbortHandler|#0xadc8
-ce1d:    d7 fe                  mov A, IL15(P)	 ; Install abort handler in interrupt level 15
+ce1d:    d7 fe                  mov IL15(P), A	 ; Install abort handler in interrupt level 15
 ce1f:    3a                     clr! A, #0
-ce20:    d7 ac                  mov A, IL10(C)
+ce20:    d7 ac                  mov IL10(C), A
 ce22:    90 01 00               ld A, #0x0100
 ce25:    b1 00 5a               st A, [0x005a]
 ce28:    2e 2c 78 e1 1a         wpf1 #0x78, [R_e11a|0xe11a]
@@ -12570,7 +12570,7 @@ ce6f:    2e 0d f9 00 36         wpf #0xf9, [A + 0x0036]
 ce74:    2e 0d fb 00 36         wpf #0xfb, [A + 0x0036]
 ce79:    47 44 0f 00 36 01 81   memcpy #0x10, [A + 0x0036], [PageTableTwo|0x0181]
 ce80:    90 00 01               ld A, #0x0001
-ce83:    d7 6c                  mov A, IL6(C)
+ce83:    d7 6c                  mov IL6(C), A
 ce85:    60 ff ff               ld X, #0xffff
 
 L_ce88:
@@ -14737,11 +14737,11 @@ e571:    f6 30 00               ld BL, +0x0(A)
 e574:    e6 6e                  mov A, IL6(P)
 e576:    b3 08                  st A, [pc + 0x08]
 e578:    90 e5 86               ld A, R_e586|#0xe586
-e57b:    d7 6e                  mov A, IL6(P)
+e57b:    d7 6e                  mov IL6(P), A
 e57d:    04                     ei
 e57e:    0e                     dly
 e57f:    90 00 00               ld A, #0x0000
-e582:    d7 6e                  mov A, IL6(P)
+e582:    d7 6e                  mov IL6(P), A
 e584:    73 0a                  jmp [L_e590|+0xa]
 
 R_e586:
@@ -14774,7 +14774,7 @@ e5b5:    55 ab e5 30            mov S, S, [Debug_Regs_S|0xe530]
 e5b9:    55 cd e5 32            mov C, C, [Debug_Regs_C|0xe532]
 e5bd:    55 ef e5 34            mov P, P, [Debug_Regs_P|0xe534]
 e5c1:    91 e5 39               ld A, [R_e539|0xe539]
-e5c4:    d7 a8                  mov A, IL10(Z)
+e5c4:    d7 a8                  mov IL10(Z), A
 e5c6:    91 e5 26               ld A, [Debug_Regs_A|0xe526]
 e5c9:    6e                     unknown
 e5ca:    e5 'e'

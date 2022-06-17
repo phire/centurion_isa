@@ -261,7 +261,7 @@ def MatchPushPop(pc, mem):
     return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, MultiRegRef(start, count)), bytes )
 
 def MatchD7_E6(pc, mem):
-    store = mem[pc] == 0xd6
+    store = mem[pc] == 0xd7
 
     level = mem[pc+1] >> 4
     ref = LvlRegRef(level, Reg16Ref(mem[pc+1] & 0x0f))
