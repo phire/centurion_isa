@@ -15,20 +15,20 @@ TEST_3:
 8847:    00 00                  (0x0)
 
 Entry_CPU_INSTRUCTION_TEST:
-8849:    90 07 cc               ld A, #0x07cc
+8849:    90 07 cc               ld A, 0x07cc
 884c:    50 80                  add A, Z
 884e:    7d 00                  call [A]
 8850:    "\x1b\x1c\x0cCPU INSTRUCTION TEST, CONTROL-C TO EXIT\r\n\0"
 887d:    6d a2                  st X, [--S]
 887f:    55 80                  mov A, Z
 8881:    b5 a2                  st A, [--S]
-8883:    60 00 20               ld X, #0x0020	 ; This is a testing that the 60 3 byte instruction is working.
-                                             	 ; Which it will use later to test other multi-byte instructions
-                                             	 ; If the operand isn't consumed, then a HALT instruction will be executed
-8886:    90 05 a1               ld A, #0x05a1
+8883:    60 00 20               ld X, 0x0020	 ; This is a testing that the 60 3 byte instruction is working.
+                                            	 ; Which it will use later to test other multi-byte instructions
+                                            	 ; If the operand isn't consumed, then a HALT instruction will be executed
+8886:    90 05 a1               ld A, 0x05a1
 8889:    50 80                  add A, Z
 888b:    5c                     mov Y, A	 ; This might be installing an exception handler?
-888c:    90 00 10               ld A, #0x0010
+888c:    90 00 10               ld A, 0x0010
 
 L_888f:
 888f:    c5 61                  ld BL, [Y++]
@@ -37,7 +37,7 @@ L_888f:
 8894:    15 f9                  bnz L_888f	 ; clearing all registers?
 8896:    03                     rf
 8897:    07                     rl
-8898:    c0 01                  ld BL, #0x01	 ; if A is empty. This would set the overflow flag
+8898:    c0 01                  ld BL, 0x01	 ; if A is empty. This would set the overflow flag
 889a:    11 01                  bnc L_889d	 ; Some tests for all the branch instructions
 889c:    00                     HALT
 
@@ -164,7 +164,7 @@ L_88f6:
 88f8:    00                     HALT
 
 L_88f9:
-88f9:    2a                     clr! AL, #0
+88f9:    2a                     clr AL, #0
 88fa:    11 01                  bnc L_88fd
 88fc:    00                     HALT
 
@@ -185,7 +185,7 @@ L_8906:
 8908:    00                     HALT
 
 L_8909:
-8909:    2b                     not! AL, #0
+8909:    2b                     not AL, #0
 890a:    13 01                  bnn L_890d
 890c:    00                     HALT
 
@@ -617,15 +617,15 @@ L_8a78:
 8a7b:    00                     HALT
 
 L_8a7c:
-8a7c:    3a                     clr! A, #0
-8a7d:    3b                     not! A, #0
-8a7e:    3c                     srl! A, #1
-8a7f:    39                     dec! A, #1
-8a80:    3d                     sll! A, #1
-8a81:    38                     inc! A, #1
-8a82:    38                     inc! A, #1
-8a83:    38                     inc! A, #1
-8a84:    38                     inc! A, #1
+8a7c:    3a                     clr A, #0
+8a7d:    3b                     not A, #0
+8a7e:    3c                     srl A, #1
+8a7f:    39                     dec A, #1
+8a80:    3d                     sll A, #1
+8a81:    38                     inc A, #1
+8a82:    38                     inc A, #1
+8a83:    38                     inc A, #1
+8a84:    38                     inc A, #1
 8a85:    14 01                  bz L_8a88
 8a87:    00                     HALT
 
@@ -638,8 +638,8 @@ L_8a8b:
 8a8d:    00                     HALT
 
 L_8a8e:
-8a8e:    3a                     clr! A, #0
-8a8f:    80 aa                  ld AL, #0xaa
+8a8e:    3a                     clr A, #0
+8a8f:    80 aa                  ld AL, 0xaa
 8a91:    11 01                  bnc L_8a94
 8a93:    00                     HALT
 
@@ -665,12 +665,12 @@ L_8aa2:
 8aa4:    00                     HALT
 
 L_8aa5:
-8aa5:    80 00                  ld AL, #0x00
+8aa5:    80 00                  ld AL, 0x00
 8aa7:    14 01                  bz L_8aaa
 8aa9:    00                     HALT
 
 L_8aaa:
-8aaa:    c0 80                  ld BL, #0x80
+8aaa:    c0 80                  ld BL, 0x80
 8aac:    10 01                  bc L_8aaf
 8aae:    00                     HALT
 
@@ -688,8 +688,8 @@ L_8ab5:
 8ab9:    00                     HALT
 
 L_8aba:
-8aba:    3a                     clr! A, #0
-8abb:    90 aa aa               ld A, #0xaaaa
+8aba:    3a                     clr A, #0
+8abb:    90 aa aa               ld A, 0xaaaa
 8abe:    11 01                  bnc L_8ac1
 8ac0:    00                     HALT
 
@@ -715,12 +715,12 @@ L_8acf:
 8ad1:    00                     HALT
 
 L_8ad2:
-8ad2:    90 00 00               ld A, #0x0000
+8ad2:    90 00 00               ld A, 0x0000
 8ad5:    14 01                  bz L_8ad8
 8ad7:    00                     HALT
 
 L_8ad8:
-8ad8:    60 80 00               ld X, #0x8000
+8ad8:    60 80 00               ld X, 0x8000
 8adb:    10 01                  bc L_8ade
 8add:    00                     HALT
 
@@ -738,8 +738,8 @@ L_8ae4:
 8ae8:    00                     HALT
 
 L_8ae9:
-8ae9:    80 aa                  ld AL, #0xaa
-8aeb:    c0 aa                  ld BL, #0xaa
+8ae9:    80 aa                  ld AL, 0xaa
+8aeb:    c0 aa                  ld BL, 0xaa
 8aed:    41 13                  sub BL, AL
 8aef:    14 01                  bz L_8af2
 8af1:    00                     HALT
@@ -753,7 +753,7 @@ L_8af5:
 8af7:    00                     HALT
 
 L_8af8:
-8af8:    c0 55                  ld BL, #0x55
+8af8:    c0 55                  ld BL, 0x55
 8afa:    40 31                  add AL, BL
 8afc:    11 01                  bnc L_8aff
 8afe:    00                     HALT
@@ -763,12 +763,12 @@ L_8aff:
 8b01:    00                     HALT
 
 L_8b02:
-8b02:    2b                     not! AL, #0
+8b02:    2b                     not AL, #0
 8b03:    14 01                  bz L_8b06
 8b05:    00                     HALT
 
 L_8b06:
-8b06:    80 aa                  ld AL, #0xaa
+8b06:    80 aa                  ld AL, 0xaa
 8b08:    43 31                  or AL, BL
 8b0a:    11 01                  bnc L_8b0d
 8b0c:    00                     HALT
@@ -778,12 +778,12 @@ L_8b0d:
 8b0f:    00                     HALT
 
 L_8b10:
-8b10:    2b                     not! AL, #0
+8b10:    2b                     not AL, #0
 8b11:    14 01                  bz L_8b14
 8b13:    00                     HALT
 
 L_8b14:
-8b14:    80 55                  ld AL, #0x55
+8b14:    80 55                  ld AL, 0x55
 8b16:    02                     sf
 8b17:    06                     sl
 8b18:    44 31                  xor AL, BL
@@ -799,8 +799,8 @@ L_8b20:
 8b22:    00                     HALT
 
 L_8b23:
-8b23:    90 55 55               ld A, #0x5555
-8b26:    d0 55 55               ld B, #0x5555
+8b23:    90 55 55               ld A, 0x5555
+8b26:    d0 55 55               ld B, 0x5555
 8b29:    51 02                  sub B, A
 8b2b:    14 01                  bz L_8b2e
 8b2d:    00                     HALT
@@ -814,7 +814,7 @@ L_8b31:
 8b33:    00                     HALT
 
 L_8b34:
-8b34:    d0 aa aa               ld B, #0xaaaa
+8b34:    d0 aa aa               ld B, 0xaaaa
 8b37:    50 20                  add A, B
 8b39:    11 01                  bnc L_8b3c
 8b3b:    00                     HALT
@@ -828,12 +828,12 @@ L_8b3f:
 8b41:    00                     HALT
 
 L_8b42:
-8b42:    3b                     not! A, #0
+8b42:    3b                     not A, #0
 8b43:    14 01                  bz L_8b46
 8b45:    00                     HALT
 
 L_8b46:
-8b46:    90 55 55               ld A, #0x5555
+8b46:    90 55 55               ld A, 0x5555
 8b49:    53 20                  or A, B
 8b4b:    11 01                  bnc L_8b4e
 8b4d:    00                     HALT
@@ -843,12 +843,12 @@ L_8b4e:
 8b50:    00                     HALT
 
 L_8b51:
-8b51:    3b                     not! A, #0
+8b51:    3b                     not A, #0
 8b52:    14 01                  bz L_8b55
 8b54:    00                     HALT
 
 L_8b55:
-8b55:    90 aa aa               ld A, #0xaaaa
+8b55:    90 aa aa               ld A, 0xaaaa
 8b58:    06                     sl
 8b59:    02                     sf
 8b5a:    54 20                  xor A, B
@@ -864,7 +864,7 @@ L_8b62:
 8b64:    00                     HALT
 
 L_8b65:
-8b65:    90 aa 55               ld A, #0xaa55
+8b65:    90 aa 55               ld A, 0xaa55
 8b68:    55 02                  mov B, A
 8b6a:    55 04                  mov X, A
 8b6c:    55 06                  mov Y, A
@@ -883,7 +883,7 @@ L_8b65:
 8b86:    00                     HALT
 
 L_8b87:
-8b87:    d0 55 aa               ld B, #0x55aa
+8b87:    d0 55 aa               ld B, 0x55aa
 8b8a:    44 67                  xor YL, YH
 8b8c:    44 76                  xor YH, YL
 8b8e:    44 67                  xor YL, YH
@@ -901,9 +901,9 @@ L_8b95:
 8ba1:    00                     HALT
 
 L_8ba2:
-8ba2:    90 80 00               ld A, #0x8000
-8ba5:    d0 00 01               ld B, #0x0001
-8ba8:    59                     sub! B, A
+8ba2:    90 80 00               ld A, 0x8000
+8ba5:    d0 00 01               ld B, 0x0001
+8ba8:    59                     sub B, A
 8ba9:    12 01                  bn L_8bac
 8bab:    00                     HALT
 
@@ -918,7 +918,7 @@ L_8baf:
 L_8bb2:
 8bb2:    03                     rf
 8bb3:    06                     sl
-8bb4:    58                     add! B, A
+8bb4:    58                     add B, A
 8bb5:    13 01                  bnn L_8bb8
 8bb7:    00                     HALT
 
@@ -932,23 +932,23 @@ L_8bbb:
 8bbf:    00                     HALT
 
 L_8bc0:
-8bc0:    90 aa aa               ld A, #0xaaaa
-8bc3:    d0 55 55               ld B, #0x5555
+8bc0:    90 aa aa               ld A, 0xaaaa
+8bc3:    d0 55 55               ld B, 0x5555
 8bc6:    5e                     mov Z, A
 8bc7:    5b                     mov X, A
-8bc8:    5a                     and! B, A
+8bc8:    5a                     and B, A
 8bc9:    14 01                  bz L_8bcc
 8bcb:    00                     HALT
 
 L_8bcc:
-8bcc:    5a                     and! B, A
+8bcc:    5a                     and B, A
 8bcd:    14 01                  bz L_8bd0
 8bcf:    00                     HALT
 
 L_8bd0:
 8bd0:    55 82                  mov B, Z
 8bd2:    55 40                  mov A, X
-8bd4:    5a                     and! B, A
+8bd4:    5a                     and B, A
 8bd5:    51 40                  sub A, X
 8bd7:    14 01                  bz L_8bda
 8bd9:    00                     HALT
@@ -990,7 +990,7 @@ L_8bff:
 L_8c08:
 8c08:    61 00 2c               ld X, [0x002c]
 8c0b:    54 42                  xor B, X
-8c0d:    58                     add! B, A
+8c0d:    58                     add B, A
 8c0e:    33 20                  not B, #0
 8c10:    14 01                  bz L_8c13
 8c12:    00                     HALT
@@ -1024,53 +1024,53 @@ L_8c45:
 
 L_8c4b:
 8c4b:    54 20                  xor A, B
-8c4d:    3b                     not! A, #0
+8c4d:    3b                     not A, #0
 8c4e:    14 01                  bz L_8c51
 8c50:    00                     HALT
 
 L_8c51:
-8c51:    94 1c                  ld A, @[pc + 0x1c]
+8c51:    94 1c                  ld A, @[0x8c6f|+0x1c]
 8c53:    18 01                  bgt L_8c56
 8c55:    00                     HALT
 
 L_8c56:
-8c56:    d4 19                  ld B, @[pc + 0x19]
+8c56:    d4 19                  ld B, @[0x8c71|+0x19]
 8c58:    16 01                  blt L_8c5b
 8c5a:    00                     HALT
 
 L_8c5b:
 8c5b:    54 20                  xor A, B
-8c5d:    3b                     not! A, #0
+8c5d:    3b                     not A, #0
 8c5e:    14 01                  bz L_8c61
 8c60:    00                     HALT
 
 L_8c61:
-8c61:    93 0c                  ld A, [pc + 0x0c]
-8c63:    d3 0c                  ld B, [pc + 0x0c]
-8c65:    58                     add! B, A
-8c66:    90 ff ba               ld A, #0xffba
-8c69:    58                     add! B, A
+8c61:    93 0c                  ld A, [0x8c6f|+0xc]
+8c63:    d3 0c                  ld B, [0x8c71|+0xc]
+8c65:    58                     add B, A
+8c66:    90 ff ba               ld A, 0xffba
+8c69:    58                     add B, A
 8c6a:    14 01                  bz L_8c6d
 8c6c:    00                     HALT
 
 L_8c6d:
-8c6d:    73 04                  jmp [L_8c73|+0x4]
+8c6d:    73 04                  jmp L_8c73
 8c6f:    00
 8c70:    22
 8c71:    00
 8c72:    24
 
 L_8c73:
-8c73:    60 00 20               ld X, #0x0020
+8c73:    60 00 20               ld X, 0x0020
 8c76:    9a                     ld A, [X]
-8c77:    d0 ff ff               ld B, #0xffff
-8c7a:    59                     sub! B, A
+8c77:    d0 ff ff               ld B, 0xffff
+8c7a:    59                     sub B, A
 8c7b:    14 01                  bz L_8c7e
 8c7d:    00                     HALT
 
 L_8c7e:
 8c7e:    95 41                  ld A, [X++]
-8c80:    3b                     not! A, #0
+8c80:    3b                     not A, #0
 8c81:    14 01                  bz L_8c84
 8c83:    00                     HALT
 
@@ -1078,7 +1078,7 @@ L_8c84:
 8c84:    95 41                  ld A, [X++]
 8c86:    d5 41                  ld B, [X++]
 8c88:    54 20                  xor A, B
-8c8a:    3b                     not! A, #0
+8c8a:    3b                     not A, #0
 8c8b:    14 01                  bz L_8c8e
 8c8d:    00                     HALT
 
@@ -1091,45 +1091,45 @@ L_8c92:
 8c92:    95 42                  ld A, [--X]
 8c94:    d5 42                  ld B, [--X]
 8c96:    54 20                  xor A, B
-8c98:    3b                     not! A, #0
+8c98:    3b                     not A, #0
 8c99:    14 01                  bz L_8c9c
 8c9b:    00                     HALT
 
 L_8c9c:
-8c9c:    d0 00 24               ld B, #0x0024
+8c9c:    d0 00 24               ld B, 0x0024
 8c9f:    9a                     ld A, [X]
-8ca0:    65 28 fe               ld X, [B + -0x002]
+8ca0:    65 28 fe               ld X, [B + -0x2]
 8ca3:    54 40                  xor A, X
 8ca5:    14 01                  bz L_8ca8
 8ca7:    00                     HALT
 
 L_8ca8:
-8ca8:    95 28 fc               ld A, [B + -0x004]
-8cab:    65 29 02               ld X, [B++ + 0x0002]
+8ca8:    95 28 fc               ld A, [B + -0x4]
+8cab:    65 29 02               ld X, [B++ + 0x02]
 8cae:    50 40                  add A, X
-8cb0:    3b                     not! A, #0
+8cb0:    3b                     not A, #0
 8cb1:    14 01                  bz L_8cb4
 8cb3:    00                     HALT
 
 L_8cb4:
 8cb4:    99                     ld A, [B]
-8cb5:    65 2a fc               ld X, [--B + -0x004]
+8cb5:    65 2a fc               ld X, [--B + -0x4]
 8cb8:    54 40                  xor A, X
-8cba:    3b                     not! A, #0
+8cba:    3b                     not A, #0
 8cbb:    14 01                  bz L_8cbe
 8cbd:    00                     HALT
 
 L_8cbe:
-8cbe:    60 00 10               ld X, #0x0010
+8cbe:    60 00 10               ld X, 0x0010
 8cc1:    95 44                  ld A, @[X]
-8cc3:    d0 ff ff               ld B, #0xffff
-8cc6:    59                     sub! B, A
+8cc3:    d0 ff ff               ld B, 0xffff
+8cc6:    59                     sub B, A
 8cc7:    14 01                  bz L_8cca
 8cc9:    00                     HALT
 
 L_8cca:
 8cca:    95 45                  ld A, @[X++]
-8ccc:    3b                     not! A, #0
+8ccc:    3b                     not A, #0
 8ccd:    14 01                  bz L_8cd0
 8ccf:    00                     HALT
 
@@ -1137,7 +1137,7 @@ L_8cd0:
 8cd0:    95 45                  ld A, @[X++]
 8cd2:    d5 45                  ld B, @[X++]
 8cd4:    54 20                  xor A, B
-8cd6:    3b                     not! A, #0
+8cd6:    3b                     not A, #0
 8cd7:    14 01                  bz L_8cda
 8cd9:    00                     HALT
 
@@ -1145,64 +1145,64 @@ L_8cda:
 8cda:    95 46                  ld A, @[--X]
 8cdc:    d5 46                  ld B, @[--X]
 8cde:    54 20                  xor A, B
-8ce0:    3b                     not! A, #0
+8ce0:    3b                     not A, #0
 8ce1:    14 01                  bz L_8ce4
 8ce3:    00                     HALT
 
 L_8ce4:
-8ce4:    60 00 14               ld X, #0x0014
+8ce4:    60 00 14               ld X, 0x0014
 8ce7:    95 44                  ld A, @[X]
-8ce9:    d5 4c fe               ld B, @[X + -0x002]
+8ce9:    d5 4c fe               ld B, @[X + -0x2]
 8cec:    54 20                  xor A, B
-8cee:    3b                     not! A, #0
+8cee:    3b                     not A, #0
 8cef:    14 01                  bz L_8cf2
 8cf1:    00                     HALT
 
 L_8cf2:
-8cf2:    95 4c fc               ld A, @[X + -0x004]
-8cf5:    d5 4d 02               ld B, @[X++ + 0x0002]
+8cf2:    95 4c fc               ld A, @[X + -0x4]
+8cf5:    d5 4d 02               ld B, @[X++ + 0x02]
 8cf8:    50 20                  add A, B
-8cfa:    3b                     not! A, #0
+8cfa:    3b                     not A, #0
 8cfb:    14 01                  bz L_8cfe
 8cfd:    00                     HALT
 
 L_8cfe:
 8cfe:    95 44                  ld A, @[X]
-8d00:    d5 4e fc               ld B, @[--X + -0x004]
+8d00:    d5 4e fc               ld B, @[--X + -0x4]
 8d03:    54 20                  xor A, B
-8d05:    3b                     not! A, #0
+8d05:    3b                     not A, #0
 8d06:    14 01                  bz L_8d09
 8d08:    00                     HALT
 
 L_8d09:
 8d09:    0d                     unknown
-8d0a:    90 05 0a               ld A, #0x050a
+8d0a:    90 05 0a               ld A, 0x050a
 8d0d:    50 80                  add A, Z
 8d0f:    51 04                  sub X, A
 8d11:    14 01                  bz L_8d14
 8d13:    00                     HALT
 
 L_8d14:
-8d14:    90 00 3a               ld A, #0x003a
+8d14:    90 00 3a               ld A, 0x003a
 8d17:    5f                     mov S, A
-8d18:    60 20 20               ld X, #0x2020
-8d1b:    7b 06                  call [L_8d23|+0x6]
+8d18:    60 20 20               ld X, 0x2020
+8d1b:    7b 06                  call L_8d23
 8d1d:    01                     nop
 8d1e:    01                     nop
 8d1f:    00                     HALT
-8d20:    73 16                  jmp [L_8d38|+0x16]
+8d20:    73 16                  jmp L_8d38
 8d22:    00
 
 L_8d23:
 8d23:    95 41                  ld A, [X++]
-8d25:    d0 01 01               ld B, #0x0101
+8d25:    d0 01 01               ld B, 0x0101
 8d28:    54 20                  xor A, B
 8d2a:    14 01                  bz L_8d2d
 8d2c:    00                     HALT
 
 L_8d2d:
 8d2d:    9d                     ld A, [S]
-8d2e:    d0 20 20               ld B, #0x2020
+8d2e:    d0 20 20               ld B, 0x2020
 8d31:    54 20                  xor A, B
 8d33:    14 01                  bz L_8d36
 8d35:    00                     HALT
@@ -1212,68 +1212,68 @@ L_8d36:
 8d37:    09                     ret
 
 L_8d38:
-8d38:    60 09 ef               ld X, #0x09ef
-8d3b:    90 11 ff               ld A, #0x11ff
+8d38:    60 09 ef               ld X, 0x09ef
+8d3b:    90 11 ff               ld A, 0x11ff
 8d3e:    b5 41                  st A, [X++]
 8d40:    55 42                  mov B, X
-8d42:    90 09 f1               ld A, #0x09f1
-8d45:    59                     sub! B, A
+8d42:    90 09 f1               ld A, 0x09f1
+8d45:    59                     sub B, A
 8d46:    14 01                  bz L_8d49
 8d48:    00                     HALT
 
 L_8d49:
-8d49:    60 09 ef               ld X, #0x09ef
+8d49:    60 09 ef               ld X, 0x09ef
 8d4c:    95 41                  ld A, [X++]
-8d4e:    d0 11 ff               ld B, #0x11ff
+8d4e:    d0 11 ff               ld B, 0x11ff
 8d51:    41 02                  sub BH, AH
 8d53:    14 01                  bz L_8d56
 8d55:    00                     HALT
 
 L_8d56:
-8d56:    49                     sub! BL, AL
+8d56:    49                     sub BL, AL
 8d57:    14 01                  bz L_8d5a
 8d59:    00                     HALT
 
 L_8d5a:
-8d5a:    90 60 66               ld A, #0x6066
+8d5a:    90 60 66               ld A, 0x6066
 8d5d:    2f 00                  ld_dma_addr A
 8d5f:    2f 21                  st_dma_addr B
-8d61:    59                     sub! B, A
+8d61:    59                     sub B, A
 8d62:    14 01                  bz L_8d65
 8d64:    00                     HALT
 
 L_8d65:
-8d65:    90 46 11               ld A, #0x4611
+8d65:    90 46 11               ld A, 0x4611
 8d68:    2f 02                  ld_dma_count A
 8d6a:    2f 23                  st_dma_count B
-8d6c:    59                     sub! B, A
+8d6c:    59                     sub B, A
 8d6d:    14 01                  bz L_8d70
 8d6f:    00                     HALT
 
 L_8d70:
 8d70:    81 f2 00               ld AL, [0xf200]
-8d73:    2c                     srl! AL, #1
+8d73:    2c                     srl AL, #1
 8d74:    11 18                  bnc L_8d8e
 8d76:    81 f2 01               ld AL, [0xf201]
-8d79:    c0 80                  ld BL, #0x80
+8d79:    c0 80                  ld BL, 0x80
 8d7b:    43 31                  or AL, BL
-8d7d:    c0 83                  ld BL, #0x83
-8d7f:    49                     sub! BL, AL
+8d7d:    c0 83                  ld BL, 0x83
+8d7f:    49                     sub BL, AL
 8d80:    15 0c                  bnz L_8d8e
 8d82:    61 bf fe               ld X, [0xbffe]
 8d85:    91 bf fc               ld A, [0xbffc]
-8d88:    d0 07 74               ld B, #0x0774
-8d8b:    58                     add! B, A
+8d88:    d0 07 74               ld B, 0x0774
+8d8b:    58                     add B, A
 8d8c:    75 20                  jmp [B]
 
 L_8d8e:
 8d8e:    a1 f1 0a               st AL, [0xf10a]
-8d91:    90 bf fc               ld A, #0xbffc
+8d91:    90 bf fc               ld A, 0xbffc
 8d94:    5f                     mov S, A
 8d95:    95 a1                  ld A, [S++]
 8d97:    5e                     mov Z, A
 8d98:    65 a1                  ld X, [S++]
-8d9a:    90 00 7d               ld A, #0x007d
+8d9a:    90 00 7d               ld A, 0x007d
 8d9d:    50 80                  add A, Z
 8d9f:    75 00                  jmp [A]
 
@@ -1293,61 +1293,61 @@ InstructionTestInitialRegisterState:
 8db9:    80 01                  (0x8001)
 
 Entry_CPU6_MAPPING_RAM_TEST:
-8dbb:    90 07 cc               ld A, #0x07cc
+8dbb:    90 07 cc               ld A, 0x07cc
 8dbe:    50 80                  add A, Z
 8dc0:    7d 00                  call [A]
 8dc2:    "\x1b\x1c\x0cCPU-6 MAPPING RAM TEST, CONTROL-C TO EXIT\r\n\0"
 8df1:    22 32                  clr BL, #2	 ; 0 for CPU5, non-zero for CPU6
 8df3:    15 3a                  bnz MappingRamTestLoop
-8df5:    90 07 cc               ld A, #0x07cc
+8df5:    90 07 cc               ld A, 0x07cc
 8df8:    50 80                  add A, Z
 8dfa:    7d 00                  call [A]
 8dfc:    "\r\n*** THIS TEST WILL NOT RUN ON CPU-5 ***\r\n\0"
-8e28:    90 07 8a               ld A, #0x078a
+8e28:    90 07 8a               ld A, 0x078a
 8e2b:    50 80                  add A, Z
 8e2d:    75 00                  jmp [A]	 ; Press Space to Exit
 
 MappingRamTestLoop:
-8e2f:    90 06 d9               ld A, #0x06d9
+8e2f:    90 06 d9               ld A, 0x06d9
 8e32:    50 80                  add A, Z
 8e34:    7d 00                  call [A]	 ; Call MappingInit
-8e36:    47 40 ff 01 00 02 00   memcpy #0x100, [0x0100], [0x0200]
-8e3d:    7b 36                  call [L_8e75|+0x36]
+8e36:    47 40 ff 01 00 02 00   memcpy 0x100, [0x0100], [0x0200]
+8e3d:    7b 36                  call L_8e75
 8e3f:    01                     nop
-8e40:    7b 33                  call [L_8e75|+0x33]
+8e40:    7b 33                  call L_8e75
 8e42:    02                     sf
-8e43:    7b 30                  call [L_8e75|+0x30]
+8e43:    7b 30                  call L_8e75
 8e45:    03                     rf
-8e46:    7b 2d                  call [L_8e75|+0x2d]
+8e46:    7b 2d                  call L_8e75
 8e48:    04                     ei
-8e49:    7b 2a                  call [L_8e75|+0x2a]
+8e49:    7b 2a                  call L_8e75
 8e4b:    05                     di
-8e4c:    7b 27                  call [L_8e75|+0x27]
+8e4c:    7b 27                  call L_8e75
 8e4e:    06                     sl
-8e4f:    7b 24                  call [L_8e75|+0x24]
+8e4f:    7b 24                  call L_8e75
 8e51:    07                     rl
-8e52:    7b 53                  call [L_8ea7|+0x53]
-8e54:    7b 1f                  call [L_8e75|+0x1f]
+8e52:    7b 53                  call L_8ea7
+8e54:    7b 1f                  call L_8e75
 8e56:    00                     HALT
-8e57:    7b 73                  call [L_8ecc|+0x73]
+8e57:    7b 73                  call L_8ecc
 8e59:    a1 f1 0a               st AL, [0xf10a]
 8e5c:    81 f2 00               ld AL, [0xf200]
-8e5f:    2c                     srl! AL, #1
+8e5f:    2c                     srl AL, #1
 8e60:    11 cd                  bnc MappingRamTestLoop
 
 ReturnAddress:
 8e62:    81 f2 01               ld AL, [0xf201]
-8e65:    c0 80                  ld BL, #0x80
+8e65:    c0 80                  ld BL, 0x80
 8e67:    43 31                  or AL, BL
-8e69:    c0 83                  ld BL, #0x83
-8e6b:    49                     sub! BL, AL
+8e69:    c0 83                  ld BL, 0x83
+8e6b:    49                     sub BL, AL
 8e6c:    15 c1                  bnz MappingRamTestLoop
-8e6e:    90 07 74               ld A, #0x0774
+8e6e:    90 07 74               ld A, 0x0774
 8e71:    50 80                  add A, Z
 8e73:    75 00                  jmp [A]
 
 L_8e75:
-8e75:    3a                     clr! A, #0
+8e75:    3a                     clr A, #0
 8e76:    85 41                  ld AL, [X++]
 8e78:    35 04                  sll A, #5
 8e7a:    20 00                  inc AH, #1
@@ -1355,19 +1355,19 @@ L_8e75:
 8e7e:    5c                     mov Y, A
 8e7f:    5e                     mov Z, A
 8e80:    20 80                  inc ZH, #1
-8e82:    60 00 20               ld X, #0x0020
+8e82:    60 00 20               ld X, 0x0020
 
 nextMemoryLcation:
-8e85:    d0 01 00               ld B, #0x0100
+8e85:    d0 01 00               ld B, 0x0100
 
 nextByteValue:
 8e88:    8b                     ld AL, [Y]	 ; EF = 0x120 or 0x140 etc
-8e89:    28                     inc! AL, #1
+8e89:    28                     inc AL, #1
 8e8a:    ab                     st AL, [Y]
 8e8b:    ac                     st AL, [Z]	 ; HL is EF+0x100
-8e8c:    7b 76                  call [ReadAllPages|+0x76]
-8e8e:    7b 49                  call [WriteAllPages|+0x49]
-8e90:    47 80 ff 01 00 02 00   memcmp #0x100, [0x0100], [0x0200]
+8e8c:    7b 76                  call ReadAllPages
+8e8e:    7b 49                  call WriteAllPages
+8e90:    47 80 ff 01 00 02 00   memcmp 0x100, [0x0100], [0x0200]
 8e97:    15 69                  bnz L_8f02	 ; Branch if parity Error
 8e99:    31 20                  dec B, #1	 ; Test every single byte pattern
 8e9b:    15 eb                  bnz nextByteValue
@@ -1379,77 +1379,77 @@ nextByteValue:
 8ea6:    09                     ret
 
 L_8ea7:
-8ea7:    2e 1c f8 03 00         rpf #0xf8, [0x0300]
-8eac:    2e 0c f9 03 00         wpf #0xf9, [0x0300]
-8eb1:    80 01                  ld AL, #0x01
+8ea7:    2e 1c f8 03 00         rpf 0xf8, [0x0300]
+8eac:    2e 0c f9 03 00         wpf 0xf9, [0x0300]
+8eb1:    80 01                  ld AL, 0x01
 
 L_8eb3:
 8eb3:    a5 a2                  st AL, [--S]
-8eb5:    2a                     clr! AL, #0
+8eb5:    2a                     clr AL, #0
 8eb6:    a5 a2                  st AL, [--S]
 8eb8:    6d a2                  st X, [--S]
 8eba:    a5 a2                  st AL, [--S]
-8ebc:    60 06 c2               ld X, #0x06c2
+8ebc:    60 06 c2               ld X, 0x06c2
 8ebf:    50 84                  add X, Z
 8ec1:    0f                     rsys
 
 rsysContinue:
-8ec2:    7b 15                  call [WriteAllPages|+0x15]
-8ec4:    47 40 ff 01 00 02 00   memcpy #0x100, [0x0100], [0x0200]
+8ec2:    7b 15                  call WriteAllPages
+8ec4:    47 40 ff 01 00 02 00   memcpy 0x100, [0x0100], [0x0200]
 8ecb:    09                     ret
 
 L_8ecc:
-8ecc:    2e 1c f9 03 00         rpf #0xf9, [0x0300]
-8ed1:    2e 0c f8 03 00         wpf #0xf8, [0x0300]
-8ed6:    2a                     clr! AL, #0
-8ed7:    73 da                  jmp [L_8eb3|-0x26]
+8ecc:    2e 1c f9 03 00         rpf 0xf9, [0x0300]
+8ed1:    2e 0c f8 03 00         wpf 0xf8, [0x0300]
+8ed6:    2a                     clr AL, #0
+8ed7:    73 da                  jmp L_8eb3
 
 WriteAllPages:
-8ed9:    2e 1c f8 01 00         rpf #0xf8, [0x0100]
-8ede:    2e 1c f9 01 20         rpf #0xf9, [0x0120]
-8ee3:    2e 1c fa 01 40         rpf #0xfa, [0x0140]
-8ee8:    2e 1c fb 01 60         rpf #0xfb, [0x0160]
-8eed:    2e 1c fc 01 80         rpf #0xfc, [0x0180]
-8ef2:    2e 1c fd 01 a0         rpf #0xfd, [0x01a0]
-8ef7:    2e 1c fe 01 c0         rpf #0xfe, [0x01c0]
-8efc:    2e 1c ff 01 e0         rpf #0xff, [0x01e0]
+8ed9:    2e 1c f8 01 00         rpf 0xf8, [0x0100]
+8ede:    2e 1c f9 01 20         rpf 0xf9, [0x0120]
+8ee3:    2e 1c fa 01 40         rpf 0xfa, [0x0140]
+8ee8:    2e 1c fb 01 60         rpf 0xfb, [0x0160]
+8eed:    2e 1c fc 01 80         rpf 0xfc, [0x0180]
+8ef2:    2e 1c fd 01 a0         rpf 0xfd, [0x01a0]
+8ef7:    2e 1c fe 01 c0         rpf 0xfe, [0x01c0]
+8efc:    2e 1c ff 01 e0         rpf 0xff, [0x01e0]
 8f01:    09                     ret
 
 L_8f02:
-8f02:    73 29                  jmp [L_8f2d|+0x29]
+8f02:    73 29                  jmp L_8f2d
 
 ReadAllPages:
-8f04:    2e 0c f8 01 00         wpf #0xf8, [0x0100]
-8f09:    2e 0c f9 01 20         wpf #0xf9, [0x0120]
-8f0e:    2e 0c fa 01 40         wpf #0xfa, [0x0140]
-8f13:    2e 0c fb 01 60         wpf #0xfb, [0x0160]
-8f18:    2e 0c fc 01 80         wpf #0xfc, [0x0180]
-8f1d:    2e 0c fd 01 a0         wpf #0xfd, [0x01a0]
-8f22:    2e 0c fe 01 c0         wpf #0xfe, [0x01c0]
-8f27:    2e 0c ff 01 e0         wpf #0xff, [0x01e0]
+8f04:    2e 0c f8 01 00         wpf 0xf8, [0x0100]
+8f09:    2e 0c f9 01 20         wpf 0xf9, [0x0120]
+8f0e:    2e 0c fa 01 40         wpf 0xfa, [0x0140]
+8f13:    2e 0c fb 01 60         wpf 0xfb, [0x0160]
+8f18:    2e 0c fc 01 80         wpf 0xfc, [0x0180]
+8f1d:    2e 0c fd 01 a0         wpf 0xfd, [0x01a0]
+8f22:    2e 0c fe 01 c0         wpf 0xfe, [0x01c0]
+8f27:    2e 0c ff 01 e0         wpf 0xff, [0x01e0]
 8f2c:    09                     ret
 
 L_8f2d:
 8f2d:    7f 45                  pop {X, Y, Z}
 8f2f:    65 a1                  ld X, [S++]
-8f31:    90 07 cc               ld A, #0x07cc
+8f31:    90 07 cc               ld A, 0x07cc
 8f34:    50 80                  add A, Z
 8f36:    7d 00                  call [A]
 8f38:    "\r\n*** MAP RAM ERROR ***\r\n\0"
 8f52:    a1 f1 0b               st AL, [0xf10b]
 8f55:    a1 f1 0c               st AL, [0xf10c]
-8f58:    90 07 8a               ld A, #0x078a
+8f58:    90 07 8a               ld A, 0x078a
 8f5b:    50 80                  add A, Z
 8f5d:    75 00                  jmp [A]
 
 Entry_ROM_SELF_TEST:
 8f5f:    55 86                  mov Y, Z
-8f61:    3a                     clr! A, #0
+8f61:    3a                     clr A, #0
 
 ChecksumLoop:
 8f62:    85 61                  ld AL, [Y++]	 ; Load Byte via base+index, post-increment index
 8f64:    40 10                  add AH, AL
-8f66:    d0 07 dd               ld B, #0x07dd
+8f66:    d0 07 dd               ld B, 0x07dd
 8f69:    50 82                  add B, Z
 8f6b:    51 62                  sub B, Y
 8f6d:    15 f3                  bnz ChecksumLoop
@@ -1458,32 +1458,32 @@ ChecksumLoop:
 8f72:    15 32                  bnz ChecksumFail
 
 PrintPassedAndExit:
-8f74:    7b 56                  call [WriteString|+0x56]
+8f74:    7b 56                  call WriteString
 8f76:    "\r\n*** PASS ***\r\n\0"
 8f87:    a1 f1 0a               st AL, [0xf10a]
 
 L_8f8a:
-8f8a:    7b 40                  call [WriteString|+0x40]
+8f8a:    7b 40                  call WriteString
 8f8c:    "PRESS SPACE\x07\r\n\0"
 
 WaitForKey:
 8f9b:    81 f2 00               ld AL, [0xf200]
-8f9e:    2c                     srl! AL, #1
+8f9e:    2c                     srl AL, #1
 8f9f:    11 fa                  bnc WaitForKey
 8fa1:    81 f2 01               ld AL, [0xf201]
 8fa4:    75 40                  jmp [X]
 
 ChecksumFail:
-8fa6:    7b 24                  call [WriteString|+0x24]
+8fa6:    7b 24                  call WriteString
 8fa8:    "\r\n*** CHECK SUM ERROR ***\r\n\0"
 8fc4:    a1 f1 0b               st AL, [0xf10b]
 8fc7:    a1 f1 0c               st AL, [0xf10c]
-8fca:    73 be                  jmp [L_8f8a|-0x42]
+8fca:    73 be                  jmp L_8f8a
 
 WriteString:
 8fcc:    81 f2 00               ld AL, [0xf200]
-8fcf:    2c                     srl! AL, #1
-8fd0:    2c                     srl! AL, #1
+8fcf:    2c                     srl AL, #1
+8fd0:    2c                     srl AL, #1
 8fd1:    11 f9                  bnc WriteString
 8fd3:    85 41                  ld AL, [X++]
 8fd5:    15 01                  bnz L_8fd8
@@ -1491,7 +1491,7 @@ WriteString:
 
 L_8fd8:
 8fd8:    a1 f2 01               st AL, [0xf201]
-8fdb:    73 ef                  jmp [WriteString|-0x11]
+8fdb:    73 ef                  jmp WriteString
 8fdd:    82
 8fde:    <null bytes>
 
