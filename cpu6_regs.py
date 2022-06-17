@@ -1,4 +1,4 @@
-
+from cpu6_ops import *
 
 RegNames16 = [
     "A", "B", "X", "Y", "Z", "S", "C", "P",
@@ -23,12 +23,18 @@ class Reg16Ref(RegRef):
     def __str__(self):
         return RegNames16[self.reg]
 
+    def getNode(self, cpu):
+        return cpu.getReg(self.reg, 16)
+
 class Reg8Ref(RegRef):
     def __init__(self, reg):
         self.reg = reg
 
     def __str__(self):
         return RegNames8[self.reg]
+
+    def getNode(self, cpu):
+        return cpu.getReg(self.reg, 8)
 
 class PostIncRef(Ref):
     def __init__(self, reg):
@@ -37,12 +43,22 @@ class PostIncRef(Ref):
     def __str__(self):
         return f"{self.reg}++"
 
+    def getNode(self, cpu):
+        node = self.reg.getNode(cpu)
+        cpu.sideEffect(node.Add(node.width / 8))
+        return node
+
 class PreDecRef(Ref):
     def __init__(self, reg):
         self.reg = reg
 
     def __str__(self):
         return f"--{self.reg}"
+
+    def getNode(self, cpu):
+        node = Add(self.reg.getNode(cpu), node.width / 8)
+        cpu.sideEffect(node.Add(node.width / 8))
+        return node
 
 class MultiRegRef(Ref):
     def __init__(self, start, count):

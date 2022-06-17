@@ -96,7 +96,7 @@ class MemoryWrapper:
             return memory_addr_info[addr].label
         return None
 
-    def get_xargs(self, addr):
+    def get_xargs(self, addr) -> Xargs | None:
         if memory_addr_info[addr].func_info:
             if memory_addr_info[addr].func_info.xargs:
                 return Xargs(memory_addr_info[addr].func_info.xargs)
@@ -117,10 +117,10 @@ class MemoryWrapper:
     def visited(self, addr):
         return addr in memory_addr_info and memory_addr_info[addr].visited
 
-    def info(self, addr):
+    def info(self, addr) -> MemInfo:
         return memory_addr_info[addr]
 
-    def read_only_info(self, addr):
+    def read_only_info(self, addr) -> MemInfo:
         # like info(), but doesn't create a new entry in the DefaultDict
         return memory_addr_info[addr] if addr in memory_addr_info else MemInfo()
 
@@ -137,10 +137,11 @@ def tochar(byte):
         return True, c
     return False, '.'
 
-def disassemble(memory):
+def disassembleAllEntries(memory):
     for entry in entry_points:
         recursive_disassemble(memory, entry)
 
+def printListing(memory):
     skipping = True # Ignore null bytes at start of memory
 
     i = 0
@@ -262,6 +263,10 @@ def disassemble(memory):
             for line in lines[1:]:
                 out += "\n" + " " * indent + f"\t ; {line}"
         print(out.strip())
+
+def disassemble(memory):
+    disassembleAllEntries(memory)
+    printListing(memory)
 
 def apply_comments(comments):
     for addr, comment in comments:
@@ -411,7 +416,8 @@ def main():
                 'entry_points': entry_points}
             exec(ast, script_globals, script_globals)
 
-    disassemble(mem)
+    return mem
 
 if __name__ == "__main__":
-    main()
+    mem = main()
+    disassemble(mem)

@@ -1,4 +1,5 @@
 from cpu6_regs import Reg8Ref, Reg16Ref, PostIncRef, PreDecRef, Ref
+from cpu6_ops import *
 
 class DirectRef(Ref):
     def __init__(self, addr, pc):
@@ -12,7 +13,8 @@ class DirectRef(Ref):
             return f"[{label}|{self.addr:#06x}]"
         return f"[{self.addr.to_string(memory, forceLabel=True)}]"
 
-
+    def getNode(self, cpu):
+        return cpu.getMem(self.addr.getNode(cpu))
 
 class ComplexRef(Ref):
     def __init__(self, base, index=None, disp=None):
@@ -27,6 +29,14 @@ class ComplexRef(Ref):
         if self.disp:
             return f"{ret} + {self.disp.to_string(memory)}]"
         return ret + "]"
+
+    def getNode(self, cpu):
+        node = self.base.getNode(cpu)
+        if self.index:
+            node = node.Add(self.index)
+        if self.disp:
+            node = node.Add(self.disp)
+        return cpu.getMem(node)
 
 class LiteralRef(Ref):
     def __init__(self, val, size, pc=None):
@@ -46,12 +56,20 @@ class LiteralRef(Ref):
     def getValue(self, memory, **kwargs):
         return self.val
 
+    def getNode(self, cpu):
+        if self.pc:
+            return cpu.readMem(LiteralValue(self.pc, 16), self.size * 8)
+        return LiteralValue(self.val, self.size * 8)
+
 class SmallLiteralRef(Ref):
     def __init__(self, val):
         self.val = val
 
     def __str__(self):
         return f"#{self.val:d}"
+
+    def getNode(self, cpu):
+        return LiteralValue(self.val, 4)
 
 class PcDisplacementRef(Ref):
     def __init__(self, pc, disp):
@@ -68,6 +86,9 @@ class PcDisplacementRef(Ref):
     def to_string(self, memory, **kwargs):
         return f"[{self.ref.to_string(memory, forceLabel=True)}|{self.disp:+#04x}]"
 
+    def getNode(self, cpu):
+        return cpu.getMem(LiteralValue(self.pc, 16), self.size * 8)
+
 class IndirectRef(Ref):
     def __init__(self, ref):
         self.ref = ref
@@ -77,6 +98,9 @@ class IndirectRef(Ref):
 
     def to_string(self, memory, **kwargs):
         return f"@{self.ref.to_string(memory, **kwargs)}"
+
+    def getNode(self, cpu):
+        return cpu.getMem(self.ref)
 
 # A short 2bit address mode, which will consume more bytes from PC
 def Cpu6AddrMode(mode, pc, mem, prev=None, size = 1):

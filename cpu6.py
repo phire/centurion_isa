@@ -1,14 +1,16 @@
 from generic import *
 from cpu6_regs import Reg16Ref, Reg8Ref, MultiRegRef, LvlRegRef
 from cpu6_addr import *
+from cpu6_ops import *
 import struct
 
 class BasicCpu6Inst:
     newpc = None
-    def __init__(self, mnonomic, dst=None, *sources):
+    def __init__(self, mnonomic, dst=None, *sources, fn=None):
         self.mnemonic = mnonomic
         self.dst = dst
         self.srcs = [s for s in sources if s is not None]
+        self.fn = fn
 
     def to_string(self, dict, mem):
         str = self.mnemonic
@@ -17,6 +19,21 @@ class BasicCpu6Inst:
         for src in self.srcs:
             str += f", {src.to_string(mem)}"
         return str
+
+    def to_tree(self, cpu):
+        if len(self.srcs) == 1:
+            a, b = self.dst, self.srcs[0]
+        elif len(self.srcs) == 2:
+            a, b = self.srcs
+        else:
+            return None
+
+        if self.fn:
+            return self.dst.getNode(cpu).Eq(Flags(self.fn(a.getNode(cpu), b.getNode(cpu))))
+        if self.mnemonic in ["ld", "mov"]:
+            return self.dst.getNode(cpu).Eq(Flags(b.getNode(cpu)))
+        if self.mnemonic == "st":
+            return b.getNode(cpu).Eq(Flags(a.getNode(cpu)))
 
 class ControlFlowInst:
     def __init__(self, mnemonic, src):
@@ -47,6 +64,9 @@ class ControlFlowInst:
     def to_string(self, dict, mem):
         return f"{self.mnemonic} {self.src.to_string(mem, forceLabel=True, supressAlt=True)}"
 
+    def to_tree(self, cpu):
+        return None
+
 class SyscallInst(ControlFlowInst):
     def __init__(self, num):
         self.num = num
@@ -75,16 +95,28 @@ def AluMatch(pc, mem):
 
     if inst >= 0x40:
         op += 8
-
-    OPs = [
-        "inc", "dec", "clr", "not", "srl", "sll", "rrc", "rlc",
-        "add", "sub", "and", "or", "xor", "mov"]
-
-    # These don't fit the pattern
-    if inst & 0x0e == 0x0e or inst > 0x5b or op >= len(OPs):
+    if (inst & 0xf) >= 0xe or op >= 14:
         return None
 
-    mnemonic = OPs[op]
+    OPs = [
+        # Small Literal:
+        ("inc", lambda a, b: a.Add(b)),
+        ("dec", lambda a, b: a.Sub(b)),
+        ("clr", lambda a, b: b),
+        ("not", lambda a, b: a.Not().Add(b)),
+        ("srl", lambda a, b: a.ShiftRight(b)),
+        ("sll", lambda a, b: a.ShiftLeft(b)),
+        ("rrc", lambda a, b: a.RotateRight(b)),
+        ("rlc", lambda a, b: a.RotateLeft(b)),
+        # Two Arg:
+        ("add", lambda a, b: a.Add(b)),
+        ("sub", lambda a, b: a.Sub(b)),
+        ("and", lambda a, b: a.And(b)),
+        ("or",  lambda a, b: a.Or(b)),
+        ("xor", lambda a, b: a.Xor(b)),
+        ("mov", lambda a, b: b)
+    ]
+    mnemonic, fn = OPs[op]
 
     if implicit:
         # Shifts, rotates and increments effectively add 1 to 'imm' value
@@ -110,7 +142,7 @@ def AluMatch(pc, mem):
         dst, src, src2, pc = AluAddrMode(mode, inst, pc, mem)
 
     bytes = mem[orig_pc:pc]
-    return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, dst, src, src2), bytes, {})
+    return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, dst, src, src2, fn=fn), bytes, {})
 
 def Match2e(pc, mem):
     orig_pc = pc
