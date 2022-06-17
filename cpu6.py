@@ -1,6 +1,6 @@
 from generic import *
 from cpu6_regs import Reg16Ref, Reg8Ref, MultiRegRef, LvlRegRef
-from cpu6_addr import Cpu6AddrMode, Cpu4AddrMode, LiteralRef, SmallLiteralRef, AluAddrMode, D6Mode, DirectRef
+from cpu6_addr import *
 import struct
 
 class BasicCpu6Inst:
@@ -25,7 +25,7 @@ class ControlFlowInst:
         self.resume = mnemonic == "call"
 
     def get_dst(self, mem):
-        try: return self.src.getValue()
+        try: return self.src.getValue(mem)
         except AttributeError: return None
 
     def get_xargs(self, mem):
@@ -45,7 +45,7 @@ class ControlFlowInst:
         return ret
 
     def to_string(self, dict, mem):
-        return f"{self.mnemonic} {self.src.to_string(mem)}"
+        return f"{self.mnemonic} {self.src.to_string(mem, forceLabel=True, supressAlt=True)}"
 
 class SyscallInst(ControlFlowInst):
     def __init__(self, num):
@@ -337,7 +337,15 @@ def MemoryMatch(pc, mem):
         return InstructionMatch(orig_pc, BasicCpu6Inst(mode, reg, operand), bytes)
 
     if isinstance(operand, LiteralRef):
+        # Literal addressing mode isn't valid for call/jump
         return None
+
+    # It looks nicer if we unwrap these
+    if isinstance(operand, DirectRef):
+        operand = operand.addr
+    elif isinstance(operand, PcDisplacementRef):
+        operand = operand.ref
+
     return InstructionMatch(orig_pc, ControlFlowInst(mode, operand), bytes, mem=mem)
 
 # 00

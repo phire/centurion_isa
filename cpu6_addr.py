@@ -1,41 +1,32 @@
 from cpu6_regs import Reg8Ref, Reg16Ref, PostIncRef, PreDecRef, Ref
 
 class DirectRef(Ref):
-    def __init__(self, addr):
-        self.addr = addr
+    def __init__(self, addr, pc):
+        self.addr = LiteralRef(addr, 2, pc)
 
-    def __str__(self):
-        return f"[{self.addr:#06x}]"
-
-    def getValue(self):
-        return self.addr
+    def getValue(self, memory, **kwargs):
+        return self.addr.getValue(memory)
 
     def to_string(self, memory, **kwargs):
         if label := memory.get_label(self.addr):
             return f"[{label}|{self.addr:#06x}]"
-        return str(self)
+        return f"[{self.addr.to_string(memory, forceLabel=True)}]"
 
-class IndexedRef(Ref):
-    def __init__(self, base, disp=0):
-        self.base = base
-        self.disp = disp
-
-    def __str__(self):
-        if self.disp == 0:
-            return f"[{self.base}]"
-        return f"[{self.base} + {self.disp:#06x}]"
 
 
 class ComplexRef(Ref):
-    def __init__(self, base, index, disp=0):
+    def __init__(self, base, index=None, disp=None):
         self.base = base
+        if isinstance(base, DirectRef): # unwrap
+            self.base = base.addr
         self.index = index
         self.disp = disp
 
-    def __str__(self):
-        if self.disp == 0:
-            return f"[{self.base} + {self.index}]"
-        return f"[{self.base} + {self.index} + {self.disp:#06x}]"
+    def to_string(self, memory, **kwargs):
+        ret = f"[{self.base.to_string(memory, forceLabel=True)}"
+        if self.disp:
+            return f"{ret} + {self.disp.to_string(memory)}]"
+        return ret + "]"
 
 class LiteralRef(Ref):
     def __init__(self, val, size, pc=None):
@@ -43,15 +34,17 @@ class LiteralRef(Ref):
         self.size = size
         self.pc = pc
 
-    def __str__(self):
-        return f"#{self.val:#0{self.size*2+2}x}"
-
     def to_string(self, memory, **kwargs):
-        # Only label literals if they have been fixed up
-        if self.pc and memory.is_fixup(self.pc):
+        # Only label literals if they have been fixed up (or forced)
+        if (self.pc and memory.is_fixup(self.pc)) or "forceLabel" in kwargs:
             if label := memory.get_label(self.val):
-                return f"{label}|{self}"
-        return str(self)
+                if "supressAlt" in kwargs:
+                    return label
+                return f"{label}|{self.val:#0{self.size*2+2}x}"
+        return f"{self.val:#0{self.size*2+2}x}"
+
+    def getValue(self, memory, **kwargs):
+        return self.val
 
 class SmallLiteralRef(Ref):
     def __init__(self, val):
@@ -64,17 +57,16 @@ class PcDisplacementRef(Ref):
     def __init__(self, pc, disp):
         self.pc = pc
         self.disp = disp
+        self.ref = LiteralRef(pc + disp, 2)
 
     def __str__(self):
         return f"[pc + {self.disp:#04x}]"
 
-    def getValue(self):
+    def getValue(self, memory):
         return self.pc + self.disp
 
     def to_string(self, memory, **kwargs):
-        if label := memory.get_label(self.pc + self.disp):
-            return f"[{label}|{self.disp:+#04x}]"
-        return str(self)
+        return f"[{self.ref.to_string(memory, forceLabel=True)}|{self.disp:+#04x}]"
 
 class IndirectRef(Ref):
     def __init__(self, ref):
@@ -90,25 +82,25 @@ class IndirectRef(Ref):
 def Cpu6AddrMode(mode, pc, mem, prev=None, size = 1):
     match mode:
         case 0: # direct
-            addr = mem.get_be16(pc)
+            ref = DirectRef(mem.get_be16(pc), pc)
             pc += 2
-            return DirectRef(addr), pc
+            return ref, pc
         case 1: # complex
             regs = mem[pc]
             pc += 1
 
             reg_a = Reg16Ref(regs >> 4)
             reg_b = Reg16Ref(regs & 0xf)
+            if reg_b.reg == 0:
+                reg_b = None
 
             if regs & 0x10 == 0:
-                imm = mem.get_i8(pc)
+                imm = LiteralRef(mem.get_i8(pc), 1, pc)
                 pc += 1
             else:
-                imm = mem.get_be16(pc)
+                imm = LiteralRef(mem.get_be16(pc), 1, pc)
                 pc += 2
 
-            if reg_b.reg == 0:
-                return IndexedRef(reg_a, imm), pc
             # todo: This mode also does PC-relative addressing?
             return ComplexRef(reg_a, reg_b, imm), pc
         case 2: # indexed
@@ -125,7 +117,7 @@ def Cpu6AddrMode(mode, pc, mem, prev=None, size = 1):
                 reg = mem[pc] >> 4
                 pc += 1
                 upper = True
-            ref = IndexedRef(Reg16Ref(reg), 0)
+            ref = ComplexRef(Reg16Ref(reg))
             ref.only_upper = upper
             return ref, pc
         case 3: # literal
@@ -142,9 +134,9 @@ def Cpu4AddrMode(mode, word, pc, mem):
                 return LiteralRef(mem.get_be16(pc), 2, pc), pc + 2
             return LiteralRef(mem[pc], 1, pc), pc + 1
         case 1: # Direct
-            return DirectRef(mem.get_be16(pc)), pc + 2
+            return DirectRef(mem.get_be16(pc), pc), pc + 2
         case 2: # Indirect
-            return IndirectRef(DirectRef(mem.get_be16(pc))), pc + 2
+            return IndirectRef(DirectRef(mem.get_be16(pc), pc)), pc + 2
         case 3: # Displaced
             return PcDisplacementRef(pc+1, mem.get_i8(pc)), pc + 1
         case 4: # Displaced Indirect
@@ -164,10 +156,10 @@ def Cpu4AddrMode(mode, word, pc, mem):
                     return None, orig_pc
 
             if modifier & 8 == 8: # Displacement
-                disp = mem.get_i8(pc)
+                disp = LiteralRef(mem.get_i8(pc), 1, pc)
                 pc += 1
 
-            ref = IndexedRef(ref, disp)
+            ref = ComplexRef(ref, None, disp)
             if modifier & 4 == 4: # Indirect
                 return IndirectRef(ref), pc
             return ref, pc # Direct
@@ -176,7 +168,7 @@ def Cpu4AddrMode(mode, word, pc, mem):
             return None, pc
         case mode: # One byte indexed mode
             reg = (mode & 7) << 1
-            return IndexedRef(Reg16Ref(reg)), pc
+            return ComplexRef(Reg16Ref(reg)), pc
 
 # Handles all the addressing modes in alu instructions
 # returns (dst, src1, src2, newpc)
@@ -192,13 +184,13 @@ def AluAddrMode(mode, inst, pc, mem):
             return Reg16Ref(mode >> 4), imm, None, pc
         case 0x30:
             # lower nibble set means we use a special address mode
-            ref = DirectRef(mem.get_be16(pc))
+            addr = mem.get_be16(pc)
             pc += 2
             match (mode >> 4) & 0xe:
                 case 0: # Direct
-                    return ref, imm, None, pc
+                    return DirectRef(addr, pc-2), imm, None, pc
                 case reg: # Indexed
-                    return ComplexRef(Reg16Ref(reg), ref), imm, None, pc
+                    return ComplexRef(Reg16Ref(reg), LiteralRef(addr, pc)), imm, None, pc
         case 0x40:
             return Reg8Ref(mode & 0xf), Reg8Ref(mode >> 4), None, pc
         #case 0x50 if mode & 0x11 == 0: # neither lower nibble set
@@ -209,7 +201,7 @@ def AluAddrMode(mode, inst, pc, mem):
                 case 0x00: # neither lower nibble set, normal reg, reg
                     return dst_reg, src_reg, None, pc
                 case 0x01: # dest <- src (direct)
-                    return dst_reg, src_reg, DirectRef(mem.get_be16(pc)), pc + 2
+                    return dst_reg, src_reg, DirectRef(mem.get_be16(pc), pc), pc + 2
                 case 0x10: # dest <- src op literal
                     return dst_reg, src_reg, LiteralRef(mem.get_be16(pc), 2, pc), pc + 2
                 case 0x11: # dest <- src op reg
@@ -223,12 +215,12 @@ def D6Mode(mode, pc, mem):
     unk = mem[pc+1] & 0x10
 
     addr = mem.get_be16(pc)
-    ref = DirectRef(addr)
+    ref = DirectRef(addr, pc)
     pc += 2
 
     if a != b:
         if addr == 0:
-            return Reg16Ref(a), IndexedRef(Reg16Ref(b)), pc
+            return Reg16Ref(a), ComplexRef(Reg16Ref(b)), pc
         ref = ComplexRef(ref, Reg16Ref(b))
     return Reg16Ref(a), ref, pc
 
