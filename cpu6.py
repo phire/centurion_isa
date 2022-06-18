@@ -431,12 +431,6 @@ branch_instructions = [
 ]
 
 instructions  = [
-    I("01011011", "mov X, A"),
-
-# 30
-    I("00111110", "inc {RegNames16[2]}"),
-    I("00111111", "dec {RegNames16[2]}"),
-
     I("11110111", "?F7?"),
     I("01101111 NNNNNNNN NNNNNNNN", "stcc [{N:#06x}]"),
 
@@ -475,6 +469,12 @@ def disassemble_instruction(mem, pc):
                 return m
 
     match byte:
+        case 0x3e:
+            fn = lambda a,b: a.Add(1)
+            return InstructionMatch(pc, BasicCpu6Inst("inc", Reg16Ref(4), fn=fn), mem[pc:pc+1])
+        case 0x3f:
+            fn = lambda a,b: a.Sub(1)
+            return InstructionMatch(pc, BasicCpu6Inst("dec", Reg16Ref(4), fn=fn), mem[pc:pc+1])
         case 0x77 | 0x78:
             return MatchMul(pc, mem)
         case 0x66: # jsys aka Syscall
