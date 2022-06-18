@@ -26,6 +26,8 @@ class ComplexRef(Ref):
 
     def to_string(self, memory, **kwargs):
         ret = f"[{self.base.to_string(memory, forceLabel=True)}"
+        if self.index:
+            ret += f" + {self.index.to_string(memory)}"
         if self.disp:
             return f"{ret} + {self.disp.to_string(memory)}]"
         return ret + "]"
@@ -194,6 +196,21 @@ def Cpu4AddrMode(mode, word, pc, mem):
             reg = (mode & 7) << 1
             return ComplexRef(Reg16Ref(reg)), pc
 
+def TwoRegExtendedMode(mode, pc, mem):
+    dst_reg = Reg16Ref(mode & 0xe)
+    src_reg = Reg16Ref((mode >> 4) & 0xe)
+    match mode & 0x11:
+        case 0x00: # neither lower nibble set, normal reg, reg
+            return dst_reg, src_reg, None, pc
+        case 0x01: # dest <- src (direct)
+            return dst_reg, src_reg, DirectRef(mem.get_be16(pc), pc), pc + 2
+        case 0x10: # dest <- src op literal
+            return dst_reg, src_reg, LiteralRef(mem.get_be16(pc), 2, pc), pc + 2
+        case 0x11: # dest <- src op reg
+            disp = LiteralRef(mem.get_be16(pc), 2, pc)
+            return dst_reg, ComplexRef(src_reg, None, disp), dst_reg, pc + 2
+
+
 # Handles all the addressing modes in alu instructions
 # returns (dst, src1, src2, newpc)
 def AluAddrMode(mode, inst, pc, mem):
@@ -214,37 +231,25 @@ def AluAddrMode(mode, inst, pc, mem):
                 case 0: # Direct
                     return DirectRef(addr, pc-2), imm, None, pc
                 case reg: # Indexed
-                    return ComplexRef(Reg16Ref(reg), LiteralRef(addr, pc)), imm, None, pc
+                    return ComplexRef(Reg16Ref(reg), LiteralRef(addr, 2, pc)), imm, None, pc
         case 0x40:
             return Reg8Ref(mode & 0xf), Reg8Ref(mode >> 4), None, pc
         #case 0x50 if mode & 0x11 == 0: # neither lower nibble set
         case 0x50 | 0x70:
-            dst_reg = Reg16Ref(mode & 0xe)
-            src_reg = Reg16Ref((mode >> 4) & 0xe)
-            match mode & 0x11:
-                case 0x00: # neither lower nibble set, normal reg, reg
-                    return dst_reg, src_reg, None, pc
-                case 0x01: # dest <- src (direct)
-                    return dst_reg, src_reg, DirectRef(mem.get_be16(pc), pc), pc + 2
-                case 0x10: # dest <- src op literal
-                    return dst_reg, src_reg, LiteralRef(mem.get_be16(pc), 2, pc), pc + 2
-                case 0x11: # dest <- src op reg
-                    index = src_reg
-                    base = LiteralRef(mem.get_be16(pc), 2, pc)
-                    return Reg16Ref(mode & 0xe), ComplexRef(index, base), None, pc + 2
+            return TwoRegExtendedMode(mode, pc, mem)
 
 def D6Mode(mode, pc, mem):
-    a = (mode >> 4) & 0xe
-    b = mode & 0x0e
-    unk = mem[pc+1] & 0x10
-
-    addr = mem.get_be16(pc)
-    ref = DirectRef(addr, pc)
-    pc += 2
-
-    if a != b:
-        if addr == 0:
-            return Reg16Ref(a), ComplexRef(Reg16Ref(b)), pc
-        ref = ComplexRef(ref, Reg16Ref(b))
-    return Reg16Ref(a), ref, pc
+    # almost the same as TwoRegExtendedMode above, bur with src and dst switched up
+    dst_reg = Reg16Ref(mode & 0xe)
+    src_reg = Reg16Ref((mode >> 4) & 0xe)
+    match mode & 0x11:
+        case 0x00: # neither lower nibble set, normal reg, reg
+            return dst_reg, src_reg, pc
+        case 0x01: # dest <- src (direct)
+            return DirectRef(mem.get_be16(pc), pc), src_reg, pc + 2
+        case 0x10: # dest <- src op literal
+            return LiteralRef(mem.get_be16(pc), 2, pc), src_reg, pc + 2
+        case 0x11: # dest <- src op reg
+            disp = LiteralRef(mem.get_be16(pc), 2, pc)
+            return ComplexRef(dst_reg, None, disp), src_reg, pc + 2
 

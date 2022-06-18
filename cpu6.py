@@ -141,6 +141,13 @@ def AluMatch(pc, mem):
         pc += 1
         dst, src, src2, pc = AluAddrMode(mode, inst, pc, mem)
 
+        # if we have two sources, mov ignores the source that isn't mem
+        if op == 13 and src2 != None:
+            if isinstance(src2, (Reg16Ref, Reg8Ref)):
+                src2 = None
+            elif isinstance(src, (Reg16Ref, Reg8Ref)):
+                src, src2 = src2, None
+
     bytes = mem[orig_pc:pc]
     return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, dst, src, src2, fn=fn), bytes, {})
 
@@ -267,16 +274,16 @@ def MatchMul(pc, mem):
 def MatchD6(pc, mem):
     orig_pc = pc
     mode = mem[pc+1]
-    mnemonic = "st" if (mode & 0x10) == 0 else "ld"
+    mnemonic = "st" # if (mode & 0x10) == 0 else "ld"
 
     pc += 2
-    reg, ref, pc = D6Mode(mode, pc, mem)
+    src, dest, pc = D6Mode(mode, pc, mem)
 
     bytes = mem[orig_pc:pc]
-    if mode & 0x1 != 1:
-        return InstructionMatch(orig_pc, BasicCpu6Inst("unknown_d6", reg, ref), bytes)
+    #if mode & 0x1 != 1:
+    #    return InstructionMatch(orig_pc, BasicCpu6Inst("unknown_d6", reg, ref), bytes)
 
-    return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, reg, ref), bytes)
+    return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, dest, src), bytes)
 
 def MatchPushPop(pc, mem):
     orig_pc = pc

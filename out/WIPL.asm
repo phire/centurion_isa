@@ -767,7 +767,7 @@ PrintString:
 0538:    7e 45                  push {X, Y, Z}
 053a:    9a                     ld A, [X]
 053b:    5c                     mov Y, A
-053c:    55 98 f2 00            mov Z, Z, 0xf200
+053c:    55 98 f2 00            mov Z, 0xf200
 0540:    65 61                  ld X, [Y++]
 0542:    19 11                  ble L_0555
 
@@ -802,7 +802,7 @@ L_0563:
 
 PrintChar:
 0564:    7e 81                  push {Z}
-0566:    55 98 f2 00            mov Z, Z, 0xf200	 ; Serisl port 0 base address
+0566:    55 98 f2 00            mov Z, 0xf200	 ; Serisl port 0 base address
 056a:    f6 19 0d               st AL, +0xd(Z)
 056d:    c0 c5                  ld BL, 0xc5	 ; Set up baud rate ?
 056f:    f6 39 00               st BL, +0x0(Z)
@@ -876,7 +876,7 @@ RawPrintChar:
 
 L_05c4:
 05c4:    7e 81                  push {Z}
-05c6:    55 98 f2 00            mov Z, Z, 0xf200
+05c6:    55 98 f2 00            mov Z, 0xf200
 05ca:    83 a2                  ld AL, [0x056e|-0x5e]
 05cc:    f6 19 00               st AL, +0x0(Z)
 05cf:    90 05 a6               ld A, 0x05a6
