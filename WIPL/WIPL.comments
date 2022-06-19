@@ -47,6 +47,7 @@
 0x1a3 ,	comment	; This will be address of our trampoline code
 0x1a6 ,	comment	; '='
 0x1a8 ,	comment	; This sets up prompt character, i wonder why...
+0x1ae ,	comment	; abort_addr = to BackToPrompt
 0x1b1 ,	comment	; '1'
 0x1b3 ,	comment	; This sets default boot disk to "01" or "00"
 0x1b5 ,	comment	; depending on Sense4 value
@@ -64,6 +65,7 @@
 0x1e1 ,	comment	; "DISK"
 0x1e6 ,	comment	; disk_buffer
 0x1eb ,	comment	; "CODE"
+0x1ed ,	comment	; Enable echo of terminal input
 0x1f5 ,	comment	; code_buffer
 0x200 ,	comment	; name_buffer
 0x202 ,	comment	; disk_buffer
@@ -388,13 +390,83 @@
 0x575 ,	comment	; Print with a delay
 0x579 ,	comment	; If character is \r...
 0x57e ,	comment	; Add \n
-0x584 ,	comment	; (0x5a0) - preserve the original character ???
-0x59f ,	comment	; Shouldn't this be ld ?
+0x584 ,	comment	; (0x5a0) - preserve AL value
+0x595 ,	comment	; Wait for port ready
+0x59c ,	comment	; Output che character
+0x59f ,	comment	; Preserved character. Is this mov AL, #imm ?
+		; This value is patched from different places, but only 0x8d is stored.
+		; No idea how 0xbd got here...
+0x5a2 ,	comment	; Interrupt ACK perhaps
+0x5a6,	pre_comment 	; This is an interrupt handler for the serial port
+	 	; We know that a daisy chain interrupt line is used
+0x5a6 ,	comment	; Serial0 base address
+0x5ae ,	comment	; Read the character if ready
+0x5b0 ,	comment	; This likely clears some mux0 internal state
+0x5bc ,	comment	; No character available
+0x5c4,	pre_comment 	; Wait for one character to arrive from the serial0 and echo it.
+0x5c6 ,	comment	; Serial port base address
+0x5ca ,	comment	; Grab a constant of 0xc5 from PrintChar
+0x5cc ,	comment	; Baud rate ?
+0x5cf ,	comment	; Install the interrupt handler
+0x5d4 ,	comment	; Clear A at IPL6
+0x5d7 ,	comment	; 6 is an IPL number, could be a coincidence
+0x5d9 ,	comment	; But anyways we need to set the serial port up to
+0x5dc ,	comment	; generate a daisy chain interrupt
+0x5df ,	comment	; This waits for the character to arrive
+0x5e1 ,	comment	; from within an interrupt handler
+0x5e9 ,	comment	; "Echo enable flag", patched from other places
+0x5ed ,	comment	; Echo the character if enabled
+0x5f0 ,	comment	; 0x60 is an apostrophe, 0x61 is 'A'
+0x5f5 ,	comment	; Looks like AL = toupper(AL)
+0x5fa ,	comment	; A character of '\n' aborts the input and jumps to abort_addr.
+0x5fc ,	comment	; In the beginning abort_addr was preset to BackToPrompt
+0x5fd ,	comment	; If no, just return
+0x5ff ,	comment	; abort_addr
+0x602 ,	comment	; Ignore if unset
+0x606 ,	comment	; The character is in AL
 0x609,	pre_comment 	; This routine supposedly reads a line from the terminal; i didn't care
 	 	; about the guts.
 	 	; The line is prefixed by 16-bit length, just like strings we print.
 	 	; It is also supposed to be padded with spaces (0xA0) up to a certain
 	 	; fixed length of at least 10 chars. NAME comparison wouldn't work without
 	 	; it as it compares exactly 10 characters.
+0x60b ,	comment	; preserved_abort_addr = abort_addr
+0x60d ,	comment	; abort_addr = ReadLineAbort
+0x612 ,	comment	; A = pointer to a buffer
+0x613 ,	comment	; Push X (return address)
+0x615 ,	comment	; X = buffer + 1 - this skips first byte of the length
+0x616 ,	comment	; The second byte will be skipped because storing a character preincrements it
 0x617 ,	comment	; '='
 0x619 ,	comment	; This signals a prompt
+0x61e ,	comment	; Check for Backspace
+0x623 ,	comment	; Another option for backspace is 0x15 (NAK)
+0x62a ,	comment	; Preserve our control character
+0x630 ,	comment	; Nothing to do if we have empty buffer
+0x632 ,	comment	; ' ' (space)
+0x634 ,	comment	; Shouldn't we move the cursor back before doing so ???
+0x637 ,	comment	; Restore our control character
+0x639,	pre_comment 	; Here we see that the preserved value is 0x95, this may explain
+	 	; why space is printed first, together with 0x16 (SYN) character below.
+	 	; I suggest that this somehow reverses the direction and prints
+	 	; the space backwards
+	 	; Another option is to print a space, then issue the control character,
+	 	; then issue 0x16 in order to repeat it
+0x639 ,	comment	; PrintChar
+0x63e ,	comment	; 0x16 - does this switch cursor movement to forward again ?
+0x640 ,	comment	; PrintChar
+0x644 ,	comment	; Check for '\n'
+0x649 ,	comment	; Preserve the character
+0x651 ,	comment	; Looks like this checks for maximum string length
+0x655 ,	comment	; Next location (note the preincrement)
+0x656 ,	comment	; AL = preserved character
+0x658 ,	comment	; Store it and loop back to reading the next char
+0x65b ,	comment	; A = pointer to a buffer + 1
+0x65e ,	comment	; A = resulting string length
+0x660 ,	comment	; Pop return address
+0x662 ,	comment	; This stores length of the entered string and skips over the literal
+0x664 ,	comment	; preserved_abort_addr
+0x667 ,	comment	; abort_addr = preserved_abort_addr
+0x669 ,	comment	; Disable echo of terminal input
+0x66f ,	comment	; Pop return address
+0x671 ,	comment	; String length = 0
+0x674 ,	comment	; Will return to preserved_abort_addr
