@@ -107,7 +107,7 @@ L_0185:
 01a6:    80 bd                  ld AL, 0xbd	 ; '='
 01a8:    a1 06 18               st AL, [0x0618]	 ; This sets up prompt character, i wonder why...
 01ab:    90 01 bb               ld A, 0x01bb
-01ae:    b1 06 00               st A, [0x0600]
+01ae:    b1 06 00               st A, [0x0600]	 ; abort_addr = to BackToPrompt
 01b1:    80 b1                  ld AL, 0xb1	 ; '1'
 01b3:    1d 01                  bs4 L_01b6	 ; This sets default boot disk to "01" or "00"
 01b5:    29                     dec AL, #1	 ; depending on Sense4 value
@@ -140,7 +140,7 @@ BackToPrompt:
 01e6:    03 74                  (0x374)	 ; disk_buffer
 01e8:    79 05 36               call PrintString
 01eb:    03 5a                  (0x35a)	 ; "CODE"
-01ed:    80 01                  ld AL, 0x01
+01ed:    80 01                  ld AL, 0x01	 ; Enable echo of terminal input
 01ef:    a1 05 ea               st AL, [0x05ea]
 01f2:    79 06 09               call ReadLine
 01f5:    03 78                  (0x378)	 ; code_buffer
@@ -816,7 +816,7 @@ PrintChar:
 057e:    80 8a                  ld AL, 0x8a	 ; Add \n
 0580:    7b 13                  call RawPrintChar
 0582:    80 8d                  ld AL, 0x8d
-0584:    a3 1a                  st AL, [0x05a0|+0x1a]	 ; (0x5a0) - preserve the original character ???
+0584:    a3 1a                  st AL, [0x05a0|+0x1a]	 ; (0x5a0) - preserve AL value
 0586:    0e                     dly
 0587:    7f 81                  pop {Z}
 0589:    09                     ret
@@ -833,88 +833,79 @@ L_0590:
 0594:    09                     ret
 
 RawPrintChar:
-0595:    f6 38 00               ld BL, +0x0(Z)
+0595:    f6 38 00               ld BL, +0x0(Z)	 ; Wait for port ready
 0598:    24 31                  srl BL, #2
 059a:    11 f9                  bnc RawPrintChar
-059c:    f6 19 01               st AL, +0x1(Z)
-059f:    a0 bd                  st AL, 0xbd	 ; Shouldn't this be ld ?
+059c:    f6 19 01               st AL, +0x1(Z)	 ; Output che character
+059f:    a0 bd                  st AL, 0xbd	 ; Preserved character. Is this mov AL, #imm ?
+                                           	 ; This value is patched from different places, but only 0x8d is stored.
+                                           	 ; No idea how 0xbd got here...
 05a1:    09                     ret
-05a2:    f6 'v'
-05a3:    38
-05a4:    0f
-05a5:    0a
-05a6:    55
-05a7:    98
-05a8:    f2 'r'
-05a9:    00
-05aa:    f6 'v'
-05ab:    18
-05ac:    00
-05ad:    2c
-05ae:    10
-05af:    0f
-05b0:    f6 'v'
-05b1:    18
-05b2:    01
-05b3:    f6 'v'
-05b4:    18
-05b5:    03
-05b6:    f6 'v'
-05b7:    18
-05b8:    05
-05b9:    f6 'v'
-05ba:    18
-05bb:    07
-05bc:    2a
-05bd:    73
-05be:    e3 'c'
-05bf:    f6 'v'
-05c0:    18
-05c1:    01
-05c2:    73
-05c3:    de '^'
 
-L_05c4:
+L_05a2:
+05a2:    f6 38 0f               ld BL, +0xf(Z)	 ; Interrupt ACK perhaps
+05a5:    0a                     reti
+
+SerialIntHandler:
+    ; This is an interrupt handler for the serial port
+    ; We know that a daisy chain interrupt line is used
+05a6:    55 98 f2 00            mov Z, 0xf200	 ; Serial0 base address
+05aa:    f6 18 00               ld AL, +0x0(Z)
+05ad:    2c                     srl AL, #1
+05ae:    10 0f                  bc L_05bf	 ; Read the character if ready
+05b0:    f6 18 01               ld AL, +0x1(Z)	 ; This likely clears some mux0 internal state
+05b3:    f6 18 03               ld AL, +0x3(Z)
+05b6:    f6 18 05               ld AL, +0x5(Z)
+05b9:    f6 18 07               ld AL, +0x7(Z)
+05bc:    2a                     clr AL, #0	 ; No character available
+05bd:    73 e3                  jmp L_05a2
+
+L_05bf:
+05bf:    f6 18 01               ld AL, +0x1(Z)
+05c2:    73 de                  jmp L_05a2
+
+ReadChar:
+    ; Wait for one character to arrive from the serial0 and echo it.
 05c4:    7e 81                  push {Z}
-05c6:    55 98 f2 00            mov Z, 0xf200
-05ca:    83 a2                  ld AL, [0x056e|-0x5e]
-05cc:    f6 19 00               st AL, +0x0(Z)
-05cf:    90 05 a6               ld A, 0x05a6
+05c6:    55 98 f2 00            mov Z, 0xf200	 ; Serial port base address
+05ca:    83 a2                  ld AL, [0x056e|-0x5e]	 ; Grab a constant of 0xc5 from PrintChar
+05cc:    f6 19 00               st AL, +0x0(Z)	 ; Baud rate ?
+05cf:    90 05 a6               ld A, 0x05a6	 ; Install the interrupt handler
 05d2:    d7 6e                  mov IL6(P), A
-05d4:    3a                     clr A, #0
+05d4:    3a                     clr A, #0	 ; Clear A at IPL6
 05d5:    d7 60                  mov IL6(A), A
-05d7:    80 06                  ld AL, 0x06
-05d9:    f6 19 0a               st AL, +0xa(Z)
-05dc:    f6 19 0e               st AL, +0xe(Z)
+05d7:    80 06                  ld AL, 0x06	 ; 6 is an IPL number, could be a coincidence
+05d9:    f6 19 0a               st AL, +0xa(Z)	 ; But anyways we need to set the serial port up to
+05dc:    f6 19 0e               st AL, +0xe(Z)	 ; generate a daisy chain interrupt
 
 L_05df:
-05df:    e6 60                  mov A, IL6(A)
-05e1:    45 10                  mov AH, AL
+05df:    e6 60                  mov A, IL6(A)	 ; This waits for the character to arrive
+05e1:    45 10                  mov AH, AL	 ; from within an interrupt handler
 05e3:    14 fa                  bz L_05df
 05e5:    c0 80                  ld BL, 0x80
 05e7:    43 31                  or AL, BL
-05e9:    c0 00                  ld BL, 0x00
+05e9:    c0 00                  ld BL, 0x00	 ; "Echo enable flag", patched from other places
 05eb:    15 03                  bnz L_05f0
-05ed:    79 05 64               call PrintChar
+05ed:    79 05 64               call PrintChar	 ; Echo the character if enabled
 
 L_05f0:
-05f0:    c0 e0                  ld BL, 0xe0
+05f0:    c0 e0                  ld BL, 0xe0	 ; 0x60 is an apostrophe, 0x61 is 'A'
 05f2:    49                     sub BL, AL
 05f3:    16 05                  blt L_05fa
-05f5:    c0 20                  ld BL, 0x20
+05f5:    c0 20                  ld BL, 0x20	 ; Looks like AL = toupper(AL)
 05f7:    49                     sub BL, AL
 05f8:    45 31                  mov AL, BL
 
 L_05fa:
-05fa:    c0 8a                  ld BL, 0x8a
-05fc:    49                     sub BL, AL
-05fd:    15 07                  bnz L_0606
-05ff:    d0 06 6f               ld B, 0x066f
-0602:    14 02                  bz L_0606
+05fa:    c0 8a                  ld BL, 0x8a	 ; A character of '\n' aborts the input and jumps to abort_addr.
+05fc:    49                     sub BL, AL	 ; In the beginning abort_addr was preset to BackToPrompt
+05fd:    15 07                  bnz L_0606	 ; If no, just return
+05ff:    d0 06 6f               ld B, 0x066f	 ; abort_addr
+0602:    14 02                  bz L_0606	 ; Ignore if unset
 0604:    55 24                  mov X, B
 
 L_0606:
-0606:    7f 81                  pop {Z}
+0606:    7f 81                  pop {Z}	 ; The character is in AL
 0608:    09                     ret
 
 ReadLine:
@@ -925,78 +916,85 @@ ReadLine:
     ; fixed length of at least 10 chars. NAME comparison wouldn't work without
     ; it as it compares exactly 10 characters.
 0609:    93 f5                  ld A, [0x0600|-0xb]
-060b:    b3 58                  st A, [0x0665|+0x58]
-060d:    90 06 6f               ld A, 0x066f
+060b:    b3 58                  st A, [0x0665|+0x58]	 ; preserved_abort_addr = abort_addr
+060d:    90 06 6f               ld A, 0x066f	 ; abort_addr = ReadLineAbort
 0610:    b3 ee                  st A, [0x0600|-0x12]
-0612:    9a                     ld A, [X]
-0613:    6d a2                  st X, [--S]
-0615:    38                     inc A, #1
-0616:    5b                     mov X, A
+0612:    9a                     ld A, [X]	 ; A = pointer to a buffer
+0613:    6d a2                  st X, [--S]	 ; Push X (return address)
+0615:    38                     inc A, #1	 ; X = buffer + 1 - this skips first byte of the length
+0616:    5b                     mov X, A	 ; The second byte will be skipped because storing a character preincrements it
 0617:    80 bd                  ld AL, 0xbd	 ; '='
 0619:    79 05 64               call PrintChar	 ; This signals a prompt
 
-L_061c:
-061c:    7b a6                  call L_05c4
-061e:    c0 88                  ld BL, 0x88
+ReadNextChar:
+061c:    7b a6                  call ReadChar
+061e:    c0 88                  ld BL, 0x88	 ; Check for Backspace
 0620:    49                     sub BL, AL
-0621:    14 05                  bz L_0628
-0623:    c0 95                  ld BL, 0x95
+0621:    14 05                  bz HandleBackspace
+0623:    c0 95                  ld BL, 0x95	 ; Another option for backspace is 0x15 (NAK)
 0625:    49                     sub BL, AL
 0626:    15 1c                  bnz L_0644
 
-L_0628:
+HandleBackspace:
 0628:    d5 a4                  ld B, @[S]
-062a:    a3 0c                  st AL, [0x0638|+0xc]
+062a:    a3 0c                  st AL, [0x0638|+0xc]	 ; Preserve our control character
 062c:    30 20                  inc B, #1
 062e:    51 42                  sub B, X
-0630:    14 0c                  bz L_063e
-0632:    80 a0                  ld AL, 0xa0
-0634:    79 05 64               call PrintChar
-0637:    80 95                  ld AL, 0x95
-0639:    7c fa                  call @[0x0635|-0x6]
+0630:    14 0c                  bz L_063e	 ; Nothing to do if we have empty buffer
+0632:    80 a0                  ld AL, 0xa0	 ; ' ' (space)
+0634:    79 05 64               call PrintChar	 ; Shouldn't we move the cursor back before doing so ???
+0637:    80 95                  ld AL, 0x95	 ; Restore our control character
+
+    ; Here we see that the preserved value is 0x95, this may explain
+    ; why space is printed first, together with 0x16 (SYN) character below.
+    ; I suggest that this somehow reverses the direction and prints
+    ; the space backwards
+    ; Another option is to print a space, then issue the control character,
+    ; then issue 0x16 in order to repeat it
+0639:    7c fa                  call @[0x0635|-0x6]	 ; PrintChar
 063b:    3f                     dec X
-063c:    73 de                  jmp L_061c
+063c:    73 de                  jmp ReadNextChar
 
 L_063e:
-063e:    80 86                  ld AL, 0x86
-0640:    7c f3                  call @[0x0635|-0xd]
-0642:    73 d8                  jmp L_061c
+063e:    80 86                  ld AL, 0x86	 ; 0x16 - does this switch cursor movement to forward again ?
+0640:    7c f3                  call @[0x0635|-0xd]	 ; PrintChar
+0642:    73 d8                  jmp ReadNextChar
 
 L_0644:
-0644:    c0 8d                  ld BL, 0x8d
+0644:    c0 8d                  ld BL, 0x8d	 ; Check for '\n'
 0646:    49                     sub BL, AL
-0647:    14 12                  bz L_065b
-0649:    a3 0c                  st AL, [0x0657|+0xc]
+0647:    14 12                  bz HandleEnter
+0649:    a3 0c                  st AL, [0x0657|+0xc]	 ; Preserve the character
 064b:    95 a4                  ld A, @[S]
 064d:    d0 00 85               ld B, 0x0085
 0650:    58                     add B, A
-0651:    51 42                  sub B, X
-0653:    17 06                  bp L_065b
-0655:    3e                     inc X
-0656:    80 b0                  ld AL, 0xb0
-0658:    aa                     st AL, [X]
-0659:    73 c1                  jmp L_061c
+0651:    51 42                  sub B, X	 ; Looks like this checks for maximum string length
+0653:    17 06                  bp HandleEnter
+0655:    3e                     inc X	 ; Next location (note the preincrement)
+0656:    80 b0                  ld AL, 0xb0	 ; AL = preserved character
+0658:    aa                     st AL, [X]	 ; Store it and loop back to reading the next char
+0659:    73 c1                  jmp ReadNextChar
 
-L_065b:
-065b:    95 a4                  ld A, @[S]
+HandleEnter:
+065b:    95 a4                  ld A, @[S]	 ; A = pointer to a buffer + 1
 065d:    38                     inc A, #1
-065e:    51 40                  sub A, X
-0660:    65 a1                  ld X, [S++]
-0662:    b5 45                  st A, @[X++]
-0664:    d0 01 bb               ld B, 0x01bb
-0667:    f3 97                  st B, [0x0600|-0x69]
-0669:    22 30                  clr BL, #0
+065e:    51 40                  sub A, X	 ; A = resulting string length
+0660:    65 a1                  ld X, [S++]	 ; Pop return address
+0662:    b5 45                  st A, @[X++]	 ; This stores length of the entered string and skips over the literal
+
+L_0664:
+0664:    d0 01 bb               ld B, 0x01bb	 ; preserved_abort_addr
+0667:    f3 97                  st B, [0x0600|-0x69]	 ; abort_addr = preserved_abort_addr
+0669:    22 30                  clr BL, #0	 ; Disable echo of terminal input
 066b:    e1 05 ea               st BL, [0x05ea]
 066e:    09                     ret
-066f:    65
-0670:    a1 '!'
-0671:    3a
-0672:    b5 '5'
-0673:    45
-0674:    63
-0675:    ef 'o'
-0676:    73
-0677:    ec 'l'
+
+ReadLineAbort:
+066f:    65 a1                  ld X, [S++]	 ; Pop return address
+0671:    3a                     clr A, #0	 ; String length = 0
+0672:    b5 45                  st A, @[X++]
+0674:    63 ef                  ld X, [0x0665|-0x11]	 ; Will return to preserved_abort_addr
+0676:    73 ec                  jmp L_0664
 
 L_0678:
 0678:    95 41                  ld A, [X++]
