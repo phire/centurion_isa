@@ -1,4 +1,23 @@
 0x1eb ,	comment	; Current open file? Number open files?
+0x220 ,	comment	; Process PageTable
+0x288 ,	comment	; Set to the user supplied boot Code
+0x2a1 ,	comment	; Set to the user supplied boot Code
+0x2ba ,	comment	; Set to the user supplied boot Code
+0x2d3 ,	comment	; Set to the user supplied boot Code
+0x2ec ,	comment	; Set to the user supplied boot Code
+0x305 ,	comment	; Set to the user supplied boot Code
+0x31e ,	comment	; Set to the user supplied boot Code
+0x337 ,	comment	; Set to the user supplied boot Code
+0x350 ,	comment	; Set to the user supplied boot Code
+0x369 ,	comment	; Set to the user supplied boot Code
+0x382 ,	comment	; Set to the user supplied boot Code
+0x39b ,	comment	; Set to the user supplied boot Code
+0x3b4 ,	comment	; Set to the user supplied boot Code
+0x3cd ,	comment	; Set to the user supplied boot Code
+0x3e6 ,	comment	; Set to the user supplied boot Code
+0x3ff ,	comment	; Set to the user supplied boot Code
+0x418 ,	comment	; Set to the user supplied boot Code
+0x431 ,	comment	; Set to the user supplied boot Code
 0x43e,	pre_comment 	; Null terminated list of Device objects to early-initialize at boot
 0x8073,	pre_comment 	; LongCall?
 0x839c ,	comment	; Calculate syscall table offset
@@ -8,6 +27,7 @@
 0x83a4 ,	comment	; jump to syscall
 0x85c5 ,	comment	; 1eb
 0x860a ,	comment	; Is this yield?
+0x862d ,	comment	; Gets patched by Clock Routine
 0x863c ,	comment	; Clear CurrentProcess
 0x863e ,	comment	; Setup Temporary stack
 0x8aa6,	pre_comment 	; Not entirely sure
@@ -25,6 +45,8 @@
 0x8b49 ,	comment	; B = FileOP struct
 0x8b4b ,	comment	; Special case?
 0x8ce1,	pre_comment 	; arg in A, should be postive
+0xa134 ,	comment	; '	 ; '	 ; '
+0xa7b1 ,	comment	; '	 ; '	 ; '
 0xaa27 ,	comment	; move stack down
 0xaa30 ,	comment	; rearange our stack
 0xaa33 ,	comment	; store X
@@ -47,6 +69,15 @@
 0xb2d7 ,	comment	; Check A is below 0x8000
 0xb2e9 ,	comment	; SystemInfo_TopOfMemory
 0xb2ed ,	comment	; A is above 0xefff
+0xb3a2,	pre_comment 	; Writes uptime (as 32bit tenths of a second) into xarg pointer
+0xb3ba,	pre_comment 	; returns uptime (as 32bit tenths of a second) in Regs A, B
+0xb3d0 ,	comment	; Patches immediate in subbig
+0xb3d5 ,	comment	; Mains Power Frequency
+0xb3dc ,	comment	; Invert IL10(X)
+0xb3e2 ,	comment	; might be divide by 6?
+0xb3f0,	pre_comment 	; Writes clock into string
+0xb3fd ,	comment	; Process type check?
+0xb40b ,	comment	; Null termiate
 0xb44b ,	comment	; Setup stack at the end of this Init function
 		; We don't need it anymore, so overwrite it
 0xb461,	pre_comment 	; I suspect this is the timer interrupt
@@ -55,14 +86,40 @@
 0xb473 ,	comment	; Decrement Timeslice counter
 0xb474 ,	comment	; store at 0x0141
 0xb483,	pre_comment 	; Update Clock
-0xb4c9 ,	comment	; X before call
+0xb488 ,	comment	; ASCII "60"
+0xb4a3 ,	comment	; ASCII "24"
+0xb4b0 ,	comment	; X before call
+0xb4be,	pre_comment 	; Takes a two digit ASCII number in A, adds one
+	 	; If the result is greater than the two digit ASCII number in X (which gets pushed
+	 	; to [S] during call), then it wraps around to ascii "00"
+	 	; 
+0xb4be ,	comment	; A = A+1
+0xb4bf ,	comment	; Ascii '9'
+0xb4c7 ,	comment	; A - 10
+0xb4cd ,	comment	; ascii "00"
 0xb4f8,	pre_comment 	; Is hardcoded to assume Error device is a mux port
 0xb500 ,	comment	; B = string
 0xb506 ,	comment	; Error device
 0xb509 ,	comment	; MMIO address 0xf200
 0xb523 ,	comment	; Wait for UART to be ready
+0xb912 ,	comment	; '	 ; '	 ; '
+0xb924 ,	comment	; '	 ; '	 ; '
+0xb926 ,	comment	; '	 ; '	 ; '
+0xba0d ,	comment	; '	 ; '	 ; '
+0xba0f ,	comment	; '	 ; '	 ; '
+0xba52 ,	comment	; '	 ; '	 ; '
+0xba88 ,	comment	; '	 ; '	 ; '
+0xbaaf ,	comment	; '	 ; '	 ; '
+0xbac2 ,	comment	; '	 ; '	 ; '
+0xbad8 ,	comment	; '	 ; '	 ; '
+0xbadb ,	comment	; '	 ; '	 ; '
+0xbadd ,	comment	; '	 ; '	 ; '
+0xbaf7 ,	comment	; '	 ; '	 ; '
+0xbb03 ,	comment	; '	 ; '	 ; '
 0xbb4f ,	comment	; Patch PrintStringToErrorDevice arg
 0xbb77 ,	comment	; " FAIL:  X XXXX XXXX\x07\r"
+0xbba1 ,	comment	; '	 ; '	 ; '
+0xbbd6 ,	comment	; '	 ; '	 ; '
 0xc085 ,	comment	; "EC:XX CP:XX CMDS: "
 0xc27e,	pre_comment 	; X is the CRT device
 	 	; Z is the WriteStruct (file operation object?)
@@ -75,7 +132,7 @@
 0xc5ac ,	comment	; Install exception handler
 0xca1f ,	comment	; "EC:XX CMDS: "
 0xcc0d ,	comment	; fixme: bad encoding?
-0xcc80,	pre_comment 	; SystemInfo + 0x32 = 8
+0xcc80,	pre_comment 	; CurrentProcess + 0x32 = 8
 0xcd4d,	pre_comment 	; Looks like this function converts a 16bit word to hex and writes
 	 	; it to the ascii buffer specified at [X]
 0xcdd1,	pre_comment 	; This is the entry point where WIPL transfers control
@@ -92,9 +149,26 @@
 0xce09 ,	comment	; BL should now be the DISK number.
 		; 0/1 for Hawk, 10/11 for Finch, 20/21 for Phoenix
 0xce1d ,	comment	; Install abort handler in interrupt level 15
+0xce20 ,	comment	; Set timer interrupt pagetable base to 0
 0xce28 ,	comment	; Map OPSYS's page 0 to 0x7800
-0xce37 ,	comment	; could this be a memcpy of 0x0000 to 0x7800?
-0xce4c ,	comment	; memcpy
+0xce37 ,	comment	; could this be a memcpy of 0x0000-0x07ff to 0x7800?
+0xce3f ,	comment	; Map a diffrent page to 0x7800
+		; I think this is the final page which will live here
+0xce4c ,	comment	; memcpy 0x100 to 0xeeff???
+		; Doesn't feel right for a memcpy instrution
+0xce4d ,	comment	; Remap OPSYS's page0 where it should go
+0xce58 ,	comment	; Not sure what this data is
+0xce6c ,	comment	; StartProcess
+0xce6f ,	comment	; Copy 32 entries to Page Table base 1
+0xce74 ,	comment	; Copy Same 32 entries to Page Table base 3
+0xce79 ,	comment	; Active page table?
+0xce83 ,	comment	; Set Mux Interrupt page table base to 1
+0xce88,	pre_comment 	; Zero??? all pages from page 0x1e to page 0x7d
+0xce88 ,	comment	; Map page to 0xf800-0xffff
+0xcea4 ,	comment	; Almost feels like this is doing a memset?
+0xcea5 ,	comment	; zero upper AH regiter so we can use 16bit sub-immediate below
+0xceb4 ,	comment	; map page 7f (should be MMIO regs) to 0xf800-0xffff
+0xceb9 ,	comment	; Init Timer
 0xcebf,	pre_comment 	; This initilizes all devices in the null-terminated EarlyInitDevices array
 	 	; Which in this case is just CrtDevice_Init
 0xcecc,	pre_comment 	; LOS Prompt:
@@ -102,8 +176,32 @@
 0xcee0 ,	comment	; Check if we should autoboot
 0xcee5,	pre_comment 	; Asks for NAME, DISK and CODE
 0xcee5 ,	comment	; "NAME="
+0xcef1 ,	comment	; Will return once "NAME=" is on CRT
+0xcefa ,	comment	; Will return once ReadBuffer contains user input
+0xcf0c,	pre_comment 	; Loop, converting lowercase letters to uppercase
+0xcf0c ,	comment	; 'a'
+0xcf17 ,	comment	; 'z'
+0xcf23 ,	comment	; Convert to upper case
 0xcf2a ,	comment	; "DISK="
+0xcf36 ,	comment	; Print "DISK="
+0xcf3d ,	comment	; Read user input
+0xcf46 ,	comment	; ASCII to num?
+0xcf4f ,	comment	; Substract? 20
+0xcf55 ,	comment	; < 20
+0xcf5b ,	comment	; Disktype += 20
+0xcf61 ,	comment	; Subtract? 10
+0xcf69 ,	comment	; Disktype += 10
 0xcf74 ,	comment	; "CODE="
+0xcf80 ,	comment	; print "CODE="
+0xcf8e ,	comment	; Set bit 3 on Device_CRT0+0
+		; Turn off echo?
+0xcf94 ,	comment	; Read user inpur
+0xcfa2 ,	comment	; Clear bit 3 on Device_CRT0+0
+0xcfa8 ,	comment	; Convert to Int
+0xcfb8 ,	comment	; Start at first Disk Device
+0xcfba,	pre_comment 	; Loop though all Devices, until we find the one matching out Disk Number
+0xcfcd,	pre_comment 	; Found the correct device
+0xcfd0 ,	comment	; Set the user supplied boot code
 0xcfd6 ,	comment	; patch the length(?) byte of the unkblk2 instruction
 0xcfd8 ,	comment	; Copy to R_e351, scanning for dot
 0xcfe2 ,	comment	; space
@@ -111,12 +209,40 @@
 0xcfe5 ,	comment	; Y now points after the '.'
 0xcfe7 ,	comment	; This looks like it overwrites other variables?
 0xcff0 ,	comment	; filename
-0xcff3 ,	comment	; Open file?
+0xcff3 ,	comment	; Get subdirectory metadata?
+0xcffc,	pre_comment 	; Successfully opened? (or found) directory?
+0xcffc ,	comment	; arg1 of Syscall_4f
+0xd006 ,	comment	; Type == Directory
+0xd011 ,	comment	; Same as Syscall_0e, but within a subdirectory
 0xd019 ,	comment	; Filename
-0xd074 ,	comment	; might be a single byte copy? But why have a special blk instruction for that?
+0xd031 ,	comment	; Type == File, maybe?
+0xd042 ,	comment	; Disnum
+0xd047 ,	comment	; FileHandle?
+0xd049,	pre_comment 	; Read Sector
+0xd04e ,	comment	; Read Data out of File
+0xd050 ,	comment	; 400 byte, sector size
+0xd052 ,	comment	; File handle?
+0xd055 ,	comment	; Sector Num
+0xd059 ,	comment	; Sector count?
+0xd066 ,	comment	; A load to 0x004c is counted as a configuration block
+0xd06c ,	comment	; And there is a base-address at this offset
+0xd074,	pre_comment 	; So this is a crazy microcoded instrution, it implements the whole inner loop of WECB loading
+	 	; First argument is the base address, destinations will be calculed relative to this
+	 	; Second arg is an incrementable source containing the record.
+	 	; 
+	 	; First byte is the type field. Known types are 0x00 and 0x01
+	 	; Byte two is a length (potentially signed? @LOAD never uses a value higher than 0x78)
+	 	; Bytes three and four are a Memory address
+	 	; Then there are Length bytes of data
+	 	; Followed by a single checksum byte
+0xd080 ,	comment	; End of WECB file
+0xd087 ,	comment	; Next sector
+0xd08e,	pre_comment 	; Next sector
 0xd08e ,	comment	; arg4
+0xd0b2 ,	comment	; Disable MUX interrupt?
 0xd0bb ,	comment	; This is the value in A that WIPL gave us
-0xd0c0,	pre_comment 	; Read configuration dataset
+0xd0be ,	comment	; Jump to new entry point
+0xd0c0,	pre_comment 	; Called when the user asks to load a file with type 1
 0xd0ca ,	comment	; Clear the screen
 0xd0cc ,	comment	; Wait until screen clear has finished
 0xd0d0 ,	comment	; Switch to LOS's page0
@@ -132,6 +258,10 @@
 0xd255,	pre_comment 	; Writes a string to CRT0
 	 	; String is in Y, should be pointing 2 bytes into a pascal style string
 0xd277 ,	comment	; set disknum
+0xd665 ,	comment	; '9'
+0xd66d ,	comment	; '6'
+0xd675 ,	comment	; 'R'
+0xd67d ,	comment	; 'H'
 0xd9da ,	comment	; "OPSYS OVERSIZE-LOAD PROCESS DISCONTINUED\r\n"
 0xe2b2 ,	comment	; DeviceType?
 0xe311 ,	comment	; <esc><fs><ff> (escape, file seperator, form feed)
@@ -184,7 +314,7 @@
 0xe750 ,	comment	; ]
 0xe76b,	pre_comment 	; Hexdump
 	 	; Y = address
-	 	;
+	 	; 
 0xe770 ,	comment	; Print Address
 0xe775 ,	comment	; start_of_row
 0xe77a ,	comment	; number of missing bytes for alignment
@@ -214,3 +344,25 @@
 0xe830,	pre_comment 	; Page table
 	 	; This gets copied to 0x140 by above command
 0xe921 ,	comment	; Install interrupt handler into IL14
+0xe935 ,	comment	; Key: A -> TosCmd_editregA
+0xe937 ,	comment	; Key: B -> TosCmd_editregB
+0xe939 ,	comment	; Key: C -> TosCmd_editregC
+0xe93b ,	comment	; Key: D -> TosCmd_hexDump
+0xe93f ,	comment	; Key: F -> TOS_CommandF
+0xe941 ,	comment	; Key: G -> TOS_CommandG
+0xe943 ,	comment	; Key: H -> TOS_CommandH
+0xe945 ,	comment	; Key: I -> TOS_CommandI
+0xe94b ,	comment	; Key: L -> TosCmd_Launch
+0xe94d ,	comment	; Key: M -> TOS_CommandM
+0xe94f ,	comment	; Key: N -> TOS_CommandN
+0xe951 ,	comment	; Key: O -> TOS_CommandO
+0xe953 ,	comment	; Key: P -> TosCmd_editregP
+0xe955 ,	comment	; Key: Q -> TOS_CommandQ
+0xe959 ,	comment	; Key: S -> TosCmd_editregS
+0xe95b ,	comment	; Key: T -> TOS_CommandT
+0xe95d ,	comment	; Key: U -> TOS_CommandU
+0xe95f ,	comment	; Key: V -> TosCmd_editregV
+0xe961 ,	comment	; Key: W -> TOS_CommandW
+0xe963 ,	comment	; Key: X -> TosCmd_editregX
+0xe965 ,	comment	; Key: Y -> TosCmd_editregY
+0xe967 ,	comment	; Key: Z -> TosCmd_editregZ

@@ -7,6 +7,12 @@
 0x011d, fnptr
 0x0126, label, EarlyInitDevicesPtr
 0x0126, ptr
+0x0130, label, ClockHours
+0x0130, char[2]
+0x0133, label, ClockMinutes
+0x0133, char[2]
+0x0136, label, ClockSeconds
+0x0136, char[2]
 0x0161, label, PageTableOne
 0x0181, label, PageTableTwo
 0x01ea, label, StartProcess
@@ -44,6 +50,7 @@
 0x8333, cstring
 0x8338, cstring
 0x8612, label, Yield
+0x862e, label, UptimeDays
 0x88cc, label, SyscallTable
 0x89ac, label, NumSyscalls
 0x89ac, B
@@ -174,12 +181,15 @@
 0xcbbc, pstring16
 0xcdd1, code, Start
 0xcee5, label, DiskPrompt
+0xd0c0, label, ReadConfigurationDataset
 0xdb19, label, DiskNum
 0xdb19, B
 0xe118, label, LOS_Page0
 0xe118, B
 0xe11a, label, OPSYS_Page0
 0xe11a, B
+0xe11b, label, LoadBaseAddress
+0xe11b, >H
 0xe11d, label, WIPL_A
 0xe11d, >H
 0xe11f, B
@@ -214,6 +224,7 @@
 0xe311, pstring16
 0xe311, label, ClearScreen
 0xe316, pstring16
+0xe343, label, UserDiskType?
 0xe344, label, UserDiskNum
 0xe346, cstring
 0xe351, cstring

@@ -37,6 +37,10 @@ Syscalls = {
 
     # These aren't used within @LOAD
 
+    0x0b: ("UptimeDays", None),
+    0x15: ("GetUptimeAB", None),
+    0x1b: ("GetUptimePtr", {"dest": "ptr"}),
+    0x1c: ("GetClock?", {"dest": "ptr"}),
     0x2b: ("divide", None),
     0x2c: ("multiply", None),
 }
@@ -69,13 +73,19 @@ memory.syscall_map = syscall_map
 def add_device(addr):
     name = bytes([c&0x7f for c in memory[addr+7:addr+13]]).decode("ascii").strip()
     memory_addr_info[addr].label = f"Device_{name}"
-    memory_addr_info[addr].type = "char[1]"
-    memory_addr_info[addr+1].type = ">H"
-    memory_addr_info[addr+3].type = "fnptr"
+    memory_addr_info[addr].type = "B"
+    memory_addr_info[addr+1].type = "b"
+    memory_addr_info[addr+2].type = "b"
+    memory_addr_info[addr+2].label = f"Device_{name}_number"
+    memory_addr_info[addr+3].type = "ptr"
     memory_addr_info[addr+5].type = "fnptr"
     memory_addr_info[addr+5].label = f"Device_{name}_Obj"
     memory_addr_info[addr+7].type = 'char[6]'
     memory_addr_info[addr+15].type = "ptr"
+
+    if name.startswith("DISK"):
+        memory_addr_info[addr+0x17].type = ">H"
+        memory_addr_info[addr+0x17].comment = f"Set to the user supplied boot Code"
 
 # Devices table (might be special files?)
 table_start = 0x01ba
@@ -90,7 +100,7 @@ while True:
         memory_addr_info[addr].label = "DevicesEnd"
         break
 
-    memory_addr_info[addr].type = "fnptr"
+    memory_addr_info[addr].type = "ptr"
     add_device(device_addr)
     device_num += 1
 
