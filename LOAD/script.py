@@ -20,11 +20,11 @@ Syscalls = {
 
 
     0x4c: ("4c", {
-        "arg1" : "word",
-        "arg2" : "word",
+        "size" : "word",
+        "fileHandle" : "word",
         "disknum" : "byte",
-        "arg4" : "word",
-        "arg5" : "ptr",
+        "SectorNum" : "word",
+        "Buffer" : "ptr",
         "arg6" : "byte"}),
     0x4f: ("4f", {"arg1" : "word", "arg2" : "ptr" }),
     0x55: ("55", {"arg1" : "word" }),
@@ -74,18 +74,24 @@ def add_device(addr):
     name = bytes([c&0x7f for c in memory[addr+7:addr+13]]).decode("ascii").strip()
     memory_addr_info[addr].label = f"Device_{name}"
     memory_addr_info[addr].type = "B"
-    memory_addr_info[addr+1].type = "b"
-    memory_addr_info[addr+2].type = "b"
+    memory_addr_info[addr+1].type = "B"
+    memory_addr_info[addr+2].type = "B"
     memory_addr_info[addr+2].label = f"Device_{name}_number"
     memory_addr_info[addr+3].type = "ptr"
-    memory_addr_info[addr+5].type = "fnptr"
+    memory_addr_info[addr+5].type = "ptr"
     memory_addr_info[addr+5].label = f"Device_{name}_Obj"
     memory_addr_info[addr+7].type = 'char[6]'
-    memory_addr_info[addr+15].type = "ptr"
 
     if name.startswith("DISK"):
+        memory_addr_info[addr+0x11].type = ">H"
+        memory_addr_info[addr+0x11].label = f"Device_{name}_TotalTracks"
+        memory_addr_info[addr+0x13].type = "B"
+        memory_addr_info[addr+0x14].type = "ptr"
         memory_addr_info[addr+0x17].type = ">H"
         memory_addr_info[addr+0x17].comment = f"Set to the user supplied boot Code"
+    if name.startswith("CRT"):
+        memory_addr_info[addr+15].type = "ptr"
+
 
 # Devices table (might be special files?)
 table_start = 0x01ba
@@ -116,11 +122,11 @@ func(0xcd4d, None, {"dest": "ptr"})
 func(0xb4f8, "PrintStringToErrorDevice", {"string": "ptr"})
 func(0x85b9, None, {"arg1": "byte"})
 func(0xb5f2, None, {
-    "arg1": "ptr",
-    "arg2": "ptr",
-    "arg3": "byte",
-    "arg4": "ptr",
-    "arg5": "ptr",
+    "fileHandle": "ptr",
+    "size": "word",
+    "diskNum": "byte",
+    "SectorNum" : "word",
+    "Buffer" : "ptr",
     "arg6": "byte",
 })
 

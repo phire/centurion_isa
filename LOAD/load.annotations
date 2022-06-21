@@ -13,6 +13,8 @@
 0x0133, char[2]
 0x0136, label, ClockSeconds
 0x0136, char[2]
+0x0141, label, Timeout
+0x0141, B
 0x0161, label, PageTableOne
 0x0181, label, PageTableTwo
 0x01ea, label, StartProcess
@@ -29,6 +31,10 @@
 0x043e, label, EarlyInitDevices
 0x045b, label, CenturionVI_String
 0x045b, pstring16
+0x803b, label, CallDeviceMethod
+0x8042, label, CallAinPageBase3
+0x805a, label, SwitchToPageBase0
+0x8073, label, SwitchToPageBase3
 0x80c5, pstring16
 0x80d0, pstring16
 0x80ef, pstring16
@@ -49,6 +55,7 @@
 0x832c, cstring
 0x8333, cstring
 0x8338, cstring
+0x83a7, label, CheckProcessPermission
 0x8612, label, Yield
 0x862e, label, UptimeDays
 0x88cc, label, SyscallTable
@@ -101,8 +108,19 @@
 0xb6c4, fnptr
 0xb6c6, fnptr
 0xb6c8, fnptr
-#0xb6ca, code
+0xb6ca, label, HawkDevice_BlockRead
+0xb7a1, label, _FileHandle
+0xb7a3, label, _DevicePlus13
+0xb7a4, label, _Arg6LowBits
+0xb7a5, label, _SectorNum
+0xb7a9, label, _CurrentSectorNum
+0xb7ab, label, _DestBuffer
+0xb7b3, label, _DeviceNum
+0xb7a7, label, _ReadSize
+0xb7ad, label, _AlsoReadSize
+0xb7d7, label, _Arg6Bit7
 0xb88b, code, HawkDevice_Init
+0xb93c, code, HawkLevel2_Handler
 0xbbde, pstring16
 0xbbe3, pstring16
 0xbbe9, pstring16
@@ -167,6 +185,7 @@
 0xcd4d, label, FormatHexWord
 0xcd65, label, FormatHexWord_Temp
 0xcd65, >H
+0xcda8, label, FindDiskDevice
 0xcae6, pstring16
 0xcb03, pstring16
 0xcb1e, pstring16
@@ -182,6 +201,17 @@
 0xcdd1, code, Start
 0xcee5, label, DiskPrompt
 0xd0c0, label, ReadConfigurationDataset
+0xd255, label, WritePString
+0xd274, label, ReadFirstConfigEntry
+0xd293, label, ReadNextConfigEntry
+0xd2b5, label, ParseTIB
+0xd32a, label, FinishParsingConfigurationDataset
+0xd3b3, label, ParseDISK
+0xd535, label, ParseCRT
+0xd5fc, label, ParsePTR
+0xd13d, label, ParseSPOOL
+0xd77e, label, ParseLINE
+0xd797, label, ParseSPEC
 0xdb19, label, DiskNum
 0xdb19, B
 0xe118, label, LOS_Page0
