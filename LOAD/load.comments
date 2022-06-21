@@ -1,23 +1,6 @@
 0x1eb ,	comment	; Current open file? Number open files?
 0x220 ,	comment	; Process PageTable
-0x288 ,	comment	; Set to the user supplied boot Code
-0x2a1 ,	comment	; Set to the user supplied boot Code
-0x2ba ,	comment	; Set to the user supplied boot Code
-0x2d3 ,	comment	; Set to the user supplied boot Code
-0x2ec ,	comment	; Set to the user supplied boot Code
-0x305 ,	comment	; Set to the user supplied boot Code
-0x31e ,	comment	; Set to the user supplied boot Code
-0x337 ,	comment	; Set to the user supplied boot Code
-0x350 ,	comment	; Set to the user supplied boot Code
 0x369 ,	comment	; Set to the user supplied boot Code
-0x382 ,	comment	; Set to the user supplied boot Code
-0x39b ,	comment	; Set to the user supplied boot Code
-0x3b4 ,	comment	; Set to the user supplied boot Code
-0x3cd ,	comment	; Set to the user supplied boot Code
-0x3e6 ,	comment	; Set to the user supplied boot Code
-0x3ff ,	comment	; Set to the user supplied boot Code
-0x418 ,	comment	; Set to the user supplied boot Code
-0x431 ,	comment	; Set to the user supplied boot Code
 0x43e,	pre_comment 	; Null terminated list of Device objects to early-initialize at boot
 0x8073,	pre_comment 	; LongCall?
 0x839c ,	comment	; Calculate syscall table offset
@@ -45,8 +28,6 @@
 0x8b49 ,	comment	; B = FileOP struct
 0x8b4b ,	comment	; Special case?
 0x8ce1,	pre_comment 	; arg in A, should be postive
-0xa134 ,	comment	; '	 ; '	 ; '
-0xa7b1 ,	comment	; '	 ; '	 ; '
 0xaa27 ,	comment	; move stack down
 0xaa30 ,	comment	; rearange our stack
 0xaa33 ,	comment	; store X
@@ -92,7 +73,7 @@
 0xb4be,	pre_comment 	; Takes a two digit ASCII number in A, adds one
 	 	; If the result is greater than the two digit ASCII number in X (which gets pushed
 	 	; to [S] during call), then it wraps around to ascii "00"
-	 	; 
+	 	;
 0xb4be ,	comment	; A = A+1
 0xb4bf ,	comment	; Ascii '9'
 0xb4c7 ,	comment	; A - 10
@@ -102,24 +83,12 @@
 0xb506 ,	comment	; Error device
 0xb509 ,	comment	; MMIO address 0xf200
 0xb523 ,	comment	; Wait for UART to be ready
-0xb912 ,	comment	; '	 ; '	 ; '
-0xb924 ,	comment	; '	 ; '	 ; '
 0xb926 ,	comment	; '	 ; '	 ; '
-0xba0d ,	comment	; '	 ; '	 ; '
 0xba0f ,	comment	; '	 ; '	 ; '
-0xba52 ,	comment	; '	 ; '	 ; '
-0xba88 ,	comment	; '	 ; '	 ; '
-0xbaaf ,	comment	; '	 ; '	 ; '
 0xbac2 ,	comment	; '	 ; '	 ; '
-0xbad8 ,	comment	; '	 ; '	 ; '
-0xbadb ,	comment	; '	 ; '	 ; '
 0xbadd ,	comment	; '	 ; '	 ; '
-0xbaf7 ,	comment	; '	 ; '	 ; '
-0xbb03 ,	comment	; '	 ; '	 ; '
 0xbb4f ,	comment	; Patch PrintStringToErrorDevice arg
 0xbb77 ,	comment	; " FAIL:  X XXXX XXXX\x07\r"
-0xbba1 ,	comment	; '	 ; '	 ; '
-0xbbd6 ,	comment	; '	 ; '	 ; '
 0xc085 ,	comment	; "EC:XX CP:XX CMDS: "
 0xc27e,	pre_comment 	; X is the CRT device
 	 	; Z is the WriteStruct (file operation object?)
@@ -219,27 +188,60 @@
 0xd042 ,	comment	; Disnum
 0xd047 ,	comment	; FileHandle?
 0xd049,	pre_comment 	; Read Sector
-0xd04e ,	comment	; Read Data out of File
+0xd049 ,	comment	; Load OPSYS page before doing syscall
+0xd04e ,	comment	; Read Data out of file into ReadBuffer
 0xd050 ,	comment	; 400 byte, sector size
 0xd052 ,	comment	; File handle?
 0xd055 ,	comment	; Sector Num
 0xd059 ,	comment	; Sector count?
-0xd066 ,	comment	; A load to 0x004c is counted as a configuration block
+0xd05a ,	comment	; LOS_Page0 is potentially empty before this load?
+0xd066 ,	comment	; A load to 0x004c is counted as a configuration sector
 0xd06c ,	comment	; And there is a base-address at this offset
-0xd074,	pre_comment 	; So this is a crazy microcoded instrution, it implements the whole inner loop of WECB loading
-	 	; First argument is the base address, destinations will be calculed relative to this
-	 	; Second arg is an incrementable source containing the record.
-	 	; 
+0xd074,	pre_comment 	; So this is a crazy microcoded instruction, it appears to implement the whole inner loop of
+	 	; WECB record loading
+	 	;
+	 	; This is how I think the instruction should work:
+	 	; First argument is the base address, destinations will be calculated relative to this
+	 	; Second arg is an implementable source containing the record.
+	 	;
 	 	; First byte is the type field. Known types are 0x00 and 0x01
 	 	; Byte two is a length (potentially signed? @LOAD never uses a value higher than 0x78)
-	 	; Bytes three and four are a Memory address
-	 	; Then there are Length bytes of data
-	 	; Followed by a single checksum byte
+	 	; Bytes three and four are a RecordAddress
+	 	; Then there <Length> bytes of data will follow
+	 	; Followed by a single checksum byte. The checksum is calculated as:
+	 	; 0x100 - sum(all header/data bytes)
+	 	;
+	 	; In a type 0 record, the data is simply copied to RecordAddress (plus BaseAddress)
+	 	; A zero-length type 0 record is valid, and should copy no data
+	 	; WECB files use a zero-length record at the end to indicate the entry address
+	 	; In a type 1 record, the data is one or more 16bit fixup addresses.
+	 	; For each 16bit FixupAddress, the microcode should:
+	 	; FixupAddress = BaseAddress+BaseAddress
+	 	; FixupValue = 16bit load from Fixup address
+	 	; FixupValue = FixupValue + RecordAddress + BaseAddress
+	 	; Write FixupValue back to FixupAddress
+	 	;
+	 	; On completion:
+	 	; Fault flag should be set if there was an error
+	 	; Carry flag should be set depending on some condition (record length > 0x80?)
+	 	; A = RecordAddress + BaseAddress
+	 	; Z = pointer to next record
+0xd079 ,	comment	; Check fault flag
+0xd07e ,	comment	; Something causes the microcode to set carry, and it means next sector.
 0xd080 ,	comment	; End of WECB file
-0xd087 ,	comment	; Next sector
+0xd087 ,	comment	; Next record type, Next sector
+0xd08c ,	comment	; next record is something other than 0x80, go back to microcode
 0xd08e,	pre_comment 	; Next sector
-0xd08e ,	comment	; arg4
-0xd0b2 ,	comment	; Disable MUX interrupt?
+0xd08e ,	comment	; modify arg4 of Syscall_4c
+0xd094,	pre_comment 	; Loading complete, transfer execution to loaded binary
+0xd0a2 ,	comment	; clear ISR
+0xd0a4 ,	comment	; Decoded wrong. should be "ld_dma_mode 0",
+0xd0ac ,	comment	; Clear timer interrupt handler
+		; If the timer is still going, the new binary will need
+		; to disable or install a new handler before enabling
+		; interrupts
+0xd0af ,	comment	; Reset MUX interrupt
+0xd0ba ,	comment	; A is binary entrypoint from microcode
 0xd0bb ,	comment	; This is the value in A that WIPL gave us
 0xd0be ,	comment	; Jump to new entry point
 0xd0c0,	pre_comment 	; Called when the user asks to load a file with type 1
@@ -314,7 +316,7 @@
 0xe750 ,	comment	; ]
 0xe76b,	pre_comment 	; Hexdump
 	 	; Y = address
-	 	; 
+	 	;
 0xe770 ,	comment	; Print Address
 0xe775 ,	comment	; start_of_row
 0xe77a ,	comment	; number of missing bytes for alignment
