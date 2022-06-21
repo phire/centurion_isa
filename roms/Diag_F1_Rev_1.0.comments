@@ -1,0 +1,116 @@
+0x8002 ,	comment	; This is the first word in Diag's 1KB of RAM
+0x8013 ,	comment	; Set stack pointer just beyond top of Diag's 1KB of RAM
+0x801b ,	comment	; This is writing a pointer directly into registers.
+0x801f ,	comment	; Something really funky is going on here.
+0x8022 ,	comment	; I assume this is calling or jumpting to that function
+0x8024 ,	comment	; Turn Decimal Point 1 off
+0x8027 ,	comment	; Turn Decimal Point 2 off
+0x802a ,	comment	; Turn Decimal Point 3 off
+0x802d ,	comment	; Turn Decimal Point 4 off
+0x8030 ,	comment	; A = Dip swiches value
+0x8035 ,	comment	; A = A & 0x0f
+0x8037 ,	comment	; Write A to hex displays
+0x803a ,	comment	; Unblank the hex displys
+0x803f ,	comment	; Compare with 0b1011
+0x8042 ,	comment	; If dipswitches == 0xb111:
+		; Display Auxiliary Test Menu
+0x8055,	pre_comment 	; This is the table of test functions
+	 	; The above code indexes into it based on DIP switches
+0x8055 ,	comment	; DiagEntryPoint
+0x8057 ,	comment	; DmaRegTest: Test_01: Write every single bit pattern to DMA's address and count
+		; registers, checks that it reads back correctly
+		; On error, flashes hex 11 if address failed, and hex 12 if count failed
+		; waits for button press to continue.
+		; On success, lights the success DP pattern and loops.
+0x8059 ,	comment	; MemoryTest: Test_02: A basic memory test.
+		; Writes every memory word from 0x0100 to 0x7fff with it's address,
+		; then loops back and checks the the memory value hasn't changed.
+		; Also installs an interrupt handler, which probally catches parity errors
+		; On invalid memory data, flashes an error with some hex value ?2
+		; On parity interrupt, shows some error hex value ?2
+		; On any other interrupt, shows error hex ?f where x is the interrupt
+		; On success, lights the success DP pattern and loops.
+		; 
+0x805b ,	comment	; Test_03
+0x805d ,	comment	; MuxSendTest: Test_04: Continually writes U to mux port 0.
+		; Fails if MMIO f200 & 0x1c is not zero
+0x805f ,	comment	; MuxRecvTest: Test_05: Echos whatever is received on mux port 0 back
+		; Fails if MMIO f200 & 0x1c is not zero
+0x8061 ,	comment	; MuxRecvInterruptTest: Test_06: Same as Test_05, but uses interrupts instead of polling
+		; 
+0x8063 ,	comment	; Test_07
+0x8065 ,	comment	; Test_08
+0x8067 ,	comment	; HawkTest: Test_09: Tests Hawk and DMA
+0x8069 ,	comment	; TOS_Entry: TestOS: This is a Monitor that operates over serial console
+0x806b ,	comment	; Bootstrap_test: Test_0b: This seems to be a copy/paste of bootstrap, letting you
+		; boot off a disk. But doesn't support CMD/Phoenix
+0x806d ,	comment	; Diag_self_test: Test_0c: Checksum's the F1 rom, flashes 1c if fail.
+		; Then test diag's sram from b800 to bfff, flashes 2c if fail.
+		; If everything passes, it lights up all decimal points, sets the
+		; hex displays to 88 (aka Christmas tree) and loops.
+0x806f ,	comment	; AuxiliaryTestMenu
+0x8071 ,	comment	; DiagEntryPoint
+0x8073 ,	comment	; DiagEntryPoint
+0x8077,	pre_comment 	; Takes 4 bit error code, displays ((error code << 4) | 0xf) on hex displays
+0x808e,	pre_comment 	; Test_01: Write every single bit pattern to DMA's address and count
+	 	; registers, checks that it reads back correctly
+	 	; On error, flashes hex 11 if address failed, and hex 12 if count failed
+	 	; waits for button press to continue.
+	 	; On success, lights the success DP pattern and loops.
+0x80e3,	pre_comment 	; Takes a error code, sets the fail decimal places and flashes the error
+	 	; code until button is pressed (450ms on, 450ms off)
+	 	; continues execution
+0x811b,	pre_comment 	; Test_02: A basic memory test.
+	 	; Writes every memory word from 0x0100 to 0x7fff with it's address,
+	 	; then loops back and checks the the memory value hasn't changed.
+	 	; Also installs an interrupt handler, which probally catches parity errors
+	 	; On invalid memory data, flashes an error with some hex value ?2
+	 	; On parity interrupt, shows some error hex value ?2
+	 	; On any other interrupt, shows error hex ?f where x is the interrupt
+	 	; On success, lights the success DP pattern and loops.
+	 	; 
+0x81dc,	pre_comment 	; Test_04: Continually writes U to mux port 0.
+	 	; Fails if MMIO f200 & 0x1c is not zero
+0x8203,	pre_comment 	; Test_05: Echos whatever is received on mux port 0 back
+	 	; Fails if MMIO f200 & 0x1c is not zero
+0x8229,	pre_comment 	; Check (UART_status & 0x1c == 0); Pass/Fail
+0x8247,	pre_comment 	; Test_06: Same as Test_05, but uses interrupts instead of polling
+	 	; 
+0x8247 ,	comment	; 9600 bps ???
+0x824e ,	comment	; Enable IRQ level 6 ?
+0x8251 ,	comment	; Test06_Vector
+0x8254 ,	comment	; This is register P for IPL 6
+0x825c ,	comment	; MUX0_BASE + 0x0e = 0
+0x826f ,	comment	; This should also ACK the interrupt
+0x8274 ,	comment	; AH = status, AL = character.
+		; Note we ignore the status; i don't know why we read both registers
+0x8277 ,	comment	; This echoes the character back, note no "ready for output" check
+0x827a ,	comment	; Copy the stack pointer from Interrupt level 0
+0x837f,	pre_comment 	; Test_09: Tests Hawk and DMA
+0x846f,	pre_comment 	; TestOS: This is a Monitor that operates over serial console
+0x8498 ,	comment	; Configure UART
+0x84a3 ,	comment	; ''
+0x84ab ,	comment	; 'M'
+0x84b0 ,	comment	; 'G'
+0x84b5 ,	comment	; 'Q'
+0x84ba ,	comment	; Start of ROM
+0x84bf,	pre_comment 	; Go: Takes a
+0x8500 ,	comment	; Jumps back to the start of F1 if some condition is met
+0x853c ,	comment	; Diag SRAM
+0x8592 ,	comment	; '\n'
+0x8596 ,	comment	; This is the ascii DEL charater
+0x859d,	pre_comment 	; Test_0b: This seems to be a copy/paste of bootstrap, letting you
+	 	; boot off a disk. But doesn't support CMD/Phoenix
+0x86b2,	pre_comment 	; Test_0c: Checksum's the F1 rom, flashes 1c if fail.
+	 	; Then test diag's sram from b800 to bfff, flashes 2c if fail.
+	 	; If everything passes, it lights up all decimal points, sets the
+	 	; hex displays to 88 (aka Christmas tree) and loops.
+0x8766 ,	comment	; Print the Test Number
+0x8769 ,	comment	; '='
+0x876b ,	comment	; Print('=')
+0x8770 ,	comment	; Print the Test Name
+0x879f,	pre_comment 	; If the DIPs are nolonger configured for the Auxiliary Test Menu, then
+	 	; jump back to start of DIAG
+0x87a1 ,	comment	; Read DIP switches
+0x87bf ,	comment	; Echo Testnum back to terminal
+0x87c2 ,	comment	; Convert to hex; Since there aren't many tests, this counts as convert to interger

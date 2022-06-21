@@ -60,6 +60,7 @@
 0x4e1 ,  label,		SeekToTrack
 0x4f5 ,	 label,		WaitForDataReady
 0x4fb ,	 label,		WaitForHawkCmdCompletion
+0x506 ,	 code,		AbortHandler
 0x507 ,  label,		CopyMem
 0x536 ,	 label,		PrintString
 0x564 ,	 label,		PrintChar
