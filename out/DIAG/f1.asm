@@ -35,8 +35,8 @@ L_8023:
 803d:    c0 0d                  ld BL, 0x0d
 803f:    49                     sub BL, AL	 ; Compare with 0b1011
 8040:    15 03                  bnz L_8045
-8042:    71 87 28               jmp AuxiliaryTestMenu	 ; If dipswitches == 0xb111: 
-                                                     	 ;     Display Auxiliary Test Menu
+8042:    71 87 28               jmp AuxiliaryTestMenu	 ; If dipswitches == 0xb111:
+                                                     	 ; Display Auxiliary Test Menu
 
 L_8045:
 8045:    c1 f1 10               ld BL, [0xf110]
@@ -426,16 +426,16 @@ L_8236:
 MuxRecvInterruptTest:
     ; Test_06: Same as Test_05, but uses interrupts instead of polling
     ; 
-8247:    80 c5                  ld AL, 0xc5
+8247:    80 c5                  ld AL, 0xc5	 ; 9600 bps ???
 8249:    a1 f2 00               st AL, [0xf200]
 824c:    80 06                  ld AL, 0x06
-824e:    a1 f2 0a               st AL, [0xf20a]
-8251:    90 82 6f               ld A, 0x826f
-8254:    b1 00 6e               st A, [0x006e]
+824e:    a1 f2 0a               st AL, [0xf20a]	 ; Enable IRQ level 6 ?
+8251:    90 82 6f               ld A, 0x826f	 ; Test06_Vector
+8254:    b1 00 6e               st A, [0x006e]	 ; This is register P for IPL 6
 8257:    3a                     clr A, #0
 8258:    b1 00 6c               st A, [0x006c]
 825b:    04                     ei
-825c:    a1 f2 0e               st AL, [0xf20e]
+825c:    a1 f2 0e               st AL, [0xf20e]	 ; MUX0_BASE + 0x0e = 0
 
 L_825f:
 825f:    90 0f 00               ld A, 0x0f00
@@ -447,10 +447,11 @@ L_825f:
 826c:    71 80 01               jmp DiagEntryPoint
 
 Test06_Vector:
-826f:    81 f2 0f               ld AL, [0xf20f]
+826f:    81 f2 0f               ld AL, [0xf20f]	 ; This should also ACK the interrupt
 8272:    15 0d                  bnz L_8281
-8274:    91 f2 00               ld A, [0xf200]
-8277:    a1 f2 01               st AL, [0xf201]
+8274:    91 f2 00               ld A, [0xf200]	 ; AH = status, AL = character.
+                                              	 ; Note we ignore the status; i don't know why we read both registers
+8277:    a1 f2 01               st AL, [0xf201]	 ; This echoes the character back, note no "ready for output" check
 827a:    91 00 0a               ld A, [0x000a]	 ; Copy the stack pointer from Interrupt level 0
 827d:    5f                     mov S, A
 827e:    7b a9                  call CheckMuxStatus
@@ -826,7 +827,7 @@ TOS_PromptLoop:
 84bd:    73 04                  jmp Q_Command
 
 G_Command:
-    ; Go: Takes a 
+    ; Go: Takes a
 84bf:    7b 79                  call ReadHexWord
 84c1:    55 80                  mov A, Z
 
@@ -1177,7 +1178,7 @@ Diag_self_test:
     ; Test_0c: Checksum's the F1 rom, flashes 1c if fail.
     ; Then test diag's sram from b800 to bfff, flashes 2c if fail.
     ; If everything passes, it lights up all decimal points, sets the
-    ; hex displays to 88 (aka Christmas tree) and loops. 
+    ; hex displays to 88 (aka Christmas tree) and loops.
 86b2:    d0 0f 0c               ld B, 0x0f0c
 86b5:    81 f1 10               ld AL, [0xf110]
 86b8:    42 21                  and AL, BH
