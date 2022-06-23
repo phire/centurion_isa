@@ -56,8 +56,10 @@
 0x8333, cstring
 0x8338, cstring
 0x83a7, label, CheckProcessPermission
+0x85b9, label, LockMutex?
 0x8612, label, Yield
 0x862e, label, UptimeDays
+0x8805, label, GetProcessPermission
 0x88cc, label, SyscallTable
 0x89ac, label, NumSyscalls
 0x89ac, B
@@ -67,6 +69,7 @@
 0x8b33, label, DoFileOpInner
 0x8d54, label, Syscall_02_Singleton
 0x8d54, >H
+0x8de4, label, LockMutex?3B
 0xadc8, code, AbortHandler
 0xadd5, label, AbortHandlerInner
 0xaf33, label, AbortWriteStruct
@@ -201,6 +204,8 @@
 0xcdd1, code, Start
 0xcee5, label, DiskPrompt
 0xd0c0, label, ReadConfigurationDataset
+0xd0f6, label, ParseNextConfig
+0xd188, label, EchoLines
 0xd255, label, WritePString
 0xd274, label, ReadFirstConfigEntry
 0xd293, label, ReadNextConfigEntry
@@ -209,11 +214,85 @@
 0xd3b3, label, ParseDISK
 0xd535, label, ParseCRT
 0xd5fc, label, ParsePTR
-0xd13d, label, ParseSPOOL
+0xd723, label, ParseSPOOL
 0xd77e, label, ParseLINE
 0xd797, label, ParseSPEC
+0xd85d, label, ConfigEarlyInitLen
+0xd85f, label, ConfigEarlyInitPtr
 0xdb19, label, DiskNum
-0xdb19, B
+0xe076, label, ConfigSystem00
+0xe077, label, ConfigSystem01
+0xe078, label, ConfigSystem02
+0xe079, label, ConfigSystem03
+0xe07a, label, ConfigNumTibs
+0xe07b, label, ConfigNumDisks
+0xe07c, label, ConfigNumCRTs
+0xe07d, label, ConfigNumPrinters
+0xe07e, label, ConfigNumSpools
+0xe07f, label, ConfigNumLines
+0xe080, label, ConfigNumSpecs
+0xe081, label, ConfigEchoLineCount
+0xe082, label, ConfigSystem12
+0xe083, label, ConfigSystem13
+0xe084, label, ConfigSystem14
+0xe085, label, ConfigSystem15
+0xe086, label, ConfigSystem16
+0xe087, label, ConfigTib0
+0xe088, label, ConfigTib1
+0xe089, label, ConfigTib2
+0xe08a, label, ConfigTib3
+0xe08b, label, ConfigDisk_0
+0xe08c, label, ConfigDisk_1
+0xe08d, label, ConfigDisk_2
+0xe08e, label, ConfigDisk_3
+0xe08f, label, ConfigDisk_4
+0xe090, label, ConfigDisk_5
+0xe091, label, ConfigDisk_6
+0xe092, label, ConfigDisk_7
+0xe093, label, ConfigDisk_8
+0xe094, label, ConfigDisk_9
+0xe095, label, ConfigDisk_a
+0xe096, label, ConfigDisk_b
+0xe097, label, ConfigDisk_c
+0xe098, label, ConfigCrt_00
+0xe098, label, ConfigCrt_01
+0xe099, label, ConfigCrt_02
+0xe09a, label, ConfigCrt_03
+0xe09b, label, ConfigCrt_04
+0xe09c, label, ConfigCrt_05
+0xe09d, label, ConfigCrt_06
+0xe09e, label, ConfigCrt_07
+0xe09f, label, ConfigCrt_08
+0xe0a0, label, ConfigCrt_09
+0xe0a1, label, ConfigCrt_0a
+0xe0a2, label, ConfigCrt_0b
+0xe0a3, label, ConfigCrt_0c
+0xe0a4, label, ConfigCrt_0d
+0xe0a5, label, ConfigCrt_0e
+0xe0a6, label, ConfigCrt_0f
+0xe0a7, label, ConfigCrt_10
+0xe0a8, label, ConfigCrt_11
+0xe0a9, label, ConfigCrt_12
+0xe0aa, label, ConfigCrt_13
+0xe0ab, label, ConfigCrt_14
+0xe0ac, label, ConfigPtr_0
+0xe0ad, label, ConfigPtr_1
+0xe0ae, label, ConfigPtr_2
+0xe0af, label, ConfigPtr_3
+0xe0b0, label, ConfigPtr_4
+0xe0b1, label, ConfigPtr_5
+0xe0b2, label, ConfigPtr_6
+0xe0b3, label, ConfigPtr_7
+0xe0b4, label, ConfigPtr_8
+0xe0b5, label, ConfigPtr_9
+0xe0b6, label, ConfigSpool_00
+0xe0e4, label, ConfigSpec_00
+0xe0e5, label, ConfigSpec_01
+0xe0e6, label, ConfigSpec_02
+0xe0e7, label, ConfigSpec_03
+0xe0e8, label, ConfigSpec_04
+0xe0e9, label, ConfigSpec_05
+0xe0ea, label, ConfigSpec_06_DirName?
 0xe118, label, LOS_Page0
 0xe118, B
 0xe11a, label, OPSYS_Page0
@@ -256,15 +335,17 @@
 0xe316, pstring16
 0xe343, label, UserDiskType?
 0xe344, label, UserDiskNum
+0xe345, label, DoAutoboot
+0xe345, B
 0xe346, cstring
 0xe351, cstring
 0xe35c, label, BootNameLen
 0xe35c, >H
 0xe35e, label, BootName
-0xe35e, cstring
-0xe376, cstring
-0xe345, label, DoAutoboot
-0xe345, B
+0xe35e, char[23]
+0xe376, char[21]
+0xe38b, label, ConfigLoadedTIBs
+0xe393, label, ConfigDeviceCount
 0xe399, label, Tos_Entry
 0xe39b, label, Tos_Return
 0xe4d6, label, TosPrompt

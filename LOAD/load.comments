@@ -38,6 +38,7 @@
 0x862d ,	comment	; Gets patched by Clock Routine
 0x863c ,	comment	; Clear CurrentProcess
 0x863e ,	comment	; Setup Temporary stack
+0x8805,	pre_comment 	; Returns a pointer to the current process's permission byte
 0x8aa6,	pre_comment 	; Not entirely sure
 	 	; Seems to gets the device instance struct corrosponding to byte at [B + 1]
 	 	; Result in B
@@ -53,8 +54,41 @@
 0x8b49 ,	comment	; B = FileOP struct
 0x8b4b ,	comment	; Special case?
 0x8ce1,	pre_comment 	; arg in A, should be postive
-0xa134 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
-0xa7b1 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
+0x8d21,	pre_comment 	; Might be read file. Might be open File
+	 	; X+0: DiskNum
+	 	; X+1: FilenamePtr
+	 	; X+3: DestBuffer
+	 	; X+4: arg4
+	 	; Returns length in A
+0x8d2d ,	comment	; Is this actually permission?
+0x8d33 ,	comment	; Disknum
+0x8d3c ,	comment	; Filename
+0x8d3e ,	comment	; arg1
+0x8d4a ,	comment	; Filename
+0x8d50 ,	comment	; FileName
+0x8d5e ,	comment	; Abort
+0x8d66 ,	comment	; OldPermission
+0x8d6b ,	comment	; DiskNum
+0x8d9a,	pre_comment 	; A = FileHandle
+	 	; B = DiskNum
+	 	; Xarg+0 = Destination
+0x8da4,	pre_comment 	; Common Tail for Syscall_02, Syscall_03 and Syscall_62
+0x8da4 ,	comment	; SectorNum
+0x8da8 ,	comment	; FileHandle
+0x8dad ,	comment	; DiskNum
+0x8dbb ,	comment	; DiskNum
+0x8dbf ,	comment	; DestinationBuffer
+0x8dc4 ,	comment	; arg4
+0x8dc9 ,	comment	; Change stack; Overwrites strings at 8237
+0x8ddb ,	comment	; Abort
+0x8de4,	pre_comment 	; Not entirely sure, but this appears to be locking a mutex
+0x8df4,	pre_comment 	; Syscalls 02/03/62 continued
+0x8e50 ,	comment	; patched with Destination Buffer
+		; Um, this decoding is suspect, it should be using P
+0x9004 ,	comment	; LockMutex
+0x9007 ,	comment	; Filename
+0x900a ,	comment	; R_9289|0x9289
+0x9036 ,	comment	; R_9289|0x9289
 0xaa27 ,	comment	; move stack down
 0xaa30 ,	comment	; rearange our stack
 0xaa33 ,	comment	; store X
@@ -157,7 +191,6 @@
 		; set (as far as I can tell). Does this mean that enabling
 		; DMA with 0 count instantly tiggeres the interrupt?
 0xb85a ,	comment	; X
-0xb912 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
 0xb926 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
 0xba0f ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
 0xbac2 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
@@ -171,8 +204,21 @@
 0xc280 ,	comment	; Lock?
 0xc290 ,	comment	; Overwrites string????
 0xc2de ,	comment	; "ATTN PRINT\n\r"
+0xc325 ,	comment	; Get which port caused interrupt
+0xc3dc ,	comment	; ASCII STX (Start of Text)
+0xc3e1,	pre_comment 	; This is probally a generic Secure-Attention-Key type mechnisim that always goes to the kernel
+	 	; Right now, it's configured to break into the debugger, but I suspect on a retail kernel it
+	 	; will be considered to do something more sane and not a secutiry flaw, like killling the current
+	 	; process
+0xc3e3 ,	comment	; 1a is TOS_Entry (or Debugger)
+0xc3e6 ,	comment	; Check for jump instruction at TOS entry
+0xc3e9 ,	comment	; Beep if no valid handler found
+0xc3fa ,	comment	; Get original Return address
+0xc3fc ,	comment	; Store it Tos_Return
+0xc3fe ,	comment	; Replace it with return, launch TOS
+0xc406 ,	comment	; ASCII BEL (bel)
+0xc5a4 ,	comment	; End of this function, Stack will overwrite it
 0xc5a7 ,	comment	; Set exception handler's S register
-		; Doesn't actually get used as a Stack
 0xc5ac ,	comment	; Install exception handler
 0xca1f ,	comment	; "EC:XX CMDS: "
 0xcc0b ,	comment	; Lock Mutex?
@@ -358,6 +404,9 @@
 0xd0d5 ,	comment	; Read data (and do some other stuff)
 0xd0d8 ,	comment	; "SYSTEM"
 0xd0e4 ,	comment	; ERROR
+0xd0e7 ,	comment	; "SYSTEM" + two extra chars
+0xd0e9 ,	comment	; A string of variables
+		; Mostly contains counts for each config entry type
 0xd0f9 ,	comment	; "TIB   "
 0xd10a ,	comment	; "DISK  "
 0xd11b ,	comment	; "CRT   "
@@ -366,21 +415,54 @@
 0xd14e ,	comment	; "LINE  "
 0xd15f ,	comment	; "SPEC  "
 0xd170 ,	comment	; "INVALID CONFIGURATION DATA SET\r\n"
+0xd188,	pre_comment 	; First, the next (ConfigEchoLineCount) entries should be echoed to the CRT
+0xd188 ,	comment	; Part of the bulk read after System
+0xd190 ,	comment	; Write it to screen
+0xd199,	pre_comment 	; Setup a bunch of fixed values in lower mem, and allocate data structures
+0xd199 ,	comment	; This is all happening on LOS Page0, so it won't effect the current' running OPSYS
+0xd19f ,	comment	; Jump instruction
+0xd1b0 ,	comment	; 107 is a pointer to a two byte object
+0xd1dc ,	comment	; PageTable
+0xd1e3 ,	comment	; PageTable
+0xd1f4 ,	comment	; TIBs are two bytes each?
+0xd215 ,	comment	; B should be number of devices (plus 2)
+0xd217 ,	comment	; Truncate upper bits?
+0xd219 ,	comment	; B should be 2*num_devices, size of Devices array
 0xd255,	pre_comment 	; Writes a string to CRT0
 	 	; String is in Y, should be pointing 2 bytes into a pascal style string
+	 	; Which is the layout that ReadNextConfigEntry returns
 0xd277 ,	comment	; set disknum
+0xd279,	pre_comment 	; Read Sector Loop
 0xd280 ,	comment	; 400 bytes
 0xd282 ,	comment	; FileHandle Patched before ReadConfigurationDataset was called
 0xd285 ,	comment	; Sector
-0xd294 ,	comment	; Disable Timeout, so OPSYS can't kill us
+0xd293,	pre_comment 	; The caller should update Y to point past the end of the the previous entry
+0xd294 ,	comment	; Disable Timeout, so OPSYS won't kill us
+		; The Configuration Dataset file format appears to be a sequence of Pascal style strings
+		; If the length starts with 0xff (so probally -1?) Skip to the next sector
 0xd29e ,	comment	; Skip to next sector if the next byte is 0xff
-0xd2a2 ,	comment	; Loop
+0xd2a2 ,	comment	; Read Sector Loop
+0xd2a4,	pre_comment 	; The Configuration Dataset file format ends with a two byte string, starting with ASCII EOT
 0xd2a4 ,	comment	; check for magic end of file marker
+0xd2c3 ,	comment	; SystemProcess? SystemObject?
+0xd316 ,	comment	; Each TIB is 0x5c
+0xd325 ,	comment	; loop, Next TIB
+0xd3d8 ,	comment	; Flags, Type
+0xd3df ,	comment	; Disknum
 0xd665 ,	comment	; '9'
 0xd66d ,	comment	; '6'
 0xd675 ,	comment	; 'R'
 0xd67d ,	comment	; 'H'
+0xd7c4 ,	comment	; Buffer
+0xd7f7 ,	comment	; Buffer?
+0xd802 ,	comment	; Disknum
+0xd803 ,	comment	; Filename
+0xd805 ,	comment	; Buffer
+0xd88a ,	comment	; Patched at d86a
 0xd9da ,	comment	; "OPSYS OVERSIZE-LOAD PROCESS DISCONTINUED\r\n"
+0xd9ec ,	comment	; SpinForever
+0xd9ee ,	comment	; Syscall entry point
+0xda03 ,	comment	; @SYS.OSN
 0xe2b2 ,	comment	; DeviceType?
 0xe311 ,	comment	; <esc><fs><ff> (escape, file seperator, form feed)
 0xe35c,	pre_comment 	; This string is used as both a pascal string and a C string.

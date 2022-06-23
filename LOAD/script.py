@@ -2,7 +2,7 @@ import struct
 from generic import entry_points, memory_addr_info, FunctionInfo
 
 Syscalls = {
-    0x02: ("02", {"arg1": "byte", "arg2": "ptr"}),
+    0x02: ("02", {"DiskNum": "byte", "Filename": "ptr", "Buffer": "word", "arg4": "byte"}),
     0x04: ("04", {"arg1": "ptr", "arg2": "ptr", "arg3": "byte"}),
     0x05: ("05", {"arg1": "byte"}), # fixme, can't follow whole function. probally wrong
     0x06: ("06", {"arg1": "byte"}), # same as 12, but takes arg on X
@@ -31,7 +31,7 @@ Syscalls = {
     0x57: ("57", {"arg1" : "word", "arg2" : "word", "arg3" : "byte" }),
     0x59: ("59", None),
     0x5a: ("5a", None),
-    0x64: ("64", {"arg1" : "word", "arg2" : "word"}),
+    0x64: ("64", {"filename" : "ptr", "arg2" : "word"}),
     0x65: ("65", {"arg1" : "word"}),
     0x6b: ("AbortAL", None), # Same as 09 Abort, but abort_code is passed via AL
 
