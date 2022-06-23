@@ -91,62 +91,6 @@ lables = [
 
 ]
 
-comments = [
-    (0x8002, "This is the first word in Diag's 1KB of RAM"),
-    (0x8013, "Set stack pointer just beyond top of Diag's 1KB of RAM"),
-
-    (0x801b, "This is writing a pointer directly into registers."),
-    (0x801f, "Something really funky is going on here."),
-    (0x8022, "I assume this is calling or jumpting to that function"),
-
-    (0x8024, "Turn Decimal Point 1 off"),
-    (0x8027, "Turn Decimal Point 2 off"),
-    (0x802a, "Turn Decimal Point 3 off"),
-    (0x802d, "Turn Decimal Point 4 off"),
-    (0x8030, "A = Dip swiches value"),
-    (0x8035, "A = A & 0x0f"),
-    (0x8037, "Write A to hex displays"),
-    (0x803a, "Unblank the hex displys"),
-    (0x803f, "Compare with 0b1011"),
-
-    (0x8042, "If dipswitches == 0xb111: \n"
-             "    Display Auxiliary Test Menu"),
-
-
-    (0x8063, "TOS_Entry"),
-
-    (0x827a, "Copy the stack pointer from Interrupt level 0"),
-
-
-    (0x8498, "Configure UART"),
-    (0x84a3, "'\'"),
-    (0x84ab, "'M'"),
-    (0x84b0, "'G'"),
-    (0x84b5, "'Q'"),
-
-    (0x84ba, "Start of ROM"),
-
-
-
-    (0x8500, "Jumps back to the start of F1 if some condition is met"),
-
-    (0x853c, "Diag SRAM"),
-    (0x8592, "'\\n'"),
-    (0x8596, "This is the ascii DEL charater"),
-
-    # (0x875b, "will wrap around to 0x800, the length of each ROM"),
-    # (0x8774, "will wrap around to 0x800, the length of each ROM"),
-    (0x8766, "Print the Test Number"),
-    (0x8769, "'='"),
-    (0x876b, "Print('=')"),
-    (0x8770, "Print the Test Name"),
-
-    (0x87a1, "Read DIP switches"),
-    (0x87bf, "Echo Testnum back to terminal"),
-    (0x87c2, "Convert to hex; Since there aren't many tests, this counts as convert to interger"),
-
-
-]
 
 if __name__ == "__main__":
     with open(filename, "rb") as f:
@@ -172,7 +116,8 @@ if __name__ == "__main__":
         add_string(memory, addr)
 
 
-    apply_comments(comments)
+    mem = MemoryWrapper(memory)
+    read_annotations("roms/Diag_F1_Rev_1.0.comments", mem)
 
 
     # There is a table of tests here:
@@ -193,4 +138,4 @@ if __name__ == "__main__":
 
 
 
-    disassemble(MemoryWrapper(memory))
+    disassemble(mem)

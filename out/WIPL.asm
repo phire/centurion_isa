@@ -12,11 +12,11 @@ DiskCodeValue:
 L_0108:
     ; Entry point
 0108:    3a                     clr A, #0
-0109:    b1 00 6c               st A, [0x006c]	 ; Initialize some vars
-010c:    b1 00 fc               st A, [0x00fc]
-010f:    b1 00 ae               st A, [0x00ae]
+0109:    b1 00 6c               st A, [0x006c]	 ; S[IPL6] = 0
+010c:    b1 00 fc               st A, [0x00fc]	 ; S[IPL15] = 0
+010f:    b1 00 ae               st A, [0x00ae]	 ; P[IPL10] = 0
 0112:    90 05 06               ld A, 0x0506
-0115:    b1 00 fe               st A, [0x00fe]
+0115:    b1 00 fe               st A, [0x00fe]	 ; P[IPL15] = AbortHandler
 0118:    83 ed                  ld AL, [0x0107|-0x13]	 ; 0xc5
 011a:    a1 04 3d               st AL, [0x043d]	 ; Patch ld AL, #0xc5 instruction at addr 043c
 011d:    a1 05 6e               st AL, [0x056e]	 ; Patch ld BL, #0xc5 instruction at addr 056d
@@ -35,7 +35,7 @@ L_0108:
 
 L_0138:
     ; We go here if sense1 switch is set (DIAG board is present)
-0138:    61 00 1a               ld X, [0x001a]	 ; X = (0x001a) - 20
+0138:    61 00 1a               ld X, [0x001a]	 ; X = S[IPL1] - 20
 013b:    50 54 ff ec            add X, X, 0xffec	 ; Looks like DIAG overrides our mem test and tells us
 013f:    73 44                  jmp L_0185	 ; size of RAM to use
 
@@ -140,8 +140,8 @@ BackToPrompt:
 01e6:    03 74                  (0x374)	 ; disk_buffer
 01e8:    79 05 36               call PrintString
 01eb:    03 5a                  (0x35a)	 ; "CODE"
-01ed:    80 01                  ld AL, 0x01	 ; Enable echo of terminal input
-01ef:    a1 05 ea               st AL, [0x05ea]
+01ed:    80 01                  ld AL, 0x01	 ; Suppress terminal input echo for CODE entering
+01ef:    a1 05 ea               st AL, [0x05ea]	 ; disable_echo
 01f2:    79 06 09               call ReadLine
 01f5:    03 78                  (0x378)	 ; code_buffer
 01f7:    79 05 36               call PrintString
@@ -356,7 +356,7 @@ L_02f4:
 0307:    85 81                  ld AL, [Z++]	 ; dirent.file_type
 0309:    b5 a2                  st A, [--S]	 ; push file_type
 030b:    90 ff a9               ld A, 0xffa9
-030e:    7b 2c                  call CallHighMem	 ; Call (end_of_ram - 87) = LoadSector
+030e:    7b 2c                  call CallHighMem	 ; Call (end_of_ram - 87) = LoadSector (relocated)
 0310:    01                     nop	 ; Load the metadata sector into buffer #1
 
     ; The first two metadata entries constitute a header. We know nothing of
@@ -386,9 +386,9 @@ L_0321:
 032b:    90 ff ff               ld A, 0xffff
 032e:    d3 0d                  ld B, [0x033d|+0xd]	 ; B = ram_top
 0330:    58                     add B, A
-0331:    f1 00 fe               st B, [0x00fe]	 ; Set 0x00fe ram_top - 1; i don't get why.
+0331:    f1 00 fe               st B, [0x00fe]	 ; P[IPL15] = (end_of_ram - 1) = AbortHandler (relocated)
 0334:    90 fe e5               ld A, 0xfee5
-0337:    7b 03                  call CallHighMem	 ; Call (end_of_ram - 283) = RelocatablePart
+0337:    7b 03                  call CallHighMem	 ; Call (end_of_ram - 283) = RelocatablePart (relocated)
 
 L_0339:
 0339:    71 01 bb               jmp BackToPrompt
@@ -714,7 +714,10 @@ WaitForHawkCmdCompletion:
 0502:    49                     sub BL, AL
 0503:    15 f6                  bnz WaitForHawkCmdCompletion
 0505:    09                     ret
-0506:    00
+
+AbortHandler:
+    ; We set IPL14 vector to this point
+0506:    00                     HALT
 
 CopyMem:
     ; This is the end of a fragment, which gets copied to top of RAM.
@@ -791,9 +794,9 @@ L_0555:
 0559:    09                     ret
 
 L_055a:
-055a:    80 8d                  ld AL, 0x8d
-055c:    c3 42                  ld BL, [0x05a0|+0x42]
-055e:    49                     sub BL, AL
+055a:    80 8d                  ld AL, 0x8d	 ; '\r'
+055c:    c3 42                  ld BL, [0x05a0|+0x42]	 ; last_char
+055e:    49                     sub BL, AL	 ; Don't print CR if already done
 055f:    14 02                  bz L_0563
 0561:    7b 01                  call PrintChar
 
@@ -816,7 +819,7 @@ PrintChar:
 057e:    80 8a                  ld AL, 0x8a	 ; Add \n
 0580:    7b 13                  call RawPrintChar
 0582:    80 8d                  ld AL, 0x8d
-0584:    a3 1a                  st AL, [0x05a0|+0x1a]	 ; (0x5a0) - preserve AL value
+0584:    a3 1a                  st AL, [0x05a0|+0x1a]	 ; last_char = '\r'
 0586:    0e                     dly
 0587:    7f 81                  pop {Z}
 0589:    09                     ret
@@ -837,14 +840,17 @@ RawPrintChar:
 0598:    24 31                  srl BL, #2
 059a:    11 f9                  bnc RawPrintChar
 059c:    f6 19 01               st AL, +0x1(Z)	 ; Output che character
-059f:    a0 bd                  st AL, 0xbd	 ; Preserved character. Is this mov AL, #imm ?
-                                           	 ; This value is patched from different places, but only 0x8d is stored.
-                                           	 ; No idea how 0xbd got here...
+059f:    a0 bd                  st AL, 0xbd	 ; last_char - last printed character stored right into the literal field.
+                                           	 ; Yes, this is a self-modifying instruction.
 05a1:    09                     ret
 
 L_05a2:
 05a2:    f6 38 0f               ld BL, +0xf(Z)	 ; Interrupt ACK perhaps
-05a5:    0a                     reti
+05a5:    0a                     reti		 ; A nice mechanics of reloading P register back to its original value.
+						 ; Interrupts in cpu6 don't use stack, instead they just switch the
+						 ; context like coroutines. This will store current PC value in P register
+						 ; of the current IPL (so that it gets reloaded) and resumes from P register
+						 ; on a lower IPL (0 in case of WIPL).
 
 SerialIntHandler:
     ; This is an interrupt handler for the serial port
@@ -853,10 +859,10 @@ SerialIntHandler:
 05aa:    f6 18 00               ld AL, +0x0(Z)
 05ad:    2c                     srl AL, #1
 05ae:    10 0f                  bc L_05bf	 ; Read the character if ready
-05b0:    f6 18 01               ld AL, +0x1(Z)	 ; This likely clears some mux0 internal state
-05b3:    f6 18 03               ld AL, +0x3(Z)
-05b6:    f6 18 05               ld AL, +0x5(Z)
-05b9:    f6 18 07               ld AL, +0x7(Z)
+05b0:    f6 18 01               ld AL, +0x1(Z)	 ; Read data register of all 4 ports
+05b3:    f6 18 03               ld AL, +0x3(Z)	 ; It looks like this is supposed to ensure a pending "RX ready"
+05b6:    f6 18 05               ld AL, +0x5(Z)	 ; status is clear on all of them and the interrupt will be deasserted
+05b9:    f6 18 07               ld AL, +0x7(Z)   ; In case if it was caused by pressing a random key on any other terminal
 05bc:    2a                     clr AL, #0	 ; No character available
 05bd:    73 e3                  jmp L_05a2
 
@@ -882,10 +888,10 @@ L_05df:
 05df:    e6 60                  mov A, IL6(A)	 ; This waits for the character to arrive
 05e1:    45 10                  mov AH, AL	 ; from within an interrupt handler
 05e3:    14 fa                  bz L_05df
-05e5:    c0 80                  ld BL, 0x80
+05e5:    c0 80                  ld BL, 0x80	 ; Note we always set 8th bit by hands
 05e7:    43 31                  or AL, BL
-05e9:    c0 00                  ld BL, 0x00	 ; "Echo enable flag", patched from other places
-05eb:    15 03                  bnz L_05f0
+05e9:    c0 00                  ld BL, 0x00	 ; disable_echo, patched from other places
+05eb:    15 03                  bnz L_05f0	 ; No echo if disabled
 05ed:    79 05 64               call PrintChar	 ; Echo the character if enabled
 
 L_05f0:
@@ -909,8 +915,7 @@ L_0606:
 0608:    09                     ret
 
 ReadLine:
-    ; This routine supposedly reads a line from the terminal; i didn't care
-    ; about the guts.
+    ; This routine reads a line from the terminal.
     ; The line is prefixed by 16-bit length, just like strings we print.
     ; It is also supposed to be padded with spaces (0xA0) up to a certain
     ; fixed length of at least 10 chars. NAME comparison wouldn't work without
@@ -932,31 +937,24 @@ ReadNextChar:
 0620:    49                     sub BL, AL
 0621:    14 05                  bz HandleBackspace
 0623:    c0 95                  ld BL, 0x95	 ; Another option for backspace is 0x15 (NAK)
-0625:    49                     sub BL, AL
+0625:    49                     sub BL, AL	 ; Looks like our ADDS terminal uses it instead of standard 0x08
 0626:    15 1c                  bnz L_0644
 
 HandleBackspace:
 0628:    d5 a4                  ld B, @[S]
-062a:    a3 0c                  st AL, [0x0638|+0xc]	 ; Preserve our control character
-062c:    30 20                  inc B, #1
-062e:    51 42                  sub B, X
-0630:    14 0c                  bz L_063e	 ; Nothing to do if we have empty buffer
+062a:    a3 0c                  st AL, [0x0638|+0xc]	 ; Preserve our control character whatever it was
+062c:    30 20                  inc B, #1		 ; Note it has already been echoed back by ReadChar, so our cursor
+062e:    51 42                  sub B, X		 ; has already moved one position back
+0630:    14 0c                  bz L_063e	 ; Nothing to delete if we have empty buffer
 0632:    80 a0                  ld AL, 0xa0	 ; ' ' (space)
-0634:    79 05 64               call PrintChar	 ; Shouldn't we move the cursor back before doing so ???
-0637:    80 95                  ld AL, 0x95	 ; Restore our control character
-
-    ; Here we see that the preserved value is 0x95, this may explain
-    ; why space is printed first, together with 0x16 (SYN) character below.
-    ; I suggest that this somehow reverses the direction and prints
-    ; the space backwards
-    ; Another option is to print a space, then issue the control character,
-    ; then issue 0x16 in order to repeat it
-0639:    7c fa                  call @[0x0635|-0x6]	 ; PrintChar
-063b:    3f                     dec X
+0634:    79 05 64               call PrintChar	 ; This actually rubs out the character on the screen
+0637:    80 95                  ld AL, 0x95	 ; Restore our saved control character
+0639:    7c fa                  call @[0x0635|-0x6]	 ; And repeat it in order to move the cursor one step back again
+063b:    3f                     dec X			; Decrement current input buffer position
 063c:    73 de                  jmp ReadNextChar
 
 L_063e:
-063e:    80 86                  ld AL, 0x86	 ; 0x16 - does this switch cursor movement to forward again ?
+063e:    80 86                  ld AL, 0x86	 ; 0x06 - move the cursor one position forward ?
 0640:    7c f3                  call @[0x0635|-0xd]	 ; PrintChar
 0642:    73 d8                  jmp ReadNextChar
 
@@ -985,8 +983,8 @@ HandleEnter:
 L_0664:
 0664:    d0 01 bb               ld B, 0x01bb	 ; preserved_abort_addr
 0667:    f3 97                  st B, [0x0600|-0x69]	 ; abort_addr = preserved_abort_addr
-0669:    22 30                  clr BL, #0	 ; Disable echo of terminal input
-066b:    e1 05 ea               st BL, [0x05ea]
+0669:    22 30                  clr BL, #0	 ; Re-enable echo of terminal input
+066b:    e1 05 ea               st BL, [0x05ea]	 ; disable_echo
 066e:    09                     ret
 
 ReadLineAbort:
