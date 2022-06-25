@@ -23,21 +23,26 @@ def recursive_disassemble(mem, entry):
 
         if valid:
             mem.info(pc).instruction = info
+            for i in range(1, len(info.bytes)):
+                mem.info(pc + i).insn_offset = i
+                if mem.info(pc + i).label:
+                    # There could be a label inside an instruction, perhaps
+                    # from wecb fixups. This means there's an inline variable here,
+                    # let's put the label at the instruction itself
+                    mem.create_label(pc)
 
         if len(info.next_pc) == 0:
             return
 
         for next_pc in info.next_pc[1:]:
             if isinstance(next_pc, TransferExecution):
-                if mem.info(next_pc()).label == None:
-                    mem.info(next_pc()).label = f"L_{next_pc():04x}"
+                mem.create_label(next_pc())
             recursive_disassemble(mem, next_pc())
 
         next_pc = info.next_pc[0]
 
         if isinstance(next_pc, TransferExecution):
-            if mem.info(next_pc()).label == None:
-                mem.info(next_pc()).label = f"L_{next_pc():04x}"
+            mem.create_label(next_pc())
         pc = next_pc()
 
 def escape_char(c):
@@ -93,7 +98,15 @@ class MemoryWrapper:
 
     def get_label(self, addr):
         if addr in memory_addr_info:
-            return memory_addr_info[addr].label
+            info = memory_addr_info[addr]
+            if info.insn_offset:
+                # The address being referenced is located inside an instruction
+                # Try to fetch a label for the instruction instead
+                offset = info.insn_offset
+                insn_info = memory_addr_info[addr - offset]
+                if insn_info.label:
+                    return insn_info.label + f"+{offset}"
+            return info.label
         return None
 
     def get_xargs(self, addr) -> Xargs | None:
@@ -119,6 +132,11 @@ class MemoryWrapper:
 
     def info(self, addr) -> MemInfo:
         return memory_addr_info[addr]
+
+    def create_label(self, addr):
+        info = memory_addr_info[addr]
+        if info.label == None:
+            info.label = f"L_{addr:04x}"
 
     def read_only_info(self, addr) -> MemInfo:
         # like info(), but doesn't create a new entry in the DefaultDict
@@ -206,9 +224,8 @@ def printListing(memory):
         elif info.type in ["fnptr", "ptr"]:
             # 16 bit absolute pointer
             addr = memory.get_be16(i)
+            memory.create_label(addr)
             label = memory.info(addr).label
-            if label == None:
-                label = memory.info(addr).label = f"L_{addr:04x}"
             data = memory[i:i+2]
             out += f"{label}"
             i += 2
