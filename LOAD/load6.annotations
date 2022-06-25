@@ -3,6 +3,8 @@
 0x0103, ptr
 0x0109, label, DevicesPtr
 0x0109, ptr
+0x010b, label, CrtInstancesPtr
+0x010b,	ptr
 0x01ba, label, Devices
 0x011d, fnptr
 0x0126, label, EarlyInitDevicesPtr
@@ -17,6 +19,9 @@
 0x0141, B
 0x0161, label, PageTableOne
 0x0181, label, PageTableTwo
+0x01e4,	label, CrtInstances
+0x01e4,	>H
+0x01e6, ptr
 0x01ea, label, StartProcess
 0x01ee, label, StartProcess_File?
 0x01ee, ptr
@@ -24,13 +29,17 @@
 0x01f2, ptr
 0x01f6, label, StartProcess_TopOfMemory
 0x01f6, >H
+0x0257, B
+0x0258, >H
+0x025a, >H
 0x025c, B
-0x025c, label, Device_CRT0_Lock
+0x0261, fnptr
 0x0263, fnptr
 0x043e, ptr
 0x043e, label, EarlyInitDevices
 0x045b, label, CenturionVI_String
 0x045b, pstring16
+0x8003, code
 0x803b, label, CallDeviceMethod
 0x8042, label, CallAinPageBase3
 0x805a, label, SwitchToPageBase0
@@ -100,7 +109,7 @@
 0xb2d1, label, AssertIsSystemPtr
 0xb446, label, InitLevel10Device
 0xb461, code, Level10_InterruptHandler
-0xb6b6, label, HawkDeviceObj
+0xb6b6, label, HawkDeviceFunctions
 0xb6b6, >H
 0xb6b8, fnptr
 0xb6ba, fnptr
@@ -133,7 +142,7 @@
 0xbc0a, pstring16
 0xbc21, pstring16
 0xbc2a, pstring16
-0xbc5c, label, FfcDeviceObj
+0xbc5c, label, FfcDeviceFunctions
 0xbc5c, >H
 0xbc5e, fnptr
 0xbc60, fnptr
@@ -156,7 +165,7 @@
 0xc1f7, pstring16
 0xc204, pstring16
 0xc210, pstring16
-0xc21f, label, CrtDeviceObj
+0xc21f, label, CrtDeviceFunctions
 0xc21f, >H
 0xc221, fnptr
 0xc223, fnptr
@@ -168,11 +177,20 @@
 #0xc22f, code
 #0xc276, code
 0xc27e, label, CrtDevice_Write
+0xc29e, label, WaitForTxReady
+0xc2c3, label, WaitForTxDone
+0xc2db, label, AttnPrint
 0xc2e2, pstring16
+0xc319, label, GetMUXBaseAndOffset
 0xc322, code, CrtDevice_InterruptHandler
+0xc39f, label, CrtDevice_RxDoneInterrupt
 0xc402, label, CrtDevice_InterruptHandler_End
+0xc495, label, PrintEcho
+0xc49d, label, PrintChar
+0xc4ae, label, CrtDevice_TxDoneInterrupt
+0xc4e0, label, CrtDevice_InterruptHandler_Exit
 0xc5a4, label, CrtDevice_Init
-0xc5ee, label, CmdDeviceObj
+0xc5ee, label, CmdDeviceFunctions
 0xc5ee, >H
 0xc5f0, fnptr
 0xc5f2, fnptr
@@ -185,6 +203,9 @@
 0xc603, fnptr
 #0xc819, code
 0xc82d, code, CmdDevice_Init
+0xcc80, label, SetTimeout8
+0xcc89, label, CheckTimeout
+0xcc97, label, SetTimeout256
 0xcd4d, label, FormatHexWord
 0xcd65, label, FormatHexWord_Temp
 0xcd65, >H
