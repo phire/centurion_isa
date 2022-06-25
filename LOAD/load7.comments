@@ -1,0 +1,31 @@
+0x2f1 ,	comment	; Set to the user supplied boot Code
+0x30a ,	comment	; Set to the user supplied boot Code
+0x323 ,	comment	; Set to the user supplied boot Code
+0x33c ,	comment	; Set to the user supplied boot Code
+0x355 ,	comment	; Set to the user supplied boot Code
+0x36e ,	comment	; Set to the user supplied boot Code
+0x387 ,	comment	; Set to the user supplied boot Code
+0x3a0 ,	comment	; Set to the user supplied boot Code
+0x3b9 ,	comment	; Set to the user supplied boot Code
+0x3d2 ,	comment	; Set to the user supplied boot Code
+0x3eb ,	comment	; Set to the user supplied boot Code
+0x404 ,	comment	; Set to the user supplied boot Code
+0x41d ,	comment	; Set to the user supplied boot Code
+0x436 ,	comment	; Set to the user supplied boot Code
+0x44f ,	comment	; Set to the user supplied boot Code
+0x468 ,	comment	; Set to the user supplied boot Code
+0x481 ,	comment	; Set to the user supplied boot Code
+0x49a ,	comment	; Set to the user supplied boot Code
+0x4b3 ,	comment	; Set to the user supplied boot Code
+0x4cc ,	comment	; Set to the user supplied boot Code
+0x4e5 ,	comment	; Set to the user supplied boot Code
+0xa4cd ,	comment	; SecondsOnes
+0xa4d4 ,	comment	; SecondsOnes
+0xa4e9 ,	comment	; MinutesOnes
+0xa4f0 ,	comment	; MinutesOnes
+0xa515 ,	comment	; HoursOnes
+0xa52c ,	comment	; Stored X
+0xa54a ,	comment	; Stored X
+0xb85b ,	comment	; '	 ; '	 ; '	 ; '	 ; '
+0xb85d ,	comment	; '	 ; '	 ; '	 ; '	 ; '
+0xd71e ,	comment	; Clear terminal
