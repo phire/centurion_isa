@@ -301,6 +301,7 @@
 0xe11b, >H
 0xe11d, label, WIPL_A
 0xe11d, >H
+0xe11f, label, HighestPolulatedMemoryPage
 0xe11f, B
 0xe120, B
 0xe121, char[400]

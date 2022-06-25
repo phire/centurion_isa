@@ -846,11 +846,11 @@ RawPrintChar:
 
 L_05a2:
 05a2:    f6 38 0f               ld BL, +0xf(Z)	 ; Interrupt ACK perhaps
-05a5:    0a                     reti		 ; A nice mechanics of reloading P register back to its original value.
-						 ; Interrupts in cpu6 don't use stack, instead they just switch the
-						 ; context like coroutines. This will store current PC value in P register
-						 ; of the current IPL (so that it gets reloaded) and resumes from P register
-						 ; on a lower IPL (0 in case of WIPL).
+05a5:    0a                     reti	 ; A nice mechanics of reloading P register back to its original value.
+                                    	 ; Interrupts in cpu6 don't use stack, instead they just switch the
+                                    	 ; context like coroutines. This will store current PC value in P register
+                                    	 ; of the current IPL (so that it gets reloaded) and resumes from P register
+                                    	 ; on a lower IPL (0 in case of WIPL).
 
 SerialIntHandler:
     ; This is an interrupt handler for the serial port
@@ -862,7 +862,7 @@ SerialIntHandler:
 05b0:    f6 18 01               ld AL, +0x1(Z)	 ; Read data register of all 4 ports
 05b3:    f6 18 03               ld AL, +0x3(Z)	 ; It looks like this is supposed to ensure a pending "RX ready"
 05b6:    f6 18 05               ld AL, +0x5(Z)	 ; status is clear on all of them and the interrupt will be deasserted
-05b9:    f6 18 07               ld AL, +0x7(Z)   ; In case if it was caused by pressing a random key on any other terminal
+05b9:    f6 18 07               ld AL, +0x7(Z)	 ; In case if it was caused by pressing a random key on any other terminal
 05bc:    2a                     clr AL, #0	 ; No character available
 05bd:    73 e3                  jmp L_05a2
 
@@ -943,14 +943,14 @@ ReadNextChar:
 HandleBackspace:
 0628:    d5 a4                  ld B, @[S]
 062a:    a3 0c                  st AL, [0x0638|+0xc]	 ; Preserve our control character whatever it was
-062c:    30 20                  inc B, #1		 ; Note it has already been echoed back by ReadChar, so our cursor
-062e:    51 42                  sub B, X		 ; has already moved one position back
+062c:    30 20                  inc B, #1	 ; Note it has already been echoed back by ReadChar, so our cursor
+062e:    51 42                  sub B, X	 ; has already moved one position back
 0630:    14 0c                  bz L_063e	 ; Nothing to delete if we have empty buffer
 0632:    80 a0                  ld AL, 0xa0	 ; ' ' (space)
 0634:    79 05 64               call PrintChar	 ; This actually rubs out the character on the screen
 0637:    80 95                  ld AL, 0x95	 ; Restore our saved control character
 0639:    7c fa                  call @[0x0635|-0x6]	 ; And repeat it in order to move the cursor one step back again
-063b:    3f                     dec X			; Decrement current input buffer position
+063b:    3f                     dec X	 ; Decrement current input buffer position
 063c:    73 de                  jmp ReadNextChar
 
 L_063e:

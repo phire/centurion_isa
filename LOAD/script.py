@@ -41,8 +41,8 @@ Syscalls = {
     0x15: ("GetUptimeAB", None),
     0x1b: ("GetUptimePtr", {"dest": "ptr"}),
     0x1c: ("GetClock?", {"dest": "ptr"}),
-    0x2b: ("divide", None),
-    0x2c: ("multiply", None),
+    0x2b: ("multiply", None),
+    0x2c: ("divide", None),
 }
 
 syscall_map = {}
@@ -67,8 +67,6 @@ for num, addr in enumerate(range(0x88cc, 0x89ac, 2)):
     memory_addr_info[syscall_addr].label = label
 
 memory.syscall_map = syscall_map
-
-
 
 def add_device(addr):
     name = bytes([c&0x7f for c in memory[addr+7:addr+13]]).decode("ascii").strip()

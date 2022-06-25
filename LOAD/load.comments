@@ -134,7 +134,7 @@
 0xb4be,	pre_comment 	; Takes a two digit ASCII number in A, adds one
 	 	; If the result is greater than the two digit ASCII number in X (which gets pushed
 	 	; to [S] during call), then it wraps around to ascii "00"
-	 	; 
+	 	;
 0xb4be ,	comment	; A = A+1
 0xb4bf ,	comment	; Ascii '9'
 0xb4c7 ,	comment	; A - 10
@@ -191,10 +191,6 @@
 		; set (as far as I can tell). Does this mean that enabling
 		; DMA with 0 count instantly tiggeres the interrupt?
 0xb85a ,	comment	; X
-0xb926 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
-0xba0f ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
-0xbac2 ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
-0xbadd ,	comment	; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '	 ; '
 0xbb4f ,	comment	; Patch PrintStringToErrorDevice arg
 0xbb77 ,	comment	; " FAIL:  X XXXX XXXX\x07\r"
 0xc085 ,	comment	; "EC:XX CP:XX CMDS: "
@@ -283,10 +279,17 @@
 0xce74 ,	comment	; Copy Same 32 entries to Page Table base 3
 0xce79 ,	comment	; Active page table?
 0xce83 ,	comment	; Set Mux Interrupt page table base to 1
-0xce88,	pre_comment 	; Zero??? all pages from page 0x1e to page 0x7d
+0xce88,	pre_comment 	; Detect memory.
+	 	; Scans memory, 2KB pages at a time until it finds a page that doesn't hold values
 0xce88 ,	comment	; Map page to 0xf800-0xffff
+0xce8f ,	comment	; write/read 0 to 0xffff
+0xce90 ,	comment	; Check it matches
+0xce94 ,	comment	; A = 0xffff
+0xce97 ,	comment	; write/read 0xff to 0xffff
+0xce9a ,	comment	; check it matces
 0xcea4 ,	comment	; Almost feels like this is doing a memset?
 0xcea5 ,	comment	; zero upper AH regiter so we can use 16bit sub-immediate below
+0xceb4,	pre_comment 	; Finished memory detection
 0xceb4 ,	comment	; map page 7f (should be MMIO regs) to 0xf800-0xffff
 0xceb9 ,	comment	; Init Timer
 0xcebf,	pre_comment 	; This initilizes all devices in the null-terminated EarlyInitDevices array
@@ -352,18 +355,18 @@
 0xd06c ,	comment	; And there is a base-address at this offset
 0xd074,	pre_comment 	; So this is a crazy microcoded instruction, it appears to implement the whole inner loop of
 	 	; WECB record loading
-	 	; 
+	 	;
 	 	; This is how I think the instruction should work:
 	 	; First argument is the base address, destinations will be calculated relative to this
 	 	; Second arg is an implementable source containing the record.
-	 	; 
+	 	;
 	 	; First byte is the type field. Known types are 0x00 and 0x01
 	 	; Byte two is a length (potentially signed? @LOAD never uses a value higher than 0x78)
 	 	; Bytes three and four are a RecordAddress
 	 	; Then there <Length> bytes of data will follow
 	 	; Followed by a single checksum byte. The checksum is calculated as:
 	 	; 0x100 - sum(all header/data bytes)
-	 	; 
+	 	;
 	 	; In a type 0 record, the data is simply copied to RecordAddress (plus BaseAddress)
 	 	; A zero-length type 0 record is valid, and should copy no data
 	 	; WECB files use a zero-length record at the end to indicate the entry address
@@ -373,7 +376,7 @@
 	 	; FixupValue = 16bit load from Fixup address
 	 	; FixupValue = FixupValue + RecordAddress + BaseAddress
 	 	; Write FixupValue back to FixupAddress
-	 	; 
+	 	;
 	 	; On completion:
 	 	; Fault flag should be set if there was an error
 	 	; Carry flag should be set depending on some condition (record length > 0x80?)
@@ -463,6 +466,7 @@
 0xd9ec ,	comment	; SpinForever
 0xd9ee ,	comment	; Syscall entry point
 0xda03 ,	comment	; @SYS.OSN
+0xda26 ,	comment	; Zero memory usage table
 0xe2b2 ,	comment	; DeviceType?
 0xe311 ,	comment	; <esc><fs><ff> (escape, file seperator, form feed)
 0xe35c,	pre_comment 	; This string is used as both a pascal string and a C string.
@@ -514,7 +518,7 @@
 0xe750 ,	comment	; ]
 0xe76b,	pre_comment 	; Hexdump
 	 	; Y = address
-	 	; 
+	 	;
 0xe770 ,	comment	; Print Address
 0xe775 ,	comment	; start_of_row
 0xe77a ,	comment	; number of missing bytes for alignment
