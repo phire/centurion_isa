@@ -9,15 +9,20 @@ import struct
 class ChecksumException(Exception):
     pass
 
+class TruncatedException(Exception):
+    pass
+
 class WecbLoader:
     def __init__(self, data):
         self.data = data
+        self.n = 0
         self.next_sector()
         self.section_type = None
 
     def next_sector(self):
         self.sector_data = self.data[:400]
         self.data = self.data[400:]
+        self.n += 400
 
     def sections(self):
         while True:
@@ -27,6 +32,11 @@ class WecbLoader:
 
             if type == 0x80: # A type of 0x80 means there are no more blocks in this sector
                 self.next_sector() # And we should load the next one
+                if len(self.sector_data) == 0:
+                    if self.section_type != None:
+                        yield self.section_type, self.section_addr, self.section_data
+                    raise TruncatedException("File Truncated")
+                    return
                 continue
 
             # Combine blocks
@@ -82,7 +92,7 @@ if __name__ == "__main__":
     if len(sys.argv) != 3:
         print(f"Usage: {sys.argv[0]} <mode> <file>")
         print ("Modes:")
-        print ("    hex - hex dump the file contents")
+        print ("    dump - hex dump the file contents")
         print ("    verify - verify the checksums")
         sys.exit(1)
 
