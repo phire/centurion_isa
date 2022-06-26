@@ -233,13 +233,14 @@ def printListing(memory):
         elif info.type and info.type.startswith("char["):
             # fixed length string
             str_len = int(info.type[5:-1])
-            data = memory[i:i+str_len]
+
+            out += "\""
+            for j in range(0, str_len):
+                c = memory[i + j] & 0x7f
+                out += escape_char(c)
+            out += "\""
+
             i += str_len
-
-            stripped_data = bytes([c & 0x7f for c in data]) # strip high bit
-            string = stripped_data.decode("ascii", errors="replace")
-            out += f"\"{string}\""
-
 
         elif info.type != None:
             value = struct.unpack_from(info.type, memory[i:])[0]
