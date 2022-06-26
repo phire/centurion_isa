@@ -1,5 +1,19 @@
+0x1e4 ,	comment	; Length of the table in bytes
+0x1e6,	pre_comment 	; This is a CRT device instances table, used by CrtDevice_Init function
+	 	; The function is only called once during early init, and will initialize
+	 	; all the device instances, listed here.
+0x1e6 ,	comment	; The only CRT instance we have
 0x1eb ,	comment	; Current open file? Number open files?
 0x220 ,	comment	; Process PageTable
+0x246,	pre_comment 	; CRT0 device descriptor
+0x24b ,	comment	; Offset +5   - Functions table
+0x24d ,	comment	; Offset +7   - device name (6 chars)
+0x253 ,	comment	; Offset +0xd
+0x255 ,	comment	; Offset +0xf - Serial port base
+0x257 ,	comment	; Offset +0x11 - device state
+0x25a ,	comment	; Offset +0x14 - Current WriteStruct
+0x25f ,	comment	; Offset +0x19 - baud rate, 0xc5 stands for 9600
+0x261 ,	comment	; Offset +0x1b - low-level character read routine, called in interrupt
 0x288 ,	comment	; Set to the user supplied boot Code
 0x2a1 ,	comment	; Set to the user supplied boot Code
 0x2ba ,	comment	; Set to the user supplied boot Code
@@ -134,7 +148,7 @@
 0xb4be,	pre_comment 	; Takes a two digit ASCII number in A, adds one
 	 	; If the result is greater than the two digit ASCII number in X (which gets pushed
 	 	; to [S] during call), then it wraps around to ascii "00"
-	 	;
+	 	; 
 0xb4be ,	comment	; A = A+1
 0xb4bf ,	comment	; Ascii '9'
 0xb4c7 ,	comment	; A - 10
@@ -194,14 +208,75 @@
 0xbb4f ,	comment	; Patch PrintStringToErrorDevice arg
 0xbb77 ,	comment	; " FAIL:  X XXXX XXXX\x07\r"
 0xc085 ,	comment	; "EC:XX CP:XX CMDS: "
-0xc27e,	pre_comment 	; X is the CRT device
-	 	; Z is the WriteStruct (file operation object?)
-	 	; Y is ????
-0xc280 ,	comment	; Lock?
+0xc231 ,	comment	; Set first byte of the function table to 0
+0xc241 ,	comment	; device_obj.state = 1
+0xc25b ,	comment	; MUX_REG[8] = port_offset + 1, we don't know the purpose
+0xc269 ,	comment	; jmp SwitchToPageBase0
+0xc26c,	pre_comment 	; This waits for (device_obj + 0x11) to become 0
+0xc278 ,	comment	; Set first byte of the function table to 0
+0xc27e,	pre_comment 	; Z is the WriteStruct (file operation object?)
+	 	; Y is the devce descriptor (Device_CRT0)
+0xc27e ,	comment	; device_obj.state = -1. Bit 7 probably signals "output in progress"
+0xc27f ,	comment	; See a waiting loop with timeout below at c2c3
+0xc280 ,	comment	; This location is being manipulated by input interrupt handler
+0xc28c ,	comment	; Set current WriteStruct
 0xc290 ,	comment	; Overwrites string????
+0xc296 ,	comment	; port_offset + 1
+0xc298 ,	comment	; MUX_REG[8] = port_offset + 1, we don't know the purpose
+0xc29e,	pre_comment 	; This loop waits for the MUX device to be ready for transmit
+0xc29e ,	comment	; MMIOBase = MUX port base address
+0xc2a1 ,	comment	; Status register
+0xc2a4 ,	comment	; Check TX_READY flag
+0xc2a8 ,	comment	; Check whether TX timeout has passed
+0xc2ab ,	comment	; Shout out if so
+0xc2ad ,	comment	; Repeat the check
+0xc2ba ,	comment	; [Z] = 0x80 - this will enable timeout check below
+0xc2bb ,	comment	; A = MUXBase
+0xc2c0 ,	comment	; MUX_REG[0x0c] = something
+0xc2c3,	pre_comment 	; And here we're waiting for device_obj.state to become 0 or 1
+	 	; The output is interrupt-driven, see CrtDevice_InterruptHandler
+0xc2cb ,	comment	; [WriteStruct + 0] & 0x80
+0xc2cc ,	comment	; Check for "receiver not ready"
+0xc2cd ,	comment	; If nonzero, proceed to timeout check
+0xc2d1 ,	comment	; Otherwise just reset the timeout
+0xc2d4 ,	comment	; and keep waiting
 0xc2de ,	comment	; "ATTN PRINT\n\r"
-0xc325 ,	comment	; Get which port caused interrupt
+0xc319,	pre_comment 	; Given a serial port base address at [Y + 0x0f],
+	 	; return base address of the MUX card in A
+	 	; and isolated offset (relative to the base) of the port on this card in B
+0xc319 ,	comment	; A = MMMIOBase = serial port base
+0xc31c ,	comment	; 3 << 1
+0xc31e ,	comment	; BL = bits 1 and 2 of the address AKA port offset
+0xc31f ,	comment	; And this will set these bits to 0
+0xc321 ,	comment	; Note port offset stays in BL
+0xc325 ,	comment	; Get which port caused interrupt, this also ACKs the interrupt
+0xc328 ,	comment	; Z = data register address at this point
+0xc32c ,	comment	; AH = ZL & 0b110
+0xc32e ,	comment	; AL = ZL & 0b11110000
+0xc330 ,	comment	; AL = AH | (AL >> 1), i don't understand why. It this for more advanced MUX
+0xc331 ,	comment	; with more than 4 ports ?
+0xc333 ,	comment	; A = port number * 2 here
+0xc338 ,	comment	; X = table length
+0xc33a ,	comment	; Check if we actually have the port in the table
+0xc33c ,	comment	; If yes, proceed to read
+0xc33e ,	comment	; If no, read the character in order to clear the pending RX_READY
+0xc344 ,	comment	; A = device descriptor
+0xc345 ,	comment	; Bail out if nullptr
+0xc347 ,	comment	; Y = device descriptor
+0xc348 ,	comment	; Read one byte at (descritor + 0)
+0xc349 ,	comment	; If zero, the port is considered inactive
+0xc34b ,	comment	; port base address
+0xc34e ,	comment	; Read the data register only to clear character pending state
+0xc354 ,	comment	; A word at (descriptor + 0x0d) has to do with memory management
+0xc36c ,	comment	; Check if we have read routine set
+0xc371 ,	comment	; Call if set
+0xc39f ,	comment	; Read the character from the port
+0xc3a2 ,	comment	; Enside bit 7 is set
+0xc3bc ,	comment	; Preserve the character
+0xc3d4 ,	comment	; [0x013e]++
+0xc3d7 ,	comment	; Is that a counter of received characters ? Ring buffer size ?
 0xc3dc ,	comment	; ASCII STX (Start of Text)
+0xc3df ,	comment	; If not equal, proceed to handling input
 0xc3e1,	pre_comment 	; This is probally a generic Secure-Attention-Key type mechnisim that always goes to the kernel
 	 	; Right now, it's configured to break into the debugger, but I suspect on a retail kernel it
 	 	; will be considered to do something more sane and not a secutiry flaw, like killling the current
@@ -213,12 +288,86 @@
 0xc3fc ,	comment	; Store it Tos_Return
 0xc3fe ,	comment	; Replace it with return, launch TOS
 0xc406 ,	comment	; ASCII BEL (bel)
+0xc40d ,	comment	; Check the byte at (device_obj + 0x11)
+0xc410 ,	comment	; If 0 of -1, beep and exit
+0xc41d ,	comment	; AL = character
+0xc41f ,	comment	; If the code is equal to 0x02...
+0xc421 ,	comment	; Substitute it with something else
+0xc423 ,	comment	; Restore the character back
+0xc425 ,	comment	; Echo it and proceed
+0xc427 ,	comment	; Translation table for control chars ?
+0xc42a ,	comment	; Substitute the character
+0xc42d ,	comment	; Print a substituted char instead of an echo
+0xc42f ,	comment	; AL = character
+0xc431 ,	comment	; Avoid the echo
+0xc433 ,	comment	; AL = characrter
+0xc44f ,	comment	; ' ' (space)
+0xc453 ,	comment	; Backspace
+0xc467 ,	comment	; A character is stored here
+0xc495 ,	comment	; BH = [device_obj + 1]
+0xc496 ,	comment	; Check "no echo" flag ???
+0xc49d ,	comment	; Serial port base
+0xc4a0 ,	comment	; Wait for TX_READY
+0xc4aa ,	comment	; Write the character
+0xc4ae ,	comment	; If (device_object + 0x11) & 0x80 == 0
+0xc4b1 ,	comment	; Do nothing, just return
+0xc4b6 ,	comment	; Z = device_object.CurrentWriteStruct
+0xc4b7 ,	comment	; Serial port base
+0xc4ba ,	comment	; Read the status register
+0xc4bd ,	comment	; Check tor TX_READY
+0xc4bf ,	comment	; Just return if not ready
+0xc4c1 ,	comment	; And this checks for bit 6 of the status
+0xc4c3 ,	comment	; Is this CTS ???
+0xc4c5 ,	comment	; Signal "Receiver is not ready" in the WriteStruct
+0xc4c7 ,	comment	; This will be picked up by WaitForTxDone loop and it will
+		; start reporting "ATTN PRINT" if this state sits for too long
+0xc4c8 ,	comment	; This does some housekeeping and exits the interrupt
+0xc4cf ,	comment	; Fetch next character ???
+0xc4e8 ,	comment	; Serial port base
+0xc4eb ,	comment	; Check status register
+0xc4ee ,	comment	; Check for CTS
+0xc4f2 ,	comment	; If zero, we're still doing the output
+0xc4f3 ,	comment	; I guess we'll be waiting for it to go high
+0xc4f7 ,	comment	; device_object.status = -1
+0xc4fc ,	comment	; device_object.status = 0
+0xc4fd ,	comment	; This signals "output done"
+0xc500 ,	comment	; if device_object[1] == 2, append line feed
+0xc503 ,	comment	; Is it the famous CR->CRLF translation ?
+0xc507 ,	comment	; '\n'
+0xc516,	pre_comment 	; Here we're doint some housekeeping and leaving the interrupt
 0xc5a4 ,	comment	; End of this function, Stack will overwrite it
 0xc5a7 ,	comment	; Set exception handler's S register
 0xc5ac ,	comment	; Install exception handler
+0xc5b4 ,	comment	; A = CrtInstances
+0xc5b7 ,	comment	; X = table length
+0xc5b9 ,	comment	; X = length / 2 - number of instances to initialize
+0xc5bc ,	comment	; A = device object (descriptor), will be Device_CRT0
+0xc5c3 ,	comment	; BL = baud rate
+0xc5c6 ,	comment	; Why setting twice ???
+0xc5c9 ,	comment	; Should be serial port base address here
+0xc5cc ,	comment	; Set baud rate
+0xc5d1 ,	comment	; This should output 0x84 character
+0xc5d6 ,	comment	; AL is now card address instead of a port adddess
+0xc5d8 ,	comment	; Configure IPL 6 interrupt
+0xc5e2 ,	comment	; MUX_REG[0x0b] = 0xe0
+0xc701 ,	comment	; The first word in CRT0 descriptor points here
 0xca1f ,	comment	; "EC:XX CMDS: "
 0xcc0b ,	comment	; Lock Mutex?
-0xcc80,	pre_comment 	; CurrentProcess + 0x32 = 8
+0xcc68 ,	comment	; jmp SwitchToPageBase0
+0xcc80,	pre_comment 	; This routine sets timeout, used by CheckTimeout, to 8 ticks
+	 	; The actual tick time is unknown.
+0xcc80 ,	comment	; 8 cycles ?
+0xcc85 ,	comment	; Store timeout value
+0xcc89,	pre_comment 	; This routine rolls the system clock and checks whether a timeout,
+	 	; set by SetTimeout, has expired.
+0xcc89 ,	comment	; Let the timeout to decrement
+0xcc8e ,	comment	; Timeout value ???
+0xcc91 ,	comment	; This is essentually A = !A
+0xcc93 ,	comment	; Timeout ot expired
+0xcc95 ,	comment	; Timeout expired
+0xcc97,	pre_comment 	; This routine sets timeout, used by CheckTimeout, to 256 ticks
+0xcce8 ,	comment	; jmp SwitchToPageBase0
+0xccf2 ,	comment	; jmp SwitchToPageBase0
 0xcd02,	pre_comment 	; Is this a cache lookup? Or a sector remapping?
 	 	; B, A = 24bit Physical Sector
 	 	; Y = Device
@@ -287,13 +436,18 @@
 0xce94 ,	comment	; A = 0xffff
 0xce97 ,	comment	; write/read 0xff to 0xffff
 0xce9a ,	comment	; check it matces
-0xcea4 ,	comment	; Almost feels like this is doing a memset?
+0xce9c ,	comment	; Y = 0xf800
+0xcea4 ,	comment	; I think the goal here is to initilize all the parity bits
 0xcea5 ,	comment	; zero upper AH regiter so we can use 16bit sub-immediate below
 0xceb4,	pre_comment 	; Finished memory detection
 0xceb4 ,	comment	; map page 7f (should be MMIO regs) to 0xf800-0xffff
 0xceb9 ,	comment	; Init Timer
 0xcebf,	pre_comment 	; This initilizes all devices in the null-terminated EarlyInitDevices array
 	 	; Which in this case is just CrtDevice_Init
+0xcec3 ,	comment	; Init routine
+0xcec6 ,	comment	; Go to a next device if missing
+0xcec8 ,	comment	; Call the init routine
+0xceca ,	comment	; Go to a next device
 0xcecc,	pre_comment 	; LOS Prompt:
 0xcecd ,	comment	; "LOS 6.05 - B"
 0xcee0 ,	comment	; Check if we should autoboot
@@ -355,18 +509,18 @@
 0xd06c ,	comment	; And there is a base-address at this offset
 0xd074,	pre_comment 	; So this is a crazy microcoded instruction, it appears to implement the whole inner loop of
 	 	; WECB record loading
-	 	;
+	 	; 
 	 	; This is how I think the instruction should work:
 	 	; First argument is the base address, destinations will be calculated relative to this
 	 	; Second arg is an implementable source containing the record.
-	 	;
+	 	; 
 	 	; First byte is the type field. Known types are 0x00 and 0x01
 	 	; Byte two is a length (potentially signed? @LOAD never uses a value higher than 0x78)
 	 	; Bytes three and four are a RecordAddress
 	 	; Then there <Length> bytes of data will follow
 	 	; Followed by a single checksum byte. The checksum is calculated as:
 	 	; 0x100 - sum(all header/data bytes)
-	 	;
+	 	; 
 	 	; In a type 0 record, the data is simply copied to RecordAddress (plus BaseAddress)
 	 	; A zero-length type 0 record is valid, and should copy no data
 	 	; WECB files use a zero-length record at the end to indicate the entry address
@@ -376,7 +530,7 @@
 	 	; FixupValue = 16bit load from Fixup address
 	 	; FixupValue = FixupValue + RecordAddress + BaseAddress
 	 	; Write FixupValue back to FixupAddress
-	 	;
+	 	; 
 	 	; On completion:
 	 	; Fault flag should be set if there was an error
 	 	; Carry flag should be set depending on some condition (record length > 0x80?)
@@ -518,7 +672,7 @@
 0xe750 ,	comment	; ]
 0xe76b,	pre_comment 	; Hexdump
 	 	; Y = address
-	 	;
+	 	; 
 0xe770 ,	comment	; Print Address
 0xe775 ,	comment	; start_of_row
 0xe77a ,	comment	; number of missing bytes for alignment

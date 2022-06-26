@@ -13,6 +13,7 @@ class MemInfo:
         self.fixup = None
         self.func_info = None
         self.arg_name = None
+        self.insn_offset = None
 
 class FunctionInfo:
     def __init__(self, x_args):
