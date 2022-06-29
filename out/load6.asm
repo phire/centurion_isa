@@ -300,19 +300,20 @@ Device_CRT0_number:
 0249:    04 33                  R_0433
 024b:    c2 1f                  CrtDeviceFunctions	 ; Offset +5   - Functions table
 024d:    "CRT0  "	 ; Offset +7   - device name (6 chars)
-0253:    00                     HALT	 ; Offset +0xd
+0253:    00                     HALT	 ; Offset +0xd - process, doing the output
 0254:    00                     HALT
 0255:    f2 00                  L_f200	 ; Offset +0xf - Serial port base
 0257:    00                     (0x0)	 ; Offset +0x11 - device state
-0258:    00 00                  (0x0)
+0258:    00                     (0x0)	 ; Offset +0x12 - last written character
+0259:    00                     (0x0)	 ; Offset +0x13 - break (Ctrl-C) state
 025a:    00 00                  (0x0)	 ; Offset +0x14 - Current WriteStruct
 025c:    00                     (0x0)
-025d:    83
+025d:    83                     (0x83)	 ; Offset +0x17 - BreakKey - defaults to Ctrl0C
 025e:    18
-025f:    c5 'E'	 ; Offset +0x19 - baud rate, 0xc5 stands for 9600
+025f:    c5                     (0xc5)	 ; Offset +0x19 - baud rate, 0xc5 stands for 9600
 0260:    00
 0261:    00 00                  L_0000	 ; Offset +0x1b - low-level character read routine, called in interrupt
-0263:    b6 56                  R_b656
+0263:    b6 56                  CrtDeviceHooks	 ; Offset +0x1d - customization table
 0265:    00
 0266:    00
 0267:    00
@@ -9361,32 +9362,37 @@ b64f:    5c                     mov Y, A
 b650:    90 00 06               ld A, 0x0006
 b653:    71 80 3b               jmp CallDeviceMethod
 
-R_b656:
-b656:    73 1a                  jmp L_b672
-b658:    02
-b659:    88
-b65a:    02
+CrtDeviceHooks:
+b656:    73 1a                  L_731a	 ; WriteHook
+
+    ; Input translation table follows
+    ; We're mostly translating to virtual key codes. Probably this acts as a
+    ; terminal control code descriptor (yes, termcap precursor). At the moment
+    ; only the virtual code for backspace is known
+b658:    02	 ; 0x88 -> 0x02 VK_BACKSPACE
+b659:    88	 ; This also has a special designation as default backspace character
+b65a:    02	 ; 0x85 -> 0x02 VK_BACKSPACE
 b65b:    95
-b65c:    01
+b65c:    01	 ; 0x81 -> 0x01
 b65d:    81
-b65e:    01
+b65e:    01	 ; 0x98 -> 0x01
 b65f:    98
-b660:    01
+b660:    01	 ; 0x99 -> 0x02 VK_BACKSPACE
 b661:    99
-b662:    05
+b662:    05	 ; 0x0b -> 0x05
 b663:    9b
-b664:    03
+b664:    03	 ; 0x86 -> 0x03
 b665:    86
-b666:    04
+b666:    04	 ; 0x9A -> 0x04
 b667:    9a
-b668:    02
+b668:    02	 ; 0xFF -> 0x02
 b669:    ff
-b66a:    02
+b66a:    02	 ; 0xDF -> 0x02
 b66b:    df '_'
 b66c:    df '_'
-b66d:    9f
+b66d:    9f	 ; 0x9F -> 0xDF
 b66e:    8d
-b66f:    9d
+b66f:    9d	 ; 0x9d -> 0x8d
 b670:    00
 b671:    00
 
@@ -11074,9 +11080,9 @@ CrtDevice_Write:
 c27e:    3a                     clr A, #0	 ; device_obj.state = -1. Bit 7 probably signals "output in progress"
 c27f:    29                     dec AL, #1	 ; See a waiting loop with timeout below at c2c3
 c280:    a5 68 11               st AL, [Y + 0x11]	 ; This location is being manipulated by input interrupt handler
-c283:    95 68 1d               ld A, [Y + 0x1d]
-c286:    14 02                  bz L_c28a
-c288:    7d 00                  call [A]
+c283:    95 68 1d               ld A, [Y + 0x1d]	 ; CrtDeviceHooks
+c286:    14 02                  bz L_c28a	 ; Skip if not installed
+c288:    7d 00                  call [A]	 ; Call WriteHook
 
 L_c28a:
 c28a:    55 80                  mov A, Z
@@ -11101,7 +11107,7 @@ c2ad:    73 ef                  jmp WaitForTxReady	 ; Repeat the check
 L_c2af:
 c2af:    79 cc 80               call SetTimeout8
 c2b2:    91 01 03               ld A, [CurrentProcess|0x0103]
-c2b5:    b5 68 0d               st A, [Y + 0x0d]
+c2b5:    b5 68 0d               st A, [Y + 0x0d]	 ; Set device_obj.Process
 
 L_c2b8:
 c2b8:    80 80                  ld AL, 0x80
@@ -11205,11 +11211,11 @@ L_c351:
 c351:    71 c4 02               jmp CrtDevice_InterruptHandler_End
 
 L_c354:
-c354:    95 68 0d               ld A, [Y + 0x0d]	 ; A word at (descriptor + 0x0d) has to do with memory management
-c357:    14 13                  bz L_c36c
+c354:    95 68 0d               ld A, [Y + 0x0d]	 ; device_obj.Process
+c357:    14 13                  bz L_c36c	 ; Skip if not set
 c359:    47 40 0f 01 81 c3 7f   memcpy 0x10, [PageTableTwo|0x0181], [R_c37f|0xc37f]
 c360:    47 44 0f 00 46 c3 8f   memcpy 0x10, [A + 0x46], [R_c38f|0xc38f]
-c367:    2e 0c f9 c3 7f         wpf 0xf9, [R_c37f|0xc37f]
+c367:    2e 0c f9 c3 7f         wpf 0xf9, [R_c37f|0xc37f]	 ; Does this make sure process' memory is mapped ?
 
 L_c36c:
 c36c:    95 68 1b               ld A, [Y + 0x1b]	 ; Check if we have read routine set
@@ -11238,37 +11244,46 @@ c3a4:    43 31                  or AL, BL	 ; AL is the character
 c3a6:    c0 1c                  ld BL, 0x1c	 ; Check bits 4 - 2 of status register, we don't know what they are
 c3a8:    42 03                  and BL, AH
 c3aa:    15 5a                  bnz BeepAndDropInput	 ; If any of these bits is set, beep and exit
-c3ac:    65 68 1d               ld X, [Y + 0x1d]
-c3af:    14 0b                  bz L_c3bc
-c3b1:    30 41                  inc X, #2
+
+    ; Translate a character according to a table in CrtDeviceHooks
+    ; The table consists of words. First word is an write hook, called
+    ; from within CrtDevice_Write. Other words are 2-byte entries
+    ; in format: TO FROM. The table is terminated with a zero word.
+    ; A character to translate is placed in AL, on return it will be either
+    ; translated according to the hooks table or left as it is.
+c3ac:    65 68 1d               ld X, [Y + 0x1d]	 ; CrtDeviceHooks
+c3af:    14 0b                  bz L_c3bc	 ; Skip translation if not installed
+c3b1:    30 41                  inc X, #2	 ; Skip over write hook
 
 L_c3b3:
-c3b3:    d5 41                  ld B, [X++]
-c3b5:    14 05                  bz L_c3bc
-c3b7:    49                     sub BL, AL
-c3b8:    15 f9                  bnz L_c3b3
-c3ba:    45 21                  mov AL, BH
+c3b3:    d5 41                  ld B, [X++]	 ; Fetch a translation table entry (BH, BL)
+c3b5:    14 05                  bz L_c3bc	 ; Stop if hit the terminator word
+c3b7:    49                     sub BL, AL	 ; char == BL
+c3b8:    15 f9                  bnz L_c3b3	 ; If doesn't match, go to next entry
+c3ba:    45 21                  mov AL, BH	 ; otherwise AL = translated char
 
 L_c3bc:
 c3bc:    a1 c4 68               st AL, [L_c467+1|0xc468]	 ; Preserve the character
-c3bf:    c5 68 17               ld BL, [Y + 0x17]
+
+    ; Here we check for a programmable Break key, which defaults to Ctrl-C
+c3bf:    c5 68 17               ld BL, [Y + 0x17]	 ; Check for Break key (defaults to Ctrl-C)
 c3c2:    49                     sub BL, AL
-c3c3:    15 17                  bnz L_c3dc
-c3c5:    85 68 13               ld AL, [Y + 0x13]
+c3c3:    15 17                  bnz L_c3dc	 ; If doesn't match, proceed to TOS check
+c3c5:    85 68 13               ld AL, [Y + 0x13]	 ; Check if device_obj.break_state & 0x7F == 0
 c3c8:    3d                     sll A, #1
 c3c9:    4d                     mov BL, AL
-c3ca:    15 36                  bnz CrtDevice_InterruptHandler_End
-c3cc:    3c                     srl A, #1
-c3cd:    c0 01                  ld BL, 0x01
-c3cf:    43 13                  or BL, AL
-c3d1:    e5 68 13               st BL, [Y + 0x13]
-c3d4:    81 01 3e               ld AL, [0x013e]	 ; [0x013e]++
-c3d7:    28                     inc AL, #1	 ; Is that a counter of received characters ? Ring buffer size ?
+c3ca:    15 36                  bnz CrtDevice_InterruptHandler_End	 ; If not, just drop the character and leave
+c3cc:    3c                     srl A, #1	 ; AL = device_obj.break_state & 0x7F at this point, we know it's 0
+c3cd:    c0 01                  ld BL, 0x01	 ; And now we set it to 1.
+c3cf:    43 13                  or BL, AL	 ; Note that we'll only register another Break again if someone outside
+c3d1:    e5 68 13               st BL, [Y + 0x13]	 ; resets the break_state back to 0
+c3d4:    81 01 3e               ld AL, [0x013e]	 ; [0x013e]++ - global break counter
+c3d7:    28                     inc AL, #1
 c3d8:    a4 fb                  st AL, @[0xc3d5|-0x5]
 c3da:    73 26                  jmp CrtDevice_InterruptHandler_End
 
 L_c3dc:
-c3dc:    c0 82                  ld BL, 0x82	 ; ASCII STX (Start of Text)
+c3dc:    c0 82                  ld BL, 0x82	 ; ASCII STX (Start of Text), Ctrl-B
 c3de:    49                     sub BL, AL
 c3df:    15 2c                  bnz L_c40d	 ; If not equal, proceed to handling input
 
@@ -11314,16 +11329,16 @@ c41a:    4a                     and BL, AL
 c41b:    14 16                  bz L_c433
 c41d:    83 49                  ld AL, [L_c467+1|0xc468|+0x49]	 ; AL = character
 c41f:    21 11                  dec AL, #2	 ; If the code is equal to 0x02...
-c421:    14 04                  bz L_c427	 ; Substitute it with something else
+c421:    14 04                  bz EchoBackspace	 ; Substitute it with something else
 c423:    20 11                  inc AL, #2	 ; Restore the character back
 c425:    73 4d                  jmp L_c474	 ; Echo it and proceed
 
-L_c427:
-c427:    d5 68 1d               ld B, [Y + 0x1d]	 ; Translation table for control chars ?
-c42a:    85 28 03               ld AL, [B + 0x03]	 ; Substitute the character
-c42d:    7b 66                  call PrintEcho	 ; Print a substituted char instead of an echo
-c42f:    83 37                  ld AL, [L_c467+1|0xc468|+0x37]	 ; AL = character
-c431:    73 43                  jmp L_c476	 ; Avoid the echo
+EchoBackspace:
+c427:    d5 68 1d               ld B, [Y + 0x1d]	 ; CrtDeviceHooks
+c42a:    85 28 03               ld AL, [B + 0x03]	 ; Get backspace character
+c42d:    7b 66                  call PrintEcho	 ; And write it to the terminal
+c42f:    83 37                  ld AL, [L_c467+1|0xc468|+0x37]	 ; Restore che original virtual key in AL
+c431:    73 43                  jmp L_c476	 ; Proceed without echo
 
 L_c433:
 c433:    83 33                  ld AL, [L_c467+1|0xc468|+0x33]	 ; AL = characrter
@@ -11332,8 +11347,8 @@ c437:    29                     dec AL, #1
 c438:    14 c8                  bz CrtDevice_InterruptHandler_End
 c43a:    29                     dec AL, #1
 c43b:    15 1d                  bnz L_c45a
-c43d:    d5 68 1d               ld B, [Y + 0x1d]
-c440:    85 28 03               ld AL, [B + 0x03]
+c43d:    d5 68 1d               ld B, [Y + 0x1d]	 ; CrtDeviceHooks
+c440:    85 28 03               ld AL, [B + 0x03]	 ; Backspace characrter
 c443:    a3 0f                  st AL, [0xc454|+0xf]
 c445:    d5 68 14               ld B, [Y + 0x14]
 c448:    d5 2c 06               ld B, @[B + 0x06]
@@ -11418,101 +11433,101 @@ c4b3:    95 68 14               ld A, [Y + 0x14]
 c4b6:    5e                     mov Z, A	 ; Z = device_object.CurrentWriteStruct
 c4b7:    d5 68 0f               ld B, [Y + 0x0f]	 ; Serial port base
 c4ba:    f6 12 00               ld AL, +0x0(B)	 ; Read the status register
-c4bd:    24 11                  srl AL, #2	 ; Check tor TX_READY
+c4bd:    24 11                  srl AL, #2	 ; Check for TX_READY
 c4bf:    11 1f                  bnc CrtDevice_InterruptHandler_Exit	 ; Just return if not ready
-c4c1:    24 13                  srl AL, #4	 ; And this checks for bit 6 of the status
+c4c1:    24 13                  srl AL, #4	 ; And this checks for bit 5 of the status
 c4c3:    10 05                  bc L_c4ca	 ; Is this CTS ???
 
-L_c4c5:
+NoCTS:
 c4c5:    80 86                  ld AL, 0x86	 ; Signal "Receiver is not ready" in the WriteStruct
 c4c7:    ac                     st AL, [Z]	 ; This will be picked up by WaitForTxDone loop and it will
                                           	 ; start reporting "ATTN PRINT" if this state sits for too long
 c4c8:    73 4c                  jmp R_c516	 ; This does some housekeeping and exits the interrupt
 
 L_c4ca:
-c4ca:    95 88 08               ld A, [Z + 0x08]
-c4cd:    16 2d                  blt L_c4fc
-c4cf:    7b 53                  call L_c524	 ; Fetch next character ???
-c4d1:    14 43                  bz R_c516
-c4d3:    7b c8                  call PrintChar
-c4d5:    a5 68 12               st AL, [Y + 0x12]
-c4d8:    c0 8c                  ld BL, 0x8c
+c4ca:    95 88 08               ld A, [Z + 0x08]	 ; WriteStruct.written
+c4cd:    16 2d                  blt L_c4fc	 ; If < 0, we're resuming from state, which was entered at 0xc4f4
+c4cf:    7b 53                  call GetNextCharToWrite	 ; Fetch next character from the WriteStruct
+c4d1:    14 43                  bz R_c516	 ; If returned zero, we are done
+c4d3:    7b c8                  call PrintChar	 ; Write the character to the terminal
+c4d5:    a5 68 12               st AL, [Y + 0x12]	 ; Store device_obj.last_char
+c4d8:    c0 8c                  ld BL, 0x8c	 ; Was it clear screen ?
 c4da:    49                     sub BL, AL
-c4db:    14 2e                  bz L_c50b
-c4dd:    28                     inc AL, #1
+c4db:    14 2e                  bz L_c50b	 ; If yes, we do something strange, i don't understand it
+c4dd:    28                     inc AL, #1	 ; If it was 0xFF, we're done
 c4de:    15 03                  bnz L_c4e3
 
 CrtDevice_InterruptHandler_Exit:
 c4e0:    71 c4 02               jmp CrtDevice_InterruptHandler_End
 
 L_c4e3:
-c4e3:    c0 8e                  ld BL, 0x8e
+c4e3:    c0 8e                  ld BL, 0x8e	 ; if it's not 0x8e, we're done
 c4e5:    49                     sub BL, AL
 c4e6:    15 f8                  bnz CrtDevice_InterruptHandler_Exit
 c4e8:    d5 68 0f               ld B, [Y + 0x0f]	 ; Serial port base
 c4eb:    f6 32 00               ld BL, +0x0(B)	 ; Check status register
 c4ee:    24 35                  srl BL, #6	 ; Check for CTS
-c4f0:    10 0e                  bc L_c500
-c4f2:    3a                     clr A, #0	 ; If zero, we're still doing the output
-c4f3:    39                     dec A, #1	 ; I guess we'll be waiting for it to go high
-c4f4:    b5 88 08               st A, [Z + 0x08]
+c4f0:    10 0e                  bc L_c500	 ; Proceed if high
+c4f2:    3a                     clr A, #0	 ; Otherwise we do strange things with our WriteRequest
+c4f3:    39                     dec A, #1
+c4f4:    b5 88 08               st A, [Z + 0x08]	 ; WriteStruct.written = -1
 c4f7:    a5 68 11               st AL, [Y + 0x11]	 ; device_object.status = -1
-c4fa:    73 c9                  jmp L_c4c5
+c4fa:    73 c9                  jmp NoCTS	 ; Receiver is not ready
 
 L_c4fc:
-c4fc:    2a                     clr AL, #0	 ; device_object.status = 0
+c4fc:    2a                     clr AL, #0	 ; device_object.state = 0
 c4fd:    a5 68 11               st AL, [Y + 0x11]	 ; This signals "output done"
 
 L_c500:
-c500:    85 68 01               ld AL, [Y + 0x01]	 ; if device_object[1] == 2, append line feed
-c503:    21 11                  dec AL, #2	 ; Is it the famous CR->CRLF translation ?
+c500:    85 68 01               ld AL, [Y + 0x01]	 ; if device_object[1] == 2, write LF
+c503:    21 11                  dec AL, #2
 c505:    15 04                  bnz L_c50b
 c507:    80 8a                  ld AL, 0x8a	 ; '\n'
 c509:    7b 92                  call PrintChar
 
 L_c50b:
 c50b:    80 8d                  ld AL, 0x8d
-c50d:    a5 68 12               st AL, [Y + 0x12]
-c510:    90 0f a0               ld A, 0x0fa0
-c513:    b5 88 08               st A, [Z + 0x08]
+c50d:    a5 68 12               st AL, [Y + 0x12]	 ; last_char = '\r'
+c510:    90 0f a0               ld A, 0x0fa0	 ; WriteStruct.written = 0x0fa0
+c513:    b5 88 08               st A, [Z + 0x08]	 ; I don't undeestand this
 
 R_c516:
     ; Here we're doint some housekeeping and leaving the interrupt
-c516:    95 68 0d               ld A, [Y + 0x0d]
+c516:    95 68 0d               ld A, [Y + 0x0d]	 ; device_obj.Process
 c519:    14 c5                  bz CrtDevice_InterruptHandler_Exit
-c51b:    d0 fb ff               ld B, 0xfbff
+c51b:    d0 fb ff               ld B, 0xfbff	 ; Clear some flag in the process descriptor
 c51e:    c8                     ld BL, [A]
 c51f:    42 23                  and BL, BH
 c521:    e8                     st BL, [A]
 c522:    73 bc                  jmp CrtDevice_InterruptHandler_Exit
 
-L_c524:
-c524:    95 68 14               ld A, [Y + 0x14]
-c527:    5e                     mov Z, A
+GetNextCharToWrite:
+c524:    95 68 14               ld A, [Y + 0x14]	 ; device_obj.WriteStruct
+c527:    5e                     mov Z, A	 ; Z = WriteStruct
 c528:    6d a2                  st X, [--S]
-c52a:    95 88 08               ld A, [Z + 0x08]
-c52d:    65 88 06               ld X, [Z + 0x06]
-c530:    d5 41                  ld B, [X++]
-c532:    50 04                  add X, A
-c534:    38                     inc A, #1
-c535:    59                     sub B, A
-c536:    19 0b                  ble L_c543
+c52a:    95 88 08               ld A, [Z + 0x08]	 ; WriteStruct.written - number of characters already written
+c52d:    65 88 06               ld X, [Z + 0x06]	 ; WriteStruct.ptr - pointer to a string
+c530:    d5 41                  ld B, [X++]	 ; B = string length
+c532:    50 04                  add X, A	 ; Skip over already written chars
+c534:    38                     inc A, #1	 ; Go to next character
+c535:    59                     sub B, A	 ; Check for end of buffer
+c536:    19 0b                  ble L_c543	 ; Get the character if not reached
 c538:    65 a1                  ld X, [S++]
 
-L_c53a:
+WriteDone:
 c53a:    2a                     clr AL, #0
-c53b:    a5 68 11               st AL, [Y + 0x11]
+c53b:    a5 68 11               st AL, [Y + 0x11]	 ; device_obj.state = 0
 c53e:    a5 6c 03               st AL, @[Y + 0x03]
-c541:    ac                     st AL, [Z]
+c541:    ac                     st AL, [Z]	 ; WriteStruct state, could be error code
 c542:    09                     ret
 
 L_c543:
 c543:    b5 88 08               st A, [Z + 0x08]
-c546:    8a                     ld AL, [X]
-c547:    65 a1                  ld X, [S++]
-c549:    c0 84                  ld BL, 0x84
+c546:    8a                     ld AL, [X]	 ; Fetch the character
+c547:    65 a1                  ld X, [S++]	 ; Pop X
+c549:    c0 84                  ld BL, 0x84	 ; The string may terminate early with 0x84
 c54b:    49                     sub BL, AL
-c54c:    14 ec                  bz L_c53a
+c54c:    14 ec                  bz WriteDone
 c54e:    09                     ret
 
 R_c54f:
@@ -11544,7 +11559,7 @@ c576:    95 21                  ld A, [B++]
 c578:    58                     add B, A
 c579:    2a                     clr AL, #0
 c57a:    a9                     st AL, [B]
-c57b:    73 bd                  jmp L_c53a
+c57b:    73 bd                  jmp WriteDone
 
 L_c57d:
 c57d:    6d a2                  st X, [--S]

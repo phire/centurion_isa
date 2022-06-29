@@ -372,20 +372,20 @@ Device_CRT0_Obj:
 02bb:    c5 00                  ld BL, [A]
 02bd:    00                     HALT
 02be:    00                     HALT
-02bf:    a6                     unknown
-02c0:    85 00                  ld AL, [A]
-02c2:    00                     HALT
-02c3:    00                     HALT
-02c4:    00                     HALT
-02c5:    00                     HALT
-02c6:    00                     HALT
-02c7:    ff                     st B, [P]
-02c8:    ff                     st B, [P]
-02c9:    ff                     st B, [P]
-02ca:    ff                     st B, [P]
-02cb:    ff                     st B, [P]
-02cc:    ff                     st B, [P]
-02cd:    03                     rf
+02bf:    a6 85                  CrtDeviceHooks
+02c1:    00
+02c2:    00
+02c3:    00
+02c4:    00
+02c5:    00
+02c6:    00
+02c7:    ff
+02c8:    ff
+02c9:    ff
+02ca:    ff
+02cb:    ff
+02cc:    ff
+02cd:    03
 02ce:    <null bytes>
 
 
@@ -6976,8 +6976,8 @@ a67d:    7f 21                  pop {B}
 a67f:    90 00 0f               ld A, 0x000f
 a682:    71 80 44               jmp R_8044
 
-R_a685:
-a685:    73 1a                  jmp L_a6a1
+CrtDeviceHooks:
+a685:    73 1a                  L_731a
 a687:    02
 a688:    88
 a689:    02
@@ -8815,7 +8815,7 @@ b389:    16 05                  blt L_b390
 
 L_b38b:
 b38b:    f6 08 00               ld AH, +0x0(Z)
-b38e:    73 0e                  jmp L_b39e
+b38e:    73 0e                  jmp CrtDevice_InterruptHandler_Exit
 
 L_b390:
 b390:    58                     add B, A
@@ -8827,8 +8827,8 @@ b396:    15 09                  bnz L_b3a1
 b398:    d5 68 0f               ld B, [Y + 0x0f]
 b39b:    f6 12 01               ld AL, +0x1(B)
 
-L_b39e:
-b39e:    71 b4 ef               jmp R_b4ef
+CrtDevice_InterruptHandler_Exit:
+b39e:    71 b4 ef               jmp CrtDevice_InterruptHandler_End
 
 L_b3a1:
 b3a1:    95 68 0d               ld A, [Y + 0x0d]
@@ -8841,12 +8841,12 @@ L_b3b9:
 b3b9:    95 68 1b               ld A, [Y + 0x1b]
 b3bc:    14 05                  bz L_b3c3
 b3be:    7d 00                  call [A]
-b3c0:    71 b4 ef               jmp R_b4ef
+b3c0:    71 b4 ef               jmp CrtDevice_InterruptHandler_End
 
 L_b3c3:
 b3c3:    80 01                  ld AL, 0x01
 b3c5:    42 91                  and AL, ZL
-b3c7:    14 43                  bz L_b40c
+b3c7:    14 43                  bz CrtDevice_RxDoneInterrupt
 b3c9:    71 b7 03               jmp R_b703
 
 R_b3cc:
@@ -8861,80 +8861,83 @@ R_b3ec:
 b3ec:    <null bytes>
 
 
-L_b40c:
-b40c:    f6 08 00               ld AH, +0x0(Z)
+CrtDevice_RxDoneInterrupt:
+b40c:    f6 08 00               ld AH, +0x0(Z)	 ; DISASSEMBLER BUG! Should be ld A, +0(Z) - read both status and character
 b40f:    d0 0a 00               ld B, 0x0a00
-b412:    c5 68 01               ld BL, [Y + 0x01]
+b412:    c5 68 01               ld BL, [Y + 0x01]	 ; if [device_obj + 1] == 0x0a....
 b415:    41 23                  sub BL, BH
 b417:    15 03                  bnz L_b41c
-b419:    71 b6 a0               jmp R_b6a0
+b419:    71 b6 a0               jmp R_b6a0	 ; .. then we go do some memory moves
 
 L_b41c:
-b41c:    c5 68 01               ld BL, [Y + 0x01]
+b41c:    c5 68 01               ld BL, [Y + 0x01]	 ; if [device_obj + 1] == 3, silently drop the output and leave the interrupt
 b41f:    21 32                  dec BL, #3
 b421:    15 03                  bnz L_b426
-b423:    71 b4 ef               jmp R_b4ef
+b423:    71 b4 ef               jmp CrtDevice_InterruptHandler_End
 
 L_b426:
-b426:    c0 80                  ld BL, 0x80
+b426:    c0 80                  ld BL, 0x80	 ; Make sure bit 7 of the character is set
 b428:    43 31                  or AL, BL
-b42a:    c0 1c                  ld BL, 0x1c
+b42a:    c0 1c                  ld BL, 0x1c	 ; Check bits 4 - 2 of status register, we don't know what they are
 b42c:    42 03                  and BL, AH
 b42e:    15 02                  bnz L_b432
-b430:    73 0e                  jmp L_b440
+b430:    73 0e                  jmp L_b440	 ; If zero, proceed with handling the input
 
 L_b432:
-b432:    c0 04                  ld BL, 0x04
+b432:    c0 04                  ld BL, 0x04	 ; Check bit 2
 b434:    42 03                  and BL, AH
-b436:    14 05                  bz L_b43d
-b438:    c0 80                  ld BL, 0x80
-b43a:    49                     sub BL, AL
-b43b:    14 03                  bz L_b440
+b436:    14 05                  bz L_b43d	 ; If zero, beep and discard the input
+b438:    c0 80                  ld BL, 0x80	 ; Otherwise check if the character is NUL
+b43a:    49                     sub BL, AL	 ; I think this checks for BREAK on the serial port
+b43b:    14 03                  bz L_b440	 ; If yes, proceed to TOS check
 
 L_b43d:
-b43d:    71 b4 f3               jmp R_b4f3
+b43d:    71 b4 f3               jmp BeepAndDropInput
 
 L_b440:
-b440:    45 10                  mov AH, AL
-b442:    79 b5 ae               call R_b5ae
-b445:    c5 68 17               ld BL, [Y + 0x17]
+b440:    45 10                  mov AH, AL	 ; Run the character through the translation table
+b442:    79 b5 ae               call TranslateChar	 ; AL = translated character
+b445:    c5 68 17               ld BL, [Y + 0x17]	 ; Check for Break (Ctrl-C)
 b448:    49                     sub BL, AL
-b449:    15 1b                  bnz L_b466
+b449:    15 1b                  bnz CheckForTOSMagic	 ; If not, check for TOS entry request
 b44b:    d5 68 2f               ld B, [Y + 0x2f]
-b44e:    14 03                  bz L_b453
-b450:    79 b5 41               call R_b541
+b44e:    14 03                  bz L_b453	 ; if ([device_obj + 0x2f]) call R_b541
+b450:    79 b5 41               call R_b541	 ; This is v7 feature, there are no these checks in LOAD v6
 
 L_b453:
-b453:    c5 68 13               ld BL, [Y + 0x13]
-b456:    15 0b                  bnz L_b463
-b458:    c0 01                  ld BL, 0x01
+b453:    c5 68 13               ld BL, [Y + 0x13]	 ; device_obj.break_state
+b456:    15 0b                  bnz CrtDevice_InterruptHandler_Exit2	 ; Exit if already registered
+b458:    c0 01                  ld BL, 0x01	 ; Set device_obj.break_state
 b45a:    e5 68 13               st BL, [Y + 0x13]
-b45d:    46 00 0c 01 01 3e      addbig(0, 0) 0x01, [0x013e]
+b45d:    46 00 0c 01 01 3e      addbig(0, 0) 0x01, [0x013e]	 ; Increment global break counter
 
-L_b463:
-b463:    71 b4 ef               jmp R_b4ef
+CrtDevice_InterruptHandler_Exit2:
+b463:    71 b4 ef               jmp CrtDevice_InterruptHandler_End
 
-L_b466:
+CheckForTOSMagic:
 b466:    c0 87                  ld BL, 0x87
-b468:    49                     sub BL, AL
-b469:    15 3b                  bnz L_b4a6
-b46b:    d5 68 0f               ld B, [Y + 0x0f]
-b46e:    52 32 0d ff            and B, B, 0x0dff
+b468:    49                     sub BL, AL	 ; The translated character has to be Ctrl-G (BELL)
+b469:    15 3b                  bnz L_b4a6	 ; Note that default CrtHooks table doesn't translate 0x80 to 0x87,
+                                          	 ; so we cannot enter this advanced TOS in LOAD v7.
+                                          	 ; Probably this is even a bug, i don't know. Would've been way more logical
+                                          	 ; to have a sequence BREAK then Ctrl-G
+b46b:    d5 68 0f               ld B, [Y + 0x0f]	 ; Serial port base
+b46e:    52 32 0d ff            and B, B, 0x0dff	 ; Allowed addresses: 0x?000, 0x?100, 0x?200, 0x?300
 b472:    15 32                  bnz L_b4a6
-b474:    d5 68 2f               ld B, [Y + 0x2f]
+b474:    d5 68 2f               ld B, [Y + 0x2f]	 ; if ([device_obj + 0x2f]) call R_b541
 b477:    14 03                  bz L_b47c
 b479:    79 b5 41               call R_b541
 
 L_b47c:
 b47c:    7e 01                  push {A}
 b47e:    82 00 1a               ld AL, @[0x001a]
-b481:    c0 73                  ld BL, 0x73
+b481:    c0 73                  ld BL, 0x73	 ; Check for jmp instruction in the beginning
 b483:    49                     sub BL, AL
-b484:    14 04                  bz L_b48a
+b484:    14 04                  bz CallTOS
 b486:    7f 01                  pop {A}
 b488:    73 1c                  jmp L_b4a6
 
-L_b48a:
+CallTOS:
 b48a:    7f 01                  pop {A}
 b48c:    d0 00 fe               ld B, 0x00fe
 b48f:    80 0e                  ld AL, 0x0e
@@ -8947,7 +8950,7 @@ b49b:    d5 a4                  ld B, @[S]
 b49d:    f5 01                  st B, [A++]
 b49f:    b5 a4                  st A, @[S]
 b4a1:    95 a1                  ld A, [S++]
-b4a3:    71 b4 ef               jmp R_b4ef
+b4a3:    71 b4 ef               jmp CrtDevice_InterruptHandler_End
 
 L_b4a6:
 b4a6:    45 01                  mov AL, AH
@@ -8966,7 +8969,7 @@ b4ba:    79 b5 41               call R_b541
 L_b4bd:
 b4bd:    47 85 01 60 2f 60 35   memcmp 0x02, [Y + 0x2f], [Y + 0x35]
 b4c4:    16 02                  blt L_b4c8
-b4c6:    73 2b                  jmp R_b4f3
+b4c6:    73 2b                  jmp BeepAndDropInput
 
 L_b4c8:
 b4c8:    6d a2                  st X, [--S]
@@ -8986,14 +8989,14 @@ b4e7:    91 00 5a               ld A, [0x005a]
 b4ea:    c0 01                  ld BL, 0x01
 b4ec:    e5 08 6b               st BL, [A + 0x6b]
 
-R_b4ef:
+CrtDevice_InterruptHandler_End:
 b4ef:    0a                     reti
 b4f0:    71 b3 6f               jmp level6Handler
 
-R_b4f3:
+BeepAndDropInput:
 b4f3:    80 87                  ld AL, 0x87
-b4f5:    79 b6 ea               call R_b6ea
-b4f8:    71 b4 ef               jmp R_b4ef
+b4f5:    79 b6 ea               call PrintEcho
+b4f8:    71 b4 ef               jmp CrtDevice_InterruptHandler_End
 
 R_b4fb:
 b4fb:    d5 68 2f               ld B, [Y + 0x2f]
@@ -9089,22 +9092,28 @@ b5a3:    71 b6 53               jmp R_b653
 
 L_b5a6:
 b5a6:    7b 1b                  call R_b5c3
-b5a8:    7b 04                  call R_b5ae
+b5a8:    7b 04                  call TranslateChar
 b5aa:    7b 25                  call L_b5d1
 b5ac:    73 30                  jmp L_b5de
 
-R_b5ae:
+TranslateChar:
+    ; Translate a character according to a table in CrtDeviceHooks
+    ; The table consists of words. First word is an write hook, called
+    ; from within CrtDevice_Write. Other words are 2-byte entries
+    ; in format: TO FROM. The table is terminated with a zero word.
+    ; A character to translate is placed in AL, on return it will be either
+    ; translated according to the hooks table or left as it is.
 b5ae:    7e 41                  push {X}
-b5b0:    65 68 1d               ld X, [Y + 0x1d]
-b5b3:    14 0b                  bz L_b5c0
-b5b5:    30 41                  inc X, #2
+b5b0:    65 68 1d               ld X, [Y + 0x1d]	 ; CrtDeviceHooks
+b5b3:    14 0b                  bz L_b5c0	 ; If not set, do nothing
+b5b5:    30 41                  inc X, #2	 ; Skip write hook address
 
 L_b5b7:
-b5b7:    d5 41                  ld B, [X++]
-b5b9:    14 05                  bz L_b5c0
-b5bb:    49                     sub BL, AL
-b5bc:    15 f9                  bnz L_b5b7
-b5be:    45 21                  mov AL, BH
+b5b7:    d5 41                  ld B, [X++]	 ; BH, BL = [table++]
+b5b9:    14 05                  bz L_b5c0	 ; If a terminator reached, nothing found
+b5bb:    49                     sub BL, AL	 ; if AL != BL
+b5bc:    15 f9                  bnz L_b5b7	 ; check the next entry
+b5be:    45 21                  mov AL, BH	 ; return BH
 
 L_b5c0:
 b5c0:    7f 41                  pop {X}
@@ -9152,9 +9161,9 @@ b5f7:    20 11                  inc AL, #2
 b5f9:    73 79                  jmp L_b674
 
 L_b5fb:
-b5fb:    d5 68 1d               ld B, [Y + 0x1d]
-b5fe:    85 28 03               ld AL, [B + 0x03]
-b601:    79 b6 ea               call R_b6ea
+b5fb:    d5 68 1d               ld B, [Y + 0x1d]	 ; CrtDeviceHooks table
+b5fe:    85 28 03               ld AL, [B + 0x03]	 ; Get the first FROM character from the translation table
+b601:    79 b6 ea               call PrintEcho
 b604:    7b bd                  call R_b5c3
 b606:    73 6e                  jmp L_b676
 
@@ -9165,17 +9174,17 @@ b60c:    29                     dec AL, #1
 b60d:    14 3c                  bz L_b64b
 b60f:    29                     dec AL, #1
 b610:    15 20                  bnz L_b632
-b612:    d5 68 1d               ld B, [Y + 0x1d]
-b615:    85 28 03               ld AL, [B + 0x03]
+b612:    d5 68 1d               ld B, [Y + 0x1d]	 ; CrtDeviceHooks table
+b615:    85 28 03               ld AL, [B + 0x03]	 ; Get the first FROM character from the translation table
 b618:    a3 11                  st AL, [0xb62b|+0x11]
 b61a:    d5 68 14               ld B, [Y + 0x14]
 b61d:    d5 2c 06               ld B, @[B + 0x06]
 b620:    14 29                  bz L_b64b
-b622:    79 b6 ea               call R_b6ea
+b622:    79 b6 ea               call PrintEcho
 b625:    80 a0                  ld AL, 0xa0
-b627:    79 b6 ea               call R_b6ea
+b627:    79 b6 ea               call PrintEcho
 b62a:    80 88                  ld AL, 0x88
-b62c:    79 b6 ea               call R_b6ea
+b62c:    79 b6 ea               call PrintEcho
 b62f:    2a                     clr AL, #0
 b630:    73 44                  jmp L_b676
 
@@ -9203,7 +9212,7 @@ R_b646:
 b646:    80 87                  ld AL, 0x87
 
 L_b648:
-b648:    79 b6 ea               call R_b6ea
+b648:    79 b6 ea               call PrintEcho
 
 L_b64b:
 b64b:    d5 68 2f               ld B, [Y + 0x2f]
@@ -9223,18 +9232,18 @@ L_b665:
 b665:    71 b2 b3               jmp R_b2b3
 
 L_b668:
-b668:    71 b4 ef               jmp R_b4ef
+b668:    71 b4 ef               jmp CrtDevice_InterruptHandler_End
 
 L_b66b:
 b66b:    80 ad                  ld AL, 0xad
 
 L_b66d:
-b66d:    7b 7b                  call R_b6ea
+b66d:    7b 7b                  call PrintEcho
 b66f:    79 b7 b0               call R_b7b0
 b672:    80 8d                  ld AL, 0x8d
 
 L_b674:
-b674:    7b 74                  call R_b6ea
+b674:    7b 74                  call PrintEcho
 
 L_b676:
 b676:    79 b7 b0               call R_b7b0
@@ -9244,12 +9253,12 @@ b67e:    14 0d                  bz L_b68d
 b680:    80 8a                  ld AL, 0x8a
 b682:    49                     sub BL, AL
 b683:    14 04                  bz L_b689
-b685:    7b 63                  call R_b6ea
+b685:    7b 63                  call PrintEcho
 b687:    73 04                  jmp L_b68d
 
 L_b689:
 b689:    80 8d                  ld AL, 0x8d
-b68b:    7b 5d                  call R_b6ea
+b68b:    7b 5d                  call PrintEcho
 
 L_b68d:
 b68d:    8b                     ld AL, [Y]
@@ -9283,7 +9292,7 @@ b6bf:    79 b7 9b               call R_b79b
 b6c2:    71 b7 77               jmp R_b777
 
 L_b6c5:
-b6c5:    71 b4 ef               jmp R_b4ef
+b6c5:    71 b4 ef               jmp CrtDevice_InterruptHandler_End
 
 L_b6c8:
 b6c8:    7e 41                  push {X}
@@ -9305,7 +9314,7 @@ b6e4:    7f 41                  pop {X}
 b6e6:    7b 0a                  call L_b6f2
 b6e8:    73 db                  jmp L_b6c5
 
-R_b6ea:
+PrintEcho:
 b6ea:    db                     ld B, [Y]
 b6eb:    c0 08                  ld BL, 0x08
 b6ed:    42 23                  and BL, BH
@@ -9359,7 +9368,7 @@ b73e:    28                     inc AL, #1
 b73f:    15 03                  bnz L_b744
 
 L_b741:
-b741:    71 b4 ef               jmp R_b4ef
+b741:    71 b4 ef               jmp CrtDevice_InterruptHandler_End
 
 L_b744:
 b744:    c0 8e                  ld BL, 0x8e
@@ -15072,7 +15081,7 @@ e329:    ff
 e32a:    ff
 
 R_e32b:
-e32b:    c1 b3 a0               ld BL, [L_b39e+2|0xb3a0]
+e32b:    c1 b3 a0               ld BL, [CrtDevice_InterruptHandler_Exit+2|0xb3a0]
 e32e:    a0 09                  st AL, 0x09
 e330:    0a                     reti
 e331:    03                     rf
