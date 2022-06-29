@@ -210,7 +210,7 @@
 0xc085 ,	comment	; "EC:XX CP:XX CMDS: "
 0xc231 ,	comment	; Set first byte of the function table to 0
 0xc241 ,	comment	; device_obj.state = 1
-0xc25b ,	comment	; MUX_REG[8] = port_offset + 1, we don't know the purpose
+0xc25b ,	comment	; MUX_REG[8] = port_offset + 0, we don't know the purpose
 0xc269 ,	comment	; jmp SwitchToPageBase0
 0xc26c,	pre_comment 	; This waits for (device_obj + 0x11) to become 0
 0xc278 ,	comment	; Set first byte of the function table to 0
@@ -260,6 +260,7 @@
 0xc33a ,	comment	; Check if we actually have the port in the table
 0xc33c ,	comment	; If yes, proceed to read
 0xc33e ,	comment	; If no, read the character in order to clear the pending RX_READY
+0xc341 ,	comment	; and leave silently
 0xc344 ,	comment	; A = device descriptor
 0xc345 ,	comment	; Bail out if nullptr
 0xc347 ,	comment	; Y = device descriptor
@@ -270,8 +271,11 @@
 0xc354 ,	comment	; A word at (descriptor + 0x0d) has to do with memory management
 0xc36c ,	comment	; Check if we have read routine set
 0xc371 ,	comment	; Call if set
-0xc39f ,	comment	; Read the character from the port
-0xc3a2 ,	comment	; Enside bit 7 is set
+0xc39f ,	comment	; DISASSEMBLER BUG! Should be ld A, +0(Z) - read both status and character
+0xc3a2 ,	comment	; Enside bit 7 is set in the character
+0xc3a4 ,	comment	; AL is the character
+0xc3a6 ,	comment	; Check bits 4 - 2 of status register, we don't know what they are
+0xc3aa ,	comment	; If any of these bits is set, beep and exit
 0xc3bc ,	comment	; Preserve the character
 0xc3d4 ,	comment	; [0x013e]++
 0xc3d7 ,	comment	; Is that a counter of received characters ? Ring buffer size ?

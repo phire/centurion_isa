@@ -103,7 +103,11 @@
 0xb276, fnptr
 0xb278, fnptr
 0xb27a, fnptr
+0xb2cb, label, CrtDevice_Write
+0xb328, label, AttnPrint
 0xb32f, pstring16
+0xb366, label, GetMUXBaseAndOffset
+0xb805, label, CrtDevice_Init
 0xb84f, label, WDCDeviceObj
 0xb84f, >H
 0xb851, fnptr
@@ -180,6 +184,9 @@
 0xcc9e, pstring16
 0xccb4, pstring16
 0xcccc, pstring16
+0xce2a, label, SetTimeout8
+0xce33, label, CheckTimeout
+0xce41, label, SetTimeout256
 0xd4f5, pstring16
 0xe1a9, pstring16
 0xe1b0, pstring16

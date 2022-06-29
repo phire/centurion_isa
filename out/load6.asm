@@ -11041,7 +11041,7 @@ c252:    47 6d 00 04 00 00      unkblk6 0x01, 0x04, [A + 0x00]
 
 L_c258:
 c258:    79 c3 19               call GetMUXBaseAndOffset
-c25b:    f6 31 08               st BL, +0x8(A)	 ; MUX_REG[8] = port_offset + 1, we don't know the purpose
+c25b:    f6 31 08               st BL, +0x8(A)	 ; MUX_REG[8] = port_offset + 0, we don't know the purpose
 
 R_c25e:
 c25e:    65 a1                  ld X, [S++]
@@ -11189,7 +11189,7 @@ c33c:    16 05                  blt L_c343	 ; If yes, proceed to read
 
 L_c33e:
 c33e:    f6 08 00               ld AH, +0x0(Z)	 ; If no, read the character in order to clear the pending RX_READY
-c341:    73 0e                  jmp L_c351
+c341:    73 0e                  jmp L_c351	 ; and leave silently
 
 L_c343:
 c343:    58                     add B, A
@@ -11232,12 +11232,12 @@ c38f:    <null bytes>
 
 
 CrtDevice_RxDoneInterrupt:
-c39f:    f6 08 00               ld AH, +0x0(Z)	 ; Read the character from the port
-c3a2:    c0 80                  ld BL, 0x80	 ; Enside bit 7 is set
-c3a4:    43 31                  or AL, BL
-c3a6:    c0 1c                  ld BL, 0x1c
+c39f:    f6 08 00               ld AH, +0x0(Z)	 ; DISASSEMBLER BUG! Should be ld A, +0(Z) - read both status and character
+c3a2:    c0 80                  ld BL, 0x80	 ; Enside bit 7 is set in the character
+c3a4:    43 31                  or AL, BL	 ; AL is the character
+c3a6:    c0 1c                  ld BL, 0x1c	 ; Check bits 4 - 2 of status register, we don't know what they are
 c3a8:    42 03                  and BL, AH
-c3aa:    15 5a                  bnz L_c406
+c3aa:    15 5a                  bnz BeepAndDropInput	 ; If any of these bits is set, beep and exit
 c3ac:    65 68 1d               ld X, [Y + 0x1d]
 c3af:    14 0b                  bz L_c3bc
 c3b1:    30 41                  inc X, #2
@@ -11280,7 +11280,7 @@ c3e1:    45 10                  mov AH, AL
 c3e3:    82 00 1a               ld AL, @[0x001a]	 ; 1a is TOS_Entry (or Debugger)
 c3e6:    c0 73                  ld BL, 0x73	 ; Check for jump instruction at TOS entry
 c3e8:    49                     sub BL, AL
-c3e9:    15 1b                  bnz L_c406	 ; Beep if no valid handler found
+c3e9:    15 1b                  bnz BeepAndDropInput	 ; Beep if no valid handler found
 c3eb:    d0 00 fe               ld B, 0x00fe
 c3ee:    80 0e                  ld AL, 0x0e
 c3f0:    43 c1                  or AL, CH
@@ -11297,7 +11297,7 @@ CrtDevice_InterruptHandler_End:
 c402:    0a                     reti
 c403:    71 c3 22               jmp CrtDevice_InterruptHandler
 
-L_c406:
+BeepAndDropInput:
 c406:    80 87                  ld AL, 0x87	 ; ASCII BEL (bel)
 
 L_c408:
@@ -11306,7 +11306,7 @@ c40b:    73 f5                  jmp CrtDevice_InterruptHandler_End
 
 L_c40d:
 c40d:    c5 68 11               ld BL, [Y + 0x11]	 ; Check the byte at (device_obj + 0x11)
-c410:    19 f4                  ble L_c406	 ; If 0 of -1, beep and exit
+c410:    19 f4                  ble BeepAndDropInput	 ; If 0 of -1, beep and exit
 c412:    95 68 14               ld A, [Y + 0x14]
 c415:    85 08 02               ld AL, [A + 0x02]
 c418:    c0 08                  ld BL, 0x08

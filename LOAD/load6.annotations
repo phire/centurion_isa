@@ -153,6 +153,7 @@
 0xbc6a, fnptr
 0xbc6c, fnptr
 0xbeb8, label, FfcDevice_Init
+0xc406, label, BeepAndDropInput
 0xc157, pstring16
 0xc172, pstring16
 0xc18c, pstring16

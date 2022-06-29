@@ -26,6 +26,20 @@
 0xa515 ,	comment	; HoursOnes
 0xa52c ,	comment	; Stored X
 0xa54a ,	comment	; Stored X
+0xb2eb ,	comment	; Serial port base
+0xb2ee ,	comment	; Wait for TX_READY
+0xb81d ,	comment	; A = device_obj
+0xb81f ,	comment	; Skip if nullptr
+0xb821 ,	comment	; If [device_obj + 1] is zero, the device is disabled
+0xb824 ,	comment	; BL = baud rate
+0xb827 ,	comment	; Why setting twice ?
+0xb82a ,	comment	; A = serial port base
+0xb82d ,	comment	; Set baud rate
+0xb832 ,	comment	; Write '\x14'
+0xb837 ,	comment	; Convert from port base to MUX card base
+0xb83b ,	comment	; Read IRQ level 6
+0xb83e ,	comment	; Write IRQ level 6
+0xb843 ,	comment	; We don't know what this does
 0xb85b ,	comment	; '	 ; '	 ; '	 ; '	 ; '
 0xb85d ,	comment	; '	 ; '	 ; '	 ; '	 ; '
 0xd71e ,	comment	; Clear terminal
