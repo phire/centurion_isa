@@ -30,11 +30,14 @@
 0x01f6, label, StartProcess_TopOfMemory
 0x01f6, >H
 0x0257, B
-0x0258, >H
+0x0258, B
+0x0259, B
 0x025a, >H
 0x025c, B
+0x025d, B
+0x025f, B
 0x0261, fnptr
-0x0263, fnptr
+0x0263, ptr
 0x043e, ptr
 0x043e, label, EarlyInitDevices
 0x045b, label, CenturionVI_String
@@ -109,6 +112,8 @@
 0xb2d1, label, AssertIsSystemPtr
 0xb446, label, InitLevel10Device
 0xb461, code, Level10_InterruptHandler
+0xb656, label, CrtDeviceHooks
+0xb656, fnptr
 0xb6b6, label, HawkDeviceFunctions
 0xb6b6, >H
 0xb6b8, fnptr
@@ -186,10 +191,14 @@
 0xc322, code, CrtDevice_InterruptHandler
 0xc39f, label, CrtDevice_RxDoneInterrupt
 0xc402, label, CrtDevice_InterruptHandler_End
+0xc427, label, EchoBackspace
 0xc495, label, PrintEcho
 0xc49d, label, PrintChar
+0xc4c5, label, NoCTS
 0xc4ae, label, CrtDevice_TxDoneInterrupt
 0xc4e0, label, CrtDevice_InterruptHandler_Exit
+0xc524, label, GetNextCharToWrite
+0xc53a, label, WriteDone
 0xc5a4, label, CrtDevice_Init
 0xc5ee, label, CmdDeviceFunctions
 0xc5ee, >H

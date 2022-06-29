@@ -30,6 +30,7 @@
 0x0141, B
 0x0161, label, PageTableOne
 0x0181, label, PageTableTwo
+0x02bf, ptr
 0x04f2, label, EarlyInitDevices
 0x04f2, ptr
 0x80e3, pstring16
@@ -49,6 +50,8 @@
 0x8755, label, UptimeDays
 0xa1fd, pstring16
 0xa22b, pstring16
+0xa685, label, CrtDeviceHooks
+0xa685, fnptr
 0xa6f5, label, WeirdExtra_HawkDeviceObj
 0xa6f5, >H
 0xa6f7, label, HawkDeviceObj
@@ -107,6 +110,15 @@
 0xb328, label, AttnPrint
 0xb32f, pstring16
 0xb366, label, GetMUXBaseAndOffset
+0xb39e, label, CrtDevice_InterruptHandler_Exit
+0xb40c, label, CrtDevice_RxDoneInterrupt
+0xb463, label, CrtDevice_InterruptHandler_Exit2
+0xb466, label, CheckForTOSMagic
+0xb48a, label, CallTOS
+0xb4ef, label, CrtDevice_InterruptHandler_End
+0xb4f3, label, BeepAndDropInput
+0xb5ae, label, TranslateChar
+0xb6ea, label, PrintEcho
 0xb805, label, CrtDevice_Init
 0xb84f, label, WDCDeviceObj
 0xb84f, >H

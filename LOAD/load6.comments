@@ -8,12 +8,16 @@
 0x246,	pre_comment 	; CRT0 device descriptor
 0x24b ,	comment	; Offset +5   - Functions table
 0x24d ,	comment	; Offset +7   - device name (6 chars)
-0x253 ,	comment	; Offset +0xd
+0x253 ,	comment	; Offset +0xd - process, doing the output
 0x255 ,	comment	; Offset +0xf - Serial port base
 0x257 ,	comment	; Offset +0x11 - device state
+0x258 ,	comment	; Offset +0x12 - last written character
+0x259 ,	comment	; Offset +0x13 - break (Ctrl-C) state
 0x25a ,	comment	; Offset +0x14 - Current WriteStruct
+0x25d ,	comment	; Offset +0x17 - BreakKey - defaults to Ctrl0C
 0x25f ,	comment	; Offset +0x19 - baud rate, 0xc5 stands for 9600
 0x261 ,	comment	; Offset +0x1b - low-level character read routine, called in interrupt
+0x263 ,	comment	; Offset +0x1d - customization table
 0x288 ,	comment	; Set to the user supplied boot Code
 0x2a1 ,	comment	; Set to the user supplied boot Code
 0x2ba ,	comment	; Set to the user supplied boot Code
@@ -176,6 +180,24 @@
 0xb62f ,	comment	; Lock Mutex?
 0xb637 ,	comment	; 0x04
 0xb639 ,	comment	; Tailcall
+0xb656 ,	comment	; WriteHook
+0xb658,	pre_comment 	; Input translation table follows
+	 	; We're mostly translating to virtual key codes. Probably this acts as a
+	 	; terminal control code descriptor (yes, termcap precursor). At the moment
+	 	; only the virtual code for backspace is known
+0xb658 ,	comment	; 0x88 -> 0x02 VK_BACKSPACE
+0xb659 ,	comment	; This also has a special designation as default backspace character
+0xb65a ,	comment	; 0x85 -> 0x02 VK_BACKSPACE
+0xb65c ,	comment	; 0x81 -> 0x01
+0xb65e ,	comment	; 0x98 -> 0x01
+0xb660 ,	comment	; 0x99 -> 0x02 VK_BACKSPACE
+0xb662 ,	comment	; 0x0b -> 0x05
+0xb664 ,	comment	; 0x86 -> 0x03
+0xb666 ,	comment	; 0x9A -> 0x04
+0xb668 ,	comment	; 0xFF -> 0x02
+0xb66a ,	comment	; 0xDF -> 0x02
+0xb66d ,	comment	; 0x9F -> 0xDF
+0xb66f ,	comment	; 0x9d -> 0x8d
 0xb6ca ,	comment	; X before call
 0xb6cf ,	comment	; Arg6 & 0x7f
 0xb6d4 ,	comment	; Arg6 & 0x80
@@ -219,6 +241,9 @@
 0xc27e ,	comment	; device_obj.state = -1. Bit 7 probably signals "output in progress"
 0xc27f ,	comment	; See a waiting loop with timeout below at c2c3
 0xc280 ,	comment	; This location is being manipulated by input interrupt handler
+0xc283 ,	comment	; CrtDeviceHooks
+0xc286 ,	comment	; Skip if not installed
+0xc288 ,	comment	; Call WriteHook
 0xc28c ,	comment	; Set current WriteStruct
 0xc290 ,	comment	; Overwrites string????
 0xc296 ,	comment	; port_offset + 1
@@ -230,6 +255,7 @@
 0xc2a8 ,	comment	; Check whether TX timeout has passed
 0xc2ab ,	comment	; Shout out if so
 0xc2ad ,	comment	; Repeat the check
+0xc2b5 ,	comment	; Set device_obj.Process
 0xc2ba ,	comment	; [Z] = 0x80 - this will enable timeout check below
 0xc2bb ,	comment	; A = MUXBase
 0xc2c0 ,	comment	; MUX_REG[0x0c] = something
@@ -268,7 +294,9 @@
 0xc349 ,	comment	; If zero, the port is considered inactive
 0xc34b ,	comment	; port base address
 0xc34e ,	comment	; Read the data register only to clear character pending state
-0xc354 ,	comment	; A word at (descriptor + 0x0d) has to do with memory management
+0xc354 ,	comment	; device_obj.Process
+0xc357 ,	comment	; Skip if not set
+0xc367 ,	comment	; Does this make sure process' memory is mapped ?
 0xc36c ,	comment	; Check if we have read routine set
 0xc371 ,	comment	; Call if set
 0xc39f ,	comment	; DISASSEMBLER BUG! Should be ld A, +0(Z) - read both status and character
@@ -276,10 +304,32 @@
 0xc3a4 ,	comment	; AL is the character
 0xc3a6 ,	comment	; Check bits 4 - 2 of status register, we don't know what they are
 0xc3aa ,	comment	; If any of these bits is set, beep and exit
+0xc3ac,	pre_comment 	; Translate a character according to a table in CrtDeviceHooks
+	 	; The table consists of words. First word is an write hook, called
+	 	; from within CrtDevice_Write. Other words are 2-byte entries
+	 	; in format: TO FROM. The table is terminated with a zero word.
+	 	; A character to translate is placed in AL, on return it will be either
+	 	; translated according to the hooks table or left as it is.
+0xc3ac ,	comment	; CrtDeviceHooks
+0xc3af ,	comment	; Skip translation if not installed
+0xc3b1 ,	comment	; Skip over write hook
+0xc3b3 ,	comment	; Fetch a translation table entry (BH, BL)
+0xc3b5 ,	comment	; Stop if hit the terminator word
+0xc3b7 ,	comment	; char == BL
+0xc3b8 ,	comment	; If doesn't match, go to next entry
+0xc3ba ,	comment	; otherwise AL = translated char
 0xc3bc ,	comment	; Preserve the character
-0xc3d4 ,	comment	; [0x013e]++
-0xc3d7 ,	comment	; Is that a counter of received characters ? Ring buffer size ?
-0xc3dc ,	comment	; ASCII STX (Start of Text)
+0xc3bf,	pre_comment 	; Here we check for a programmable Break key, which defaults to Ctrl-C
+0xc3bf ,	comment	; Check for Break key (defaults to Ctrl-C)
+0xc3c3 ,	comment	; If doesn't match, proceed to TOS check
+0xc3c5 ,	comment	; Check if device_obj.break_state & 0x7F == 0
+0xc3ca ,	comment	; If not, just drop the character and leave
+0xc3cc ,	comment	; AL = device_obj.break_state & 0x7F at this point, we know it's 0
+0xc3cd ,	comment	; And now we set it to 1.
+0xc3cf ,	comment	; Note that we'll only register another Break again if someone outside
+0xc3d1 ,	comment	; resets the break_state back to 0
+0xc3d4 ,	comment	; [0x013e]++ - global break counter
+0xc3dc ,	comment	; ASCII STX (Start of Text), Ctrl-B
 0xc3df ,	comment	; If not equal, proceed to handling input
 0xc3e1,	pre_comment 	; This is probally a generic Secure-Attention-Key type mechnisim that always goes to the kernel
 	 	; Right now, it's configured to break into the debugger, but I suspect on a retail kernel it
@@ -299,12 +349,14 @@
 0xc421 ,	comment	; Substitute it with something else
 0xc423 ,	comment	; Restore the character back
 0xc425 ,	comment	; Echo it and proceed
-0xc427 ,	comment	; Translation table for control chars ?
-0xc42a ,	comment	; Substitute the character
-0xc42d ,	comment	; Print a substituted char instead of an echo
-0xc42f ,	comment	; AL = character
-0xc431 ,	comment	; Avoid the echo
+0xc427 ,	comment	; CrtDeviceHooks
+0xc42a ,	comment	; Get backspace character
+0xc42d ,	comment	; And write it to the terminal
+0xc42f ,	comment	; Restore che original virtual key in AL
+0xc431 ,	comment	; Proceed without echo
 0xc433 ,	comment	; AL = characrter
+0xc43d ,	comment	; CrtDeviceHooks
+0xc440 ,	comment	; Backspace characrter
 0xc44f ,	comment	; ' ' (space)
 0xc453 ,	comment	; Backspace
 0xc467 ,	comment	; A character is stored here
@@ -318,27 +370,56 @@
 0xc4b6 ,	comment	; Z = device_object.CurrentWriteStruct
 0xc4b7 ,	comment	; Serial port base
 0xc4ba ,	comment	; Read the status register
-0xc4bd ,	comment	; Check tor TX_READY
+0xc4bd ,	comment	; Check for TX_READY
 0xc4bf ,	comment	; Just return if not ready
-0xc4c1 ,	comment	; And this checks for bit 6 of the status
+0xc4c1 ,	comment	; And this checks for bit 5 of the status
 0xc4c3 ,	comment	; Is this CTS ???
 0xc4c5 ,	comment	; Signal "Receiver is not ready" in the WriteStruct
 0xc4c7 ,	comment	; This will be picked up by WaitForTxDone loop and it will
 		; start reporting "ATTN PRINT" if this state sits for too long
 0xc4c8 ,	comment	; This does some housekeeping and exits the interrupt
-0xc4cf ,	comment	; Fetch next character ???
+0xc4ca ,	comment	; WriteStruct.written
+0xc4cd ,	comment	; If < 0, we're resuming from state, which was entered at 0xc4f4
+0xc4cf ,	comment	; Fetch next character from the WriteStruct
+0xc4d1 ,	comment	; If returned zero, we are done
+0xc4d3 ,	comment	; Write the character to the terminal
+0xc4d5 ,	comment	; Store device_obj.last_char
+0xc4d8 ,	comment	; Was it clear screen ?
+0xc4db ,	comment	; If yes, we do something strange, i don't understand it
+0xc4dd ,	comment	; If it was 0xFF, we're done
+0xc4e3 ,	comment	; if it's not 0x8e, we're done
 0xc4e8 ,	comment	; Serial port base
 0xc4eb ,	comment	; Check status register
 0xc4ee ,	comment	; Check for CTS
-0xc4f2 ,	comment	; If zero, we're still doing the output
-0xc4f3 ,	comment	; I guess we'll be waiting for it to go high
+0xc4f0 ,	comment	; Proceed if high
+0xc4f2 ,	comment	; Otherwise we do strange things with our WriteRequest
+0xc4f4 ,	comment	; WriteStruct.written = -1
 0xc4f7 ,	comment	; device_object.status = -1
-0xc4fc ,	comment	; device_object.status = 0
+0xc4fa ,	comment	; Receiver is not ready
+0xc4fc ,	comment	; device_object.state = 0
 0xc4fd ,	comment	; This signals "output done"
-0xc500 ,	comment	; if device_object[1] == 2, append line feed
-0xc503 ,	comment	; Is it the famous CR->CRLF translation ?
+0xc500 ,	comment	; if device_object[1] == 2, write LF
 0xc507 ,	comment	; '\n'
+0xc50d ,	comment	; last_char = '\r'
+0xc510 ,	comment	; WriteStruct.written = 0x0fa0
+0xc513 ,	comment	; I don't undeestand this
 0xc516,	pre_comment 	; Here we're doint some housekeeping and leaving the interrupt
+0xc516 ,	comment	; device_obj.Process
+0xc51b ,	comment	; Clear some flag in the process descriptor
+0xc524 ,	comment	; device_obj.WriteStruct
+0xc527 ,	comment	; Z = WriteStruct
+0xc52a ,	comment	; WriteStruct.written - number of characters already written
+0xc52d ,	comment	; WriteStruct.ptr - pointer to a string
+0xc530 ,	comment	; B = string length
+0xc532 ,	comment	; Skip over already written chars
+0xc534 ,	comment	; Go to next character
+0xc535 ,	comment	; Check for end of buffer
+0xc536 ,	comment	; Get the character if not reached
+0xc53b ,	comment	; device_obj.state = 0
+0xc541 ,	comment	; WriteStruct state, could be error code
+0xc546 ,	comment	; Fetch the character
+0xc547 ,	comment	; Pop X
+0xc549 ,	comment	; The string may terminate early with 0x84
 0xc5a4 ,	comment	; End of this function, Stack will overwrite it
 0xc5a7 ,	comment	; Set exception handler's S register
 0xc5ac ,	comment	; Install exception handler
