@@ -1004,7 +1004,7 @@ Bootstrap_test:
 85a0:    a1 f1 4d               st AL, [0xf14d]
 85a3:    a1 f1 0a               st AL, [0xf10a]
 85a6:    80 c5                  ld AL, 0xc5
-85a8:    a4 7a                  st AL, @[0x8624|+0x7a]
+85a8:    a4 7a                  st AL, @[WriteString+1|0x8624|+0x7a]
 85aa:    80 8c                  ld AL, 0x8c
 85ac:    a1 f2 01               st AL, [0xf201]
 85af:    0e                     dly
@@ -1091,10 +1091,10 @@ L_862f:
 
 ReadChar:
 8634:    7b 6d                  call L_86a3
-8636:    84 ec                  ld AL, @[0x8624|-0x14]
+8636:    84 ec                  ld AL, @[WriteString+1|0x8624|-0x14]
 8638:    2c                     srl AL, #1
 8639:    11 f9                  bnc ReadChar
-863b:    84 f3                  ld AL, @[0x8630|-0xd]
+863b:    84 f3                  ld AL, @[L_862f+1|0x8630|-0xd]
 863d:    c0 80                  ld BL, 0x80
 863f:    43 31                  or AL, BL
 8641:    c0 e0                  ld BL, 0xe0
@@ -1104,7 +1104,7 @@ ReadChar:
 8648:    42 31                  and AL, BL
 
 L_864a:
-864a:    a4 e4                  st AL, @[0x8630|-0x1c]
+864a:    a4 e4                  st AL, @[L_862f+1|0x8630|-0x1c]
 864c:    09                     ret
 
 L_864d:

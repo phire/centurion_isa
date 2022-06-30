@@ -118,10 +118,10 @@ fc9e:    a1 f2 01               st AL, [0xf201]
 fca1:    73 ef                  jmp WriteString
 
 ReadChar:
-fca3:    84 ee                  ld AL, @[0xfc93|-0x12]
+fca3:    84 ee                  ld AL, @[WriteString+1|0xfc93|-0x12]
 fca5:    2c                     srl AL, #1
 fca6:    11 fb                  bnc ReadChar
-fca8:    84 f5                  ld AL, @[0xfc9f|-0xb]
+fca8:    84 f5                  ld AL, @[L_fc9e+1|0xfc9f|-0xb]
 fcaa:    c0 80                  ld BL, 0x80
 fcac:    43 31                  or AL, BL	 ; char | 0x80 - Force bit 7 to be set
 fcae:    c0 e0                  ld BL, 0xe0
@@ -131,7 +131,7 @@ fcb3:    c0 df                  ld BL, 0xdf
 fcb5:    42 31                  and AL, BL	 ; Clear bit 6, forcing it to be uppercase
 
 L_fcb7:
-fcb7:    a4 e6                  st AL, @[0xfc9f|-0x1a]
+fcb7:    a4 e6                  st AL, @[L_fc9e+1|0xfc9f|-0x1a]
 fcb9:    09                     ret
 
 LoadFromCMDTramp:

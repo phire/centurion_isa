@@ -1246,7 +1246,7 @@ R_8000:
 
 R_800f:
 800f:    7b 44                  call L_8055
-8011:    f7                     ?F7?
+8011:    f7                     memcpy16
 8012:    7b 4d                  call L_8061
 8014:    09                     ret
 
@@ -2143,7 +2143,7 @@ L_890f:
 8929:    55 20                  mov A, B
 892b:    39                     dec A, #1
 892c:    d5 88 17               ld B, [Z + 0x17]
-892f:    67 9e a0 02            memset A, 0xa0, [B]
+892f:    67 9e a0 02            memset AL, 0xa0, [B]
 8933:    95 88 04               ld A, [Z + 0x04]
 8936:    5c                     mov Y, A
 8937:    c1 88 27               ld BL, [L_8826+1|0x8827]
@@ -2801,7 +2801,7 @@ L_8d9e:
 8d9e:    65 a1                  ld X, [S++]
 8da0:    95 61                  ld A, [Y++]
 8da2:    39                     dec A, #1
-8da3:    67 4a 64               memcpy A, [Y], [X]
+8da3:    67 4a 64               memcpy AL, [Y], [X]
 8da6:    38                     inc A, #1
 8da7:    50 04                  add X, A
 8da9:    c0 8d                  ld BL, 0x8d
@@ -4385,7 +4385,7 @@ L_969d:
 96a6:    6d 61                  st X, [Y++]
 96a8:    55 40                  mov A, X
 96aa:    39                     dec A, #1
-96ab:    f7                     ?F7?
+96ab:    f7                     memcpy16
 96ac:    38                     inc A, #1
 96ad:    50 06                  add Y, A
 96af:    2a                     clr AL, #0
@@ -4424,7 +4424,7 @@ L_96ca:
 L_96e2:
 96e2:    95 41                  ld A, [X++]
 96e4:    39                     dec A, #1
-96e5:    67 4a 46               memcpy A, [X], [Y]
+96e5:    67 4a 46               memcpy AL, [X], [Y]
 96e8:    38                     inc A, #1
 96e9:    50 06                  add Y, A
 96eb:    80 8d                  ld AL, 0x8d
@@ -4515,7 +4515,7 @@ L_9775:
 9775:    95 88 0e               ld A, [Z + 0x0e]
 9778:    b5 61                  st A, [Y++]
 977a:    39                     dec A, #1
-977b:    f7                     ?F7?
+977b:    f7                     memcpy16
 977c:    38                     inc A, #1
 977d:    50 06                  add Y, A
 977f:    2a                     clr AL, #0
@@ -4586,7 +4586,7 @@ L_97d0:
 
 L_97e0:
 97e0:    39                     dec A, #1
-97e1:    f7                     ?F7?
+97e1:    f7                     memcpy16
 97e2:    79 96 1f               call R_961f
 97e5:    02                     sf
 97e6:    71 97 64               jmp R_9764
@@ -5023,7 +5023,7 @@ L_9a90:
 9a94:    b5 61                  st A, [Y++]
 9a96:    19 05                  ble L_9a9d
 9a98:    39                     dec A, #1
-9a99:    f7                     ?F7?
+9a99:    f7                     memcpy16
 9a9a:    38                     inc A, #1
 9a9b:    50 06                  add Y, A
 
@@ -11927,7 +11927,7 @@ ca17:    ca                     ld BL, [X]
 ca18:    ef                     st BL, [P]
 ca19:    ca                     ld BL, [X]
 ca1a:    f3 ca                  st B, [0xc9e6|-0x36]
-ca1c:    f7                     ?F7?
+ca1c:    f7                     memcpy16
 ca1d:    ca                     ld BL, [X]
 ca1e:    db                     ld B, [Y]
 ca1f:    ca                     ld BL, [X]
@@ -12016,7 +12016,7 @@ ca6d:    7c 12                  call @[0xca81|+0x12]
 ca6f:    cb                     ld BL, [Y]
 
 L_ca70:
-ca70:    67 7c 0e 00 00         unkblk7 A, 0x0e, [L_0000|0x0000]
+ca70:    67 7c 0e 00 00         unkblk7 AL, 0x0e, [L_0000|0x0000]
 ca75:    32 02                  clr A, #2
 ca77:    c0 b0                  ld BL, 0xb0
 ca79:    46 e0 90 cb fe ca 08   baseconv(e, 0) [R_cbfe|0xcbfe], [R_ca08|0xca08]
@@ -12045,7 +12045,7 @@ caa1:    3f                     dec X
 caa2:    18 e9                  bgt L_ca8d
 caa4:    7c db                  call @[0xca81|-0x25]
 caa6:    cb                     ld BL, [Y]
-caa7:    67 47 4c 00 ff         memcpy A, [X + C + 0x00], 0xff
+caa7:    67 47 4c 00 ff         memcpy AL, [X + C + 0x00], 0xff
 caac:    01                     nop
 caad:    1f 90                  b?F L_ca3f
 caaf:    00                     HALT
@@ -12737,12 +12737,12 @@ cfd7:    d0 78 00               ld B, 0x7800
 cfda:    55 26                  mov Y, B
 cfdc:    32 20                  clr B, #0
 cfde:    90 07 ff               ld A, 0x07ff
-cfe1:    f7                     ?F7?
+cfe1:    f7                     memcpy16
 cfe2:    2e 2c 78 d4 cc         wpf1 0x78, [R_d4cc|0xd4cc]
 cfe7:    d0 01 00               ld B, 0x0100
 cfea:    55 26                  mov Y, B
 cfec:    90 ee ff               ld A, 0xeeff
-cfef:    f7                     ?F7?
+cfef:    f7                     memcpy16
 cff0:    2e 2c 00 d4 cd         wpf1 0x00, [R_d4cd|0xd4cd]
 cff5:    90 78 05               ld A, 0x7805
 cff8:    b1 9f 96               st A, [R_9f96|0x9f96]
@@ -12773,7 +12773,7 @@ d042:    15 2b                  bnz L_d06f
 d044:    d0 f8 00               ld B, 0xf800
 d047:    55 26                  mov Y, B
 d049:    90 07 ff               ld A, 0x07ff
-d04c:    f7                     ?F7?
+d04c:    f7                     memcpy16
 
 L_d04d:
 d04d:    47 8c 01 00 00 d0 8a   memcmp 0x02, 0x0000, [R_d08a|0xd08a]
@@ -12826,13 +12826,13 @@ d0b6:    47 41 1f 01 85 20 36   memcpy 0x20, [R_0185|0x0185], [B + 0x36]
 d0bd:    2e 2c 00 d4 cb         wpf1 0x00, [R_d4cb|0xd4cb]
 d0c2:    5d                     mov B, A
 d0c3:    51 10 00 1c            sub A, A, 0x001c
-d0c7:    67 9d fd 30 01 c6      memset A, 0xfd, [B + 0x1c6]
+d0c7:    67 9d fd 30 01 c6      memset AL, 0xfd, [B + 0x1c6]
 d0cd:    28                     inc AL, #1
-d0ce:    67 9d fd 30 01 a5      memset A, 0xfd, [B + 0x1a5]
+d0ce:    67 9d fd 30 01 a5      memset AL, 0xfd, [B + 0x1a5]
 d0d4:    95 a1                  ld A, [S++]
 d0d6:    5d                     mov B, A
 d0d7:    51 10 00 1c            sub A, A, 0x001c
-d0db:    67 9d fd 30 01 86      memset A, 0xfd, [B + 0x186]
+d0db:    67 9d fd 30 01 86      memset AL, 0xfd, [B + 0x186]
 d0e1:    47 4c 02 c9 cf c4 d2 96 memcpy 0x03, 0xc9cfc4, [R_d296|0xd296]
 d0e9:    91 01 09               ld A, [DevicesPtr|0x0109]
 
@@ -13711,7 +13711,7 @@ d7ed:    d6 89 01 0b            st Z, [0x010b]
 d7f1:    90 00 4a               ld A, 0x004a
 d7f4:    b5 81                  st A, [Z++]
 d7f6:    31 01                  dec A, #2
-d7f8:    67 9e 00 08            memset A, 0x00, [Z]
+d7f8:    67 9e 00 08            memset AL, 0x00, [Z]
 d7fc:    50 08                  add Z, A
 d7fe:    d6 89 01 16            st Z, [0x0116]
 d802:    47 9e 79 00 08         memset 0x7a, 0x00, [Z]
@@ -13720,7 +13720,7 @@ d80b:    d6 89 01 68            st Z, [0x0168]
 d80f:    95 68 10               ld A, [Y + 0x10]
 d812:    38                     inc A, #1
 d813:    3d                     sll A, #1
-d814:    67 9e 00 08            memset A, 0x00, [Z]
+d814:    67 9e 00 08            memset AL, 0x00, [Z]
 d818:    50 08                  add Z, A
 d81a:    50 76 00 44            add Y, Y, 0x0044
 d81e:    71 d8 c4               jmp R_d8c4
@@ -14382,7 +14382,7 @@ de56:    73 e0                  jmp R_de38
 
 L_de58:
 de58:    85 68 36               ld AL, [Y + 0x36]
-de5b:    67 9e 00 08            memset A, 0x00, [Z]
+de5b:    67 9e 00 08            memset AL, 0x00, [Z]
 de5f:    c5 01                  ld BL, [A++]
 de61:    e5 88 06               st BL, [Z + 0x06]
 de64:    79 df ba               call R_dfba
@@ -14541,7 +14541,7 @@ R_dfdf:
 dfdf:    91 e2 57               ld A, [R_e257|0xe257]
 dfe2:    b3 20                  st A, [L_e002+2|0xe004|+0x20]
 dfe4:    39                     dec A, #1
-dfe5:    67 9e 00 08            memset A, 0x00, [Z]
+dfe5:    67 9e 00 08            memset AL, 0x00, [Z]
 dfe9:    91 01 09               ld A, [DevicesPtr|0x0109]
 
 L_dfec:
@@ -14559,7 +14559,7 @@ e002:    50 98 00 00            add Z, Z, 0x0000
 e006:    d6 89 01 26            st Z, [EarlyInitDevicesPtr|0x0126]
 e00a:    91 df 09               ld A, [R_df09|0xdf09]
 e00d:    14 08                  bz L_e017
-e00f:    67 41 df 0b 80 02      memcpy A, [R_df0b|0xdf0b], [Z + 0x02]
+e00f:    67 41 df 0b 80 02      memcpy AL, [R_df0b|0xdf0b], [Z + 0x02]
 e015:    50 08                  add Z, A
 
 L_e017:
@@ -14569,7 +14569,7 @@ e01e:    d6 89 01 6c            st Z, [0x016c]
 e022:    d1 e1 93               ld B, [R_e193|0xe193]
 e025:    95 28 0a               ld A, [B + 0x0a]
 e028:    39                     dec A, #1
-e029:    67 9e ff 08            memset A, 0xff, [Z]
+e029:    67 9e ff 08            memset AL, 0xff, [Z]
 e02d:    38                     inc A, #1
 e02e:    50 08                  add Z, A
 e030:    d6 89 01 1d            st Z, [0x011d]
@@ -14638,7 +14638,7 @@ e0db:    47 9c 1b ff 01 48      memset 0x1c, 0xff, [0x0148]
 e0e1:    91 d4 d4               ld A, [R_d4d4|0xd4d4]
 e0e4:    34 02                  srl A, #3
 e0e6:    39                     dec A, #1
-e0e7:    67 9c 00 01 44         memset A, 0x00, [0x0144]
+e0e7:    67 9c 00 01 44         memset AL, 0x00, [0x0144]
 e0ec:    91 d4 d4               ld A, [R_d4d4|0xd4d4]
 e0ef:    52 10 00 07            and A, A, 0x0007
 e0f3:    14 14                  bz L_e109

@@ -541,7 +541,7 @@ HandleDataSection:
 042c:    14 0c                  bz JumpToBinary
 042e:    55 40                  mov A, X
 0430:    39                     dec A, #1	 ; A - size - 1
-0431:    67 4a 86               memcpy A, [Z], [Y]	 ; This must be memcpy of A+1 bytes from (Z) to (Y)
+0431:    67 4a 86               memcpy AL, [Z], [Y]	 ; This must be memcpy of A+1 bytes from (Z) to (Y)
 0434:    50 46                  add Y, X	 ; Move our source and destination pointers
 0436:    50 48                  add Z, X
 0438:    73 ea                  jmp ReadChecksum
