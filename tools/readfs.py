@@ -60,6 +60,8 @@ class File:
         self.unk1 = entry.filetype >> 4 # extended file type?
         # This Epoch is just a guess, but it gives sensible results
         self.date = date(1900, 1, 1) + timedelta(days = entry.date)
+        print(f"{indent}{entry.name} filetype: {entry.filetype:02x}" + \
+            f" date: {self.date}")
         self.readMetadata(sectorFn, entry, indent)
 
     def readMetadata(self, sectorFn, entry, indent):
@@ -93,14 +95,8 @@ class File:
                     print("Error, expected " + self.size)
                 break
             else:
-                if entry.next.sector == 0x8000:
-                    # next sector
-                    # todo: Is it possible to jump forwards more than one sector?
-                    sector += 1
-                    print(" next")
-                else:
-                    sector = 0xffff - entry.next.sector
-                    print(" jump")
+                sector = 0xffff - entry.next.sector
+                print(" jump")
 
                 data = readSector(sectorFn(sector, True))
                 offset = (entry.next.offset) * 3
@@ -134,14 +130,12 @@ def listDirectory(sector, sectorFn, indent='', dir=None):
     start = 16
     while True:
         for offset in range(start, 400, 16):
-            print(offset)
+            #print(f"{offset:x}")
             entry = DirectoryEntry.parse(data[offset:])
             if not entry.name:
                 print(indent + "Done")
                 return
             file = File(sectorFn, entry, indent + '  ')
-            print(f"{indent}{entry.name} filetype: {entry.filetype:02x}" +\
-            f" date: {file.date}")
             if file.sectors and (file.type & 0xf == 5):
                 print(f"Directory with {len(file.sectors)} sectors")
                 #os.makedirs(os.path.join(diskname, file.name))
