@@ -400,13 +400,19 @@ def main():
         from wecb import WecbLoader
 
         wecb = WecbLoader(data)
+        offset = 0
 
         for type, addr, data in wecb.sections():
+            addr += offset
             if type == 0:
+                if len(data) == 0:
+                    entry_points.append(addr)
                 memory = memory[:addr] + data + memory[addr + len(data):]
+                if (addr == 0x4c and len(data) > 0x1e):
+                    offset = struct.unpack_from(">H", data[0x1b:])[0]
             elif type == 1:
                 while len(data) > 1:
-                    fixup = struct.unpack_from(">H", data)[0]
+                    fixup = struct.unpack_from(">H", data)[0] + offset
                     memory_addr_info[fixup].fixup = addr
 
                     old_value = struct.unpack(">H", memory[fixup:fixup+2])[0]
