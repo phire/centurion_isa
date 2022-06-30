@@ -235,12 +235,15 @@ def MatchBlock(pc, mem):
             blk_len = mem[pc] + 1
             args += [LiteralRef(blk_len, 1)]
             pc += 1
-        elif inst == 0x67:  # 67 gets it's length from implicit A
-            args += [Reg16Ref(0)]
+        elif inst == 0x67:  # 67 gets it's length from implicit AL
+            args += [Reg8Ref(1)]
 
     if op == 2:
-        args += [LiteralRef(mem[pc], 1)]
-        pc += 1
+        if inst == 0x47: # 47 gets it's char as a byte immediate
+            args += [LiteralRef(mem[pc], 1)]
+            pc += 1
+        elif inst == 0x67:  # 67 gets it's length from somewhere else. BL?
+            args +=  [Reg8Ref(3)] # complete guess
 
     src_len = blk_len
     if op == 9: # memset
@@ -274,7 +277,7 @@ def MatchMul(pc, mem):
 def MatchD6(pc, mem):
     orig_pc = pc
     mode = mem[pc+1]
-    mnemonic = "st" # if (mode & 0x10) == 0 else "ld"
+    mnemonic = "st"
 
     pc += 2
     src, dest, pc = D6Mode(mode, pc, mem)
@@ -431,7 +434,7 @@ branch_instructions = [
 ]
 
 instructions  = [
-    I("11110111", "?F7?"),
+    I("11110111", "memcpy16"),
     I("01101111 NNNNNNNN NNNNNNNN", "stcc [{N:#06x}]"),
 
     I("xxxxxxxx"),

@@ -200,13 +200,13 @@ def TwoRegExtendedMode(mode, pc, mem):
     dst_reg = Reg16Ref(mode & 0xe)
     src_reg = Reg16Ref((mode >> 4) & 0xe)
     match mode & 0x11:
-        case 0x00: # neither lower nibble set, normal reg, reg
+        case 0x00: # neither lower bit set, normal reg, reg
             return dst_reg, src_reg, None, pc
         case 0x01: # dest <- src (direct)
             return dst_reg, src_reg, DirectRef(mem.get_be16(pc), pc), pc + 2
         case 0x10: # dest <- src op literal
             return dst_reg, src_reg, LiteralRef(mem.get_be16(pc), 2, pc), pc + 2
-        case 0x11: # dest <- src op reg
+        case 0x11: # dest <- src(index) op dest
             disp = LiteralRef(mem.get_be16(pc), 2, pc)
             return dst_reg, ComplexRef(src_reg, None, disp), dst_reg, pc + 2
 

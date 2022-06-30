@@ -28,14 +28,14 @@ out/autoload.asm: out/disassemble.stamp disassemble_autoload.py
 out/WIPL.asm: out/disassemble.stamp WIPL/WIPL.bin WIPL/WIPL.annotations WIPL/WIPL.comments
 	python3 disassemble.py -i WIPL/WIPL.bin -s 0x100 -a WIPL/WIPL.annotations -a WIPL/WIPL.comments > out/WIPL.asm
 
-out/load.asm: out/disassemble.stamp LOAD/load6.bin LOAD/load6.annotations LOAD/load6.comments LOAD/script6.py
+out/load6.asm: out/disassemble.stamp LOAD/load6.bin LOAD/load6.annotations LOAD/load6.comments LOAD/script6.py
 	python3 disassemble.py -i LOAD/load6.bin -t wecb -a LOAD/load6.annotations -a LOAD/load6.comments \
-	--script LOAD/script6.py > out/load7.asm
+	--script LOAD/script6.py > out/load6.asm
 
 .PHONY: LOAD/load7.comments
 LOAD/load7.comments:
 	python3 extract_comments.py out/load7.asm > LOAD/load7.comments
 
-out/load_7_1.asm: out/disassemble.stamp LOAD/load_7_1.bin LOAD/script_7_1.py LOAD/load_7_1.annotations LOAD/load_7_1.comments
-	python3 disassemble.py -i LOAD/load_7_1.bin -t wecb -a LOAD/load_7_1.annotations -a LOAD/load_7_1.comments \
-	--script LOAD/script_7_1.py > out/load7.asm
+out/load7.asm: out/disassemble.stamp LOAD/load7.bin LOAD/script7.py LOAD/load7.annotations LOAD/load7.comments
+	python3 disassemble.py -i LOAD/load7.bin -t wecb -a LOAD/load7.annotations -a LOAD/load7.comments \
+	--script LOAD/script7.py > out/load7.asm
