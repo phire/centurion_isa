@@ -28,6 +28,55 @@
 0xa54a ,	comment	; Stored X
 0xb2eb ,	comment	; Serial port base
 0xb2ee ,	comment	; Wait for TX_READY
+0xb40c ,	comment	; DISASSEMBLER BUG! Should be ld A, +0(Z) - read both status and character
+0xb412 ,	comment	; if [device_obj + 1] == 0x0a....
+0xb419 ,	comment	; .. then we go do some memory moves
+0xb41c ,	comment	; if [device_obj + 1] == 3, silently drop the output and leave the interrupt
+0xb426 ,	comment	; Make sure bit 7 of the character is set
+0xb42a ,	comment	; Check bits 4 - 2 of status register, we don't know what they are
+0xb430 ,	comment	; If zero, proceed with handling the input
+0xb432 ,	comment	; Check bit 2
+0xb436 ,	comment	; If zero, beep and discard the input
+0xb438 ,	comment	; Otherwise check if the character is NUL
+0xb43a ,	comment	; I think this checks for BREAK on the serial port
+0xb43b ,	comment	; If yes, proceed to TOS check
+0xb440 ,	comment	; Run the character through the translation table
+0xb442 ,	comment	; AL = translated character
+0xb445 ,	comment	; Check for Break (Ctrl-C)
+0xb449 ,	comment	; If not, check for TOS entry request
+0xb44e ,	comment	; if ([device_obj + 0x2f]) call R_b541
+0xb450 ,	comment	; This is v7 feature, there are no these checks in LOAD v6
+0xb453 ,	comment	; device_obj.break_state
+0xb456 ,	comment	; Exit if already registered
+0xb458 ,	comment	; Set device_obj.break_state
+0xb45d ,	comment	; Increment global break counter
+0xb468 ,	comment	; The translated character has to be Ctrl-G (BELL)
+0xb469 ,	comment	; Note that default CrtHooks table doesn't translate 0x80 to 0x87,
+		; so we cannot enter this advanced TOS in LOAD v7.
+		; Probably this is even a bug, i don't know. Would've been way more logical
+		; to have a sequence BREAK then Ctrl-G
+0xb46b ,	comment	; Serial port base
+0xb46e ,	comment	; Allowed addresses: 0x?000, 0x?100, 0x?200, 0x?300
+0xb474 ,	comment	; if ([device_obj + 0x2f]) call R_b541
+0xb481 ,	comment	; Check for jmp instruction in the beginning
+0xb5ae,	pre_comment 	; Translate a character according to a table in CrtDeviceHooks
+	 	; The table consists of words. First word is an write hook, called
+	 	; from within CrtDevice_Write. Other words are 2-byte entries
+	 	; in format: TO FROM. The table is terminated with a zero word.
+	 	; A character to translate is placed in AL, on return it will be either
+	 	; translated according to the hooks table or left as it is.
+0xb5b0 ,	comment	; CrtDeviceHooks
+0xb5b3 ,	comment	; If not set, do nothing
+0xb5b5 ,	comment	; Skip write hook address
+0xb5b7 ,	comment	; BH, BL = [table++]
+0xb5b9 ,	comment	; If a terminator reached, nothing found
+0xb5bb ,	comment	; if AL != BL
+0xb5bc ,	comment	; check the next entry
+0xb5be ,	comment	; return BH
+0xb5fb ,	comment	; CrtDeviceHooks table
+0xb5fe ,	comment	; Get the first FROM character from the translation table
+0xb612 ,	comment	; CrtDeviceHooks table
+0xb615 ,	comment	; Get the first FROM character from the translation table
 0xb81d ,	comment	; A = device_obj
 0xb81f ,	comment	; Skip if nullptr
 0xb821 ,	comment	; If [device_obj + 1] is zero, the device is disabled

@@ -393,6 +393,9 @@
 0x55c ,	comment	; last_char
 0x55e ,	comment	; Don't print CR if already done
 0x566 ,	comment	; Serisl port 0 base address
+0x56a ,	comment	; Write the unprocessed character to MUX_REG[0x0D]
+		; The purpose is unknown, probably some kind of debug port.
+		; May be even not all cards really support it.
 0x56d ,	comment	; Set up baud rate ?
 0x574 ,	comment	; If character is 0x0c (form feed)...
 0x575 ,	comment	; Print with a delay

@@ -44,10 +44,10 @@ L_0141:
     ; The function at L_014b probes for 8 units on a DSK board at base address (AL << 16) + 0x40
     ; and, if successful, sends an RTZ command.
     ; These four stores patch the base address in the code below
-0141:    a3 09                  st AL, [0x014c|+0x9]	 ; 14c
+0141:    a3 09                  st AL, [L_014b+1|0x014c|+0x9]	 ; 14c
 0143:    a3 0d                  st AL, [0x0152|+0xd]	 ; 152
 0145:    a3 16                  st AL, [0x015d|+0x16]	 ; 015d
-0147:    a3 1a                  st AL, [0x0163|+0x1a]	 ; 0163
+0147:    a3 1a                  st AL, [L_0162+1|0x0163|+0x1a]	 ; 0163
 0149:    80 07                  ld AL, 0x07	 ; Start probing from unit 7
 
 L_014b:
@@ -93,7 +93,7 @@ L_0174:
 0183:    15 ef                  bnz L_0174	 ; Repeat until we reach 0xf000
 
 L_0185:
-0185:    69 03 3d               st X, [0x033d]	 ; Store final address of our RAM
+0185:    69 03 3d               st X, [CallHighMem+1|0x033d]	 ; Store final address of our RAM
 0188:    55 42                  mov B, X
 018a:    50 32 fd 55            add B, B, 0xfd55	 ; B = ram_top - 683
 018e:    f1 04 a0               st B, [LoadBuffer0|0x04a0]	 ; Set up buffers for sector I/O
@@ -171,7 +171,7 @@ L_021c:
 021e:    25 11                  sll AL, #2
 0220:    d0 f1 40               ld B, 0xf140
 0223:    43 12                  or BH, AL	 ; DSK0_BASE | (magic_value << 2)
-0225:    f1 04 b1               st B, [0x04b1]	 ; Set DSK board address
+0225:    f1 04 b1               st B, [LoadSector+1|0x04b1]	 ; Set DSK board address
 0228:    25 11                  sll AL, #2
 022a:    c0 04                  ld BL, 0x04
 022c:    48                     add BL, AL	 ; dma_mode_byte = magic_value << 4
@@ -188,7 +188,7 @@ BackToPrompt_tramp:
 023c:    71 01 bb               jmp BackToPrompt
 
 L_023f:
-023f:    e2 04 b1               st BL, @[0x04b1]	 ; This writes Hawk unit select register
+023f:    e2 04 b1               st BL, @[LoadSector+1|0x04b1]	 ; This writes Hawk unit select register
 0242:    90 03 78               ld A, 0x0378	 ; code_buffer
 0245:    5e                     mov Z, A
 0246:    95 81                  ld A, [Z++]	 ; Check string length
@@ -384,7 +384,7 @@ L_0321:
 0328:    49                     sub BL, AL	 ; Should be equal to 4. That's why i think it's a file type
 0329:    15 0e                  bnz L_0339	 ; If the check fails, we will jump back to the IPL prompt
 032b:    90 ff ff               ld A, 0xffff
-032e:    d3 0d                  ld B, [0x033d|+0xd]	 ; B = ram_top
+032e:    d3 0d                  ld B, [CallHighMem+1|0x033d|+0xd]	 ; B = ram_top
 0330:    58                     add B, A
 0331:    f1 00 fe               st B, [0x00fe]	 ; P[IPL15] = (end_of_ram - 1) = AbortHandler (relocated)
 0334:    90 fe e5               ld A, 0xfee5
@@ -806,7 +806,9 @@ L_0563:
 PrintChar:
 0564:    7e 81                  push {Z}
 0566:    55 98 f2 00            mov Z, 0xf200	 ; Serisl port 0 base address
-056a:    f6 19 0d               st AL, +0xd(Z)
+056a:    f6 19 0d               st AL, +0xd(Z)	 ; Write the unprocessed character to MUX_REG[0x0D]
+                                              	 ; The purpose is unknown, probably some kind of debug port.
+                                              	 ; May be even not all cards really support it.
 056d:    c0 c5                  ld BL, 0xc5	 ; Set up baud rate ?
 056f:    f6 39 00               st BL, +0x0(Z)
 0572:    c0 8c                  ld BL, 0x8c
@@ -921,7 +923,7 @@ ReadLine:
     ; fixed length of at least 10 chars. NAME comparison wouldn't work without
     ; it as it compares exactly 10 characters.
 0609:    93 f5                  ld A, [0x0600|-0xb]
-060b:    b3 58                  st A, [0x0665|+0x58]	 ; preserved_abort_addr = abort_addr
+060b:    b3 58                  st A, [L_0664+1|0x0665|+0x58]	 ; preserved_abort_addr = abort_addr
 060d:    90 06 6f               ld A, 0x066f	 ; abort_addr = ReadLineAbort
 0610:    b3 ee                  st A, [0x0600|-0x12]
 0612:    9a                     ld A, [X]	 ; A = pointer to a buffer
@@ -991,7 +993,7 @@ ReadLineAbort:
 066f:    65 a1                  ld X, [S++]	 ; Pop return address
 0671:    3a                     clr A, #0	 ; String length = 0
 0672:    b5 45                  st A, @[X++]
-0674:    63 ef                  ld X, [0x0665|-0x11]	 ; Will return to preserved_abort_addr
+0674:    63 ef                  ld X, [L_0664+1|0x0665|-0x11]	 ; Will return to preserved_abort_addr
 0676:    73 ec                  jmp L_0664
 
 L_0678:
