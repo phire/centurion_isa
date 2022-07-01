@@ -18,7 +18,9 @@
 0x25f ,	comment	; Offset +0x19 - baud rate, 0xc5 stands for 9600
 0x261 ,	comment	; Offset +0x1b - low-level character read routine, called in interrupt
 0x263 ,	comment	; Offset +0x1d - customization table
+0x284 ,	comment	; Offset +0x13 - hardware unit number
 0x288 ,	comment	; Set to the user supplied boot Code
+0x29d ,	comment	; Offset +0x13 - hardware unit number
 0x2a1 ,	comment	; Set to the user supplied boot Code
 0x2ba ,	comment	; Set to the user supplied boot Code
 0x2d3 ,	comment	; Set to the user supplied boot Code
@@ -119,7 +121,7 @@
 0xaf16 ,	comment	; B should be SystemInfoPtr, 01ea
 0xaf27 ,	comment	; Load error device (defaults to Device_CRT0)
 0xaf2b ,	comment	; Get DeviceObj
-0xaf2e ,	comment	; Get Write function (default, CrtDevice_Write)
+0xaf2e ,	comment	; Get UrgentWrite function (default, CrtDevice_UrgentWrite)
 0xaf31 ,	comment	; tranfer execution to write funtion
 		; Problematic, becuase this abort function hasn't set Y at all
 		; and CrtDevice_Write does a lot with Y
@@ -198,9 +200,10 @@
 0xb66a ,	comment	; 0xDF -> 0x02
 0xb66d ,	comment	; 0x9F -> 0xDF
 0xb66f ,	comment	; 0x9d -> 0x8d
+0xb6ca,	pre_comment 	; This is the actual main function, which does the job on a particular device
 0xb6ca ,	comment	; X before call
-0xb6cf ,	comment	; Arg6 & 0x7f
-0xb6d4 ,	comment	; Arg6 & 0x80
+0xb6cf ,	comment	; Arg6 & 0x7f - function code
+0xb6d4 ,	comment	; Arg6 & 0x80 - bit 7 of the function code
 0xb6d9 ,	comment	; Buffer
 0xb6de ,	comment	; SectorNum
 0xb6e3 ,	comment	; Y + 13
@@ -219,24 +222,49 @@
 0xb73a ,	comment	; (PhysicalSector - 1)
 0xb73e ,	comment	; increment (PhysicalSector -1)
 0xb776 ,	comment	; Abort
-0xb7d6 ,	comment	; Arg6 & 0x7f
+0xb7d6 ,	comment	; AL = function code
+0xb7da ,	comment	; 0 gets substitute with 0x0d
+0xb7dc ,	comment	; Preserve the translated function code
 0xb7e4 ,	comment	; Install interrupt handler
-0xb7f4 ,	comment	; DMA mode 0
+0xb7e6 ,	comment	; device_obj.IOBase
+0xb7e9 ,	comment	; dma_mode = bits 2 and 3 of IOBase. Is it for multiple cards ?
+0xb7ed ,	comment	; position into high nibble
+0xb7f1 ,	comment	; Low nibble = 4
+0xb7f2 ,	comment	; Patch the instruction below!
+0xb7f4 ,	comment	; I wonder, why not just use register argument...
 0xb7f6 ,	comment	; Enable DMA
 		; At this point, DMA address and DMA count haven't been
 		; set (as far as I can tell). Does this mean that enabling
 		; DMA with 0 count instantly tiggeres the interrupt?
+0xb803 ,	comment	; BL = function code
+0xb807,	pre_comment 	; We will loop here until this inline variable becomes nonzero
+0xb80b ,	comment	; AL = function code
+0xb80f ,	comment	; Function code 0 prints an error message
 0xb85a ,	comment	; X
+0xb868 ,	comment	; IOBase
+0xb86b ,	comment	; HW unit number
+0xb86e ,	comment	; Select unit
+0xb871 ,	comment	; Read status
+0xb874 ,	comment	; Separate bits 4 and 7
+0xb877 ,	comment	; We know what bit 4 is (probably) drive ready; bit 7 isn't known yet
 0xbb4f ,	comment	; Patch PrintStringToErrorDevice arg
 0xbb77 ,	comment	; " FAIL:  X XXXX XXXX\x07\r"
 0xc085 ,	comment	; "EC:XX CP:XX CMDS: "
+0xc21f,	pre_comment 	; Device functions table.
+	 	; The first word is the maximum (publicly) available function number. Other entries are
+	 	; funnction pointer; ordinal number of the entry (starting from 0, i. e. not counting
+	 	; the first word, correspond to function codes in IOStruct
+	 	; UrgentWrite and Init are apparently not included in the public list (read: don't have
+	 	; an operation code) and are only called directly in some special scenarios
 0xc231 ,	comment	; Set first byte of the function table to 0
 0xc241 ,	comment	; device_obj.state = 1
 0xc25b ,	comment	; MUX_REG[8] = port_offset + 0, we don't know the purpose
 0xc269 ,	comment	; jmp SwitchToPageBase0
 0xc26c,	pre_comment 	; This waits for (device_obj + 0x11) to become 0
+0xc276,	pre_comment 	; Normal write function
 0xc278 ,	comment	; Set first byte of the function table to 0
-0xc27e,	pre_comment 	; Z is the WriteStruct (file operation object?)
+0xc27e,	pre_comment 	; This entry point is used for error reporting (see AbortWriteStruct)
+	 	; Z is the WriteStruct (file operation object?)
 	 	; Y is the devce descriptor (Device_CRT0)
 0xc27e ,	comment	; device_obj.state = -1. Bit 7 probably signals "output in progress"
 0xc27f ,	comment	; See a waiting loop with timeout below at c2c3
@@ -417,6 +445,7 @@
 0xc536 ,	comment	; Get the character if not reached
 0xc53b ,	comment	; device_obj.state = 0
 0xc541 ,	comment	; WriteStruct state, could be error code
+0xc543 ,	comment	; Update count of written characters
 0xc546 ,	comment	; Fetch the character
 0xc547 ,	comment	; Pop X
 0xc549 ,	comment	; The string may terminate early with 0x84
@@ -437,8 +466,66 @@
 0xc5e2 ,	comment	; MUX_REG[0x0b] = 0xe0
 0xc701 ,	comment	; The first word in CRT0 descriptor points here
 0xca1f ,	comment	; "EC:XX CMDS: "
+0xcbca,	pre_comment 	; This function doesn't do anything new, it's just yet another form of
+	 	; CallBlockRead with literal arguments. Note that number of public functions
+	 	; in all disk device function tables is set to 6, and this is function #7, so
+	 	; this is clearly private
+0xcbcc ,	comment	; IORequest
+0xcbce ,	comment	; Initial offset
+0xcbd0 ,	comment	; Push initial offset
+0xcbd2 ,	comment	; Push IORequest
+0xcbe8 ,	comment	; Data pointer
+0xcbea,	pre_comment 	; A = data pointer
+0xcbea ,	comment	; Push data pointer
+0xcbec ,	comment	; Get the function code - literal argumebnt
+0xcbf3 ,	comment	; BL = AL & 0x80 ? 1 : 0
+0xcbf5 ,	comment	; It's some flag
+0xcbf9 ,	comment	; AL &= 0x7f
+0xcbfb ,	comment	; Push function code
+0xcbfd ,	comment	; function code > 0x02 is an error
+0xcc05 ,	comment	; Function number 3 = BlockRead. Add to skip over table length
 0xcc0b ,	comment	; Lock Mutex?
+0xcc12 ,	comment	; A = (uint16_t)Function number
+0xcc14 ,	comment	; FuncTable_offset = Function number * 2
+0xcc15 ,	comment	; FuncPtr = device_obj.FuncTable + FuncTable_Offset
+0xcc19 ,	comment	; Call the function
+0xcc1c,	pre_comment 	; Y = device object
+	 	; Z = IORequest
+0xcc1e ,	comment	; Initial offset
+0xcc21 ,	comment	; Push
+0xcc27 ,	comment	; A = pstring16 pointer
+0xcc2a ,	comment	; Skip over length
+0xcc2c ,	comment	; Preserve the pointer
+0xcc2e ,	comment	; Push IORequest pointer itself
+0xcc30 ,	comment	; AL = unit number
+0xcc36 ,	comment	; NZ = found
+0xcc38 ,	comment	; If not found, it's a critical error
+0xcc3f ,	comment	; A = count of written characters
+0xcc42 ,	comment	; push
+0xcc44 ,	comment	; Restore the data pointer in A
+0xcc49,	pre_comment 	; A = device object
+	 	; Z = IORequest
+0xcc49 ,	comment	; Y = device_obj
+0xcc4a ,	comment	; 400 - sector size
+0xcc4d ,	comment	; Initial offset
+0xcc51 ,	comment	; On valid if less than sector size
+0xcc53 ,	comment	; Return code = invalid offset
+0xcc55,	pre_comment 	; Set an IORequest completion status and return
+	 	; A = error code
+0xcc55 ,	comment	; IORequest[0] - is this error code ?
 0xcc68 ,	comment	; jmp SwitchToPageBase0
+0xcc6b ,	comment	; B = pstring16 pointer
+0xcc6e ,	comment	; Set length and point to data
+0xcc70 ,	comment	; Advance the data pointer to a given offset
+0xcc72 ,	comment	; Store 0 at the given offset
+0xcc75 ,	comment	; Function code 1 - read
+0xcc76 ,	comment	; Result code 0 = OK
+0xcc79,	pre_comment 	; This does not really look like Write, because it's effectively the same as Read,
+	 	; but it doesn't check any IORequest fields. So, a better name could be like
+	 	; RawRead, but let's keep the current name for now as a placeholder. Initially
+	 	; it was chosen to correspond to CRT functions, initial of which were expected
+	 	; to be the same
+0xcc7c ,	comment	; Function code 2 - write
 0xcc80,	pre_comment 	; This routine sets timeout, used by CheckTimeout, to 8 ticks
 	 	; The actual tick time is unknown.
 0xcc80 ,	comment	; 8 cycles ?
@@ -451,8 +538,22 @@
 0xcc93 ,	comment	; Timeout ot expired
 0xcc95 ,	comment	; Timeout expired
 0xcc97,	pre_comment 	; This routine sets timeout, used by CheckTimeout, to 256 ticks
+0xcca0,	pre_comment 	; Z = device_object
+	 	; We think it's an Abort function because it writes zeroes all around
+0xcca3 ,	comment	; CrtInstances
+0xcca6 ,	comment	; Skip over number of entries
+0xcca8,	pre_comment 	; This tries to find Z in CrtInstances table. A chunk of code is skipped
+	 	; it the device appears to be not a CRT (however at least in this binary we aren't using
+	 	; this function for anything else. But could be reused for a printer ?
+0xcca8 ,	comment	; Hit the terminator word ?
+0xccaa ,	comment	; If yes, this is not a CRT device
+0xccae ,	comment	; If not, keep searching
+0xccb4 ,	comment	; Serial port base
+0xccb7 ,	comment	; Baud rate
+0xccba ,	comment	; Set the control register
 0xcce8 ,	comment	; jmp SwitchToPageBase0
 0xccf2 ,	comment	; jmp SwitchToPageBase0
+0xccf5,	pre_comment 	; This is also called by CrtDevice_Abort
 0xcd02,	pre_comment 	; Is this a cache lookup? Or a sector remapping?
 	 	; B, A = 24bit Physical Sector
 	 	; Y = Device
@@ -482,6 +583,7 @@
 0xcd95 ,	comment	; B = A * 3
 0xcd96 ,	comment	; A = FileHandle
 0xcd98 ,	comment	; B += FileHandle
+0xcdbb ,	comment	; Not found, set Z flag
 0xcdc0 ,	comment	; Subtract or Compare
 0xcdc6 ,	comment	; Device type != 4
 0xcdcc ,	comment	; Device Num = DeviceNum
@@ -705,7 +807,14 @@
 0xd9ee ,	comment	; Syscall entry point
 0xda03 ,	comment	; @SYS.OSN
 0xda26 ,	comment	; Zero memory usage table
-0xe2b2 ,	comment	; DeviceType?
+0xe121,	pre_comment 	; 400 bytes of data space for I/O operations
+0xe2b1 ,	comment	; Offset 0 - result code (set by the driver)
+0xe2b2 ,	comment	; Offset 1 - DeviceType?
+0xe2b4 ,	comment	; Offset 3 - function code = Write
+0xe2b5 ,	comment	; Offset 4 - probably starting offset into the text
+0xe2b7 ,	comment	; Offset 6 - pstring16 pointer
+0xe2b9 ,	comment	; ; Offset 8 - processed characters counter
+0xe2be ,	comment	; Function code = Read
 0xe311 ,	comment	; <esc><fs><ff> (escape, file seperator, form feed)
 0xe35c,	pre_comment 	; This string is used as both a pascal string and a C string.
 0xe49b ,	comment	; Setup CRT0 to 9600 baud

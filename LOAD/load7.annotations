@@ -33,6 +33,8 @@
 0x02bf, ptr
 0x04f2, label, EarlyInitDevices
 0x04f2, ptr
+0x8025, label, FindDeviceFunction
+0x8051, label, ExecuteDeviceFunction
 0x80e3, pstring16
 0x80ee, pstring16
 0x810d, pstring16
@@ -97,7 +99,7 @@
 0xb244, pstring16
 0xb251, pstring16
 0xb25d, pstring16
-0xb26c, label, CTRDeviceObj
+0xb26c, label, CRTDeviceFunctions
 0xb26c, >H
 0xb26e, fnptr
 0xb270, fnptr
@@ -106,7 +108,9 @@
 0xb276, fnptr
 0xb278, fnptr
 0xb27a, fnptr
-0xb2cb, label, CrtDevice_Write
+0xb2b9, label, CrtDevice_WaitForIdle
+0xb2c3, label, CrtDevice_Write
+0xb2cb, label, CrtDevice_UrgentWrite
 0xb328, label, AttnPrint
 0xb32f, pstring16
 0xb366, label, GetMUXBaseAndOffset

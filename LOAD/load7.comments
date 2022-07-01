@@ -19,6 +19,31 @@
 0x4b3 ,	comment	; Set to the user supplied boot Code
 0x4cc ,	comment	; Set to the user supplied boot Code
 0x4e5 ,	comment	; Set to the user supplied boot Code
+0x8025,	pre_comment 	; This routine finds a function pointer in device's function table
+	 	; Function table
+	 	; and returns it in B.
+	 	; On input X holds device object and A is function number (number of entry in device's function table)
+0x8027 ,	comment	; if A < 0, the function is not found
+0x802b ,	comment	; B = device object
+0x802c ,	comment	; First word of functions table. Number of entries
+0x8032 ,	comment	; The first entry doesn't count
+0x8033 ,	comment	; offset =  A * 2 - size of a pointer
+0x8034 ,	comment	; When we were called, this was in X
+0x8035 ,	comment	; Device function table
+0x8038 ,	comment	; Add offfset
+0x8039 ,	comment	; B = function pointer
+0x803a ,	comment	; AH = 0 and Set Z flag
+0x803c ,	comment	; Found
+0x803e ,	comment	; AH = -1, this also resets Z flag
+0x8040 ,	comment	; Not found
+0x8051 ,	comment	; Map current process ?
+0x8053 ,	comment	; Call the I/O function
+0x8bac ,	comment	; AL = function number
+0x8baf ,	comment	; Preserve function number
+0x8bb8 ,	comment	; Preserve pointer to a function address
+0x8bce ,	comment	; B = pointer to a function address
+0x8bd1 ,	comment	; Make sure the current process is mapped and jump to [B]
+0x8bd5 ,	comment	; BL = preserved function number
 0xa4cd ,	comment	; SecondsOnes
 0xa4d4 ,	comment	; SecondsOnes
 0xa4e9 ,	comment	; MinutesOnes
@@ -26,6 +51,8 @@
 0xa515 ,	comment	; HoursOnes
 0xa52c ,	comment	; Stored X
 0xa54a ,	comment	; Stored X
+0xb2b9,	pre_comment 	; This function waits until device.state == 0
+0xb2b9 ,	comment	; device_obj.state
 0xb2eb ,	comment	; Serial port base
 0xb2ee ,	comment	; Wait for TX_READY
 0xb40c ,	comment	; DISASSEMBLER BUG! Should be ld A, +0(Z) - read both status and character

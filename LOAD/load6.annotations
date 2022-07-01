@@ -15,6 +15,8 @@
 0x0133, char[2]
 0x0136, label, ClockSeconds
 0x0136, char[2]
+0x013f, label, ActiveDiskDevice
+0x013f, >H
 0x0141, label, Timeout
 0x0141, B
 0x0161, label, PageTableOne
@@ -125,7 +127,7 @@
 0xb6c4, fnptr
 0xb6c6, fnptr
 0xb6c8, fnptr
-0xb6ca, label, HawkDevice_BlockRead
+0xb6ca, label, HawkDevice_BlockIO
 0xb7a1, label, _FileHandle
 0xb7a3, label, _DevicePlus13
 0xb7a4, label, _Arg6LowBits
@@ -135,9 +137,13 @@
 0xb7b3, label, _DeviceNum
 0xb7a7, label, _ReadSize
 0xb7ad, label, _AlsoReadSize
+0xb7d6, label, Hawk_OriginalFunctionCode
 0xb7d7, label, _Arg6Bit7
+0xb803, label, Hawk_TranslatedFunctionCode2
+0xb863, label, HawkDevice_CheckStatus
 0xb88b, code, HawkDevice_Init
 0xb93c, code, HawkLevel2_Handler
+0xb948, label, Hawk_TranslatedFunctionCode
 0xbbde, pstring16
 0xbbe3, pstring16
 0xbbe9, pstring16
@@ -180,9 +186,10 @@
 0xc229, fnptr
 0xc22b, fnptr
 0xc22d, fnptr
-#0xc22f, code
-#0xc276, code
-0xc27e, label, CrtDevice_Write
+0xc22f, label, CrtDevice_Read
+0xc276, label, CrtDevice_Write
+0xc26c, label, CrtDevice_WaitForIdle
+0xc27e, label, CrtDevice_UrgentWrite
 0xc29e, label, WaitForTxReady
 0xc2c3, label, WaitForTxDone
 0xc2db, label, AttnPrint
@@ -213,13 +220,6 @@
 0xc603, fnptr
 #0xc819, code
 0xc82d, code, CmdDevice_Init
-0xcc80, label, SetTimeout8
-0xcc89, label, CheckTimeout
-0xcc97, label, SetTimeout256
-0xcd4d, label, FormatHexWord
-0xcd65, label, FormatHexWord_Temp
-0xcd65, >H
-0xcda8, label, FindDiskDevice
 0xcae6, pstring16
 0xcb03, pstring16
 0xcb1e, pstring16
@@ -232,6 +232,23 @@
 0xcb9c, pstring16
 0xcbaa, pstring16
 0xcbbc, pstring16
+0xcbca, label, DiskDevice_BlockIO_Special
+0xcbdb, label, AbortAL
+0xcc05, label, DiskDevice_CallBlockIO
+0xcc1c, label, DiskDevice_RWImpl
+0xcc49, label, DiskDevice_Read
+0xcc55, label, DiskDevice_Done
+0xcc79, label, DiskDevice_Write
+0xcc80, label, SetTimeout8
+0xcc89, label, CheckTimeout
+0xcc97, label, SetTimeout256
+0xcca0, label, CrtDevice_Abort
+0xcced, label, DiskDevice_Abort
+0xccf5, label, GenericDevice_Abort
+0xcd4d, label, FormatHexWord
+0xcd65, label, FormatHexWord_Temp
+0xcd65, >H
+0xcda8, label, FindDiskDevice
 0xcdd1, code, Start
 0xcee5, label, DiskPrompt
 0xd0c0, label, ReadConfigurationDataset
