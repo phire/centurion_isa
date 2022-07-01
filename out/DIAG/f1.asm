@@ -1004,7 +1004,7 @@ Bootstrap_test:
 85a0:    a1 f1 4d               st AL, [0xf14d]
 85a3:    a1 f1 0a               st AL, [0xf10a]
 85a6:    80 c5                  ld AL, 0xc5
-85a8:    a4 7a                  st AL, @[WriteString+1|0x8624|+0x7a]
+85a8:    a4 7a                  st AL, [0xf200(via 0x7a)]
 85aa:    80 8c                  ld AL, 0x8c
 85ac:    a1 f2 01               st AL, [0xf201]
 85af:    0e                     dly
@@ -1091,10 +1091,10 @@ L_862f:
 
 ReadChar:
 8634:    7b 6d                  call L_86a3
-8636:    84 ec                  ld AL, @[WriteString+1|0x8624|-0x14]
+8636:    84 ec                  ld AL, [0xf200(via -0x14)]
 8638:    2c                     srl AL, #1
 8639:    11 f9                  bnc ReadChar
-863b:    84 f3                  ld AL, @[L_862f+1|0x8630|-0xd]
+863b:    84 f3                  ld AL, [0xf201(via -0xd)]
 863d:    c0 80                  ld BL, 0x80
 863f:    43 31                  or AL, BL
 8641:    c0 e0                  ld BL, 0xe0
@@ -1104,7 +1104,7 @@ ReadChar:
 8648:    42 31                  and AL, BL
 
 L_864a:
-864a:    a4 e4                  st AL, @[L_862f+1|0x8630|-0x1c]
+864a:    a4 e4                  st AL, [0xf201(via -0x1c)]
 864c:    09                     ret
 
 L_864d:
@@ -1112,7 +1112,7 @@ L_864d:
 864f:    49                     sub BL, AL
 8650:    18 c0                  bgt L_8612
 8652:    a1 f1 40               st AL, [0xf140]
-8655:    94 2d                  ld A, @[0x8684|+0x2d]
+8655:    94 2d                  ld A, [0xf144(via 0x2d)]
 8657:    d0 00 10               ld B, 0x0010
 865a:    5a                     and B, A
 865b:    14 b5                  bz L_8612
@@ -1122,7 +1122,7 @@ L_864d:
 8663:    03                     rf
 
 L_8664:
-8664:    94 1e                  ld A, @[0x8684|+0x1e]
+8664:    94 1e                  ld A, [0xf144(via 0x1e)]
 8666:    d0 04 00               ld B, 0x0400
 8669:    5a                     and B, A
 866a:    15 a6                  bnz L_8612
@@ -1149,7 +1149,7 @@ L_868f:
 868f:    81 f8 01               ld AL, [0xf801]
 8692:    29                     dec AL, #1
 8693:    15 fa                  bnz L_868f
-8695:    84 f6                  ld AL, @[0x868d|-0xa]
+8695:    84 f6                  ld AL, [0xf800(via -0xa)]
 8697:    09                     ret
 
 L_8698:
@@ -1157,7 +1157,7 @@ L_8698:
 869a:    a1 f1 48               st AL, [0xf148]
 
 L_869d:
-869d:    84 e5                  ld AL, @[0x8684|-0x1b]
+869d:    84 e5                  ld AL, [0xf144(via -0x1b)]
 869f:    2c                     srl AL, #1
 86a0:    10 fb                  bc L_869d
 86a2:    09                     ret

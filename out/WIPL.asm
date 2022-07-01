@@ -17,7 +17,7 @@ L_0108:
 010f:    b1 00 ae               st A, [0x00ae]	 ; P[IPL10] = 0
 0112:    90 05 06               ld A, 0x0506
 0115:    b1 00 fe               st A, [0x00fe]	 ; P[IPL15] = AbortHandler
-0118:    83 ed                  ld AL, [0x0107|-0x13]	 ; 0xc5
+0118:    83 ed                  ld AL, [0x0107]	 ; 0xc5
 011a:    a1 04 3d               st AL, [0x043d]	 ; Patch ld AL, #0xc5 instruction at addr 043c
 011d:    a1 05 6e               st AL, [0x056e]	 ; Patch ld BL, #0xc5 instruction at addr 056d
 0120:    90 00 f0               ld A, 0x00f0	 ; Initialize stack
@@ -44,10 +44,10 @@ L_0141:
     ; The function at L_014b probes for 8 units on a DSK board at base address (AL << 16) + 0x40
     ; and, if successful, sends an RTZ command.
     ; These four stores patch the base address in the code below
-0141:    a3 09                  st AL, [L_014b+1|0x014c|+0x9]	 ; 14c
-0143:    a3 0d                  st AL, [0x0152|+0xd]	 ; 152
-0145:    a3 16                  st AL, [0x015d|+0x16]	 ; 015d
-0147:    a3 1a                  st AL, [L_0162+1|0x0163|+0x1a]	 ; 0163
+0141:    a3 09                  st AL, [L_014b+1|0x014c]	 ; 14c
+0143:    a3 0d                  st AL, [0x0152]	 ; 152
+0145:    a3 16                  st AL, [0x015d]	 ; 015d
+0147:    a3 1a                  st AL, [L_0162+1|0x0163]	 ; 0163
 0149:    80 07                  ld AL, 0x07	 ; Start probing from unit 7
 
 L_014b:
@@ -130,7 +130,7 @@ BackToPrompt:
 01ce:    03 42                  (0x342)	 ; WIPL version string
 01d0:    80 8a                  ld AL, 0x8a
 01d2:    a1 03 44               st AL, [0x0344]
-01d5:    7c f5                  call @[0x01cc|-0xb]
+01d5:    7c f5                  call PrintString(via -0xb)
 01d7:    03 4e                  (0x34e)	 ; "NAME"
 01d9:    79 06 09               call ReadLine
 01dc:    03 63                  (0x363)	 ; name_buffer
@@ -384,7 +384,7 @@ L_0321:
 0328:    49                     sub BL, AL	 ; Should be equal to 4. That's why i think it's a file type
 0329:    15 0e                  bnz L_0339	 ; If the check fails, we will jump back to the IPL prompt
 032b:    90 ff ff               ld A, 0xffff
-032e:    d3 0d                  ld B, [CallHighMem+1|0x033d|+0xd]	 ; B = ram_top
+032e:    d3 0d                  ld B, [CallHighMem+1|0x033d]	 ; B = ram_top
 0330:    58                     add B, A
 0331:    f1 00 fe               st B, [0x00fe]	 ; P[IPL15] = (end_of_ram - 1) = AbortHandler (relocated)
 0334:    90 fe e5               ld A, 0xfee5
@@ -487,13 +487,13 @@ RelocatablePart:
     ; This is the actual file loading procedure
 03ec:    95 a1                  ld A, [S++]	 ; Remove saved X from the stack, we aren't going to return
 03ee:    95 a1                  ld A, [S++]	 ; pop ClusterSize
-03f0:    b3 36                  st A, [ClusterSize|0x0428|+0x36]
+03f0:    b3 36                  st A, [ClusterSize|0x0428]
 03f2:    95 a1                  ld A, [S++]	 ; pop fs_metadata_start_entry
 03f4:    30 05                  inc A, #6	 ; This skips over header (two 3-byte entries, see above)
-03f6:    b3 5c                  st A, [0x0454|+0x5c]	 ; fs_metadata_current_entry = fs_metadata_start_entry + 6
+03f6:    b3 5c                  st A, [0x0454]	 ; fs_metadata_current_entry = fs_metadata_start_entry + 6
 03f8:    3a                     clr A, #0
 03f9:    39                     dec A, #1
-03fa:    b3 5e                  st A, [0x045a|+0x5e]	 ; Preset sector_in_cluster to -1, it's preincremented
+03fa:    b3 5e                  st A, [0x045a]	 ; Preset sector_in_cluster to -1, it's preincremented
 03fc:    7b 53                  call LoadNextFileSector	 ; This should load the first data sector of the file,
                                                        	 ; locate and parse the first section
                                                        	 ; A will hold relative address of the section on return
@@ -502,7 +502,7 @@ RelocatablePart:
 0402:    15 26                  bnz HandleDataSection	 ; This assumes the first section is always data
 0404:    95 88 1b               ld A, [Z + 0x1b]	 ; Apparently the data in this section is a header, which holds
                                                 	 ; loading address of the file at offset 27
-0407:    b3 40                  st A, [0x0449|+0x40]	 ; set load_base
+0407:    b3 40                  st A, [0x0449]	 ; set load_base
 0409:    50 48                  add Z, X	 ; Skip over this section
 040b:    30 80                  inc Z, #1	 ; Skip over checksum byte
 040d:    7b 31                  call ParseSection	 ; The next section after the header will be ignored, but we may load next sector(s)
@@ -518,7 +518,7 @@ HandleFixupSection:
     ; Z = pointer to section's data
     ; X = section length in bytes
 0417:    d5 81                  ld B, [Z++]
-0419:    93 2e                  ld A, [0x0449|+0x2e]	 ; load_base
+0419:    93 2e                  ld A, [0x0449]	 ; load_base
 041b:    58                     add B, A	 ; load_base + offset
 041c:    99                     ld A, [B]
 041d:    50 60                  add A, Y
@@ -587,16 +587,16 @@ LoadNextFileSector:
 0456:    65 08 01               ld X, [A + 0x01]	 ; X = fs_metadata_current_entry.payload
 0459:    90 00 00               ld A, 0x0000	 ; sector_in_cluster, inline variable
 045c:    38                     inc A, #1
-045d:    b3 fb                  st A, [0x045a|-0x5]	 ; sector_in_cluster += 1 - preincrement because we start from -1
+045d:    b3 fb                  st A, [0x045a]	 ; sector_in_cluster += 1 - preincrement because we start from -1
 045f:    50 04                  add X, A	 ; X = fs_metadata_current_entry.payload + sector_in_cluster
-0461:    d3 c5                  ld B, [ClusterSize|0x0428|-0x3b]
+0461:    d3 c5                  ld B, [ClusterSize|0x0428]
 0463:    59                     sub B, A
 0464:    11 30                  bnc LoadDataSector	 ; If sector_in_cluster <= ClusterSize , load data sector X and start parsing it
 0466:    3a                     clr A, #0
-0467:    b3 f1                  st A, [0x045a|-0xf]	 ; sector_in_cluster = 0
-0469:    93 e9                  ld A, [0x0454|-0x17]	 ; fs_metadata_current_entry += 3 - go to next entry
+0467:    b3 f1                  st A, [0x045a]	 ; sector_in_cluster = 0
+0469:    93 e9                  ld A, [0x0454]	 ; fs_metadata_current_entry += 3 - go to next entry
 046b:    30 02                  inc A, #3
-046d:    b3 e5                  st A, [0x0454|-0x1b]
+046d:    b3 e5                  st A, [0x0454]
 046f:    65 08 01               ld X, [A + 0x01]	 ; X = fs_metadata_current_entry.payload
 0472:    5d                     mov B, A	 ; B = fs_metadata_current_entry
 0473:    98                     ld A, [A]	 ; A = fs_metadata_current_entry.entry_type
@@ -614,16 +614,16 @@ LoadNextFileSector:
 047e:    5d                     mov B, A
 047f:    3d                     sll A, #1
 0480:    58                     add B, A	 ; B = new_entry_idx * 3
-0481:    93 1f                  ld A, [LoadBuffer1|0x04a2|+0x1f]
+0481:    93 1f                  ld A, [LoadBuffer1|0x04a2]
 0483:    58                     add B, A	 ; new_fs_metadata_current_entry = LoadBuffer1 + new_entry_idx * 3
-0484:    94 ce                  ld A, @[0x0454|-0x32]	 ; A = old_link = fs_metadata_current_entry.entry_type
-0486:    f3 cc                  st B, [0x0454|-0x34]	 ; fs_metadata_current_entry = new_fs_metadata_current_entry
+0484:    94 ce                  ld A, None	 ; A = old_link = fs_metadata_current_entry.entry_type
+0486:    f3 cc                  st B, [0x0454]	 ; fs_metadata_current_entry = new_fs_metadata_current_entry
 0488:    3b                     not A, #0
 0489:    60 57 79               ld X, 0x5779	 ; fs_metadata_start_sector, this location is patched
 048c:    50 04                  add X, A	 ; X = fs_metadata_start_sector + ~old_link
 048e:    7b 20                  call LoadSector	 ; Load filesystem metadata sector X
 0490:    01                     nop	 ; Use LoadBuffer1
-0491:    63 c1                  ld X, [0x0454|-0x3f]	 ; X = fs_metadata_current_entry
+0491:    63 c1                  ld X, [0x0454]	 ; X = fs_metadata_current_entry
 0493:    65 48 01               ld X, [X + 0x01]	 ; X = fs_metadata_current_entry.payload
 
 LoadDataSector:
@@ -659,13 +659,13 @@ LoadSector:
     ; argument: 0 or 1. Address of the buffer is returned in Z.
 04b0:    90 f1 40               ld A, 0xf140
 04b3:    5e                     mov Z, A	 ; Z = DSK_BASE
-04b4:    93 ea                  ld A, [LoadBuffer0|0x04a0|-0x16]	 ; A = LoadBuffer0
+04b4:    93 ea                  ld A, [LoadBuffer0|0x04a0]	 ; A = LoadBuffer0
 04b6:    c5 41                  ld BL, [X++]
 04b8:    14 02                  bz L_04bc	 ; If literal argument is not 0...
-04ba:    93 e6                  ld A, [LoadBuffer1|0x04a2|-0x1a]	 ; .. then A = LoadBuffer1
+04ba:    93 e6                  ld A, [LoadBuffer1|0x04a2]	 ; .. then A = LoadBuffer1
 
 L_04bc:
-04bc:    b3 10                  st A, [0x04ce|+0x10]	 ; Preserve loading address (patch instruction at 04cd)
+04bc:    b3 10                  st A, [0x04ce]	 ; Preserve loading address (patch instruction at 04cd)
 04be:    7b e4                  call SetDmaForSectorLoad	 ; Setup DMA to read
 04c0:    7b 1f                  call SeekToTrack
 04c2:    80 00                  ld AL, 0x00
@@ -685,7 +685,7 @@ L_04d2:
 04d7:    7b 22                  call WaitForHawkCmdCompletion
 04d9:    8c                     ld AL, [Z]
 04da:    a5 88 0b               st AL, [Z + 0x0b]
-04dd:    93 ef                  ld A, [0x04ce|-0x11]	 ; A = loading address (from the patched insn)
+04dd:    93 ef                  ld A, [0x04ce]	 ; A = loading address (from the patched insn)
 04df:    73 db                  jmp L_04bc	 ; Retry
 
 SeekToTrack:
@@ -795,7 +795,7 @@ L_0555:
 
 L_055a:
 055a:    80 8d                  ld AL, 0x8d	 ; '\r'
-055c:    c3 42                  ld BL, [0x05a0|+0x42]	 ; last_char
+055c:    c3 42                  ld BL, [0x05a0]	 ; last_char
 055e:    49                     sub BL, AL	 ; Don't print CR if already done
 055f:    14 02                  bz L_0563
 0561:    7b 01                  call PrintChar
@@ -806,11 +806,11 @@ L_0563:
 PrintChar:
 0564:    7e 81                  push {Z}
 0566:    55 98 f2 00            mov Z, 0xf200	 ; Serisl port 0 base address
-056a:    f6 19 0d               st AL, +0xd(Z)	 ; Write the unprocessed character to MUX_REG[0x0D]
-                                              	 ; The purpose is unknown, probably some kind of debug port.
-                                              	 ; May be even not all cards really support it.
+056a:    f6 19 0d               mov Device[Z + 0x0d], AL	 ; Write the unprocessed character to MUX_REG[0x0D]
+                                                        	 ; The purpose is unknown, probably some kind of debug port.
+                                                        	 ; May be even not all cards really support it.
 056d:    c0 c5                  ld BL, 0xc5	 ; Set up baud rate ?
-056f:    f6 39 00               st BL, +0x0(Z)
+056f:    f6 39 00               mov Device[Z + 0x00], BL
 0572:    c0 8c                  ld BL, 0x8c
 0574:    49                     sub BL, AL	 ; If character is 0x0c (form feed)...
 0575:    14 13                  bz L_058a	 ; Print with a delay
@@ -821,7 +821,7 @@ PrintChar:
 057e:    80 8a                  ld AL, 0x8a	 ; Add \n
 0580:    7b 13                  call RawPrintChar
 0582:    80 8d                  ld AL, 0x8d
-0584:    a3 1a                  st AL, [0x05a0|+0x1a]	 ; last_char = '\r'
+0584:    a3 1a                  st AL, [0x05a0]	 ; last_char = '\r'
 0586:    0e                     dly
 0587:    7f 81                  pop {Z}
 0589:    09                     ret
@@ -838,16 +838,16 @@ L_0590:
 0594:    09                     ret
 
 RawPrintChar:
-0595:    f6 38 00               ld BL, +0x0(Z)	 ; Wait for port ready
+0595:    f6 38 00               mov BL, Device[Z + 0x00]	 ; Wait for port ready
 0598:    24 31                  srl BL, #2
 059a:    11 f9                  bnc RawPrintChar
-059c:    f6 19 01               st AL, +0x1(Z)	 ; Output che character
+059c:    f6 19 01               mov Device[Z + 0x01], AL	 ; Output che character
 059f:    a0 bd                  st AL, 0xbd	 ; last_char - last printed character stored right into the literal field.
                                            	 ; Yes, this is a self-modifying instruction.
 05a1:    09                     ret
 
 L_05a2:
-05a2:    f6 38 0f               ld BL, +0xf(Z)	 ; Interrupt ACK perhaps
+05a2:    f6 38 0f               mov BL, Device[Z + 0x0f]	 ; Interrupt ACK perhaps
 05a5:    0a                     reti	 ; A nice mechanics of reloading P register back to its original value.
                                     	 ; Interrupts in cpu6 don't use stack, instead they just switch the
                                     	 ; context like coroutines. This will store current PC value in P register
@@ -858,33 +858,33 @@ SerialIntHandler:
     ; This is an interrupt handler for the serial port
     ; We know that a daisy chain interrupt line is used
 05a6:    55 98 f2 00            mov Z, 0xf200	 ; Serial0 base address
-05aa:    f6 18 00               ld AL, +0x0(Z)
+05aa:    f6 18 00               mov AL, Device[Z + 0x00]
 05ad:    2c                     srl AL, #1
 05ae:    10 0f                  bc L_05bf	 ; Read the character if ready
-05b0:    f6 18 01               ld AL, +0x1(Z)	 ; Read data register of all 4 ports
-05b3:    f6 18 03               ld AL, +0x3(Z)	 ; It looks like this is supposed to ensure a pending "RX ready"
-05b6:    f6 18 05               ld AL, +0x5(Z)	 ; status is clear on all of them and the interrupt will be deasserted
-05b9:    f6 18 07               ld AL, +0x7(Z)	 ; In case if it was caused by pressing a random key on any other terminal
+05b0:    f6 18 01               mov AL, Device[Z + 0x01]	 ; Read data register of all 4 ports
+05b3:    f6 18 03               mov AL, Device[Z + 0x03]	 ; It looks like this is supposed to ensure a pending "RX ready"
+05b6:    f6 18 05               mov AL, Device[Z + 0x05]	 ; status is clear on all of them and the interrupt will be deasserted
+05b9:    f6 18 07               mov AL, Device[Z + 0x07]	 ; In case if it was caused by pressing a random key on any other terminal
 05bc:    2a                     clr AL, #0	 ; No character available
 05bd:    73 e3                  jmp L_05a2
 
 L_05bf:
-05bf:    f6 18 01               ld AL, +0x1(Z)
+05bf:    f6 18 01               mov AL, Device[Z + 0x01]
 05c2:    73 de                  jmp L_05a2
 
 ReadChar:
     ; Wait for one character to arrive from the serial0 and echo it.
 05c4:    7e 81                  push {Z}
 05c6:    55 98 f2 00            mov Z, 0xf200	 ; Serial port base address
-05ca:    83 a2                  ld AL, [0x056e|-0x5e]	 ; Grab a constant of 0xc5 from PrintChar
-05cc:    f6 19 00               st AL, +0x0(Z)	 ; Baud rate ?
+05ca:    83 a2                  ld AL, [0x056e]	 ; Grab a constant of 0xc5 from PrintChar
+05cc:    f6 19 00               mov Device[Z + 0x00], AL	 ; Baud rate ?
 05cf:    90 05 a6               ld A, 0x05a6	 ; Install the interrupt handler
 05d2:    d7 6e                  mov IL6(P), A
 05d4:    3a                     clr A, #0	 ; Clear A at IPL6
 05d5:    d7 60                  mov IL6(A), A
 05d7:    80 06                  ld AL, 0x06	 ; 6 is an IPL number, could be a coincidence
-05d9:    f6 19 0a               st AL, +0xa(Z)	 ; But anyways we need to set the serial port up to
-05dc:    f6 19 0e               st AL, +0xe(Z)	 ; generate a daisy chain interrupt
+05d9:    f6 19 0a               mov Device[Z + 0x0a], AL	 ; But anyways we need to set the serial port up to
+05dc:    f6 19 0e               mov Device[Z + 0x0e], AL	 ; generate a daisy chain interrupt
 
 L_05df:
 05df:    e6 60                  mov A, IL6(A)	 ; This waits for the character to arrive
@@ -922,10 +922,10 @@ ReadLine:
     ; It is also supposed to be padded with spaces (0xA0) up to a certain
     ; fixed length of at least 10 chars. NAME comparison wouldn't work without
     ; it as it compares exactly 10 characters.
-0609:    93 f5                  ld A, [0x0600|-0xb]
-060b:    b3 58                  st A, [L_0664+1|0x0665|+0x58]	 ; preserved_abort_addr = abort_addr
+0609:    93 f5                  ld A, [0x0600]
+060b:    b3 58                  st A, [L_0664+1|0x0665]	 ; preserved_abort_addr = abort_addr
 060d:    90 06 6f               ld A, 0x066f	 ; abort_addr = ReadLineAbort
-0610:    b3 ee                  st A, [0x0600|-0x12]
+0610:    b3 ee                  st A, [0x0600]
 0612:    9a                     ld A, [X]	 ; A = pointer to a buffer
 0613:    6d a2                  st X, [--S]	 ; Push X (return address)
 0615:    38                     inc A, #1	 ; X = buffer + 1 - this skips first byte of the length
@@ -944,27 +944,27 @@ ReadNextChar:
 
 HandleBackspace:
 0628:    d5 a4                  ld B, @[S]
-062a:    a3 0c                  st AL, [0x0638|+0xc]	 ; Preserve our control character whatever it was
+062a:    a3 0c                  st AL, [0x0638]	 ; Preserve our control character whatever it was
 062c:    30 20                  inc B, #1	 ; Note it has already been echoed back by ReadChar, so our cursor
 062e:    51 42                  sub B, X	 ; has already moved one position back
 0630:    14 0c                  bz L_063e	 ; Nothing to delete if we have empty buffer
 0632:    80 a0                  ld AL, 0xa0	 ; ' ' (space)
 0634:    79 05 64               call PrintChar	 ; This actually rubs out the character on the screen
 0637:    80 95                  ld AL, 0x95	 ; Restore our saved control character
-0639:    7c fa                  call @[0x0635|-0x6]	 ; And repeat it in order to move the cursor one step back again
+0639:    7c fa                  call PrintChar(via -0x6)	 ; And repeat it in order to move the cursor one step back again
 063b:    3f                     dec X	 ; Decrement current input buffer position
 063c:    73 de                  jmp ReadNextChar
 
 L_063e:
 063e:    80 86                  ld AL, 0x86	 ; 0x06 - move the cursor one position forward ?
-0640:    7c f3                  call @[0x0635|-0xd]	 ; PrintChar
+0640:    7c f3                  call PrintChar(via -0xd)	 ; PrintChar
 0642:    73 d8                  jmp ReadNextChar
 
 L_0644:
 0644:    c0 8d                  ld BL, 0x8d	 ; Check for '\n'
 0646:    49                     sub BL, AL
 0647:    14 12                  bz HandleEnter
-0649:    a3 0c                  st AL, [0x0657|+0xc]	 ; Preserve the character
+0649:    a3 0c                  st AL, [0x0657]	 ; Preserve the character
 064b:    95 a4                  ld A, @[S]
 064d:    d0 00 85               ld B, 0x0085
 0650:    58                     add B, A
@@ -984,7 +984,7 @@ HandleEnter:
 
 L_0664:
 0664:    d0 01 bb               ld B, 0x01bb	 ; preserved_abort_addr
-0667:    f3 97                  st B, [0x0600|-0x69]	 ; abort_addr = preserved_abort_addr
+0667:    f3 97                  st B, [0x0600]	 ; abort_addr = preserved_abort_addr
 0669:    22 30                  clr BL, #0	 ; Re-enable echo of terminal input
 066b:    e1 05 ea               st BL, [0x05ea]	 ; disable_echo
 066e:    09                     ret
@@ -993,7 +993,7 @@ ReadLineAbort:
 066f:    65 a1                  ld X, [S++]	 ; Pop return address
 0671:    3a                     clr A, #0	 ; String length = 0
 0672:    b5 45                  st A, @[X++]
-0674:    63 ef                  ld X, [L_0664+1|0x0665|-0x11]	 ; Will return to preserved_abort_addr
+0674:    63 ef                  ld X, [L_0664+1|0x0665]	 ; Will return to preserved_abort_addr
 0676:    73 ec                  jmp L_0664
 
 L_0678:

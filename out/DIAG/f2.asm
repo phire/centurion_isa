@@ -1029,12 +1029,12 @@ L_8c4b:
 8c50:    00                     HALT
 
 L_8c51:
-8c51:    94 1c                  ld A, @[0x8c6f|+0x1c]
+8c51:    94 1c                  ld A, @[0x8c6f]
 8c53:    18 01                  bgt L_8c56
 8c55:    00                     HALT
 
 L_8c56:
-8c56:    d4 19                  ld B, @[0x8c71|+0x19]
+8c56:    d4 19                  ld B, @[0x8c71]
 8c58:    16 01                  blt L_8c5b
 8c5a:    00                     HALT
 
@@ -1045,8 +1045,8 @@ L_8c5b:
 8c60:    00                     HALT
 
 L_8c61:
-8c61:    93 0c                  ld A, [0x8c6f|+0xc]
-8c63:    d3 0c                  ld B, [0x8c71|+0xc]
+8c61:    93 0c                  ld A, [0x8c6f]
+8c63:    d3 0c                  ld B, [0x8c71]
 8c65:    58                     add B, A
 8c66:    90 ff ba               ld A, 0xffba
 8c69:    58                     add B, A
