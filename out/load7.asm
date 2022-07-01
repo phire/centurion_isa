@@ -355,9 +355,7 @@ Device_CRT0:
 Device_CRT0_number:
 02a4:    01                     (0x1)
 02a5:    04 e7                  R_04e7
-
-Device_CRT0_Obj:
-02a7:    b2 6c                  CTRDeviceObj
+02a7:    b2 6c                  CRTDeviceFunctions
 02a9:    "CRT0  "
 02af:    00                     HALT
 02b0:    00                     HALT
@@ -396,8 +394,6 @@ Device_DISK0:
 Device_DISK0_number:
 02dc:    00                     (0x0)
 02dd:    04 e8                  R_04e8
-
-Device_DISK0_Obj:
 02df:    a6 f5                  WeirdExtra_HawkDeviceObj
 02e1:    "DISK0 "
 02e7:    00
@@ -418,8 +414,6 @@ Device_DISK1:
 Device_DISK1_number:
 02f5:    01                     (0x1)
 02f6:    04 e8                  R_04e8
-
-Device_DISK1_Obj:
 02f8:    a6 f7                  HawkDeviceObj
 02fa:    "DISK1 "
 0300:    00
@@ -440,8 +434,6 @@ Device_DISK2:
 Device_DISK2_number:
 030e:    02                     (0x2)
 030f:    04 e9                  R_04e9
-
-Device_DISK2_Obj:
 0311:    a6 f7                  HawkDeviceObj
 0313:    "DISK2 "
 0319:    00
@@ -462,8 +454,6 @@ Device_DISK3:
 Device_DISK3_number:
 0327:    03                     (0x3)
 0328:    04 e9                  R_04e9
-
-Device_DISK3_Obj:
 032a:    a6 f7                  HawkDeviceObj
 032c:    "DISK3 "
 0332:    00                     HALT
@@ -484,8 +474,6 @@ Device_DISK4:
 Device_DISK4_number:
 0340:    04                     (0x4)
 0341:    04 ea                  R_04ea
-
-Device_DISK4_Obj:
 0343:    a6 f7                  HawkDeviceObj
 0345:    "DISK4 "
 034b:    00                     HALT
@@ -506,8 +494,6 @@ Device_DISK5:
 Device_DISK5_number:
 0359:    05                     (0x5)
 035a:    04 ea                  R_04ea
-
-Device_DISK5_Obj:
 035c:    a6 f7                  HawkDeviceObj
 035e:    "DISK5 "
 0364:    00                     HALT
@@ -528,8 +514,6 @@ Device_DISK10:
 Device_DISK10_number:
 0372:    0a                     (0xa)
 0373:    04 eb                  R_04eb
-
-Device_DISK10_Obj:
 0375:    ac a7                  FDCDeviceObj
 0377:    "DISK10"
 037d:    00
@@ -551,8 +535,6 @@ Device_DISK11:
 Device_DISK11_number:
 038b:    0b                     (0xb)
 038c:    04 ec                  R_04ec
-
-Device_DISK11_Obj:
 038e:    ac a7                  FDCDeviceObj
 0390:    "DISK11"
 0396:    00
@@ -574,8 +556,6 @@ Device_DISK12:
 Device_DISK12_number:
 03a4:    0c                     (0xc)
 03a5:    04 ed                  R_04ed
-
-Device_DISK12_Obj:
 03a7:    ac a7                  FDCDeviceObj
 03a9:    "DISK12"
 03af:    00
@@ -597,8 +577,6 @@ Device_DISK13:
 Device_DISK13_number:
 03bd:    0d                     (0xd)
 03be:    04 ee                  R_04ee
-
-Device_DISK13_Obj:
 03c0:    ac a7                  FDCDeviceObj
 03c2:    "DISK13"
 03c8:    00
@@ -620,8 +598,6 @@ Device_DISK20:
 Device_DISK20_number:
 03d6:    14                     (0x14)
 03d7:    04 ef                  R_04ef
-
-Device_DISK20_Obj:
 03d9:    b8 4f                  WDCDeviceObj
 03db:    "DISK20"
 03e1:    00
@@ -643,8 +619,6 @@ Device_DISK21:
 Device_DISK21_number:
 03ef:    15                     (0x15)
 03f0:    04 ef                  R_04ef
-
-Device_DISK21_Obj:
 03f2:    b8 4f                  WDCDeviceObj
 03f4:    "DISK21"
 03fa:    00
@@ -666,8 +640,6 @@ Device_DISK22:
 Device_DISK22_number:
 0408:    16                     (0x16)
 0409:    04 ef                  R_04ef
-
-Device_DISK22_Obj:
 040b:    b8 4f                  WDCDeviceObj
 040d:    "DISK22"
 0413:    00
@@ -689,8 +661,6 @@ Device_DISK23:
 Device_DISK23_number:
 0421:    17                     (0x17)
 0422:    04 ef                  R_04ef
-
-Device_DISK23_Obj:
 0424:    b8 4f                  WDCDeviceObj
 0426:    "DISK23"
 042c:    00
@@ -712,8 +682,6 @@ Device_DISK24:
 Device_DISK24_number:
 043a:    18                     (0x18)
 043b:    04 ef                  R_04ef
-
-Device_DISK24_Obj:
 043d:    b8 4f                  WDCDeviceObj
 043f:    "DISK24"
 0445:    00
@@ -735,8 +703,6 @@ Device_DISK40:
 Device_DISK40_number:
 0453:    28                     (0x28)
 0454:    04 f0                  R_04f0
-
-Device_DISK40_Obj:
 0456:    bf 08                  Unk40DeviceObj
 0458:    "DISK40"
 045e:    00                     HALT
@@ -758,8 +724,6 @@ Device_DISK41:
 Device_DISK41_number:
 046c:    29                     (0x29)
 046d:    04 f0                  R_04f0
-
-Device_DISK41_Obj:
 046f:    bf 08                  Unk40DeviceObj
 0471:    "DISK41"
 0477:    00                     HALT
@@ -781,8 +745,6 @@ Device_DISK42:
 Device_DISK42_number:
 0485:    2a                     (0x2a)
 0486:    04 f0                  R_04f0
-
-Device_DISK42_Obj:
 0488:    bf 08                  Unk40DeviceObj
 048a:    "DISK42"
 0490:    00                     HALT
@@ -804,8 +766,6 @@ Device_DISK50:
 Device_DISK50_number:
 049e:    32                     (0x32)
 049f:    04 f1                  R_04f1
-
-Device_DISK50_Obj:
 04a1:    c6 40                  Unk50DeviceObj
 04a3:    "DISK50"
 04a9:    00                     HALT
@@ -827,8 +787,6 @@ Device_DISK51:
 Device_DISK51_number:
 04b7:    33                     (0x33)
 04b8:    04 f1                  R_04f1
-
-Device_DISK51_Obj:
 04ba:    c6 40                  Unk50DeviceObj
 04bc:    "DISK51"
 
@@ -852,8 +810,6 @@ Device_DISK52:
 Device_DISK52_number:
 04d0:    34                     (0x34)
 04d1:    04 f1                  R_04f1
-
-Device_DISK52_Obj:
 04d3:    c6 40                  Unk50DeviceObj
 04d5:    "DISK52"
 
@@ -906,7 +862,7 @@ R_04f1:
 04f1:    00                     HALT
 
 EarlyInitDevices:
-04f2:    b2 6c                  CTRDeviceObj
+04f2:    b2 6c                  CRTDeviceFunctions
 
 L_04f4:
 04f4:    00                     HALT
@@ -1262,26 +1218,30 @@ R_801d:
 8020:    85 2c 05               ld AL, @[B + 0x05]
 8023:    73 3c                  jmp L_8061
 
-R_8025:
+FindDeviceFunction:
+    ; This routine finds a function pointer in device's function table
+    ; Function table
+    ; and returns it in B.
+    ; On input X holds device object and A is function number (number of entry in device's function table)
 8025:    45 11                  mov AL, AL
-8027:    16 15                  blt L_803e
+8027:    16 15                  blt L_803e	 ; if A < 0, the function is not found
 8029:    7b 2a                  call L_8055
-802b:    dd                     ld B, [S]
-802c:    d5 2c 05               ld B, @[B + 0x05]
+802b:    dd                     ld B, [S]	 ; B = device object
+802c:    d5 2c 05               ld B, @[B + 0x05]	 ; First word of functions table. Number of entries
 802f:    49                     sub BL, AL
 8030:    18 0c                  bgt L_803e
-8032:    38                     inc A, #1
-8033:    3d                     sll A, #1
-8034:    dd                     ld B, [S]
-8035:    d5 28 05               ld B, [B + 0x05]
-8038:    58                     add B, A
-8039:    d9                     ld B, [B]
-803a:    22 00                  clr AH, #0
-803c:    73 23                  jmp L_8061
+8032:    38                     inc A, #1	 ; The first entry doesn't count
+8033:    3d                     sll A, #1	 ; offset =  A * 2 - size of a pointer
+8034:    dd                     ld B, [S]	 ; When we were called, this was in X
+8035:    d5 28 05               ld B, [B + 0x05]	 ; Device function table
+8038:    58                     add B, A	 ; Add offfset
+8039:    d9                     ld B, [B]	 ; B = function pointer
+803a:    22 00                  clr AH, #0	 ; AH = 0 and Set Z flag
+803c:    73 23                  jmp L_8061	 ; Found
 
 L_803e:
-803e:    22 00                  clr AH, #0
-8040:    21 00                  dec AH, #1
+803e:    22 00                  clr AH, #0	 ; AH = -1, this also resets Z flag
+8040:    21 00                  dec AH, #1	 ; Not found
 8042:    73 1d                  jmp L_8061
 
 R_8044:
@@ -1294,9 +1254,9 @@ R_804b:
 804d:    7d 04                  call @[A]
 804f:    73 17                  jmp R_8068
 
-R_8051:
-8051:    7b 2e                  call L_8081
-8053:    75 20                  jmp [B]
+ExecuteDeviceFunction:
+8051:    7b 2e                  call L_8081	 ; Map current process ?
+8053:    75 20                  jmp [B]	 ; Call the I/O function
 
 L_8055:
 8055:    c6                     unknown
@@ -1934,11 +1894,11 @@ L_87b7:
 87b9:    90 00 05               ld A, 0x0005
 87bc:    7e 41                  push {X}
 87be:    55 64                  mov X, Y
-87c0:    79 80 25               call R_8025
+87c0:    79 80 25               call FindDeviceFunction
 87c3:    7f 41                  pop {X}
 87c5:    85 68 34               ld AL, [Y + 0x34]
 87c8:    14 03                  bz L_87cd
-87ca:    79 80 51               call R_8051
+87ca:    79 80 51               call ExecuteDeviceFunction
 
 L_87cd:
 87cd:    09                     ret
@@ -2489,12 +2449,12 @@ L_8b97:
 
 L_8bab:
 8bab:    3a                     clr A, #0
-8bac:    85 88 03               ld AL, [Z + 0x03]
-8baf:    a3 26                  st AL, [0x8bd7]
+8bac:    85 88 03               ld AL, [Z + 0x03]	 ; AL = function number
+8baf:    a3 26                  st AL, [0x8bd7]	 ; Preserve function number
 8bb1:    19 21                  ble L_8bd4
-8bb3:    79 80 25               call R_8025
+8bb3:    79 80 25               call FindDeviceFunction
 8bb6:    15 1c                  bnz L_8bd4
-8bb8:    f3 15                  st B, [0x8bcf]
+8bb8:    f3 15                  st B, [0x8bcf]	 ; Preserve pointer to a function address
 8bba:    14 18                  bz L_8bd4
 8bbc:    91 01 03               ld A, [CurrentProcess|0x0103]
 8bbf:    85 08 01               ld AL, [A + 0x01]
@@ -2504,12 +2464,12 @@ L_8bab:
 8bc9:    80 80                  ld AL, 0x80
 8bcb:    ac                     st AL, [Z]
 8bcc:    55 40                  mov A, X
-8bce:    d0 00 00               ld B, 0x0000
-8bd1:    71 80 51               jmp R_8051
+8bce:    d0 00 00               ld B, 0x0000	 ; B = pointer to a function address
+8bd1:    71 80 51               jmp ExecuteDeviceFunction	 ; Make sure the current process is mapped and jump to [B]
 
 L_8bd4:
 8bd4:    9c                     ld A, [Z]
-8bd5:    d0 00 00               ld B, 0x0000
+8bd5:    d0 00 00               ld B, 0x0000	 ; BL = preserved function number
 8bd8:    79 86 12               call R_8612
 
 L_8bdb:
@@ -7269,7 +7229,7 @@ a82e:    25 11                  sll AL, #2
 a830:    c0 04                  ld BL, 0x04
 a832:    48                     add BL, AL
 a833:    e3 01                  st BL, [0xa836]
-a835:    2f 04                  ld_dma_mode A
+a835:    2f 04                  dma_mode 0
 a837:    2f 06                  enable_dma
 a839:    e6 28                  mov A, IL2(Z)
 a83b:    f6 11 0e               mov Device[A + 0x0e], AL
@@ -8550,7 +8510,7 @@ b14d:    81 00 83               ld AL, [0x0083]
 b150:    00                     HALT
 
 R_b151:
-b151:    2f 34                  ld_dma_mode B
+b151:    2f 34                  dma_mode 3
 b153:    2f 06                  enable_dma
 b155:    2f 20                  ld_dma_addr B
 b157:    3b                     not A, #0
@@ -8643,13 +8603,13 @@ b251:    10, "FDC ERROR\r"
 R_b25d:
 b25d:    13, "DMA STAT FAIL"
 
-CTRDeviceObj:
+CRTDeviceFunctions:
 b26c:    00 05                  (0x5)
 b26e:    ce 4a                  R_ce4a
 b270:    b2 7c                  R_b27c
-b272:    b2 c3                  R_b2c3
+b272:    b2 c3                  CrtDevice_Write
 b274:    b5 55                  R_b555
-b276:    b2 cb                  CrtDevice_Write
+b276:    b2 cb                  CrtDevice_UrgentWrite
 b278:    b4 fb                  R_b4fb
 b27a:    b8 05                  CrtDevice_Init
 
@@ -8657,7 +8617,7 @@ R_b27c:
 b27c:    55 46                  mov Y, X
 b27e:    2a                     clr AL, #0
 b27f:    a5 6c 05               st AL, @[Y + 0x05]
-b282:    7b 35                  call L_b2b9
+b282:    7b 35                  call CrtDevice_WaitForIdle
 b284:    55 80                  mov A, Z
 b286:    b5 68 14               st A, [Y + 0x14]
 b289:    3a                     clr A, #0
@@ -8687,22 +8647,23 @@ R_b2b3:
 b2b3:    91 01 01               ld A, [SyscallVector+1|0x0101]
 b2b6:    75 08 03               jmp [A + 0x03]
 
-L_b2b9:
-b2b9:    85 68 11               ld AL, [Y + 0x11]
+CrtDevice_WaitForIdle:
+    ; This function waits until device.state == 0
+b2b9:    85 68 11               ld AL, [Y + 0x11]	 ; device_obj.state
 b2bc:    15 01                  bnz L_b2bf
 b2be:    09                     ret
 
 L_b2bf:
 b2bf:    66 07                  jsys Syscall_Yield
-b2c1:    73 f6                  jmp L_b2b9
+b2c1:    73 f6                  jmp CrtDevice_WaitForIdle
 
-R_b2c3:
+CrtDevice_Write:
 b2c3:    55 46                  mov Y, X
 b2c5:    3a                     clr A, #0
 b2c6:    a5 6c 05               st AL, @[Y + 0x05]
-b2c9:    7b ee                  call L_b2b9
+b2c9:    7b ee                  call CrtDevice_WaitForIdle
 
-CrtDevice_Write:
+CrtDevice_UrgentWrite:
 b2cb:    3a                     clr A, #0
 b2cc:    29                     dec AL, #1
 b2cd:    a5 68 11               st AL, [Y + 0x11]
@@ -9052,7 +9013,7 @@ R_b555:
 b555:    55 46                  mov Y, X
 b557:    7b e8                  call R_b541
 b559:    3a                     clr A, #0
-b55a:    a1 b2 6c               st AL, [CTRDeviceObj|0xb26c]
+b55a:    a1 b2 6c               st AL, [CRTDeviceFunctions|0xb26c]
 b55d:    b3 b1                  st A, [R_b50f+1|0xb510]
 b55f:    d5 68 14               ld B, [Y + 0x14]
 b562:    55 28                  mov Z, B
@@ -10347,7 +10308,7 @@ bdd2:    81 00 82               ld AL, [0x0082]
 bdd5:    ff                     st B, [P]
 
 R_bdd6:
-bdd6:    2f 34                  ld_dma_mode B
+bdd6:    2f 34                  dma_mode 3
 bdd8:    2f 20                  ld_dma_addr B
 bdda:    3b                     not A, #0
 bddb:    2f 02                  ld_dma_count A
@@ -11261,7 +11222,7 @@ c45f:    d6 67 01 3f            st Y, [0x013f]
 c463:    09                     ret
 
 R_c464:
-c464:    2f 34                  ld_dma_mode B
+c464:    2f 34                  dma_mode 3
 c466:    2f 20                  ld_dma_addr B
 c468:    3b                     not A, #0
 c469:    2f 02                  ld_dma_count A
@@ -12148,7 +12109,7 @@ cb14:    d6 67 01 3f            st Y, [0x013f]
 cb18:    09                     ret
 
 R_cb19:
-cb19:    2f 34                  ld_dma_mode B
+cb19:    2f 34                  dma_mode 3
 cb1b:    2f 20                  ld_dma_addr B
 cb1d:    3b                     not A, #0
 cb1e:    2f 02                  ld_dma_count A
@@ -13624,7 +13585,7 @@ d6f4:    2e 2c 00 d4 cb         wpf1 0x00, [R_d4cb|0xd4cb]
 d6f9:    2e 2c 78 d4 cd         wpf1 0x78, [R_d4cd|0xd4cd]
 d6fe:    32 20                  clr B, #0
 d700:    2f 28                  ld_isr B
-d702:    2f 04                  ld_dma_mode A
+d702:    2f 04                  dma_mode 0
 d704:    f1 00 6c               st B, [0x006c]
 d707:    f1 00 fc               st B, [0x00fc]
 d70a:    f1 00 ae               st B, [0x00ae]
