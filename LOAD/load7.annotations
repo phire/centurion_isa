@@ -200,9 +200,12 @@
 0xce33, label, CheckTimeout
 0xce41, label, SetTimeout256
 0xd4f5, pstring16
+0xd54e, label, LOS_WriteCRT
+0xd544, label, LOS_ReadCRT
 0xe1a9, pstring16
 0xe1b0, pstring16
 0xe1b9, pstring16
 0xe1c0, pstring16
 0xe1e2, pstring16
 0xe1f4, pstring16
+0xe1fd, label, LOS_Autoboot

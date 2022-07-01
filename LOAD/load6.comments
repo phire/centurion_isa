@@ -504,8 +504,7 @@
 0xce37 ,	comment	; could this be a memcpy of 0x0000-0x07ff to 0x7800?
 0xce3f ,	comment	; Map a diffrent page to 0x7800
 		; I think this is the final page which will live here
-0xce4c ,	comment	; memcpy 0x100 to 0xeeff???
-		; Doesn't feel right for a memcpy instrution
+0xce4c ,	comment	; Read/Write every single byte from 0x0100 to 0xeeff, to initilize parity bits
 0xce4d ,	comment	; Remap OPSYS's page0 where it should go
 0xce58 ,	comment	; Not sure what this data is
 0xce6c ,	comment	; StartProcess
@@ -522,7 +521,7 @@
 0xce97 ,	comment	; write/read 0xff to 0xffff
 0xce9a ,	comment	; check it matces
 0xce9c ,	comment	; Y = 0xf800
-0xcea4 ,	comment	; I think the goal here is to initilize all the parity bits
+0xcea4 ,	comment	; Copy each byte to itself, to initilize the parity bits
 0xcea5 ,	comment	; zero upper AH regiter so we can use 16bit sub-immediate below
 0xceb4,	pre_comment 	; Finished memory detection
 0xceb4 ,	comment	; map page 7f (should be MMIO regs) to 0xf800-0xffff

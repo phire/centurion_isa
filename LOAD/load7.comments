@@ -30,8 +30,10 @@
 0xb2ee ,	comment	; Wait for TX_READY
 0xb40c ,	comment	; DISASSEMBLER BUG! Should be ld A, +0(Z) - read both status and character
 0xb412 ,	comment	; if [device_obj + 1] == 0x0a....
+0xb415 ,	comment	; Is this a "Communication" Device type (modem?)
 0xb419 ,	comment	; .. then we go do some memory moves
 0xb41c ,	comment	; if [device_obj + 1] == 3, silently drop the output and leave the interrupt
+0xb41f ,	comment	; Is this a "Printer" device type
 0xb426 ,	comment	; Make sure bit 7 of the character is set
 0xb42a ,	comment	; Check bits 4 - 2 of status register, we don't know what they are
 0xb430 ,	comment	; If zero, proceed with handling the input
@@ -91,4 +93,10 @@
 0xb843 ,	comment	; We don't know what this does
 0xb85b ,	comment	; '	 ; '	 ; '	 ; '	 ; '
 0xb85d ,	comment	; '	 ; '	 ; '	 ; '	 ; '
+0xd537 ,	comment	; LOS 7.1 - E
+0xd544,	pre_comment 	; Small wrapper around the syscalls
+0xd54e,	pre_comment 	; Small wrapper around the syscalls
+0xd55a ,	comment	; "\r\nNAME="
+0xd58f ,	comment	; "DISK="
+0xd5e1 ,	comment	; "CODE="
 0xd71e ,	comment	; Clear terminal
