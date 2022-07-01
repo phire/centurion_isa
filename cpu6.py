@@ -427,6 +427,8 @@ branch_instructions = [
 ]
 
 instructions  = [
+    I("01110110", "enable_parity_trap"),
+    I("10000110", "disable_parity_trap"),
     I("11110111", "memcpy16"),
     I("01101111 NNNNNNNN NNNNNNNN", "stcc [{N:#06x}]"),
 
