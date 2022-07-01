@@ -163,6 +163,14 @@ class Not(UniOp):
     def getValue(self, cpu):
         return self.mask & (~self.a.getValue(cpu))
 
+class SignExtend(UniOp):
+    # only supports extend to 16
+    def getValue(self, cpu):
+        val = self.a.getValue(cpu)
+        if val > 0x80:
+            val = (~val + 1)
+        return val
+
 AllOps = {op.__name__: op for op in Op.__subclasses__() if op not in [UniOp, Nop]}
 
 class LiteralValue:

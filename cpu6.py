@@ -41,8 +41,19 @@ class ControlFlowInst:
         self.src = src
         self.resume = mnemonic == "call"
 
+    def get_target(self, mem):
+        target = self.src
+
+        # It looks nicer if we unwrap these
+        if isinstance(target, DirectRef):
+            target = target.addr
+        elif isinstance(target, PcDisplacementRef):
+            _, target = target.getLiteralRef(mem)
+        return target
+
     def get_dst(self, mem):
-        try: return self.src.getValue(mem)
+        target = self.get_target(mem)
+        try: return target.getValue(mem)
         except AttributeError: return None
 
     def get_xargs(self, mem):
@@ -62,7 +73,9 @@ class ControlFlowInst:
         return ret
 
     def to_string(self, dict, mem):
-        return f"{self.mnemonic} {self.src.to_string(mem, forceLabel=True, supressAlt=True)}"
+        target = self.get_target(mem)
+
+        return f"{self.mnemonic} {target.to_string(mem, forceLabel=True, supressAlt=True)}"
 
     def to_tree(self, cpu):
         return None
@@ -379,12 +392,6 @@ def MemoryMatch(pc, mem):
     if isinstance(operand, LiteralRef):
         # Literal addressing mode isn't valid for call/jump
         return None
-
-    # It looks nicer if we unwrap these
-    if isinstance(operand, DirectRef):
-        operand = operand.addr
-    elif isinstance(operand, PcDisplacementRef):
-        operand = operand.ref
 
     return InstructionMatch(orig_pc, ControlFlowInst(mode, operand), bytes, mem=mem)
 

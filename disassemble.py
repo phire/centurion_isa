@@ -115,17 +115,33 @@ class MemoryWrapper:
                 return Xargs(memory_addr_info[addr].func_info.xargs)
         return None
 
+    def get(self, addr, size, signed=False):
+        return int.from_bytes(self.memory[addr:addr+size], 'big', signed=signed)
+
     def get_u8(self, addr):
-        return struct.unpack_from('B', self.memory[addr:])[0]
+        return self.get(addr, 1, False)
 
     def get_be16(self, addr):
-        return struct.unpack_from('>H', self.memory[addr:])[0]
+        return self.get(addr, 2, False)
 
     def get_i8(self, addr):
-        return struct.unpack_from('b', self.memory[addr:])[0]
+        return self.get(addr, 1, True)
 
     def is_fixup(self, addr):
         return addr in memory_addr_info and memory_addr_info[addr].fixup
+
+    # If this address is inside a multi-byte type, return it's info
+    def owned(self, addr):
+        # TODO: pre-calculate backrefs data so we can find relationships more than 2 bytes back
+        # TODO: support other types of backrefs
+        for check_addr in range(addr, addr-2, -1):
+            if info := self.read_only_info(check_addr):
+                if not info.instruction:
+                    continue
+                distance = check_addr - addr
+                if len(info.instruction.bytes) >= distance:
+                    return (check_addr, info)
+        return None
 
     def visited(self, addr):
         return addr in memory_addr_info and memory_addr_info[addr].visited

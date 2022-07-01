@@ -41,26 +41,35 @@ class ComplexRef(Ref):
         return cpu.getMem(node)
 
 class LiteralRef(Ref):
-    def __init__(self, val, size, pc=None):
+    def __init__(self, val, size, pc=None, signed=False):
         self.val = val
         self.size = size
         self.pc = pc
+        self.signed = signed
 
     def to_string(self, memory, **kwargs):
+        val = self.getValue(memory)
+
         # Only label literals if they have been fixed up (or forced)
         if (self.pc and memory.is_fixup(self.pc)) or "forceLabel" in kwargs:
-            if label := memory.get_label(self.val):
+            if label := memory.get_label(val):
                 if "supressAlt" in kwargs:
                     return label
-                return f"{label}|{self.val:#0{self.size*2+2}x}"
-        return f"{self.val:#0{self.size*2+2}x}"
+                return f"{label}|{val:#0{self.size*2+2}x}"
+        return f"{val:#0{self.size*2+2}x}"
 
     def getValue(self, memory, **kwargs):
+        if self.pc:
+            return memory.get(self.pc, self.size, self.signed)
         return self.val
 
     def getNode(self, cpu):
         if self.pc:
-            return cpu.readMem(LiteralValue(self.pc, 16), self.size * 8)
+            val = cpu.readMem(LiteralValue(self.pc, 16), self.size * 8)
+            if self.signed:
+                assert self.size == 1
+                return SignExtend(val)
+            return val
         return LiteralValue(self.val, self.size * 8)
 
 class SmallLiteralRef(Ref):
@@ -74,22 +83,56 @@ class SmallLiteralRef(Ref):
         return LiteralValue(self.val, 4)
 
 class PcDisplacementRef(Ref):
-    def __init__(self, pc, disp):
+    def __init__(self, pc, disp, size=2):
         self.pc = pc
-        self.disp = disp
-        self.ref = LiteralRef(pc + disp, 2)
+        self.disp = disp # disp is a literal ref
+        self.size = size
 
     def __str__(self):
-        return f"[pc + {self.disp:#04x}]"
+        return f"[pc + {self.disp}]"
+
+    def getAddr(self, memory):
+         # disp is a literal ref, just incase self-modifying code patches it
+        return self.pc + self.disp.getValue(memory)
+
+    def getLiteralRef(self, memory):
+        addr = self.getAddr(memory)
+        addr_ref = LiteralRef(addr, 2)
+        lit_ref = LiteralRef(None, self.size, addr)
+        return lit_ref, addr_ref
 
     def getValue(self, memory):
-        return self.pc + self.disp
+        ref, _ = self.getLiteralRef(memory)
+        return ref.getValue(memory)
 
     def to_string(self, memory, **kwargs):
-        return f"[{self.ref.to_string(memory, forceLabel=True)}|{self.disp:+#04x}]"
+        ref, addr_ref = self.getLiteralRef(memory)
+        return f"[{addr_ref.to_string(memory, forceLabel=True)}]"
+
+    def to_string_indirect(self, memory, supressAlt=False, **kwargs):
+        addr = self.getAddr(memory)
+        try:
+            owner_addr, info = memory.owned(addr)
+            if info.instruction and owner_addr < addr:
+                inst = info.instruction.instruction
+                memref = None
+                if inst.mnemonic in ["ld", "st"]:
+                    memref = inst.srcs[0]
+                if inst.mnemonic in ["call"]:
+                    memref = inst.src
+
+                if isinstance(memref, DirectRef):
+                    # This is a common optimization that makes it hard to follow code
+                    ref, addr_ref = self.getLiteralRef(memory)
+                    string = f"{ref.to_string(memory, supressAlt=supressAlt, forceLabel=True)}(via {self.disp.to_string(memory)})"
+                    if inst.mnemonic in ["call"]:
+                        return string
+                    return "[" + string + "]"
+        except:
+            return "@" + self.to_string(memory)
 
     def getNode(self, cpu):
-        return cpu.getMem(LiteralValue(self.pc, 16), self.size * 8)
+        return cpu.getMem(LiteralValue(self.pc, 16).Add(self.disp), self.size * 8)
 
 class IndirectRef(Ref):
     def __init__(self, ref):
@@ -99,7 +142,10 @@ class IndirectRef(Ref):
         return f"@{self.ref}"
 
     def to_string(self, memory, **kwargs):
-        return f"@{self.ref.to_string(memory, **kwargs)}"
+        try:
+            return self.ref.to_string_indirect(memory, **kwargs)
+        except AttributeError:
+            return f"@{self.ref.to_string(memory, **kwargs)}"
 
     def getNode(self, cpu):
         return cpu.getMem(self.ref)
@@ -121,7 +167,7 @@ def Cpu6AddrMode(mode, pc, mem, prev=None, size = 1):
                 reg_b = None
 
             if regs & 0x10 == 0:
-                imm = LiteralRef(mem.get_i8(pc), 1, pc)
+                imm = signedOffset(pc, mem)
                 pc += 1
             else:
                 imm = LiteralRef(mem.get_be16(pc), 1, pc)
@@ -147,7 +193,7 @@ def Cpu6AddrMode(mode, pc, mem, prev=None, size = 1):
             ref.only_upper = upper
             return ref, pc
         case 3: # literal
-            ref = LiteralRef(int.from_bytes(mem[pc:pc+size], 'big'), size, pc)
+            ref = LiteralRef(None, size, pc)
             pc += size
             return ref, pc
 
@@ -164,11 +210,11 @@ def Cpu4AddrMode(mode, word, pc, mem):
         case 2: # Indirect
             return IndirectRef(DirectRef(mem.get_be16(pc), pc)), pc + 2
         case 3: # Displaced
-            return PcDisplacementRef(pc+1, mem.get_i8(pc)), pc + 1
+            return PcDisplacementRef(pc+1, signedOffset(pc, mem), 1 + word), pc + 1
         case 4: # Displaced Indirect
-            return IndirectRef(PcDisplacementRef(pc+1, mem.get_i8(pc))), pc + 1
+            return IndirectRef(PcDisplacementRef(pc+1, signedOffset(pc, mem))), pc + 1
         case 5: # Indexed
-            disp = 0
+            disp = None
             ref = Reg16Ref(mem[pc] >> 4)
             modifier = mem[pc] & 0xf
             pc += 1
@@ -182,7 +228,7 @@ def Cpu4AddrMode(mode, word, pc, mem):
                     return None, orig_pc
 
             if modifier & 8 == 8: # Displacement
-                disp = LiteralRef(mem.get_i8(pc), 1, pc)
+                disp = signedOffset(pc, mem)
                 pc += 1
 
             ref = ComplexRef(ref, None, disp)
