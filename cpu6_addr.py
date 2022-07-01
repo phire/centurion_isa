@@ -150,6 +150,26 @@ class IndirectRef(Ref):
     def getNode(self, cpu):
         return cpu.getMem(self.ref)
 
+class DeviceRef(Ref):
+    # OPSYS exclusively uses these references when accessing MMIO device registers
+    # CPU6 seems to be some feature to put MMIO in a different address space.
+    # It must be disabled on boot for compatibility, and enabled later.
+    def __init__(self, ref):
+        self.ref = ref
+
+    def __str__(self):
+        return f"Device{self.ref}"
+
+    def to_string(self, memory, **kwargs):
+        return f"Device{self.ref.to_string(memory, **kwargs)}"
+
+    def getNode(self, cpu):
+        return cpu.getMem(self.ref)
+
+def signedOffset(pc, mem):
+    return LiteralRef(mem.get_i8(pc), 1, pc, signed=True)
+
+
 # A short 2bit address mode, which will consume more bytes from PC
 def Cpu6AddrMode(mode, pc, mem, prev=None, size = 1):
     match mode:
@@ -298,4 +318,27 @@ def D6Mode(mode, pc, mem):
         case 0x11: # dest <- src op reg
             disp = LiteralRef(mem.get_be16(pc), 2, pc)
             return ComplexRef(dst_reg, None, disp), src_reg, pc + 2
+
+def F6Mode(pc, mem):
+    opn = mem[pc]
+    pc += 1
+
+    if opn & 0x10:
+        # Odd regs operate on bytes
+        reg = Reg8Ref(opn >> 4)
+    else:
+        # Even regs operate on words
+        reg = Reg16Ref(opn >> 4)
+
+    offset = signedOffset(pc, mem)
+    pc += 1
+
+    ref = ComplexRef(Reg16Ref(opn & 0xe), offset)
+
+    if opn & 0x01:
+        # Device(Mem) <- reg
+        return DeviceRef(ref), reg, pc
+    else:
+        # reg <- Device(Mem)
+         return reg, DeviceRef(ref), pc
 

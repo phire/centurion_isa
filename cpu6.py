@@ -331,28 +331,14 @@ def MemoryMatch(pc, mem):
     pc += 1
 
     if inst == 0xf6:
-        bytetwo = mem[pc]
-        offset_byte = mem[pc+1]
-        pc += 2
+        # All memory references are in the Device address space
+        # OPSYS exclusively uses these instructions when accessing MMIO device registers
+        # CPU6 seems to be some feature to put MMIO in a different address space.
+        # It must be disabled on boot for compatibility, and enabled later.
 
-        reg = (bytetwo >> 4) & 0xf
-        index = bytetwo & 0xf
-
-        reg_name = RegNames8[reg]
-        index_name = RegNames16[index >> 1]
-        op = ["ld", "st"][index & 1]
-        addr = f"{struct.unpack_from('>xH', mem[orig_pc:])[0]:#06x}"
-
-        offset = f"{struct.unpack_from('b', struct.pack('B', offset_byte))[0]:+#04x}"
-        format = f"{op} {reg_name}, {offset}({index_name})"
-
+        dst, src, pc = F6Mode(pc, mem)
         bytes = mem[orig_pc:pc]
-        return InstructionMatch(orig_pc, QuickInstuction(format), bytes, {
-            "reg": reg_name,
-            "index": index_name,
-            "addr": addr,
-            "offset": offset,
-        })
+        return InstructionMatch(orig_pc, BasicCpu6Inst("mov", dst, src), bytes)
 
     elif inst & 0x80 == 0x80:
         # Instructions that operate on A & B
