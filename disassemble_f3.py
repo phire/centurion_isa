@@ -26,12 +26,7 @@ labels = [
     (0x9156, "repeat_test", "Resets stack, takes 16bit test start address from RT"),
 ]
 
-if __name__ == "__main__":
-    with open(filename, "rb") as f:
-        data = f.read()
-
-    memory = b"\0" * (base_address) + data + b"\0" * (0x10000 - (len(data) + base_address))
-
+def annotate(memory, entry_points, memory_addr_info):
     #scan_calls(memory, base_address, base_address)
 
     for (addr, indirect_addr, name) in functions:
@@ -58,8 +53,3 @@ if __name__ == "__main__":
 
     scan_strings(memory, body_addr)
     scan_call_args(memory, body_addr)
-    mem = MemoryWrapper(memory)
-
-    read_annotations("roms/Diag_F3_Rev_1.0.comments", mem)
-
-    disassemble(mem)

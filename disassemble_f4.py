@@ -19,7 +19,7 @@ functions = [
     (0x291, 0x10c, "WaitNotFIn"),
 ]
 
-if __name__ == "__main__":
+def annotate(memory, entry_points, memory_addr_info):
     with open(filename, "rb") as f:
         data = f.read()
 
@@ -42,9 +42,3 @@ if __name__ == "__main__":
     entry_points.append(0x9d45)
     entry_points.append(0x9e08)
     entry_points.append(0x9ea7)
-
-    mem = MemoryWrapper(memory)
-
-    read_annotations("roms/Diag_F4_1133CMD.comments", mem)
-
-    disassemble(mem)

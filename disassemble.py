@@ -4,6 +4,7 @@ from collections import defaultdict
 import struct
 from cpu6 import disassemble_instruction
 from generic import memory_addr_info, entry_points, MemInfo, TransferExecution
+from ono.depgen import *
 
 def recursive_disassemble(mem, entry):
     valid = True
@@ -385,7 +386,7 @@ def read_annotations(name, memory):
 
 def main():
     import argparse
-    import sys
+    import sys, os
 
     all_args = argparse.ArgumentParser()
 
@@ -393,6 +394,8 @@ def main():
     all_args.add_argument("-s", "--start", required=False, help="starting address of this file")
     all_args.add_argument("-t", "--type", required=False, help="type of file", default="binary")
     all_args.add_argument("-a", "--annotations", action='append', help="annotations file")
+    all_args.add_argument("-o", "--output", required=False, help="output file")
+    all_args.add_argument("--depfile", help="automatic dependency generation for make")
     all_args.add_argument("--script", action='append', help="script file")
     args = vars(all_args.parse_args())
 
@@ -407,6 +410,7 @@ def main():
         memory_addr_info[base_address].label = "Start"
 
     with open(filename, "rb") as f:
+        add_dependency(filename)
         data = f.read()
 
     if args["type"] == "binary":
@@ -444,17 +448,33 @@ def main():
 
     if args["annotations"]:
         for ann_filename in args["annotations"]:
+            add_dependency(ann_filename)
             read_annotations(ann_filename, mem)
 
     if args["script"]:
         for script_filename in args["script"]:
+            add_dependency(script_filename)
             with open(script_filename, "r") as f:
                 ast = compile(f.read(), script_filename, 'exec')
+            name = '.'.join(os.path.split(os.path.splitext(script_filename)[0]))
             script_globals = {
-                'memory': mem,
-                'memory_addr_info': memory_addr_info,
-                'entry_points': entry_points}
+                # Needed for relative imports to work
+                '__name__': name,
+                '__file__': os.path.abspath(script_filename)}
             exec(ast, script_globals, script_globals)
+            if 'annotate' in script_globals:
+                script_globals['annotate'](mem, entry_points, memory_addr_info)
+
+
+    if args["depfile"] and args["output"]:
+        generate_depfile(args["depfile"], args["output"])
+
+    # TODO: disassemble shouldn't be printing to stdout
+    #       but until that is fixed we can redirect stdout
+
+    if args["output"]:
+        f = open(args["output"], "w")
+        sys.stdout = f
 
     return mem
 

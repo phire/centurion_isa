@@ -92,11 +92,8 @@ lables = [
 ]
 
 
-if __name__ == "__main__":
-    with open(filename, "rb") as f:
-        data = f.read()
+def annotate(memory, entry_points, memory_addr_info):
 
-    memory = b"\0" * (base_address) + data + b"\0" * (0x10000 - (len(data) + base_address))
     entry_points.append(0x8001)
 
 
@@ -115,11 +112,6 @@ if __name__ == "__main__":
     for addr in strings:
         add_string(memory, addr)
 
-
-    mem = MemoryWrapper(memory)
-    read_annotations("roms/Diag_F1_Rev_1.0.comments", mem)
-
-
     # There is a table of tests here:
     for testnum, addr in enumerate(range (0x8055, 0x8075, 2)):
         dest = struct.unpack(">H", memory[addr:addr+2])[0]
@@ -135,7 +127,3 @@ if __name__ == "__main__":
         # copy the comment
         if memory_addr_info[dest].pre_comment:
             memory_addr_info[addr].comment += f": {memory_addr_info[dest].pre_comment}"
-
-
-
-    disassemble(mem)

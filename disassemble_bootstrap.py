@@ -99,11 +99,7 @@ def add_byte(mem, address):
     address += 1
     entry_points.append(address)
 
-if __name__ == "__main__":
-    with open(filename, "rb") as f:
-        data = f.read()
-
-    memory = b"\0" * (base_address) + data + b"\0" * (0x10000 - (len(data) + base_address))
+def annotate(memory, entry_points, memory_addr_info):
 
     for (addr, name, *extra) in functions:
         memory_addr_info[addr].label = name
@@ -125,4 +121,3 @@ if __name__ == "__main__":
 
     apply_comments(comments)
 
-    disassemble(MemoryWrapper(memory))

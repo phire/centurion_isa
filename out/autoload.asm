@@ -1,5 +1,5 @@
 
-L_ef00:
+Start:
 ef00:    1c 03                  bs3 L_ef05
 ef02:    71 ef c0               jmp L_efc0
 
@@ -29,7 +29,7 @@ ef2a:    a1 f1 48               st AL, [0xf148]
 L_ef2d:
 ef2d:    81 f1 44               ld AL, [0xf144]
 ef30:    2c                     srl AL, #1
-ef31:    15 cd                  bnz L_ef00
+ef31:    15 cd                  bnz Start
 ef33:    10 f8                  bc L_ef2d
 ef35:    81 f1 45               ld AL, [0xf145]
 ef38:    c0 30                  ld BL, 0x30

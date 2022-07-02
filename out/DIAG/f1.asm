@@ -3,6 +3,9 @@ L_0103:
 0103:    <null bytes>
 
 
+Start:
+8000:    00                     HALT
+
 DiagEntryPoint:
 8001:    3a                     clr A, #0
 8002:    b1 b8 00               st A, [0xb800]	 ; This is the first word in Diag's 1KB of RAM
@@ -19,7 +22,7 @@ DiagEntryPoint:
 801b:    b1 00 fe               st A, [0x00fe]	 ; This is writing a pointer directly into registers.
 801e:    3a                     clr A, #0
 801f:    b1 00 fc               st A, [0x00fc]	 ; Something really funky is going on here.
-8022:    76                     unknown	 ; I assume this is calling or jumpting to that function
+8022:    76                     enable_parity_trap	 ; I assume this is calling or jumpting to that function
 
 L_8023:
 8023:    3a                     clr A, #0
@@ -827,7 +830,7 @@ TOS_PromptLoop:
 84bd:    73 04                  jmp Q_Command
 
 G_Command:
-    ; Go: Takes a
+    ; Go: Takes a 
 84bf:    7b 79                  call ReadHexWord
 84c1:    55 80                  mov A, Z
 
@@ -1178,7 +1181,7 @@ Diag_self_test:
     ; Test_0c: Checksum's the F1 rom, flashes 1c if fail.
     ; Then test diag's sram from b800 to bfff, flashes 2c if fail.
     ; If everything passes, it lights up all decimal points, sets the
-    ; hex displays to 88 (aka Christmas tree) and loops.
+    ; hex displays to 88 (aka Christmas tree) and loops. 
 86b2:    d0 0f 0c               ld B, 0x0f0c
 86b5:    81 f1 10               ld AL, [0xf110]
 86b8:    42 21                  and AL, BH

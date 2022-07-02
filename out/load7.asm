@@ -5688,7 +5688,7 @@ L_9e47:
 L_9e4a:
 9e4a:    20 7e                  inc YL, #15
 9e4c:    45 55                  mov XL, XL
-9e4e:    76                     unknown
+9e4e:    76                     enable_parity_trap
 9e4f:    01                     nop
 9e50:    85 32                  ld AL, [--B]
 9e52:    40 3f                  add PL, BL
@@ -12104,7 +12104,7 @@ L_caea:
 caea:    d4 7b                  ld B, @[R_cb67|0xcb67]
 caec:    d9                     ld B, [B]
 caed:    cc                     ld BL, [Z]
-caee:    76                     unknown
+caee:    76                     enable_parity_trap
 
 R_caef:
 caef:    7b d5                  call L_cac6

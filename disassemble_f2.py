@@ -75,13 +75,7 @@ comments = [
 
 ]
 
-if __name__ == "__main__":
-    with open(filename, "rb") as f:
-        data = f.read()
-
-    memory = b"\0" * (base_address) + data + b"\0" * (0x10000 - (len(data) + base_address))
-
-   # scan_calls(memory, base_address, base_address)
+def annotate(memory, entry_points, memory_addr_info):
 
     for addr in range (0x8da1, 0x8dbb, 2):
         memory_addr_info[addr].type = ">H"
@@ -109,5 +103,3 @@ if __name__ == "__main__":
 
     apply_comments(comments)
 
-
-    disassemble(MemoryWrapper(memory))
