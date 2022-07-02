@@ -247,6 +247,8 @@
 0xb871 ,	comment	; Read status
 0xb874 ,	comment	; Separate bits 4 and 7
 0xb877 ,	comment	; We know what bit 4 is (probably) drive ready; bit 7 isn't known yet
+0xb884 ,	comment	; IOBase
+0xb887 ,	comment	; Unknown register
 0xbb4f ,	comment	; Patch PrintStringToErrorDevice arg
 0xbb77 ,	comment	; " FAIL:  X XXXX XXXX\x07\r"
 0xc085 ,	comment	; "EC:XX CP:XX CMDS: "
