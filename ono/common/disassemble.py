@@ -3,7 +3,10 @@ from .memory import entry_points, TransferExecution, ResumeExecution
 import struct
 
 
-def recursive_disassemble(mem, entry, isa):
+def disassemble_basicblock(mem, entry, isa):
+    """Disassembles instructions until it hits control flow or
+       something that has already been processed."""
+
     valid = True
     pc = entry
     while valid and pc < 0xfe00:
@@ -35,15 +38,20 @@ def recursive_disassemble(mem, entry, isa):
         for next_pc in info.next_pc[1:]:
             if isinstance(next_pc, TransferExecution):
                 mem.create_label(next_pc())
-            recursive_disassemble(mem, next_pc(), isa)
+            entry_points.insert(0, next_pc())
+            disassemble_basicblock(mem, next_pc(), isa)
 
         next_pc = info.next_pc[0]
 
         if isinstance(next_pc, TransferExecution):
             mem.create_label(next_pc())
+            entry_points.insert(0, next_pc())
+            return
+
         pc = next_pc()
 
 
 def disassembleAllEntries(memory, isa):
-    for entry in entry_points:
-        recursive_disassemble(memory, entry, isa)
+    while entry_points:
+        entry = entry_points.pop(0)
+        disassemble_basicblock(memory, entry, isa)

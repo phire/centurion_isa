@@ -10,6 +10,8 @@ from common.listing import printListing
 from common.script import run_script
 import cpu6
 
+relocation_targets = []
+
 def load_binary(name, type):
     filename = args["input"]
     if args["type"] == "binary":
@@ -52,7 +54,7 @@ def load_binary(name, type):
                     new_value = struct.pack(">H", (new_addr) & 0xffff)
                     memory = memory[:fixup] + new_value + memory[fixup + 2:]
                     data = data[2:]
-                    entry_points.append(new_addr)
+                    relocation_targets.append(new_addr)
                     memory_addr_info[new_addr].label = f"R_{new_addr:04x}"
                     #memory_addr_info[fixup].label = f"F_{fixup:04x}"
 
@@ -97,5 +99,23 @@ if args["output"]:
     sys.stdout = f
 
 disassembleAllEntries(mem, cpu6)
+
+if relocation_targets:
+    # In order to get a more complete disassembly, we optimistically
+    # add all relocation targets as entries
+    # this is not correct. Many are data, many are halfway though an instruction
+
+    # But by doing it after we have already disassembled all reachable
+    # code, we minimize disruptions
+
+    for reloc in set(relocation_targets):
+        # filter out relocs which point at null bytes, they are probally data
+        if mem[reloc] == 0:
+            continue
+        entry_points.append(reloc)
+
+    disassembleAllEntries(mem, cpu6)
+
+
 printListing(mem)
 
