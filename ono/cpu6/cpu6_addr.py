@@ -1,5 +1,5 @@
-from cpu6_regs import Reg8Ref, Reg16Ref, PostIncRef, PreDecRef, Ref
-from cpu6_ops import *
+from .cpu6_regs import Reg8Ref, Reg16Ref, PostIncRef, PreDecRef, Ref
+from .cpu6_ops import *
 
 class DirectRef(Ref):
     def __init__(self, addr, pc):

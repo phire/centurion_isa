@@ -1,4 +1,4 @@
-from cpu6_ops import *
+from .cpu6_ops import *
 
 RegNames16 = [
     "A", "B", "X", "Y", "Z", "S", "C", "P",

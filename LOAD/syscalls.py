@@ -1,4 +1,4 @@
-from generic import FunctionInfo
+from cpu6.info import FunctionInfo
 
 Syscalls = {
     0x02: ("02", {"DiskNum": "byte", "Filename": "ptr", "Buffer": "word", "arg4": "byte"}),

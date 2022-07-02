@@ -1,7 +1,8 @@
-from generic import *
-from cpu6_regs import Reg16Ref, Reg8Ref, MultiRegRef, LvlRegRef
-from cpu6_addr import *
-from cpu6_ops import *
+from cpu6.info import Xargs
+from .generic import *
+from .cpu6_regs import Reg16Ref, Reg8Ref, MultiRegRef, LvlRegRef
+from .cpu6_addr import *
+from .cpu6_ops import *
 import struct
 
 class BasicCpu6Inst:
@@ -66,6 +67,7 @@ class ControlFlowInst:
         ret = []
         if instruction.resume:
             if xargs := instruction.get_xargs(mem):
+                xargs = Xargs(xargs)
                 next_pc = xargs.annotate(mem, next_pc)
             ret += [ResumeExecution(next_pc)]
         if dst := instruction.get_dst(mem):

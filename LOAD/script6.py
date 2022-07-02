@@ -1,9 +1,6 @@
 import struct
 
-import sys
-print(__name__, __file__, file=sys.stderr)
-
-from .syscalls import *
+from syscalls import *
 
 def annotate(memory, entry_points, memory_addr_info):
 

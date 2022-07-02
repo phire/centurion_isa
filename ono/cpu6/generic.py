@@ -1,41 +1,11 @@
 from collections import defaultdict
-from cpu6_regs import RegNames16, RegNames8
+
+from common.memory import ResumeExecution, TransferExecution, entry_points, memory_addr_info
+from .cpu6_regs import RegNames16, RegNames8
 import struct
 
-class MemInfo:
-    def __init__(self):
-        self.instruction = None
-        self.label = None
-        self.visited = False
-        self.type = None
-        self.comment = None
-        self.pre_comment = None
-        self.fixup = None
-        self.func_info = None
-        self.arg_name = None
-        self.insn_offset = None
-
-class FunctionInfo:
-    def __init__(self, x_args):
-        self.xargs = x_args
-
-class ResumeExecution:
-    def __init__(self, pc):
-        self.pc = pc
-
-    def __call__(self):
-        return self.pc
-
-class TransferExecution:
-    def __init__(self, pc):
-        self.pc = pc
-
-    def __call__(self):
-        return self.pc
 
 
-entry_points = []
-memory_addr_info = defaultdict(MemInfo)
 
 signed_wildcards = ("S")
 

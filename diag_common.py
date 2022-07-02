@@ -1,5 +1,6 @@
 import struct
-from disassemble import *
+from common.annotations import apply_comments
+from common.memory import entry_points, memory_addr_info
 
 def labelname(name):
     name = name.replace(" ", "_")
@@ -65,7 +66,7 @@ def add_word(mem, address):
      # resume execution after the word
     address += 2
     entry_points.append(address)
-    
+
 
 def scan_strings(mem, address):
     while True:

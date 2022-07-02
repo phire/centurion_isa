@@ -13,7 +13,7 @@ OUTPUTS = \
 
 all: $(OUTPUTS)
 
-DISASSEMBLE = python3 disassemble.py -o $@ --depfile $(DEPDIR)/$(@:%=%.d) -i $<
+DISASSEMBLE = python3 ono -o $@ --depfile $(DEPDIR)/$(@:%=%.d) -i $<
 
 out/DIAG/f1.asm: roms/Diag_F1_Rev_1.0.BIN
 	$(DISASSEMBLE) -s 0x8000 \

@@ -2,8 +2,8 @@
 
 from cpu6 import *
 from disassemble import disassembleAllEntries, main, printListing
-from cpu6_regs import RegNames16, RegNames8
-from cpu6_ops import *
+from cpu6.cpu6_regs import RegNames16, RegNames8
+from cpu6.cpu6_ops import *
 from copy import copy
 
 class FakeValue(Value):

@@ -1,7 +1,7 @@
 import struct
-from generic import FunctionInfo
+from cpu6.info import FunctionInfo
 
-from .syscalls import syscall_annotate
+from syscalls import syscall_annotate
 
 def annotate(memory, entry_points, memory_addr_info):
 

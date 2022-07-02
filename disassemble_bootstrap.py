@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from disassemble import *
+from common.annotations import apply_comments
+from common.memory import entry_points, memory_addr_info
 
 filename = "roms/bootstrap_unscrambled.bin"
 base_address = 0xfc00
