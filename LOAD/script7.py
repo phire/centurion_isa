@@ -16,7 +16,6 @@ def annotate(memory, entry_points, memory_addr_info):
         memory_addr_info[addr+2].label = f"Device_{name}_number"
         memory_addr_info[addr+3].type = "ptr"
         memory_addr_info[addr+5].type = "ptr"
-        memory_addr_info[addr+5].label = f"Device_{name}_Obj"
         memory_addr_info[addr+7].type = 'char[6]'
 
         if name.startswith("DISK"):

@@ -195,7 +195,13 @@ def Match2f(pc, mem):
         case 1:
             mnemonic += "dma_count"
         case 2:
-            mnemonic += "dma_mode"
+            mnemonic = "dma_mode"
+            if op & 1 == 1:
+                reg_ref = Reg8Ref(reg)
+            else:
+                mnemonic += f" {reg}"
+                reg_ref = None
+            return InstructionMatch(pc, BasicCpu6Inst(mnemonic, reg_ref), bytes, {})
         case 3:
             if reg == 0 and op & 1 == 0:
                 mnemonic = "enable_dma" if op & 1 == 0 else "disable_dma"

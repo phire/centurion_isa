@@ -48,8 +48,9 @@ def annotate(memory, entry_points, memory_addr_info):
     def func(addr, name, xargs):
         if name:
             memory_addr_info[addr].label = name
-        if xargs:
-            memory_addr_info[addr].func_info = FunctionInfo(xargs)
+        # Temporarily disabled, does not work :(
+        # if xargs:
+        #     memory_addr_info[addr].func_info = FunctionInfo(xargs)
 
 
     func(0x85fa, "FlushFn", {"fileop": "ptr"})
@@ -93,6 +94,7 @@ def annotate(memory, entry_points, memory_addr_info):
             dest = 0xe399 + offset
         else:
             dest = 0xe399 + (0x10000 - offset)
+
 
 
         label = memory.get_label(dest)
