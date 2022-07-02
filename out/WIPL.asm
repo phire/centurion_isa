@@ -735,10 +735,9 @@ L_050d:
 0510:    19 21                  ble L_0533
 0512:    da                     ld B, [X]	 ; arg[2, 3]
 0513:    79 06 9a               call L_069a
-0516:    a0 ' '
 
-L_0517:
-0517:    dd                     ld B, [S]	 ; B = length
+L_0516:
+0516:    a0 dd                  st AL, 0xdd
 0518:    55 60                  mov A, Y	 ; Preserve Y
 051a:    bd                     st A, [S]
 051b:    95 41                  ld A, [X++]	 ; dest
