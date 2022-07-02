@@ -6,7 +6,7 @@ from depgen import *
 from common.memory import entry_points, memory_addr_info, MemoryWrapper
 from common.annotations import read_annotations
 from common.disassemble import disassembleAllEntries
-from common.listing import printListing
+from common.listing import getListing, printListing
 from common.script import run_script
 import cpu6
 
@@ -87,10 +87,6 @@ if args["script"]:
         run_script(script_filename, mem)
 
 
-if args["depfile"] and args["output"]:
-    generate_depfile(args["depfile"], args["output"])
-
-
 disassembleAllEntries(mem, cpu6)
 
 if relocation_targets:
@@ -109,14 +105,17 @@ if relocation_targets:
 
     disassembleAllEntries(mem, cpu6)
 
-
-
-# TODO: disassemble shouldn't be printing to stdout
-#       but until that is fixed we can redirect stdout
-
 if args["output"]:
+    listing = "\n".join(getListing(mem)) + "\n"
+
     f = open(args["output"], "w")
-    sys.stdout = f
+    f.write(listing)
+    f.close()
 
-printListing(mem)
+else:
+    printListing(mem)
 
+
+# Should idealy be done last
+if args["depfile"] and args["output"]:
+    generate_depfile(args["depfile"], args["output"])

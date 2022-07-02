@@ -16,35 +16,40 @@ def format_untyped(b):
         out +=  f" '{c}'"
     return out
 
-def printListing(mem: common.memory.MemoryWrapper):
+def getListing(mem: common.memory.MemoryWrapper):
     skipping = True # Ignore null bytes at start of memory
 
     addr = 0
+    before = ""
     while addr < 0xfe00:
         info = mem.read_only_info(addr)
 
         if info.label:
-            print(f"\n{info.label}:")
+            before += f"\n{info.label}:\n"
             skipping = False
 
         # Skip large blocks of zeros, but only if they don't have lables/comments
         if mem[addr] == 0 and mem[addr:addr+10] == b"\x00" * 10:
             if not skipping:
-                print(f"{addr:04x}:    <null bytes>\n")
+                before += f"{addr:04x}:    <null bytes>\n"
                 skipping = True
             addr += 1
             while addr < mem.top and mem[addr] == 0 and not mem.hasInfo(addr):
                 addr += 1
+
+            if before:
+                yield before
+                before = ""
             continue
 
         if info.pre_comment:
             # Make sure an empty line is present in front of pre_comment
             # This aids proper parsing it back by extract_comments.py
             if not info.label:
-                print("")
+                before += "\n"
             lines = info.pre_comment.split("\n")
             for line in lines:
-                print(f"    ; {line}")
+                before += (f"    ; {line}\n")
 
         prefix = f"{addr:04x}:    "
 
@@ -77,5 +82,13 @@ def printListing(mem: common.memory.MemoryWrapper):
             out += f"\t ; {lines[0]}"
             for line in lines[1:]:
                 out += "\n" + " " * indent + f"\t ; {line}"
-        print(out.strip())
+
+
+        yield before + out.strip()
         addr += length
+        before = ""
+
+
+def printListing(mem: common.memory.MemoryWrapper):
+    for line in getListing(mem):
+        print(line)
