@@ -9740,8 +9740,8 @@ b87c:    29                     dec AL, #1
 b87d:    a4 e7                  st AL, [0x011f(via -0x19)]
 b87f:    c1 b8 04               ld BL, [Hawk_TranslatedFunctionCode2+1|0xb804]
 b882:    16 06                  blt L_b88a
-b884:    95 68 0f               ld A, [Y + 0x0f]	; IOBase
-b887:    f6 31 0b               mov Device[A + 0x0b], BL	; Unknown register
+b884:    95 68 0f               ld A, [Y + 0x0f]	 ; IOBase
+b887:    f6 31 0b               mov Device[A + 0x0b], BL	 ; Unknown register
 
 L_b88a:
 b88a:    09                     ret

@@ -76,7 +76,7 @@ fc58:    27 30                  rlc BL, #1
 fc5a:    29                     dec AL, #1
 fc5b:    17 fb                  bp LoadFromFFC
 fc5d:    f5 a2                  st B, [--S]
-fc5f:    2f 14                  ld_dma_mode A
+fc5f:    2f 14                  dma_mode 1
 fc61:    2f 06                  enable_dma
 fc63:    2f a0                  ld_dma_addr S
 fc65:    90 ff f6               ld A, 0xfff6
@@ -165,7 +165,7 @@ fcdd:    15 a0                  bnz PrintError
 fcdf:    d0 00 20               ld B, 0x0020
 fce2:    5a                     and B, A
 fce3:    14 f2                  bz L_fcd7
-fce5:    2f 04                  ld_dma_mode A
+fce5:    2f 04                  dma_mode 0
 fce7:    2f 06                  enable_dma
 fce9:    90 01 00               ld A, 0x0100	 ; DMA transfer destination address
 fcec:    2f 00                  ld_dma_addr A
@@ -255,7 +255,7 @@ fd6a:    2f 00                  ld_dma_addr A
 fd6c:    51 80                  sub A, Z
 fd6e:    3b                     not A, #0
 fd6f:    2f 02                  ld_dma_count A
-fd71:    2f 34                  ld_dma_mode B
+fd71:    2f 34                  dma_mode 3
 fd73:    2f 06                  enable_dma
 fd75:    80 43                  ld AL, 0x43
 fd77:    a1 f8 08               st AL, [0xf808]
@@ -272,7 +272,7 @@ fd82:    90 01 00               ld A, 0x0100
 fd85:    2f 00                  ld_dma_addr A
 fd87:    90 ea 1f               ld A, 0xea1f
 fd8a:    2f 02                  ld_dma_count A
-fd8c:    2f 34                  ld_dma_mode B
+fd8c:    2f 34                  dma_mode 3
 fd8e:    2f 06                  enable_dma
 fd90:    80 45                  ld AL, 0x45
 fd92:    a1 f8 08               st AL, [0xf808]

@@ -646,7 +646,7 @@ SetDmaForSectorLoad:
 04a4:    2f 00                  ld_dma_addr A
 04a6:    90 fe 6f               ld A, 0xfe6f	 ; 400 bytes == 1 sector
 04a9:    2f 02                  ld_dma_count A
-04ab:    2f 04                  ld_dma_mode A
+04ab:    2f 04                  dma_mode 0
 04ad:    2f 06                  enable_dma
 04af:    09                     ret
 

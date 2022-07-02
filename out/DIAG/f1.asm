@@ -647,7 +647,7 @@ HawkTest:
 8392:    2f 02                  ld_dma_count A
 8394:    90 01 00               ld A, 0x0100
 8397:    2f 00                  ld_dma_addr A
-8399:    2f 04                  ld_dma_mode A
+8399:    2f 04                  dma_mode 0
 839b:    2f 06                  enable_dma
 839d:    2a                     clr AL, #0
 839e:    a1 f1 48               st AL, [0xf148]
@@ -1051,7 +1051,7 @@ L_85eb:
 85ed:    29                     dec AL, #1
 85ee:    17 fb                  bp L_85eb
 85f0:    f5 a2                  st B, [--S]
-85f2:    2f 14                  ld_dma_mode A
+85f2:    2f 14                  dma_mode 1
 85f4:    2f 06                  enable_dma
 85f6:    2f a0                  ld_dma_addr S
 85f8:    90 ff f6               ld A, 0xfff6
@@ -1132,7 +1132,7 @@ L_8664:
 866c:    d0 00 20               ld B, 0x0020
 866f:    5a                     and B, A
 8670:    14 f2                  bz L_8664
-8672:    2f 04                  ld_dma_mode A
+8672:    2f 04                  dma_mode 0
 8674:    2f 06                  enable_dma
 8676:    90 01 00               ld A, 0x0100
 8679:    2f 00                  ld_dma_addr A
