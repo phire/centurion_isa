@@ -1,19 +1,24 @@
 from collections import defaultdict
-
-#from cpu6.info import Xargs
-
+import common.oldtype as oldtype
 
 class MemInfo:
+    """A MemInfo represents an address in memory, along with the (for lack of a
+       better word) the 'thing' starting at that address, and any annotations.
+
+       Both instructions and data are 'things'
+    """
     def __init__(self):
+        # information about the thing
+        self.type = None # printable object describing the thing (instruction or data)
+        self.length = 0 # length of the thing
+
+        # annotations attached to this memory.
         self.label = None
         self.comment = None
         self.pre_comment = None
-        self.length = 0
 
-        self.type = None
-
+        # internal metadata
         self.visited = False
-
         self.fixup = None
         self.func_info = None
         self.arg_name = None

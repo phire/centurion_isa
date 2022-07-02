@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from common.memory import Instruction, ResumeExecution, TransferExecution, entry_points, memory_addr_info
+from common.memory import Instruction, ResumeExecution, TransferExecution, memory_addr_info
 from .cpu6_regs import RegNames16, RegNames8
 
 signed_wildcards = ("S")
