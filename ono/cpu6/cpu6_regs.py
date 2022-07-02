@@ -1,4 +1,5 @@
 from .cpu6_ops import *
+from common.ref import Ref, RegRef
 
 RegNames16 = [
     "A", "B", "X", "Y", "Z", "S", "C", "P",
@@ -9,12 +10,6 @@ RegNames8 = [
     "AH", "AL", "BH", "BL", "XH", "XL", "YH", "YL", "ZH", "ZL", "SH", "SL", "CH", "CL", "PH", "PL",
 ]
 
-class Ref:
-    def to_string(self, memory, **kwargs):
-        return str(self)
-
-class RegRef(Ref):
-    pass
 
 class Reg16Ref(RegRef):
     def __init__(self, reg):

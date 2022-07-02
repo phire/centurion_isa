@@ -130,7 +130,7 @@ BackToPrompt:
 01ce:    03 42                  (0x342)	 ; WIPL version string
 01d0:    80 8a                  ld AL, 0x8a
 01d2:    a1 03 44               st AL, [0x0344]
-01d5:    7c f5                  call PrintString(via -0xb)
+01d5:    7c f5                  call PrintString (via 0x01cb+1)
 01d7:    03 4e                  (0x34e)	 ; "NAME"
 01d9:    79 06 09               call ReadLine
 01dc:    03 63                  (0x363)	 ; name_buffer
@@ -616,7 +616,7 @@ LoadNextFileSector:
 0480:    58                     add B, A	 ; B = new_entry_idx * 3
 0481:    93 1f                  ld A, [LoadBuffer1|0x04a2]
 0483:    58                     add B, A	 ; new_fs_metadata_current_entry = LoadBuffer1 + new_entry_idx * 3
-0484:    94 ce                  ld A, None	 ; A = old_link = fs_metadata_current_entry.entry_type
+0484:    94 ce                  ld A, @[0x0454]	 ; A = old_link = fs_metadata_current_entry.entry_type
 0486:    f3 cc                  st B, [0x0454]	 ; fs_metadata_current_entry = new_fs_metadata_current_entry
 0488:    3b                     not A, #0
 0489:    60 57 79               ld X, 0x5779	 ; fs_metadata_start_sector, this location is patched
@@ -950,13 +950,13 @@ HandleBackspace:
 0632:    80 a0                  ld AL, 0xa0	 ; ' ' (space)
 0634:    79 05 64               call PrintChar	 ; This actually rubs out the character on the screen
 0637:    80 95                  ld AL, 0x95	 ; Restore our saved control character
-0639:    7c fa                  call PrintChar(via -0x6)	 ; And repeat it in order to move the cursor one step back again
+0639:    7c fa                  call PrintChar (via 0x0634+1)	 ; And repeat it in order to move the cursor one step back again
 063b:    3f                     dec X	 ; Decrement current input buffer position
 063c:    73 de                  jmp ReadNextChar
 
 L_063e:
 063e:    80 86                  ld AL, 0x86	 ; 0x06 - move the cursor one position forward ?
-0640:    7c f3                  call PrintChar(via -0xd)	 ; PrintChar
+0640:    7c f3                  call PrintChar (via 0x0634+1)	 ; PrintChar
 0642:    73 d8                  jmp ReadNextChar
 
 L_0644:

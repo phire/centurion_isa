@@ -357,19 +357,21 @@ Device_CRT0_number:
 02a5:    04 e7                  R_04e7
 02a7:    b2 6c                  CRTDeviceFunctions
 02a9:    "CRT0  "
-02af:    00                     HALT
-02b0:    00                     HALT
+02af:    00
+02b0:    00
 02b1:    f2 00                  L_f200
 02b3:    00
-02b4:    00                     HALT
-02b5:    00                     HALT
-02b6:    00                     HALT
-02b7:    00                     HALT
-02b8:    00                     HALT
-02b9:    83 18                  ld AL, [0x02d3]
-02bb:    c5 00                  ld BL, [A]
-02bd:    00                     HALT
-02be:    00                     HALT
+02b4:    00
+02b5:    00
+02b6:    00
+02b7:    00
+02b8:    00
+02b9:    83
+02ba:    18
+02bb:    c5 'E'
+02bc:    00
+02bd:    00
+02be:    00
 02bf:    a6 85                  CrtDeviceHooks
 02c1:    00
 02c2:    00
@@ -397,14 +399,15 @@ Device_DISK0_number:
 02df:    a6 f5                  WeirdExtra_HawkDeviceObj
 02e1:    "DISK0 "
 02e7:    00
-02e8:    00                     HALT
+02e8:    00
+02e9:    f1 'q'
+02ea:    40
 
-L_02e9:
-02e9:    f1 40 03               st B, [0x4003]
-02ec:    2a                     clr AL, #0
+Device_DISK0_TotalTracks:
+02eb:    03 2a                  (0x32a)
 02ed:    00                     (0x0)
 02ee:    06 a6                  R_06a6
-02f0:    5a                     and B, A
+02f0:    5a
 02f1:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK1:
@@ -417,14 +420,15 @@ Device_DISK1_number:
 02f8:    a6 f7                  HawkDeviceObj
 02fa:    "DISK1 "
 0300:    00
-0301:    00                     HALT
+0301:    00
+0302:    f1 'q'
+0303:    40
 
-L_0302:
-0302:    f1 40 03               st B, [0x4003]
-0305:    2a                     clr AL, #0
+Device_DISK1_TotalTracks:
+0304:    03 2a                  (0x32a)
 0306:    01                     (0x1)
 0307:    06 a6                  R_06a6
-0309:    5a                     and B, A
+0309:    5a
 030a:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK2:
@@ -437,14 +441,15 @@ Device_DISK2_number:
 0311:    a6 f7                  HawkDeviceObj
 0313:    "DISK2 "
 0319:    00
-031a:    00                     HALT
+031a:    00
+031b:    f1 'q'
+031c:    40
 
-L_031b:
-031b:    f1 40 03               st B, [0x4003]
-031e:    2a                     clr AL, #0
+Device_DISK2_TotalTracks:
+031d:    03 2a                  (0x32a)
 031f:    02                     (0x2)
 0320:    06 a6                  R_06a6
-0322:    5a                     and B, A
+0322:    5a
 0323:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK3:
@@ -456,15 +461,16 @@ Device_DISK3_number:
 0328:    04 e9                  R_04e9
 032a:    a6 f7                  HawkDeviceObj
 032c:    "DISK3 "
-0332:    00                     HALT
-0333:    00                     HALT
+0332:    00
+0333:    00
+0334:    f1 'q'
+0335:    40
 
-L_0334:
-0334:    f1 40 03               st B, [0x4003]
-0337:    2a                     clr AL, #0
+Device_DISK3_TotalTracks:
+0336:    03 2a                  (0x32a)
 0338:    03                     (0x3)
 0339:    06 a6                  R_06a6
-033b:    5a                     and B, A
+033b:    5a
 033c:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK4:
@@ -476,15 +482,16 @@ Device_DISK4_number:
 0341:    04 ea                  R_04ea
 0343:    a6 f7                  HawkDeviceObj
 0345:    "DISK4 "
-034b:    00                     HALT
-034c:    00                     HALT
+034b:    00
+034c:    00
+034d:    f1 'q'
+034e:    40
 
-L_034d:
-034d:    f1 40 03               st B, [0x4003]
-0350:    2a                     clr AL, #0
+Device_DISK4_TotalTracks:
+034f:    03 2a                  (0x32a)
 0351:    04                     (0x4)
 0352:    06 a6                  R_06a6
-0354:    5a                     and B, A
+0354:    5a
 0355:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK5:
@@ -496,15 +503,16 @@ Device_DISK5_number:
 035a:    04 ea                  R_04ea
 035c:    a6 f7                  HawkDeviceObj
 035e:    "DISK5 "
-0364:    00                     HALT
-0365:    00                     HALT
+0364:    00
+0365:    00
+0366:    f1 'q'
+0367:    40
 
-L_0366:
-0366:    f1 40 03               st B, [0x4003]
-0369:    2a                     clr AL, #0
+Device_DISK5_TotalTracks:
+0368:    03 2a                  (0x32a)
 036a:    05                     (0x5)
 036b:    06 a6                  R_06a6
-036d:    5a                     and B, A
+036d:    5a
 036e:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK10:
@@ -517,15 +525,15 @@ Device_DISK10_number:
 0375:    ac a7                  FDCDeviceObj
 0377:    "DISK10"
 037d:    00
-037e:    00                     HALT
-037f:    f8                     st B, [A]
-0380:    00                     HALT
+037e:    00
+037f:    f8 'x'
+0380:    00
 
 Device_DISK10_TotalTracks:
 0381:    00 60                  (0x60)
 0383:    01                     (0x1)
 0384:    06 a6                  R_06a6
-0386:    06                     sl
+0386:    06
 0387:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK11:
@@ -559,15 +567,15 @@ Device_DISK12_number:
 03a7:    ac a7                  FDCDeviceObj
 03a9:    "DISK12"
 03af:    00
-03b0:    00                     HALT
-03b1:    f8                     st B, [A]
-03b2:    00                     HALT
+03b0:    00
+03b1:    f8 'x'
+03b2:    00
 
 Device_DISK12_TotalTracks:
 03b3:    00 60                  (0x60)
 03b5:    04                     (0x4)
 03b6:    06 a6                  R_06a6
-03b8:    06                     sl
+03b8:    06
 03b9:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK13:
@@ -580,15 +588,15 @@ Device_DISK13_number:
 03c0:    ac a7                  FDCDeviceObj
 03c2:    "DISK13"
 03c8:    00
-03c9:    00                     HALT
-03ca:    f8                     st B, [A]
-03cb:    00                     HALT
+03c9:    00
+03ca:    f8 'x'
+03cb:    00
 
 Device_DISK13_TotalTracks:
 03cc:    00 60                  (0x60)
 03ce:    08                     (0x8)
 03cf:    06 a6                  R_06a6
-03d1:    06                     sl
+03d1:    06
 03d2:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK20:
@@ -601,15 +609,15 @@ Device_DISK20_number:
 03d9:    b8 4f                  WDCDeviceObj
 03db:    "DISK20"
 03e1:    00
-03e2:    00                     HALT
-03e3:    f8                     st B, [A]
-03e4:    08                     cl
+03e2:    00
+03e3:    f8 'x'
+03e4:    08
 
 Device_DISK20_TotalTracks:
 03e5:    08 03                  (0x803)
 03e7:    00                     (0x0)
 03e8:    06 a6                  R_06a6
-03ea:    ff                     st B, [P]
+03ea:    ff
 03eb:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK21:
@@ -622,15 +630,15 @@ Device_DISK21_number:
 03f2:    b8 4f                  WDCDeviceObj
 03f4:    "DISK21"
 03fa:    00
-03fb:    00                     HALT
-03fc:    f8                     st B, [A]
-03fd:    08                     cl
+03fb:    00
+03fc:    f8 'x'
+03fd:    08
 
 Device_DISK21_TotalTracks:
 03fe:    08 03                  (0x803)
 0400:    01                     (0x1)
 0401:    06 a6                  R_06a6
-0403:    ff                     st B, [P]
+0403:    ff
 0404:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK22:
@@ -643,15 +651,15 @@ Device_DISK22_number:
 040b:    b8 4f                  WDCDeviceObj
 040d:    "DISK22"
 0413:    00
-0414:    00                     HALT
-0415:    f8                     st B, [A]
-0416:    08                     cl
+0414:    00
+0415:    f8 'x'
+0416:    08
 
 Device_DISK22_TotalTracks:
 0417:    08 03                  (0x803)
 0419:    02                     (0x2)
 041a:    06 a6                  R_06a6
-041c:    ff                     st B, [P]
+041c:    ff
 041d:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK23:
@@ -664,15 +672,15 @@ Device_DISK23_number:
 0424:    b8 4f                  WDCDeviceObj
 0426:    "DISK23"
 042c:    00
-042d:    00                     HALT
-042e:    f8                     st B, [A]
-042f:    08                     cl
+042d:    00
+042e:    f8 'x'
+042f:    08
 
 Device_DISK23_TotalTracks:
 0430:    08 03                  (0x803)
 0432:    03                     (0x3)
 0433:    06 a6                  R_06a6
-0435:    ff                     st B, [P]
+0435:    ff
 0436:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK24:
@@ -685,15 +693,15 @@ Device_DISK24_number:
 043d:    b8 4f                  WDCDeviceObj
 043f:    "DISK24"
 0445:    00
-0446:    00                     HALT
-0447:    f8                     st B, [A]
-0448:    08                     cl
+0446:    00
+0447:    f8 'x'
+0448:    08
 
 Device_DISK24_TotalTracks:
 0449:    08 03                  (0x803)
 044b:    04                     (0x4)
 044c:    06 a6                  R_06a6
-044e:    ff                     st B, [P]
+044e:    ff
 044f:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK40:
@@ -705,16 +713,16 @@ Device_DISK40_number:
 0454:    04 f0                  R_04f0
 0456:    bf 08                  Unk40DeviceObj
 0458:    "DISK40"
-045e:    00                     HALT
-045f:    00                     HALT
-0460:    f8                     st B, [A]
-0461:    00                     HALT
+045e:    00
+045f:    00
+0460:    f8 'x'
+0461:    00
 
 Device_DISK40_TotalTracks:
 0462:    15 5e                  (0x155e)
 0464:    02                     (0x2)
 0465:    06 a6                  R_06a6
-0467:    ff                     st B, [P]
+0467:    ff
 0468:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK41:
@@ -726,16 +734,16 @@ Device_DISK41_number:
 046d:    04 f0                  R_04f0
 046f:    bf 08                  Unk40DeviceObj
 0471:    "DISK41"
-0477:    00                     HALT
-0478:    00                     HALT
-0479:    f8                     st B, [A]
-047a:    00                     HALT
+0477:    00
+0478:    00
+0479:    f8 'x'
+047a:    00
 
 Device_DISK41_TotalTracks:
 047b:    15 5e                  (0x155e)
 047d:    04                     (0x4)
 047e:    06 a6                  R_06a6
-0480:    ff                     st B, [P]
+0480:    ff
 0481:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK42:
@@ -747,16 +755,16 @@ Device_DISK42_number:
 0486:    04 f0                  R_04f0
 0488:    bf 08                  Unk40DeviceObj
 048a:    "DISK42"
-0490:    00                     HALT
-0491:    00                     HALT
-0492:    f8                     st B, [A]
-0493:    00                     HALT
+0490:    00
+0491:    00
+0492:    f8 'x'
+0493:    00
 
 Device_DISK42_TotalTracks:
 0494:    15 5e                  (0x155e)
 0496:    08                     (0x8)
 0497:    06 a6                  R_06a6
-0499:    ff                     st B, [P]
+0499:    ff
 049a:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK50:
@@ -768,16 +776,16 @@ Device_DISK50_number:
 049f:    04 f1                  R_04f1
 04a1:    c6 40                  Unk50DeviceObj
 04a3:    "DISK50"
-04a9:    00                     HALT
-04aa:    00                     HALT
-04ab:    f8                     st B, [A]
-04ac:    00                     HALT
+04a9:    00
+04aa:    00
+04ab:    f8 'x'
+04ac:    00
 
 Device_DISK50_TotalTracks:
 04ad:    11 d0                  (0x11d0)
 04af:    02                     (0x2)
 04b0:    06 a6                  R_06a6
-04b2:    ff                     st B, [P]
+04b2:    ff
 04b3:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK51:
@@ -789,18 +797,16 @@ Device_DISK51_number:
 04b8:    04 f1                  R_04f1
 04ba:    c6 40                  Unk50DeviceObj
 04bc:    "DISK51"
-
-L_04c2:
-04c2:    00                     HALT
-04c3:    00                     HALT
-04c4:    f8                     st B, [A]
-04c5:    00                     HALT
+04c2:    00
+04c3:    00
+04c4:    f8 'x'
+04c5:    00
 
 Device_DISK51_TotalTracks:
 04c6:    11 d0                  (0x11d0)
 04c8:    04                     (0x4)
 04c9:    06 a6                  R_06a6
-04cb:    ff                     st B, [P]
+04cb:    ff
 04cc:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 Device_DISK52:
@@ -812,18 +818,16 @@ Device_DISK52_number:
 04d1:    04 f1                  R_04f1
 04d3:    c6 40                  Unk50DeviceObj
 04d5:    "DISK52"
-
-L_04db:
-04db:    00                     HALT
-04dc:    00                     HALT
-04dd:    f8                     st B, [A]
-04de:    00                     HALT
+04db:    00
+04dc:    00
+04dd:    f8 'x'
+04de:    00
 
 Device_DISK52_TotalTracks:
 04df:    11 d0                  (0x11d0)
 04e1:    08                     (0x8)
 04e2:    06 a6                  R_06a6
-04e4:    ff                     st B, [P]
+04e4:    ff
 04e5:    00 64                  (0x64)	 ; Set to the user supplied boot Code
 
 R_04e7:
@@ -835,39 +839,37 @@ R_04e8:
 
 
 R_04e9:
-04e9:    00                     HALT
+04e9:    00
 
 R_04ea:
-04ea:    00                     HALT
+04ea:    00
 
 R_04eb:
-04eb:    00                     HALT
+04eb:    00
 
 R_04ec:
-04ec:    00                     HALT
+04ec:    00
 
 R_04ed:
-04ed:    00                     HALT
+04ed:    00
 
 R_04ee:
-04ee:    00                     HALT
+04ee:    00
 
 R_04ef:
-04ef:    00                     HALT
+04ef:    00
 
 R_04f0:
-04f0:    00                     HALT
+04f0:    00
 
 R_04f1:
-04f1:    00                     HALT
+04f1:    00
 
 EarlyInitDevices:
 04f2:    b2 6c                  CRTDeviceFunctions
-
-L_04f4:
-04f4:    00                     HALT
-04f5:    00                     HALT
-04f6:    ff                     st B, [P]
+04f4:    00
+04f5:    00
+04f6:    ff
 
 R_04f7:
 04f7:    ff                     st B, [P]
@@ -1475,12 +1477,12 @@ R_850a:
 853c:    18 18                  bgt L_8556
 
 L_853e:
-853e:    d4 f0                  ld B, [CurrentProcess(via -0x10)]
+853e:    d4 f0                  ld B, [CurrentProcess (via 0x852f+1)]
 8540:    85 28 02               ld AL, [B + 0x02]
 8543:    17 0d                  bp L_8552
 8545:    79 87 3a               call R_873a
 8548:    e6 a8                  mov A, IL10(Z)
-854a:    d4 e4                  ld B, [CurrentProcess(via -0x1c)]
+854a:    d4 e4                  ld B, [CurrentProcess (via 0x852f+1)]
 854c:    a5 28 59               st AL, [B + 0x59]
 854f:    85 28 03               ld AL, [B + 0x03]
 
@@ -1842,7 +1844,7 @@ R_8757:
 875f:    55 a0                  mov A, S
 8761:    b5 28 10               st A, [B + 0x10]
 8764:    3a                     clr A, #0
-8765:    b4 f1                  st A, [CurrentProcess(via -0xf)]
+8765:    b4 f1                  st A, [CurrentProcess (via R_8757+1)]
 8767:    55 ba 82 83            mov S, R_8283|0x8283
 
 R_876b:
@@ -2149,7 +2151,7 @@ L_8972:
 8978:    79 8c 30               call R_8c30
 
 L_897b:
-897b:    84 f9                  ld AL, None
+897b:    84 f9                  ld AL, @[0x8976]
 897d:    16 fc                  blt L_897b
 897f:    71 87 f4               jmp R_87f4
 
@@ -2382,7 +2384,7 @@ L_8b19:
 
 L_8b35:
 8b35:    77 10 00 03            div A, A, 0x0003
-8b39:    94 ef                  ld A, [CurrentProcess(via -0x11)]
+8b39:    94 ef                  ld A, [CurrentProcess (via 0x8b29+1)]
 8b3b:    95 08 04               ld A, [A + 0x04]
 8b3e:    38                     inc A, #1
 8b3f:    58                     add B, A
@@ -2411,7 +2413,7 @@ Syscall_00:
 8b64:    55 20                  mov A, B
 8b66:    79 a3 b2               call R_a3b2
 8b69:    95 28 06               ld A, [B + 0x06]
-8b6c:    7c f9                  call R_a3b2(via -0x7)
+8b6c:    7c f9                  call R_a3b2 (via 0x8b66+1)
 8b6e:    7b 01                  call R_8b71
 8b70:    0f                     rsys
 
@@ -2560,7 +2562,7 @@ Syscall_DoFileOp:
 8c56:    55 20                  mov A, B
 8c58:    79 a3 b2               call R_a3b2
 8c5b:    95 28 06               ld A, [B + 0x06]
-8c5e:    7c f9                  call R_a3b2(via -0x7)
+8c5e:    7c f9                  call R_a3b2 (via 0x8c58+1)
 8c60:    7b 01                  call R_8c63
 8c62:    0f                     rsys
 
@@ -2949,7 +2951,7 @@ L_8eb4:
 
 L_8ebe:
 8ebe:    d3 0d                  ld B, [R_8ecd|0x8ecd]
-8ec0:    94 06                  ld A, None
+8ec0:    94 06                  ld A, @[R_8ec8|0x8ec8]
 8ec2:    59                     sub B, A
 8ec3:    11 d4                  bnc R_8e99
 8ec5:    79 a6 0d               call R_a60d
@@ -3294,8 +3296,8 @@ Syscall_4f:
 904f:    79 86 e1               call R_86e1
 9052:    3c                     srl A, #1
 9053:    3a                     clr A, #0
-9054:    b4 0c                  st A, [R_9238(via 0x0c)]
-9056:    7c e9                  call R_8572(via -0x17)
+9054:    b4 0c                  st A, [R_9238 (via R_9061+1)]
+9056:    7c e9                  call R_8572 (via 0x9040+1)
 9058:    32 20                  clr B, #0
 905a:    e1 92 6a               st BL, [R_926a|0x926a]
 905d:    95 41                  ld A, [X++]
@@ -3952,7 +3954,7 @@ L_9479:
 9480:    15 07                  bnz L_9489
 9482:    9c                     ld A, [Z]
 9483:    d5 a8 06               ld B, [S + 0x06]
-9486:    7c 95                  call R_8612(via -0x6b)
+9486:    7c 95                  call R_8612 (via 0x941c+1)
 9488:    10
 
 L_9489:
@@ -4019,7 +4021,7 @@ R_94ce:
 L_94cf:
 94cf:    a3 6a                  st AL, [0x953b]
 94d1:    55 82                  mov B, Z
-94d3:    7c c9                  call R_8bdc(via -0x37)
+94d3:    7c c9                  call R_8bdc (via 0x949d+1)
 94d5:    5b                     mov X, A
 94d6:    55 26                  mov Y, B
 94d8:    32 10 94 c7            clr [R_94c7|0x94c7], #0
@@ -4497,7 +4499,7 @@ R_978b:
 978b:    80 01                  ld AL, 0x01
 978d:    a5 a2                  st AL, [--S]
 978f:    55 82                  mov B, Z
-9791:    7c b0                  call R_8bdc(via -0x50)
+9791:    7c b0                  call R_8bdc (via 0x9742+1)
 9793:    85 28 05               ld AL, [B + 0x05]
 9796:    c0 04                  ld BL, 0x04
 9798:    4a                     and BL, AL
@@ -5190,7 +5192,7 @@ R_9baf:
 9baf:    9b                     ld A, [Y]
 9bb0:    bd                     st A, [S]
 9bb1:    9b                     ld A, [Y]
-9bb2:    d4 9b                  ld B, None
+9bb2:    d4 9b                  ld B, @[0x9b4f]
 9bb4:    eb                     st BL, [Y]
 9bb5:    9b                     ld A, [Y]
 9bb6:    fc                     st B, [Z]
@@ -5216,9 +5218,9 @@ L_9bbc:
 9bcb:    00                     HALT
 9bcc:    00                     HALT
 9bcd:    00                     HALT
-9bce:    94 ce                  ld A, None
-9bd0:    94 9b                  ld A, None
-9bd2:    94 b7                  ld A, None
+9bce:    94 ce                  ld A, @[0x9b9e]
+9bd0:    94 9b                  ld A, @[0x9b6d]
+9bd2:    94 b7                  ld A, @[0x9b8b]
 
 R_9bd4:
 9bd4:    0b                     rim
@@ -5803,7 +5805,7 @@ L_9f3f:
 
 L_9f4c:
 9f4c:    9a                     ld A, [X]
-9f4d:    b4 94                  st A, None
+9f4d:    b4 94                  st A, @[R_9ee3|0x9ee3]
 9f4f:    93 92                  ld A, [R_9ee3|0x9ee3]
 9f51:    ba                     st A, [X]
 9f52:    69 9d a6               st X, [R_9da6|0x9da6]
@@ -6654,7 +6656,7 @@ a4b6:    79 a0 8c               call R_a08c
 
 L_a4b9:
 a4b9:    29                     dec AL, #1
-a4ba:    a4 ec                  st AL, [Timeout(via -0x14)]
+a4ba:    a4 ec                  st AL, [Timeout (via level10Handler+1)]
 
 L_a4bc:
 a4bc:    50 76 00 0a            add Y, Y, 0x000a
@@ -6971,58 +6973,83 @@ a69d:    8d
 a69e:    9d
 a69f:    00
 a6a0:    00
-
-L_a6a1:
-a6a1:    6d a2                  st X, [--S]
-a6a3:    65 88 06               ld X, [Z + 0x06]
-a6a6:    30 41                  inc X, #2
-a6a8:    9a                     ld A, [X]
-a6a9:    d0 9b b1               ld B, 0x9bb1
-a6ac:    59                     sub B, A
-a6ad:    15 3c                  bnz L_a6eb
-a6af:    7e 45                  push {X, Y, Z}
-a6b1:    91 00 5a               ld A, [0x005a]
-a6b4:    95 08 6e               ld A, [A + 0x6e]
-a6b7:    39                     dec A, #1
-a6b8:    5e                     mov Z, A
-a6b9:    60 00 08               ld X, 0x0008
-
-L_a6bc:
-a6bc:    30 80                  inc Z, #1
-a6be:    3f                     dec X
-a6bf:    14 12                  bz L_a6d3
-a6c1:    95 81                  ld A, [Z++]
-a6c3:    d5 68 1d               ld B, [Y + 0x1d]
-a6c6:    59                     sub B, A
-a6c7:    15 f3                  bnz L_a6bc
-
-L_a6c9:
-a6c9:    8c                     ld AL, [Z]
-a6ca:    14 04                  bz L_a6d0
-a6cc:    66 07                  jsys Syscall_Yield
-a6ce:    73 f9                  jmp L_a6c9
-
-L_a6d0:
-a6d0:    3a                     clr A, #0
-a6d1:    39                     dec A, #1
-a6d2:    ac                     st AL, [Z]
-
-L_a6d3:
-a6d3:    7f 45                  pop {X, Y, Z}
-a6d5:    85 48 03               ld AL, [X + 0x03]
-a6d8:    c0 9f                  ld BL, 0x9f
-a6da:    48                     add BL, AL
-a6db:    e3 15                  st BL, [0xa6f2]
-a6dd:    85 48 02               ld AL, [X + 0x02]
-a6e0:    c0 9f                  ld BL, 0x9f
-a6e2:    48                     add BL, AL
-a6e3:    e3 0e                  st BL, [0xa6f3]
-a6e5:    90 a6 ee               ld A, R_a6ee|0xa6ee
-a6e8:    b5 88 06               st A, [Z + 0x06]
-
-L_a6eb:
-a6eb:    65 a1                  ld X, [S++]
-a6ed:    09                     ret
+a6a1:    6d
+a6a2:    a2 '"'
+a6a3:    65
+a6a4:    88
+a6a5:    06
+a6a6:    30
+a6a7:    41
+a6a8:    9a
+a6a9:    d0 'P'
+a6aa:    9b
+a6ab:    b1 '1'
+a6ac:    59
+a6ad:    15
+a6ae:    3c
+a6af:    7e
+a6b0:    45
+a6b1:    91
+a6b2:    00
+a6b3:    5a
+a6b4:    95
+a6b5:    08
+a6b6:    6e
+a6b7:    39
+a6b8:    5e
+a6b9:    60
+a6ba:    00
+a6bb:    08
+a6bc:    30
+a6bd:    80
+a6be:    3f
+a6bf:    14
+a6c0:    12
+a6c1:    95
+a6c2:    81
+a6c3:    d5 'U'
+a6c4:    68
+a6c5:    1d
+a6c6:    59
+a6c7:    15
+a6c8:    f3 's'
+a6c9:    8c
+a6ca:    14
+a6cb:    04
+a6cc:    66
+a6cd:    07
+a6ce:    73
+a6cf:    f9 'y'
+a6d0:    3a
+a6d1:    39
+a6d2:    ac ','
+a6d3:    7f
+a6d4:    45
+a6d5:    85
+a6d6:    48
+a6d7:    03
+a6d8:    c0 '@'
+a6d9:    9f
+a6da:    48
+a6db:    e3 'c'
+a6dc:    15
+a6dd:    85
+a6de:    48
+a6df:    02
+a6e0:    c0 '@'
+a6e1:    9f
+a6e2:    48
+a6e3:    e3 'c'
+a6e4:    0e
+a6e5:    90
+a6e6:    a6 '&'
+a6e7:    ee 'n'
+a6e8:    b5 '5'
+a6e9:    88
+a6ea:    06
+a6eb:    65
+a6ec:    a1 '!'
+a6ed:    09
 
 R_a6ee:
 a6ee:    00
@@ -7321,7 +7348,7 @@ a8c5:    09                     ret
 R_a8c6:
 a8c6:    2a                     clr AL, #0
 a8c7:    29                     dec AL, #1
-a8c8:    a4 e7                  st AL, [0x011f(via -0x19)]
+a8c8:    a4 e7                  st AL, [0x011f (via 0xa8b0+1)]
 a8ca:    c1 a8 45               ld BL, [R_a845|0xa845]
 a8cd:    16 06                  blt L_a8d5
 a8cf:    95 68 0f               ld A, [Y + 0x0f]
@@ -8296,7 +8323,7 @@ afe2:    09                     ret
 R_afe3:
 afe3:    85 41                  ld AL, [X++]
 afe5:    a3 0c                  st AL, [0xaff3]
-afe7:    7c d3                  call SetTimeout8(via -0x2d)
+afe7:    7c d3                  call SetTimeout8 (via R_afbb+1)
 afe9:    3a                     clr A, #0
 afea:    d7 12                  mov IL1(B), A
 
@@ -8307,12 +8334,12 @@ aff2:    80 00                  ld AL, 0x00
 aff4:    4a                     and BL, AL
 aff5:    49                     sub BL, AL
 aff6:    14 db                  bz L_afd3
-aff8:    7c d3                  call CheckTimeout(via -0x2d)
+aff8:    7c d3                  call CheckTimeout (via 0xafcc+1)
 affa:    14 f0                  bz L_afec
 affc:    73 14                  jmp R_b012
 
 R_affe:
-affe:    7c bc                  call SetTimeout8(via -0x44)
+affe:    7c bc                  call SetTimeout8 (via R_afbb+1)
 b000:    3a                     clr A, #0
 b001:    d7 12                  mov IL1(B), A
 
@@ -8322,7 +8349,7 @@ b006:    f6 32 01               mov BL, Device[B + 0x01]
 b009:    80 08                  ld AL, 0x08
 b00b:    4a                     and BL, AL
 b00c:    14 09                  bz L_b017
-b00e:    7c bd                  call CheckTimeout(via -0x43)
+b00e:    7c bd                  call CheckTimeout (via 0xafcc+1)
 b010:    14 f1                  bz L_b003
 
 R_b012:
@@ -8652,12 +8679,12 @@ b18d:    66 6b                  jsys 6b
 R_b18f:
 b18f:    95 41                  ld A, [X++]
 b191:    b3 07                  st A, [0xb19a]
-b193:    7c 03                  call None
+b193:    7c 03                  call @[0xb198]
 b195:    b1 a1 79               st A, [0xa179]
 b198:    a5 50                  st AL, [X]
 b19a:    00                     HALT
 b19b:    00                     HALT
-b19c:    7c fa                  call None
+b19c:    7c fa                  call @[0xb198]
 b19e:    b1 a1 09               st A, [0xa109]
 
 R_b1a1:
@@ -9575,8 +9602,6 @@ b822:    14 22                  bz L_b846
 b824:    c5 08 19               ld BL, [A + 0x19]	 ; BL = baud rate
 b827:    e5 0c 0f               st BL, @[A + 0x0f]	 ; Why setting twice ?
 b82a:    95 08 0f               ld A, [A + 0x0f]	 ; A = serial port base
-
-L_b82d:
 b82d:    f6 31 00               mov Device[A + 0x00], BL	 ; Set baud rate
 b830:    c0 94                  ld BL, 0x94
 b832:    f6 31 01               mov Device[A + 0x01], BL	 ; Write '\x14'
@@ -9778,7 +9803,7 @@ R_b97b:
 b97b:    00
 
 R_b97c:
-b97c:    84 00                  ld AL, None
+b97c:    84 00                  ld AL, @[L_b97e|0xb97e]
 
 L_b97e:
 b97e:    83 00                  ld AL, [0xb980]
@@ -10278,7 +10303,7 @@ bd24:    14 03                  bz R_bd29
 bd26:    71 bb ed               jmp R_bbed
 
 R_bd29:
-bd29:    7c 07                  call R_a550(via 0x07)
+bd29:    7c 07                  call R_a550 (via 0xbd31+1)
 bd2b:    be                     st A, [C]
 bd2c:    21 7c                  dec YL, #13
 bd2e:    03                     rf
@@ -10301,11 +10326,11 @@ bd44:    b1 be c3               st A, [R_bec3|0xbec3]
 bd47:    80 02                  ld AL, 0x02
 bd49:    46 e0 92 be c3 06      baseconv(e, 0) [R_bec3|0xbec3], [Y]
 bd4f:    30 60                  inc Y, #1
-bd51:    7c df                  call R_a550(via -0x21)
+bd51:    7c df                  call R_a550 (via 0xbd31+1)
 bd53:    be                     st A, [C]
 bd54:    c1 3f 18               ld BL, [0x3f18]
 bd57:    e9                     st BL, [B]
-bd58:    7c d8                  call R_a550(via -0x28)
+bd58:    7c d8                  call R_a550 (via 0xbd31+1)
 bd5a:    be                     st A, [C]
 bd5b:    21 47                  dec XH, #8
 bd5d:    4c                     mov YL, AL
@@ -10508,7 +10533,7 @@ beb8:    d8                     ld B, [A]
 beb9:    d8                     ld B, [A]
 beba:    a0 c3                  st AL, 0xc3
 bebc:    cd                     ld BL, [S]
-bebd:    c4 d3                  ld BL, None
+bebd:    c4 d3                  ld BL, @[0xbe92]
 bebf:    ba                     st A, [X]
 
 L_bec0:
@@ -10530,16 +10555,14 @@ becd:    cf                     ld BL, [P]
 bece:    d4 a0                  ld B, @[0xbe70]
 bed0:    c3 cf                  ld BL, [0xbea1]
 bed2:    cd                     ld BL, [S]
-
-L_bed3:
 bed3:    d0 cc c5               ld B, 0xccc5
-bed6:    d4 c5                  ld B, None
+bed6:    d4 c5                  ld B, @[0xbe9d]
 bed8:    c4 8d                  ld BL, @[0xbe67]
 
 R_beda:
 beda:    00                     HALT
 bedb:    0c                     unknown
-bedc:    c4 cd                  ld BL, None
+bedc:    c4 cd                  ld BL, @[0xbeab]
 bede:    c1 a0 c6               ld BL, [0xa0c6]
 bee1:    c1 c9 cc               ld BL, [0xc9cc]
 bee4:    d5 d2                  ld B, [--C]
@@ -10547,7 +10570,7 @@ bee4:    d5 d2                  ld B, [--C]
 L_bee6:
 bee6:    c5 8d 00               ld BL, @[Z++ + 0x00]
 bee9:    10 d7                  bc L_bec2
-beeb:    c4 c3                  ld BL, None
+beeb:    c4 c3                  ld BL, @[0xbeb0]
 beed:    a0 c9                  st AL, 0xc9
 beef:    af                     st AL, [P]
 bef0:    cf                     ld BL, [P]
@@ -10760,7 +10783,7 @@ R_c061:
 c061:    00
 
 R_c062:
-c062:    84 00                  ld AL, None
+c062:    84 00                  ld AL, @[L_c064|0xc064]
 
 L_c064:
 c064:    83 00                  ld AL, [0xc066]
@@ -10906,7 +10929,7 @@ c1b0:    c2 b3 00               ld BL, @[0xb300]
 c1b3:    83 fd                  ld AL, [0xc1b2]
 c1b5:    14 05                  bz L_c1bc
 c1b7:    79 c4 8f               call R_c48f
-c1ba:    c4 df                  ld BL, None
+c1ba:    c4 df                  ld BL, @[0xc19b]
 
 L_c1bc:
 c1bc:    79 c4 75               call R_c475
@@ -11071,7 +11094,7 @@ c2d8:    79 ce 33               call CheckTimeout
 c2db:    14 f0                  bz L_c2cd
 c2dd:    85 a1                  ld AL, [S++]
 c2df:    79 c4 8f               call R_c48f
-c2e2:    c4 fa                  ld BL, None
+c2e2:    c4 fa                  ld BL, @[0xc2de]
 
 L_c2e4:
 c2e4:    85 a1                  ld AL, [S++]
@@ -11093,7 +11116,7 @@ c2fb:    79 ce 33               call CheckTimeout
 c2fe:    14 f1                  bz L_c2f1
 c300:    85 a1                  ld AL, [S++]
 c302:    79 c4 8f               call R_c48f
-c305:    c4 fa                  ld BL, None
+c305:    c4 fa                  ld BL, @[0xc301]
 
 L_c307:
 c307:    85 a1                  ld AL, [S++]
@@ -11110,7 +11133,7 @@ c316:    c0 11                  ld BL, 0x11
 c318:    49                     sub BL, AL
 c319:    22 20                  clr BH, #0
 c31b:    35 20                  sll B, #1
-c31d:    90 c3 25               ld A, R_c325|0xc325
+c31d:    90 c3 25               ld A, Unk40jumptable|0xc325
 c320:    58                     add B, A
 c321:    99                     ld A, [B]
 c322:    75 00                  jmp [A]
@@ -11118,62 +11141,62 @@ c322:    75 00                  jmp [A]
 R_c324:
 c324:    00
 
-R_c325:
-c325:    c3 ff                  ld BL, [R_c325+1|0xc326]
-c327:    c4 03                  ld BL, None
-c329:    c4 03                  ld BL, None
-c32b:    c4 03                  ld BL, None
-c32d:    c3 f7                  ld BL, [R_c325+1|0xc326]
-c32f:    c3 fb                  ld BL, [0xc32c]
-c331:    c4 07                  ld BL, None
-c333:    c4 0b                  ld BL, None
-c335:    c4 0f                  ld BL, None
-c337:    c4 13                  ld BL, None
-c339:    c3 f7                  ld BL, [0xc332]
-c33b:    c3 f7                  ld BL, [0xc334]
-c33d:    c4 17                  ld BL, None
-c33f:    c3 fb                  ld BL, [0xc33c]
-c341:    c3 fb                  ld BL, [0xc33e]
-c343:    c3 fb                  ld BL, [0xc340]
-c345:    c3 f7                  ld BL, [0xc33e]
-c347:    c3 f7                  ld BL, [0xc340]
-c349:    c4 2b                  ld BL, None
-c34b:    c4 32                  ld BL, None
-c34d:    c3 fb                  ld BL, [0xc34a]
-c34f:    c3 fb                  ld BL, [0xc34c]
-c351:    c3 fb                  ld BL, [0xc34e]
-c353:    c3 fb                  ld BL, [0xc350]
-c355:    c3 fb                  ld BL, [0xc352]
-c357:    c3 fb                  ld BL, [0xc354]
-c359:    c3 fb                  ld BL, [0xc356]
-c35b:    c3 fb                  ld BL, [0xc358]
-c35d:    c3 fb                  ld BL, [0xc35a]
-c35f:    c3 fb                  ld BL, [0xc35c]
-c361:    c3 fb                  ld BL, [0xc35e]
-c363:    c3 fb                  ld BL, [0xc360]
-c365:    c3 f7                  ld BL, [0xc35e]
-c367:    c3 f7                  ld BL, [0xc360]
-c369:    c4 32                  ld BL, R_a550(via 0x32)
-c36b:    c4 32                  ld BL, None
-c36d:    c4 32                  ld BL, None
-c36f:    c4 2b                  ld BL, None
-c371:    c3 fb                  ld BL, [0xc36e]
-c373:    c4 2b                  ld BL, None
-c375:    c4 2b                  ld BL, None
-c377:    c4 2b                  ld BL, None
-c379:    c4 2b                  ld BL, None
-c37b:    c4 32                  ld BL, None
-c37d:    c3 fb                  ld BL, [0xc37a]
-c37f:    c3 fb                  ld BL, [0xc37c]
-c381:    c3 fb                  ld BL, [0xc37e]
-c383:    c3 fb                  ld BL, [0xc380]
-c385:    c4 17                  ld BL, @[0xc39e]
-c387:    c3 fb                  ld BL, [0xc384]
+Unk40jumptable:
+c325:    c3 ff                  R_c3ff
+c327:    c4 03                  R_c403
+c329:    c4 03                  R_c403
+c32b:    c4 03                  R_c403
+c32d:    c3 f7                  R_c3f7
+c32f:    c3 fb                  R_c3fb
+c331:    c4 07                  R_c407
+c333:    c4 0b                  R_c40b
+c335:    c4 0f                  R_c40f
+c337:    c4 13                  R_c413
+c339:    c3 f7                  R_c3f7
+c33b:    c3 f7                  R_c3f7
+c33d:    c4 17                  R_c417
+c33f:    c3 fb                  R_c3fb
+c341:    c3 fb                  R_c3fb
+c343:    c3 fb                  R_c3fb
+c345:    c3 f7                  R_c3f7
+c347:    c3 f7                  R_c3f7
+c349:    c4 2b                  R_c42b
+c34b:    c4 32                  R_c432
+c34d:    c3 fb                  R_c3fb
+c34f:    c3 fb                  R_c3fb
+c351:    c3 fb                  R_c3fb
+c353:    c3 fb                  R_c3fb
+c355:    c3 fb                  R_c3fb
+c357:    c3 fb                  R_c3fb
+c359:    c3 fb                  R_c3fb
+c35b:    c3 fb                  R_c3fb
+c35d:    c3 fb                  R_c3fb
+c35f:    c3 fb                  R_c3fb
+c361:    c3 fb                  R_c3fb
+c363:    c3 fb                  R_c3fb
+c365:    c3 f7                  R_c3f7
+c367:    c3 f7                  R_c3f7
+c369:    c4 32                  R_c432
+c36b:    c4 32                  R_c432
+c36d:    c4 32                  R_c432
+c36f:    c4 2b                  R_c42b
+c371:    c3 fb                  R_c3fb
+c373:    c4 2b                  R_c42b
+c375:    c4 2b                  R_c42b
+c377:    c4 2b                  R_c42b
+c379:    c4 2b                  R_c42b
+c37b:    c4 32                  R_c432
+c37d:    c3 fb                  R_c3fb
+c37f:    c3 fb                  R_c3fb
+c381:    c3 fb                  R_c3fb
+c383:    c3 fb                  R_c3fb
+c385:    c4 17                  R_c417
+c387:    c3 fb                  R_c3fb
 
 R_c389:
-c389:    7c 12                  call R_a550(via 0x12)
-c38b:    c4 bf                  ld BL, None
-c38d:    7c 0e                  call R_a550(via 0x0e)
+c389:    7c 12                  call R_a550 (via 0xc39c+1)
+c38b:    c4 bf                  ld BL, @[0xc34c]
+c38d:    7c 0e                  call R_a550 (via 0xc39c+1)
 
 R_c38f:
 c38f:    00                     HALT
@@ -11198,13 +11221,13 @@ c3ac:    b1 c5 61               st A, [R_c561|0xc561]
 c3af:    80 02                  ld AL, 0x02
 c3b1:    46 e0 92 c5 61 06      baseconv(e, 0) [R_c561|0xc561], [Y]
 c3b7:    30 60                  inc Y, #1
-c3b9:    7c e2                  call R_a550(via -0x1e)
+c3b9:    7c e2                  call R_a550 (via 0xc39c+1)
 c3bb:    c5                     unknown
 c3bc:    5f                     mov S, A
 c3bd:    3f                     dec X
 c3be:    18 e9                  bgt L_c3a9
-c3c0:    7c db                  call R_a550(via -0x25)
-c3c2:    c4 bf                  ld BL, None
+c3c0:    7c db                  call R_a550 (via 0xc39c+1)
+c3c2:    c4 bf                  ld BL, @[0xc383]
 c3c4:    47 4c 00 ff 01 1f      memcpy 0x01, 0xff, [0x011f]
 
 L_c3ca:
@@ -11261,7 +11284,7 @@ c409:    c5 ce 7b               ld BL, @[--C + 0x7b]
 c40c:    d5 c5                  ld B, @[C++]
 
 L_c40e:
-c40e:    e4 7b                  st BL, None
+c40e:    e4 7b                  st BL, @[L_c48b|0xc48b]
 c410:    d1 c5 f6               ld B, [R_c5f6|0xc5f6]
 
 R_c413:
@@ -11272,7 +11295,7 @@ c416:    0c                     unknown
 R_c417:
 c417:    47 44 05 60 07 c4 b8   memcpy 0x06, [Y + 0x07], [R_c4b8|0xc4b8]
 c41e:    79 a5 50               call R_a550
-c421:    c4 b2                  ld BL, None
+c421:    c4 b2                  ld BL, @[R_c3d4+1|0xc3d5]
 c423:    79 c4 4e               call R_c44e
 c426:    79 c3 d4               call R_c3d4
 c429:    73 ec                  jmp R_c417
@@ -11283,7 +11306,7 @@ c42e:    7b b2                  call L_c3e2
 
 L_c430:
 c430:    c5 1c 79               ld BL, @[A + 0x79]
-c433:    c4 3f                  ld BL, None
+c433:    c4 3f                  ld BL, @[0xc474]
 c435:    79 c1 e5               call R_c1e5
 c438:    79 c3 d4               call R_c3d4
 c43b:    7b a5                  call L_c3e2
@@ -11449,8 +11472,7 @@ c64e:    c8 52                  R_c852
 c650:    cd 74                  R_cd74
 
 R_c652:
-c652:    7f
-c653:    01                     nop
+c652:    7f 01                  pop {A}
 c654:    b1 c7 8c               st A, [R_c78c|0xc78c]
 c657:    85 a8 06               ld AL, [S + 0x06]
 c65a:    a1 c7 99               st AL, [R_c799|0xc799]
@@ -11634,7 +11656,7 @@ R_c799:
 c799:    00
 
 R_c79a:
-c79a:    84 00                  ld AL, None
+c79a:    84 00                  ld AL, @[L_c79c|0xc79c]
 
 L_c79c:
 c79c:    83 00                  ld AL, [0xc79e]
@@ -12068,7 +12090,7 @@ ca6b:    ca 'J'
 ca6c:    df '_'
 
 R_ca6d:
-ca6d:    7c 12                  call R_a550(via 0x12)
+ca6d:    7c 12                  call R_a550 (via 0xca80+1)
 ca6f:    cb                     ld BL, [Y]
 
 L_ca70:
@@ -12094,12 +12116,12 @@ ca90:    b1 cc 09               st A, [R_cc09|0xcc09]
 ca93:    80 02                  ld AL, 0x02
 ca95:    46 e0 92 cc 09 06      baseconv(e, 0) [R_cc09|0xcc09], [Y]
 ca9b:    30 60                  inc Y, #1
-ca9d:    7c e2                  call R_a550(via -0x1e)
+ca9d:    7c e2                  call R_a550 (via 0xca80+1)
 ca9f:    cc                     ld BL, [Z]
 caa0:    07                     rl
 caa1:    3f                     dec X
 caa2:    18 e9                  bgt L_ca8d
-caa4:    7c db                  call R_a550(via -0x25)
+caa4:    7c db                  call R_a550 (via 0xca80+1)
 caa6:    cb                     ld BL, [Y]
 caa7:    67 47 4c 00 ff         memcpy AL, [X + C + 0x00], 0xff
 caac:    01                     nop
@@ -12941,7 +12963,7 @@ d149:    a0 b7                  st AL, 0xb7
 d14b:    a0 b8                  st AL, 0xb8
 d14d:    a0 b9                  st AL, 0xb9
 d14f:    a0 d2                  st AL, 0xd2
-d151:    c4 c2                  ld BL, None
+d151:    c4 c2                  ld BL, @[L_d115|0xd115]
 d153:    a0 b1                  st AL, 0xb1
 d155:    b0 cd d4               st A, 0xcdd4
 d158:    d3 d4                  ld B, [R_d12c+2|0xd12e]
@@ -13055,8 +13077,6 @@ d27a:    66 02                  jsys Syscall_02
 
 R_d27c:
 d27c:    01                         DiskNum = (0x1)
-
-L_d27d:
 d27d:    d2 90                      Filename = R_d290
 
 R_d27f:
@@ -14925,7 +14945,7 @@ e246:    a0 00                  st AL, 0x00
 e248:    00                     HALT
 
 R_e249:
-e249:    c4 b3                  ld BL, None
+e249:    c4 b3                  ld BL, @[R_e1fe|0xe1fe]
 e24b:    a0 a0                  st AL, 0xa0
 
 R_e24d:
@@ -14974,7 +14994,7 @@ e26f:    a0 a0                  st AL, 0xa0
 e271:    a0 a0                  st AL, 0xa0
 
 R_e273:
-e273:    c4 b1                  ld BL, None
+e273:    c4 b1                  ld BL, @[0xe226]
 e275:    a0 a0                  st AL, 0xa0
 e277:    01                     nop
 e278:    01                     nop
@@ -14985,7 +15005,7 @@ e27c:    01                     nop
 e27d:    01                     nop
 e27e:    00                     HALT
 e27f:    01                     nop
-e280:    c4 b2                  ld BL, None
+e280:    c4 b2                  ld BL, @[0xe234]
 e282:    a0 a0                  st AL, 0xa0
 e284:    01                     nop
 e285:    02                     sf
@@ -14996,7 +15016,7 @@ e289:    01                     nop
 e28a:    01                     nop
 e28b:    00                     HALT
 e28c:    01                     nop
-e28d:    c4 b3                  ld BL, None
+e28d:    c4 b3                  ld BL, @[L_e242|0xe242]
 e28f:    a0 a0                  st AL, 0xa0
 e291:    01                     nop
 e292:    03                     rf
@@ -15007,7 +15027,7 @@ e296:    01                     nop
 e297:    01                     nop
 e298:    00                     HALT
 e299:    01                     nop
-e29a:    c4 b4                  ld BL, None
+e29a:    c4 b4                  ld BL, @[0xe250]
 e29c:    a0 a0                  st AL, 0xa0
 e29e:    01                     nop
 e29f:    04                     ei
@@ -15018,7 +15038,7 @@ e2a3:    00                     HALT
 e2a4:    01                     nop
 e2a5:    00                     HALT
 e2a6:    01                     nop
-e2a7:    c4 b5                  ld BL, None
+e2a7:    c4 b5                  ld BL, @[R_e25d+1|0xe25e]
 e2a9:    a0 a0                  st AL, 0xa0
 e2ab:    01                     nop
 e2ac:    05                     di
@@ -15029,7 +15049,7 @@ e2b0:    00                     HALT
 e2b1:    01                     nop
 e2b2:    00                     HALT
 e2b3:    01                     nop
-e2b4:    c4 b6                  ld BL, None
+e2b4:    c4 b6                  ld BL, @[0xe26c]
 e2b6:    a0 a0                  st AL, 0xa0
 e2b8:    0c                     unknown
 e2b9:    06                     sl
@@ -15038,7 +15058,7 @@ e2bb:    60 06 ff               ld X, 0x06ff
 e2be:    01                     nop
 e2bf:    ff                     st B, [P]
 e2c0:    01                     nop
-e2c1:    c4 b7                  ld BL, None
+e2c1:    c4 b7                  ld BL, @[0xe27a]
 e2c3:    a0 a0                  st AL, 0xa0
 e2c5:    0c                     unknown
 e2c6:    07                     rl
@@ -15048,7 +15068,7 @@ e2ca:    ff                     st B, [P]
 e2cb:    01                     nop
 e2cc:    ff                     st B, [P]
 e2cd:    01                     nop
-e2ce:    c4 b8                  ld BL, None
+e2ce:    c4 b8                  ld BL, @[0xe288]
 e2d0:    a0 a0                  st AL, 0xa0
 e2d2:    0e                     dly
 e2d3:    08                     cl
@@ -15057,7 +15077,7 @@ e2d5:    d1 ff 01               ld B, [0xff01]
 e2d8:    01                     nop
 e2d9:    00                     HALT
 e2da:    01                     nop
-e2db:    c4 b9                  ld BL, None
+e2db:    c4 b9                  ld BL, @[0xe296]
 e2dd:    a0 a0                  st AL, 0xa0
 e2df:    0e                     dly
 e2e0:    09                     ret

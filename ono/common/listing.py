@@ -74,7 +74,7 @@ def printListing(memory: MemoryWrapper):
             out += f"{label}"
             i += 2
 
-        elif info.type and info.type.startswith("char["):
+        elif isinstance(info.type, str) and info.type.startswith("char["):
             # fixed length string
             str_len = int(info.type[5:-1])
 
@@ -86,20 +86,20 @@ def printListing(memory: MemoryWrapper):
 
             i += str_len
 
-        elif info.type != None:
+        elif isinstance(info.type, str):
             value = struct.unpack_from(info.type, memory[i:])[0]
             data = struct.pack(info.type, value)
 
             i += len(data)
             out += f"({value:#x})"
 
-        elif info.instruction:
-            inst = info.instruction
-            data = inst.bytes
+        elif info.length > 0:
+            inst = info.type
+            data = memory[i: i+info.length]
 
-            out += inst.to_string(memory)
+            out += inst.to_string(mem=memory)
 
-            i += len(inst.bytes)
+            i += info.length
 
         else:
             out += f"{memory[i]:02x}"

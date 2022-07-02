@@ -118,10 +118,10 @@ fc9e:    a1 f2 01               st AL, [0xf201]
 fca1:    73 ef                  jmp WriteString
 
 ReadChar:
-fca3:    84 ee                  ld AL, [0xf200(via -0x12)]
+fca3:    84 ee                  ld AL, [0xf200 (via WriteString+1)]
 fca5:    2c                     srl AL, #1
 fca6:    11 fb                  bnc ReadChar
-fca8:    84 f5                  ld AL, [0xf201(via -0xb)]
+fca8:    84 f5                  ld AL, [0xf201 (via L_fc9e+1)]
 fcaa:    c0 80                  ld BL, 0x80
 fcac:    43 31                  or AL, BL	 ; char | 0x80 - Force bit 7 to be set
 fcae:    c0 e0                  ld BL, 0xe0
@@ -131,7 +131,7 @@ fcb3:    c0 df                  ld BL, 0xdf
 fcb5:    42 31                  and AL, BL	 ; Clear bit 6, forcing it to be uppercase
 
 L_fcb7:
-fcb7:    a4 e6                  st AL, [0xf201(via -0x1a)]
+fcb7:    a4 e6                  st AL, [0xf201 (via L_fc9e+1)]
 fcb9:    09                     ret
 
 LoadFromCMDTramp:
@@ -148,7 +148,7 @@ fcc0:    c0 07                  ld BL, 0x07
 fcc2:    49                     sub BL, AL
 fcc3:    18 ba                  bgt PrintError
 fcc5:    a1 f1 40               st AL, [0xf140]	 ; HawkUnitSelect = A
-fcc8:    94 2d                  ld A, [0xf144(via 0x2d)]
+fcc8:    94 2d                  ld A, [0xf144 (via 0xfcf6+1)]
 fcca:    d0 00 10               ld B, 0x0010
 fccd:    5a                     and B, A
 fcce:    14 af                  bz PrintError
@@ -158,7 +158,7 @@ fcd4:    7b 3b                  call HawkCommand	 ; HawkCommand(3) - ReturnTrack
 fcd6:    03                     (0x3)
 
 L_fcd7:
-fcd7:    94 1e                  ld A, [0xf144(via 0x1e)]
+fcd7:    94 1e                  ld A, [0xf144 (via 0xfcf6+1)]
 fcd9:    d0 04 00               ld B, 0x0400
 fcdc:    5a                     and B, A
 fcdd:    15 a0                  bnz PrintError
@@ -189,7 +189,7 @@ L_fd08:
 fd08:    81 f8 01               ld AL, [0xf801]
 fd0b:    29                     dec AL, #1
 fd0c:    15 fa                  bnz L_fd08
-fd0e:    84 f6                  ld AL, [0xf800(via -0xa)]
+fd0e:    84 f6                  ld AL, [0xf800 (via 0xfd05+1)]
 fd10:    09                     ret
 
 HawkCommand:
@@ -197,7 +197,7 @@ fd11:    85 41                  ld AL, [X++]
 fd13:    a1 f1 48               st AL, [0xf148]
 
 WaitForHawkCommand:
-fd16:    84 df                  ld AL, [0xf144(via -0x21)]	 ; 0xf144
+fd16:    84 df                  ld AL, [0xf144 (via 0xfcf6+1)]	 ; 0xf144
 fd18:    2c                     srl AL, #1
 fd19:    10 fb                  bc WaitForHawkCommand
 fd1b:    09                     ret

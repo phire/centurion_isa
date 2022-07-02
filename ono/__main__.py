@@ -91,13 +91,6 @@ if args["depfile"] and args["output"]:
     generate_depfile(args["depfile"], args["output"])
 
 
-# TODO: disassemble shouldn't be printing to stdout
-#       but until that is fixed we can redirect stdout
-
-if args["output"]:
-    f = open(args["output"], "w")
-    sys.stdout = f
-
 disassembleAllEntries(mem, cpu6)
 
 if relocation_targets:
@@ -116,6 +109,14 @@ if relocation_targets:
 
     disassembleAllEntries(mem, cpu6)
 
+
+
+# TODO: disassemble shouldn't be printing to stdout
+#       but until that is fixed we can redirect stdout
+
+if args["output"]:
+    f = open(args["output"], "w")
+    sys.stdout = f
 
 printListing(mem)
 

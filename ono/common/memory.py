@@ -1,19 +1,35 @@
 from collections import defaultdict
+
 #from cpu6.info import Xargs
 
 
 class MemInfo:
     def __init__(self):
-        self.instruction = None
         self.label = None
-        self.visited = False
-        self.type = None
         self.comment = None
         self.pre_comment = None
+        self.length = 0
+
+        self.type = None
+
+        self.visited = False
+
         self.fixup = None
         self.func_info = None
         self.arg_name = None
         self.insn_offset = None
+
+    def is_interesting(self):
+        "A non-interesting info will be hidden if it's in a large block of nulls"
+        if self.label or self.comment or self.pre_comment or self.fixup:
+            return True
+
+        match self.type:
+            case Instruction() | None: # ignore HALT instructions
+                return False
+            case type:
+                return True
+
 
 class FunctionInfo:
     def __init__(self, x_args):
@@ -32,6 +48,40 @@ class TransferExecution:
 
     def __call__(self):
         return self.pc
+
+class Instruction:
+    pass
+
+class InstructionMatch:
+    def __init__(self, start, end, instruction, mem=None):
+        self.len = end - start
+        assert self.len > 0
+        self.pc = start
+        self.inst = instruction
+        self.valid = True
+
+    def __repr__(self):
+        return f"<Match@{self.pc:04x}: {self.inst}>"
+
+    def next_pc(self, mem):
+        end = self.pc + self.len
+        try:
+            return self.inst.next_pc(mem, end)
+        except AttributeError as e:
+            if e.obj != self.inst: # check requires python 3.10
+                raise e
+
+            return [ResumeExecution(end)]
+
+    def length(self):
+        return self.len
+
+    def type(self):
+        return self.inst
+
+    def to_string(self, mem=None, **kwargs):
+        return self.inst.to_string(self.dict, mem=mem, **kwargs)
+
 
 
 class MemoryWrapper:
@@ -84,11 +134,12 @@ class MemoryWrapper:
         # TODO: support other types of backrefs
         for check_addr in range(addr, addr-2, -1):
             if info := self.read_only_info(check_addr):
-                if not info.instruction:
+                if check_addr + info.length <= addr:
                     continue
-                distance = check_addr - addr
-                if len(info.instruction.bytes) >= distance:
-                    return (check_addr, info)
+                return (check_addr, info.type)
+                # distance = check_addr - addr
+                # if len(info.instruction.bytes) >= distance:
+
         return None
 
     def visited(self, addr):
@@ -108,9 +159,7 @@ class MemoryWrapper:
 
     def hasInfo(self, addr):
         if addr in memory_addr_info:
-            return (memory_addr_info[addr].label
-                or memory_addr_info[addr].comment
-                or memory_addr_info[addr].type)
+            return memory_addr_info[addr].is_interesting()
         return False
 
 

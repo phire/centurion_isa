@@ -1,103 +1,9 @@
-from cpu6.info import Xargs
 from .generic import *
 from .cpu6_regs import Reg16Ref, Reg8Ref, MultiRegRef, LvlRegRef
 from .cpu6_addr import *
 from .cpu6_ops import *
-import struct
-
-class BasicCpu6Inst:
-    newpc = None
-    def __init__(self, mnonomic, dst=None, *sources, fn=None):
-        self.mnemonic = mnonomic
-        self.dst = dst
-        self.srcs = [s for s in sources if s is not None]
-        self.fn = fn
-
-    def to_string(self, dict, mem):
-        str = self.mnemonic
-        if self.dst:
-            str += f" {self.dst.to_string(mem)}"
-        for src in self.srcs:
-            str += f", {src.to_string(mem)}"
-        return str
-
-    def to_tree(self, cpu):
-        if len(self.srcs) == 1:
-            a, b = self.dst, self.srcs[0]
-        elif len(self.srcs) == 2:
-            a, b = self.srcs
-        else:
-            return None
-
-        if self.fn:
-            return self.dst.getNode(cpu).Eq(Flags(self.fn(a.getNode(cpu), b.getNode(cpu))))
-        if self.mnemonic in ["ld", "mov"]:
-            return self.dst.getNode(cpu).Eq(Flags(b.getNode(cpu)))
-        if self.mnemonic == "st":
-            return b.getNode(cpu).Eq(Flags(a.getNode(cpu)))
-
-class ControlFlowInst:
-    def __init__(self, mnemonic, src):
-        self.mnemonic = mnemonic
-        self.src = src
-        self.resume = mnemonic == "call"
-
-    def get_target(self, mem):
-        target = self.src
-
-        # It looks nicer if we unwrap these
-        if isinstance(target, DirectRef):
-            target = target.addr
-        elif isinstance(target, PcDisplacementRef):
-            _, target = target.getLiteralRef(mem)
-        return target
-
-    def get_dst(self, mem):
-        target = self.get_target(mem)
-        try: return target.getValue(mem)
-        except AttributeError: return None
-
-    def get_xargs(self, mem):
-        if addr := self.get_dst(mem):
-            return mem.get_xargs(addr)
-        return None
-
-    @staticmethod
-    def newpc(next_pc, instruction, mem, **kwargs):
-        ret = []
-        if instruction.resume:
-            if xargs := instruction.get_xargs(mem):
-                xargs = Xargs(xargs)
-                next_pc = xargs.annotate(mem, next_pc)
-            ret += [ResumeExecution(next_pc)]
-        if dst := instruction.get_dst(mem):
-            ret += [TransferExecution(dst)]
-        return ret
-
-    def to_string(self, dict, mem):
-        target = self.get_target(mem)
-
-        return f"{self.mnemonic} {target.to_string(mem, forceLabel=True, supressAlt=True)}"
-
-    def to_tree(self, cpu):
-        return None
-
-class SyscallInst(ControlFlowInst):
-    def __init__(self, num):
-        self.num = num
-        self.resume = True
-
-    def get_dst(self, mem):
-        if self.num in mem.syscall_map:
-            return mem.syscall_map[self.num]
-        return None
-
-    def to_string(self, dict, mem):
-        label = f"{self.num:02x}"
-        if addr := self.get_dst(mem):
-            if name := mem.get_label(addr):
-                label = name
-        return f"jsys {label}"
+from common.memory import InstructionMatch as Match
+from .inst import BasicCpu6Inst, SyscallInst, ControlFlowInst
 
 
 def AluMatch(pc, mem):
@@ -163,8 +69,7 @@ def AluMatch(pc, mem):
             elif isinstance(src, (Reg16Ref, Reg8Ref)):
                 src, src2 = src2, None
 
-    bytes = mem[orig_pc:pc]
-    return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, dst, src, src2, fn=fn), bytes, {})
+    return Match(orig_pc, pc, BasicCpu6Inst(mnemonic, dst, src, src2, fn=fn))
 
 def Match2e(pc, mem):
     orig_pc = pc
@@ -179,13 +84,11 @@ def Match2e(pc, mem):
     a_ref, pc = Cpu6AddrMode(a_mode, pc, mem)
     b_ref, pc = Cpu6AddrMode(b_mode, pc, mem, a_ref)
 
-    bytes = mem[orig_pc:pc]
-    return InstructionMatch(orig_pc, BasicCpu6Inst(f"{ops[op]}", a_ref, b_ref), bytes, {})
+    return Match(orig_pc, pc, BasicCpu6Inst(f"{ops[op]}", a_ref, b_ref))
 
 def Match2f(pc, mem):
     reg = mem[pc+1] >> 4
     op = mem[pc+1] & 0x0f
-    bytes = mem[pc:pc+2]
 
     mnemonic = "ld_" if op & 1 == 0 else "st_"
 
@@ -201,17 +104,17 @@ def Match2f(pc, mem):
             else:
                 mnemonic += f" {reg}"
                 reg_ref = None
-            return InstructionMatch(pc, BasicCpu6Inst(mnemonic, reg_ref), bytes, {})
+            return Match(pc, pc+2, BasicCpu6Inst(mnemonic, reg_ref))
         case 3:
             if reg == 0 and op & 1 == 0:
-                mnemonic = "enable_dma" if op & 1 == 0 else "disable_dma"
-                return InstructionMatch(pc, BasicCpu6Inst(mnemonic), bytes, {})
+                mnemonic = "enable_dma" if (op & 1 == 0) else "disable_dma"
+                return Match(pc, pc+2, BasicCpu6Inst(mnemonic))
             if reg != 0: # Illegal if reg != 0
                 return None
         case 4:
             mnemonic += "isr"
 
-    return InstructionMatch(pc, BasicCpu6Inst(mnemonic, Reg16Ref(reg)), bytes, {})
+    return Match(pc, pc+2, BasicCpu6Inst(mnemonic, Reg16Ref(reg)))
 
 # Implements the 46 "bignum" instructions
 def Match46(pc, mem):
@@ -234,7 +137,7 @@ def Match46(pc, mem):
     b_ref, pc = Cpu6AddrMode(b_mode, pc, mem, a_ref)
 
     bytes = mem[orig_pc:pc]
-    return InstructionMatch(orig_pc, BasicCpu6Inst(f"{ops[op]}({a_size:x}, {b_size:x})", a_ref, b_ref), bytes, {})
+    return Match(orig_pc, pc, BasicCpu6Inst(f"{ops[op]}({a_size:x}, {b_size:x})", a_ref, b_ref))
 
 # Implements 47 and 67 "block" instructions
 def MatchBlock(pc, mem):
@@ -278,8 +181,7 @@ def MatchBlock(pc, mem):
     b_ref, pc = Cpu6AddrMode(b_mode, pc, mem, a_ref, blk_len)
     args += [a_ref, b_ref]
 
-    bytes = mem[orig_pc:pc]
-    return InstructionMatch(orig_pc, BasicCpu6Inst(f"{ops[op]}", *args), bytes, {})
+    return Match(orig_pc, pc, BasicCpu6Inst(f"{ops[op]}", *args))
 
 # These might be multiple/divide
 # Order is not confirmed
@@ -290,10 +192,9 @@ def MatchMul(pc, mem):
     pc += 2
 
     dst, src, src2, pc = AluAddrMode(mode, inst, pc, mem)
-    bytes = mem[orig_pc:pc]
 
     mnemonic = "mul" if inst == 0x78 else "div"
-    return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, dst, src, src2), bytes)
+    return Match(orig_pc, pc, BasicCpu6Inst(mnemonic, dst, src, src2))
 
 def MatchD6(pc, mem):
     orig_pc = pc
@@ -303,11 +204,7 @@ def MatchD6(pc, mem):
     pc += 2
     src, dest, pc = D6Mode(mode, pc, mem)
 
-    bytes = mem[orig_pc:pc]
-    #if mode & 0x1 != 1:
-    #    return InstructionMatch(orig_pc, BasicCpu6Inst("unknown_d6", reg, ref), bytes)
-
-    return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, dest, src), bytes)
+    return Match(orig_pc, pc, BasicCpu6Inst(mnemonic, dest, src))
 
 def MatchPushPop(pc, mem):
     orig_pc = pc
@@ -315,11 +212,11 @@ def MatchPushPop(pc, mem):
     start = mem[pc+1] >> 4
     count = mem[pc+1] & 0x0f
     pc += 2
-    bytes = mem[orig_pc:pc]
-    if start + count > 15:
-        return InstructionMatch(orig_pc, BasicCpu6Inst("unknown_push"), bytes)
 
-    return InstructionMatch(orig_pc, BasicCpu6Inst(mnemonic, MultiRegRef(start, count)), bytes )
+    if start + count > 15:
+        return Match(orig_pc, pc, BasicCpu6Inst("unknown_push"))
+
+    return Match(orig_pc, pc, BasicCpu6Inst(mnemonic, MultiRegRef(start, count)))
 
 def MatchD7_E6(pc, mem):
     store = mem[pc] == 0xd7
@@ -328,7 +225,7 @@ def MatchD7_E6(pc, mem):
     ref = LvlRegRef(level, Reg16Ref(mem[pc+1] & 0x0f))
     dst, src = (ref, Reg16Ref(0)) if store else (Reg16Ref(0), ref)
 
-    return InstructionMatch(pc, BasicCpu6Inst("mov", dst, src), mem[pc:pc+2])
+    return Match(pc, pc+2, BasicCpu6Inst("mov", dst, src))
 
 
 # Implements all opcodes 0x80 and above
@@ -345,8 +242,7 @@ def MemoryMatch(pc, mem):
         # It must be disabled on boot for compatibility, and enabled later.
 
         dst, src, pc = F6Mode(pc, mem)
-        bytes = mem[orig_pc:pc]
-        return InstructionMatch(orig_pc, BasicCpu6Inst("mov", dst, src), bytes)
+        return Match(orig_pc, pc, BasicCpu6Inst("mov", dst, src))
 
     elif inst & 0x80 == 0x80:
         # Instructions that operate on A & B
@@ -378,16 +274,15 @@ def MemoryMatch(pc, mem):
     if operand is None:
         return None
 
-    bytes = mem[orig_pc:pc]
     if mode in ['ld', 'st']:
         reg = Reg16Ref(reg) if word else Reg8Ref(reg)
-        return InstructionMatch(orig_pc, BasicCpu6Inst(mode, reg, operand), bytes)
+        return Match(orig_pc, pc, BasicCpu6Inst(mode, reg, operand))
 
     if isinstance(operand, LiteralRef):
         # Literal addressing mode isn't valid for call/jump
         return None
 
-    return InstructionMatch(orig_pc, ControlFlowInst(mode, operand), bytes, mem=mem)
+    return Match(orig_pc, pc, ControlFlowInst(mode, operand), mem=mem)
 
 # 00
 control_instructions = [
@@ -467,7 +362,7 @@ def disassemble_instruction(mem, pc):
                     # Single-byte transfers instructions
                     r = [4, 6, 2, 8, 10][(n & 0xf) - 0xb]
                     dst, src = (Reg16Ref(r), Reg16Ref(0)) if n & 0x10 else (Reg8Ref(r+1), Reg8Ref(1))
-                    return InstructionMatch(pc, BasicCpu6Inst("mov", dst, src), mem[pc: pc+1])
+                    return Match(pc, pc+1, BasicCpu6Inst("mov", dst, src))
                 case _:
                     if alu := AluMatch(pc, mem):
                         return alu
@@ -478,14 +373,14 @@ def disassemble_instruction(mem, pc):
     match byte:
         case 0x3e:
             fn = lambda a,b: a.Add(1)
-            return InstructionMatch(pc, BasicCpu6Inst("inc", Reg16Ref(4), fn=fn), mem[pc:pc+1])
+            return Match(pc, pc+1, BasicCpu6Inst("inc", Reg16Ref(4), fn=fn))
         case 0x3f:
             fn = lambda a,b: a.Sub(1)
-            return InstructionMatch(pc, BasicCpu6Inst("dec", Reg16Ref(4), fn=fn), mem[pc:pc+1])
+            return Match(pc, pc+1, BasicCpu6Inst("dec", Reg16Ref(4), fn=fn))
         case 0x77 | 0x78:
             return MatchMul(pc, mem)
         case 0x66: # jsys aka Syscall
-            return InstructionMatch(pc, SyscallInst(mem[pc+1]), mem[pc:pc+2], mem=mem)
+            return Match(pc, pc+2, SyscallInst(mem[pc+1]), mem=mem)
         case 0x67:
             return MatchBlock(pc, mem)
         case 0x7e | 0x7f:

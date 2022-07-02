@@ -45,3 +45,8 @@ def annotate(memory, entry_points, memory_addr_info):
         memory_addr_info[addr].type = "ptr"
         add_device(device_addr)
         device_num += 1
+
+    # some kind of jump table:
+    memory_addr_info[0xc325].label = "Unk40jumptable"
+    for addr in range(0xc325, 0xc389, 2):
+        memory_addr_info[addr].type = "fnptr"

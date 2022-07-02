@@ -1,11 +1,7 @@
 from collections import defaultdict
 
-from common.memory import ResumeExecution, TransferExecution, entry_points, memory_addr_info
+from common.memory import Instruction, ResumeExecution, TransferExecution, entry_points, memory_addr_info
 from .cpu6_regs import RegNames16, RegNames8
-import struct
-
-
-
 
 signed_wildcards = ("S")
 
@@ -39,7 +35,7 @@ class I:
             signed = key in signed_wildcards
             dict[key] = bitstring_to_int(bistring, signed)
 
-        return InstructionMatch(pc, self, bytes, dict)
+        return GenericMatch(pc, self, bytes, dict)
 
     def to_string(self, dict, mem):
         return self.format.format(**dict)
@@ -108,19 +104,19 @@ class QuickInstuction:
     def to_string(self, dict, **kwargs):
         return self.format.format(**dict)
 
-class InstructionMatch:
+class GenericMatch(Instruction):
     def __init__(self, pc, instruction, bytes, dict={}, mem=None):
         self.disassembled = True
         self.valid = not isinstance(instruction, InvalidInstruction)
         self.instruction = instruction
 
         self.bytes = bytes
-        self.next_pc = [ResumeExecution(pc + len(self.bytes))]
+        self.control_flow = [ResumeExecution(pc + len(self.bytes))]
 
         self.dict = dict | {
             "bytes": " ".join([f"{b:02x}" for b in self.bytes]),
             "pc": pc,
-            "next_pc": self.next_pc[0](),
+            "next_pc": self.control_flow[0](),
             "RegNames8": RegNames8,
             "RegNames16": RegNames16,
             "instruction": instruction,
@@ -128,12 +124,19 @@ class InstructionMatch:
         }
 
         if self.instruction.newpc is not None:
-            self.next_pc = instruction.newpc(**self.dict)
+            self.control_flow = instruction.newpc(**self.dict)
+
+    def next_pc(self, mem):
+        return self.control_flow
+
+    def length(self):
+        return len(self.bytes)
+
+    def type(self):
+        return self
 
     def to_string(self, mem=None, **kwargs):
         return self.instruction.to_string(self.dict, mem=mem, **kwargs)
-
-
 
 def bitstring_to_int(bitstring, signed=False):
     # bigendian
@@ -170,4 +173,6 @@ def scan(instructions, mem, pc, len):
     for instruction in instructions:
         if match := instruction.match(pc, bitstring, bytes, mem):
             return match
-    return InstructionMatch(pc, InvalidInstruction(), bytes, {})
+    return GenericMatch(pc, InvalidInstruction(), bytes, {})
+
+__all__ = ["scan", "I", "B", "kill_branch", "relative_branch"]

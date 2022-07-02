@@ -1,7 +1,10 @@
-from .cpu6_regs import Reg8Ref, Reg16Ref, PostIncRef, PreDecRef, Ref
+from common.memory import Instruction
+from .cpu6_regs import Reg8Ref, Reg16Ref, PostIncRef, PreDecRef
 from .cpu6_ops import *
+from common.ref import *
+import cpu6.inst as inst
 
-class DirectRef(Ref):
+class DirectRef(MemRef):
     def __init__(self, addr, pc):
         self.addr = LiteralRef(addr, 2, pc)
 
@@ -16,7 +19,10 @@ class DirectRef(Ref):
     def getNode(self, cpu):
         return cpu.getMem(self.addr.getNode(cpu))
 
-class ComplexRef(Ref):
+    def __repr__(self) -> str:
+        return f"<Direct {self.addr.val:04x} @ {self.addr.pc:04x}>"
+
+class ComplexRef(MemRef):
     def __init__(self, base, index=None, disp=None):
         self.base = base
         if isinstance(base, DirectRef): # unwrap
@@ -53,7 +59,7 @@ class LiteralRef(Ref):
         # Only label literals if they have been fixed up (or forced)
         if (self.pc and memory.is_fixup(self.pc)) or "forceLabel" in kwargs:
             if label := memory.get_label(val):
-                if "supressAlt" in kwargs:
+                if "suppressAlt" in kwargs:
                     return label
                 return f"{label}|{val:#0{self.size*2+2}x}"
         return f"{val:#0{self.size*2+2}x}"
@@ -82,7 +88,7 @@ class SmallLiteralRef(Ref):
     def getNode(self, cpu):
         return LiteralValue(self.val, 4)
 
-class PcDisplacementRef(Ref):
+class PcDisplacementRef(MemRef):
     def __init__(self, pc, disp, size=2):
         self.pc = pc
         self.disp = disp # disp is a literal ref
@@ -92,7 +98,7 @@ class PcDisplacementRef(Ref):
         return f"[pc + {self.disp}]"
 
     def getAddr(self, memory):
-         # disp is a literal ref, just incase self-modifying code patches it
+         # disp is a literal ref, just in case self-modifying code patches it
         return self.pc + self.disp.getValue(memory)
 
     def getLiteralRef(self, memory):
@@ -109,32 +115,36 @@ class PcDisplacementRef(Ref):
         ref, addr_ref = self.getLiteralRef(memory)
         return f"[{addr_ref.to_string(memory, forceLabel=True)}]"
 
-    def to_string_indirect(self, memory, supressAlt=False, **kwargs):
-        addr = self.getAddr(memory)
-        try:
-            owner_addr, info = memory.owned(addr)
-            if info.instruction and owner_addr < addr:
-                inst = info.instruction.instruction
-                memref = None
-                if inst.mnemonic in ["ld", "st"]:
-                    memref = inst.srcs[0]
-                if inst.mnemonic in ["call"]:
-                    memref = inst.src
+    def via(self, ref: LiteralRef, addr, memory, **kwargs):
+        if ref.pc != addr:
+            # ref address doesn't match our target
+            return "@" + self.to_string(memory, **kwargs)
 
-                if isinstance(memref, DirectRef):
-                    # This is a common optimization that makes it hard to follow code
-                    ref, addr_ref = self.getLiteralRef(memory)
-                    string = f"{ref.to_string(memory, supressAlt=supressAlt, forceLabel=True)}(via {self.disp.to_string(memory)})"
-                    if inst.mnemonic in ["call"]:
-                        return string
-                    return "[" + string + "]"
-        except:
-            return "@" + self.to_string(memory)
+        addr_ref = LiteralRef(addr-1, 2)
+
+        kwargs["forceLabel"] = True
+        kwargs["suppressAlt"] = True
+
+        ret = f"{ref.to_string(memory, **kwargs)}"
+        ret += f" (via {addr_ref.to_string(memory, **kwargs)}+1)"
+
+        return ret
+
+    def to_string_indirect(self, memory, **kwargs):
+        addr = self.getAddr(memory)
+        match memory.owned(addr):
+            case (owner_addr, inst.Cpu6Inst() as o):
+                if o.mnemonic == "call" and isinstance(o.target, DirectRef):
+                    return self.via(o.target.addr, addr, memory, **kwargs)
+                if o.mnemonic in ["ld", "st"] and isinstance(o.srcs[0], DirectRef):
+                    return '[' + self.via(o.srcs[0].addr, addr, memory, **kwargs) + ']'
+        return "@" + self.to_string(memory)
+
 
     def getNode(self, cpu):
         return cpu.getMem(LiteralValue(self.pc, 16).Add(self.disp), self.size * 8)
 
-class IndirectRef(Ref):
+class IndirectRef(MemRef):
     def __init__(self, ref):
         self.ref = ref
 
@@ -144,7 +154,9 @@ class IndirectRef(Ref):
     def to_string(self, memory, **kwargs):
         try:
             return self.ref.to_string_indirect(memory, **kwargs)
-        except AttributeError:
+        except AttributeError as e:
+            if e.obj != self.ref:
+                raise e
             return f"@{self.ref.to_string(memory, **kwargs)}"
 
     def getNode(self, cpu):
