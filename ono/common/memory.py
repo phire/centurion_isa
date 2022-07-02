@@ -47,7 +47,7 @@ class MemoryWrapper:
     def get_label(self, addr):
         if addr in memory_addr_info:
             info = memory_addr_info[addr]
-            if info.insn_offset:
+            if not info.label and info.insn_offset:
                 # The address being referenced is located inside an instruction
                 # Try to fetch a label for the instruction instead
                 offset = info.insn_offset
