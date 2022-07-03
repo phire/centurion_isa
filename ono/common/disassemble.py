@@ -16,10 +16,14 @@ def disassemble_basicblock(mem, entry, isa):
         if mem.visited(pc) or mem.info(pc).type:
             return
 
-
-
         info = mem.info(pc)
         info.visited = True
+
+
+        if mem[pc] == 0 and mem.get(pc, 16) == 0:
+            # abort runs of more than 16 zeros
+            mem.info(pc).visited = True
+            return
 
         match = isa.disassemble_instruction(mem, pc)
         valid = match.valid

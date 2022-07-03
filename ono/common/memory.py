@@ -24,17 +24,6 @@ class MemInfo:
         self.arg_name = None
         self.insn_offset = None
 
-    def is_interesting(self):
-        "A non-interesting info will be hidden if it's in a large block of nulls"
-        if self.label or self.comment or self.pre_comment or self.fixup:
-            return True
-
-        match self.type:
-            case Instruction() | None: # ignore HALT instructions
-                return False
-            case type:
-                return True
-
 
 class FunctionInfo:
     def __init__(self, x_args):
@@ -158,14 +147,16 @@ class MemoryWrapper:
         if info.label == None:
             info.label = f"L_{addr:04x}"
 
+    def set_type(self, addr, type, length):
+        memory_addr_info[addr].type = type
+        memory_addr_info[addr].length = length
+
     def read_only_info(self, addr) -> MemInfo:
         # like info(), but doesn't create a new entry in the DefaultDict
         return memory_addr_info[addr] if addr in memory_addr_info else MemInfo()
 
     def hasInfo(self, addr):
-        if addr in memory_addr_info:
-            return memory_addr_info[addr].is_interesting()
-        return False
+        return addr in memory_addr_info
 
 
 # FIXME: These globals are currently imported and modified everywhere

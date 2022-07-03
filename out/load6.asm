@@ -243,21 +243,20 @@ StartProcess_TopOfMemory:
 0202:    5b                     mov X, A
 0203:    <null bytes>
 
-021c:    ff                     st B, [P]
-021d:    ff                     st B, [P]
-021e:    00                     HALT
-021f:    00                     HALT
-0220:    1f 01                  b?F L_0223	 ; Process PageTable
-0222:    02                     sf
-
-L_0223:
-0223:    03                     rf
-0224:    04                     ei
-0225:    05                     di
-0226:    06                     sl
-0227:    07                     rl
-0228:    08                     cl
-0229:    09                     ret
+021c:    ff
+021d:    ff
+021e:    00
+021f:    00
+0220:    1f	 ; Process PageTable
+0221:    01
+0222:    02
+0223:    03
+0224:    04
+0225:    05
+0226:    06
+0227:    07
+0228:    08
+0229:    09
 022a:    0a
 022b:    0b
 022c:    0c
@@ -6850,7 +6849,8 @@ a5c4:    01                     nop
 R_a5c5:
 a5c5:    <null bytes>
 
-a5e8:    7b 57                  call R_a641
+a5e8:    7b
+a5e9:    57
 a5ea:    24
 
 R_a5eb:
@@ -7226,8 +7226,8 @@ a866:    <null bytes>
 
 
 R_a86c:
-a86c:    00                     HALT
-a86d:    00                     HALT
+a86c:    00
+a86d:    00
 
 L_a86e:
 a86e:    00                     HALT
@@ -9608,23 +9608,23 @@ b7a9:    <null bytes>
 
 
 _DestBuffer:
-b7ab:    00                     HALT
-b7ac:    00                     HALT
+b7ab:    00
+b7ac:    00
 
 _AlsoReadSize:
-b7ad:    00                     HALT
-b7ae:    00                     HALT
+b7ad:    00
+b7ae:    00
 
 R_b7af:
-b7af:    00                     HALT
-b7b0:    00                     HALT
+b7af:    00
+b7b0:    00
 
 R_b7b1:
-b7b1:    00                     HALT
-b7b2:    00                     HALT
+b7b1:    00
+b7b2:    00
 
 _DeviceNum:
-b7b3:    00                     HALT
+b7b3:    00
 
 L_b7b4:
 b7b4:    f3 08                  st B, [0xb7be]

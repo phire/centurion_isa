@@ -7210,23 +7210,23 @@ a7ea:    <null bytes>
 
 
 R_a7ec:
-a7ec:    00                     HALT
-a7ed:    00                     HALT
+a7ec:    00
+a7ed:    00
 
 R_a7ee:
-a7ee:    00                     HALT
-a7ef:    00                     HALT
+a7ee:    00
+a7ef:    00
 
 R_a7f0:
-a7f0:    00                     HALT
-a7f1:    00                     HALT
+a7f0:    00
+a7f1:    00
 
 R_a7f2:
-a7f2:    00                     HALT
-a7f3:    00                     HALT
+a7f2:    00
+a7f3:    00
 
 R_a7f4:
-a7f4:    00                     HALT
+a7f4:    00
 
 L_a7f5:
 a7f5:    f3 08                  st B, [0xa7ff]
@@ -14965,20 +14965,20 @@ e253:    <null bytes>
 
 
 R_e255:
-e255:    00                     HALT
-e256:    00                     HALT
+e255:    00
+e256:    00
 
 R_e257:
-e257:    00                     HALT
-e258:    00                     HALT
+e257:    00
+e258:    00
 
 R_e259:
-e259:    00                     HALT
-e25a:    00                     HALT
+e259:    00
+e25a:    00
 
 R_e25b:
-e25b:    00                     HALT
-e25c:    00                     HALT
+e25b:    00
+e25c:    00
 
 R_e25d:
 e25d:    a0 a0                  st AL, 0xa0
