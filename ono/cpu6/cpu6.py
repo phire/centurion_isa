@@ -3,7 +3,8 @@ from .cpu6_regs import Reg16Ref, Reg8Ref, MultiRegRef, LvlRegRef
 from .cpu6_addr import *
 from .cpu6_ops import *
 from common.memory import InstructionMatch as Match
-from .inst import BasicCpu6Inst, SyscallInst, ControlFlowInst, TerminalInst
+from .inst import BasicCpu6Inst, BigNumInst, BlockInst, ImplicitLenInst, SyscallInst, ControlFlowInst, TerminalInst
+from common.ref import Implicit
 
 
 def AluMatch(pc, mem):
@@ -45,17 +46,17 @@ def AluMatch(pc, mem):
 
         match inst & 0x70:
             case 0x20:
-                dst = Reg8Ref(1)
-                src = SmallLiteralRef(imm)
+                dst = Implicit(Reg8Ref(1))
+                src = Implicit(SmallLiteralRef(imm))
             case 0x30:
-                dst = Reg16Ref(0)
-                src = SmallLiteralRef(imm)
+                dst = Implicit(Reg16Ref(0))
+                src = Implicit(SmallLiteralRef(imm))
             case 0x40:
-                dst = Reg8Ref(3)
-                src = Reg8Ref(1)
+                dst = Implicit(Reg8Ref(3))
+                src = Implicit(Reg8Ref(1))
             case 0x50:
-                dst = Reg16Ref(2)
-                src = Reg16Ref(0)
+                dst = Implicit(Reg16Ref(2))
+                src = Implicit(Reg16Ref(0))
         src2 = None
     else:
         mode = mem[pc]
@@ -84,7 +85,7 @@ def Match2e(pc, mem):
     a_ref, pc = Cpu6AddrMode(a_mode, pc, mem)
     b_ref, pc = Cpu6AddrMode(b_mode, pc, mem, a_ref)
 
-    return Match(orig_pc, pc, BasicCpu6Inst(f"{ops[op]}", a_ref, b_ref))
+    return Match(orig_pc, pc, BlockInst(f"{ops[op]}", a_ref, b_ref))
 
 def Match2f(pc, mem):
     reg = mem[pc+1] >> 4
@@ -102,13 +103,12 @@ def Match2f(pc, mem):
             if op & 1 == 1:
                 reg_ref = Reg8Ref(reg)
             else:
-                mnemonic += f" {reg}"
-                reg_ref = None
+                reg_ref = SmallLiteralRef(reg)
             return Match(pc, pc+2, BasicCpu6Inst(mnemonic, reg_ref))
         case 3:
             if reg == 0 and op & 1 == 0:
                 mnemonic = "enable_dma" if (op & 1 == 0) else "disable_dma"
-                return Match(pc, pc+2, BasicCpu6Inst(mnemonic))
+                return Match(pc, pc+2, ImplicitLenInst(mnemonic, 2))
             if reg != 0: # Illegal if reg != 0
                 return None
         case 4:
@@ -137,7 +137,7 @@ def Match46(pc, mem):
     b_ref, pc = Cpu6AddrMode(b_mode, pc, mem, a_ref)
 
     bytes = mem[orig_pc:pc]
-    return Match(orig_pc, pc, BasicCpu6Inst(f"{ops[op]}({a_size:x}, {b_size:x})", a_ref, b_ref))
+    return Match(orig_pc, pc, BigNumInst(f"{ops[op]}({a_size:x}, {b_size:x})", a_ref, b_ref))
 
 # Implements 47 and 67 "block" instructions
 def MatchBlock(pc, mem):
@@ -160,14 +160,14 @@ def MatchBlock(pc, mem):
             args += [LiteralRef(blk_len, 1)]
             pc += 1
         elif inst == 0x67:  # 67 gets it's length from implicit AL
-            args += [Reg8Ref(1)]
+            args += [Implicit(Reg8Ref(1))]
 
     if op == 2:
         if inst == 0x47: # 47 gets it's char as a byte immediate
             args += [LiteralRef(mem[pc], 1)]
             pc += 1
         elif inst == 0x67:  # 67 gets it's length from somewhere else. BL?
-            args +=  [Reg8Ref(3)] # complete guess
+            args +=  [Implicit(Reg8Ref(3))] # complete guess
 
     src_len = blk_len
     if op == 9: # memset
@@ -181,7 +181,7 @@ def MatchBlock(pc, mem):
     b_ref, pc = Cpu6AddrMode(b_mode, pc, mem, a_ref, blk_len)
     args += [a_ref, b_ref]
 
-    return Match(orig_pc, pc, BasicCpu6Inst(f"{ops[op]}", *args))
+    return Match(orig_pc, pc, BlockInst(f"{ops[op]}", *args))
 
 # These might be multiple/divide
 # Order is not confirmed
@@ -214,7 +214,7 @@ def MatchPushPop(pc, mem):
     pc += 2
 
     if start + count > 15:
-        return Match(orig_pc, pc, BasicCpu6Inst("unknown_push"))
+        return Match(orig_pc, pc, ImplicitLenInst("unknown_push", 2))
 
     return Match(orig_pc, pc, BasicCpu6Inst(mnemonic, MultiRegRef(start, count)))
 
@@ -223,7 +223,7 @@ def MatchD7_E6(pc, mem):
 
     level = mem[pc+1] >> 4
     ref = LvlRegRef(level, Reg16Ref(mem[pc+1] & 0x0f))
-    dst, src = (ref, Reg16Ref(0)) if store else (Reg16Ref(0), ref)
+    dst, src = (ref, Implicit(Reg16Ref(0))) if store else (Implicit(Reg16Ref(0)), ref)
 
     return Match(pc, pc+2, BasicCpu6Inst("mov", dst, src))
 
@@ -275,7 +275,7 @@ def MemoryMatch(pc, mem):
         return None
 
     if mode in ['ld', 'st']:
-        reg = Reg16Ref(reg) if word else Reg8Ref(reg)
+        reg = Implicit(Reg16Ref(reg)) if word else Implicit(Reg8Ref(reg))
         return Match(orig_pc, pc, BasicCpu6Inst(mode, reg, operand))
 
     if isinstance(operand, LiteralRef):
@@ -284,7 +284,7 @@ def MemoryMatch(pc, mem):
 
     resume = mode == 'call'
 
-    return Match(orig_pc, pc, ControlFlowInst(mode, operand, resume), mem=mem)
+    return Match(orig_pc, pc, ControlFlowInst(mode, operand, resume))
 
 
 # 00-0F
@@ -319,7 +319,7 @@ def control_instructions(pc, inst):
         case 0x0c:
             return Match(pc, pc+1, BasicCpu6Inst("unknown_0c"))
         case 0x0d:
-            return Match(pc, pc+1, BasicCpu6Inst("mov_pc", Reg16Ref(4)))
+            return Match(pc, pc+1, BasicCpu6Inst("mov_pc", Implicit(Reg16Ref(4))))
         case 0x0e:
             return Match(pc, pc+1, BasicCpu6Inst("dly"))
         case 0x0f:
@@ -403,7 +403,10 @@ def disassemble_instruction(mem, pc):
                 case n if n & 0x40 and n & 0xf > 0xa:
                     # Single-byte transfers instructions
                     r = [4, 6, 2, 8, 10][(n & 0xf) - 0xb]
-                    dst, src = (Reg16Ref(r), Reg16Ref(0)) if n & 0x10 else (Reg8Ref(r+1), Reg8Ref(1))
+                    if n & 0x10:
+                        dst, src = (Implicit(Reg16Ref(r)), Implicit(Reg16Ref(0)))
+                    else:
+                        dst, src = (Implicit(Reg8Ref(r+1)), Implicit(Reg8Ref(1)))
                     return Match(pc, pc+1, BasicCpu6Inst("mov", dst, src))
                 case _:
                     if alu := AluMatch(pc, mem):
@@ -415,14 +418,15 @@ def disassemble_instruction(mem, pc):
     match byte:
         case 0x3e:
             fn = lambda a,b: a.Add(1)
-            return Match(pc, pc+1, BasicCpu6Inst("inc", Reg16Ref(4), fn=fn))
+            return Match(pc, pc+1, BasicCpu6Inst("inc", Implicit(Reg16Ref(4)), fn=fn))
         case 0x3f:
             fn = lambda a,b: a.Sub(1)
-            return Match(pc, pc+1, BasicCpu6Inst("dec", Reg16Ref(4), fn=fn))
+            return Match(pc, pc+1, BasicCpu6Inst("dec", Implicit(Reg16Ref(4)), fn=fn))
         case 0x77 | 0x78:
             return MatchMul(pc, mem)
         case 0x66: # jsys aka Syscall
-            return Match(pc, pc+2, SyscallInst(mem[pc+1]), mem=mem)
+            arg = LiteralRef(mem[pc+1], 1, pc+1)
+            return Match(pc, pc+2, SyscallInst(arg))
         case 0x67:
             return MatchBlock(pc, mem)
         case 0x7e | 0x7f:

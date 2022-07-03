@@ -15,7 +15,7 @@ class Reg16Ref(RegRef):
     def __init__(self, reg):
         self.reg = reg >> 1
 
-    def __str__(self):
+    def to_string(self, mem, **kwargs):
         return RegNames16[self.reg]
 
     def getNode(self, cpu):
@@ -25,33 +25,33 @@ class Reg8Ref(RegRef):
     def __init__(self, reg):
         self.reg = reg
 
-    def __str__(self):
+    def to_string(self, mem, **kwargs):
         return RegNames8[self.reg]
 
     def getNode(self, cpu):
         return cpu.getReg(self.reg, 8)
 
 class PostIncRef(Ref):
-    def __init__(self, reg):
-        self.reg = reg
+    def __init__(self, ref):
+        self.ref = ref
 
-    def __str__(self):
-        return f"{self.reg}++"
+    def to_string(self, mem, **kwargs):
+        return f"{self.ref.to_string(mem, **kwargs)}++"
 
     def getNode(self, cpu):
-        node = self.reg.getNode(cpu)
+        node = self.ref.getNode(cpu)
         cpu.sideEffect(node.Add(node.width / 8))
         return node
 
 class PreDecRef(Ref):
-    def __init__(self, reg):
-        self.reg = reg
+    def __init__(self, ref):
+        self.ref = ref
 
-    def __str__(self):
-        return f"--{self.reg}"
+    def to_string(self, mem, **kwargs):
+        return f"--{self.ref.to_string(mem, **kwargs)}"
 
     def getNode(self, cpu):
-        node = Add(self.reg.getNode(cpu), node.width / 8)
+        node = Add(self.ref.getNode(cpu), node.width / 8)
         cpu.sideEffect(node.Add(node.width / 8))
         return node
 
@@ -60,7 +60,7 @@ class MultiRegRef(Ref):
         self.start = start
         self.count = count + 1
 
-    def __str__(self):
+    def to_string(self, mem, **kwargs):
         i = self.start
         end = self.start + self.count
         regs = []
@@ -75,6 +75,9 @@ class MultiRegRef(Ref):
 
         return f"{{{', '.join(regs)}}}"
 
+    def __len__(self):
+        return 1
+
 class LvlRegRef(Ref):
     # For instructions that can touch registers in other interrupt levels
 
@@ -83,5 +86,8 @@ class LvlRegRef(Ref):
         assert isinstance(reg, RegRef)
         self.reg = reg
 
-    def __str__(self):
-        return f"IL{self.level}({self.reg})"
+    def to_string(self, mem, **kwargs):
+        return f"IL{self.level}({self.reg.to_string(mem, **kwargs)})"
+
+    def __len__(self):
+        return 1

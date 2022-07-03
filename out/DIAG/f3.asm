@@ -329,7 +329,7 @@ L_92e4:
 92ef:    2f 02                  ld_dma_count A
 92f1:    90 01 1c               ld A, 0x011c
 92f4:    2f 00                  ld_dma_addr A
-92f6:    2f 34                  dma_mode 3
+92f6:    2f 34                  dma_mode #3
 92f8:    2f 06                  enable_dma
 92fa:    80 43                  ld AL, 0x43
 92fc:    a2 01 14               st AL, @[0x0114]
@@ -346,7 +346,7 @@ L_9309:
 9311:    2f 02                  ld_dma_count A
 9313:    90 01 1c               ld A, 0x011c
 9316:    2f 00                  ld_dma_addr A
-9318:    2f 34                  dma_mode 3
+9318:    2f 34                  dma_mode #3
 931a:    2f 06                  enable_dma
 931c:    80 44                  ld AL, 0x44
 931e:    a2 01 14               st AL, @[0x0114]
@@ -398,7 +398,7 @@ L_9383:
 938e:    2f 02                  ld_dma_count A
 9390:    90 01 1c               ld A, 0x011c
 9393:    2f 00                  ld_dma_addr A
-9395:    2f 34                  dma_mode 3
+9395:    2f 34                  dma_mode #3
 9397:    2f 06                  enable_dma
 9399:    80 46                  ld AL, 0x46
 939b:    a2 01 14               st AL, @[0x0114]
@@ -427,7 +427,7 @@ L_93c6:
 93ce:    2f 02                  ld_dma_count A
 93d0:    90 01 1c               ld A, 0x011c
 93d3:    2f 00                  ld_dma_addr A
-93d5:    2f 34                  dma_mode 3
+93d5:    2f 34                  dma_mode #3
 93d7:    2f 06                  enable_dma
 93d9:    80 47                  ld AL, 0x47
 93db:    a2 01 14               st AL, @[0x0114]
@@ -501,7 +501,7 @@ Entry_CMD_SEEK_TEST:
 9488:    2f 02                  ld_dma_count A
 948a:    90 41 4d               ld A, 0x414d
 948d:    2f 00                  ld_dma_addr A
-948f:    2f 34                  dma_mode 3
+948f:    2f 34                  dma_mode #3
 9491:    2f 06                  enable_dma
 9493:    80 43                  ld AL, 0x43
 9495:    a2 01 14               st AL, @[0x0114]
@@ -536,7 +536,7 @@ L_94c6:
 94c9:    2f 00                  ld_dma_addr A
 94cb:    90 ff f7               ld A, 0xfff7
 94ce:    2f 02                  ld_dma_count A
-94d0:    2f 34                  dma_mode 3
+94d0:    2f 34                  dma_mode #3
 94d2:    2f 06                  enable_dma
 94d4:    80 43                  ld AL, 0x43
 94d6:    a2 01 14               st AL, @[0x0114]
@@ -624,7 +624,7 @@ L_9581:
 9584:    2f 02                  ld_dma_count A
 9586:    90 41 4d               ld A, 0x414d
 9589:    2f 00                  ld_dma_addr A
-958b:    2f 34                  dma_mode 3
+958b:    2f 34                  dma_mode #3
 958d:    2f 06                  enable_dma
 958f:    80 43                  ld AL, 0x43
 9591:    a2 01 14               st AL, @[0x0114]
@@ -641,7 +641,7 @@ L_95a2:
 95a5:    2f 02                  ld_dma_count A
 95a7:    90 01 1c               ld A, 0x011c
 95aa:    2f 00                  ld_dma_addr A
-95ac:    2f 34                  dma_mode 3
+95ac:    2f 34                  dma_mode #3
 95ae:    2f 06                  enable_dma
 95b0:    80 45                  ld AL, 0x45
 95b2:    a2 01 14               st AL, @[0x0114]
@@ -688,7 +688,7 @@ Entry_FLOPPY_SEEK_TEST:
 9602:    2f 02                  ld_dma_count A
 9604:    90 41 4d               ld A, 0x414d
 9607:    2f 00                  ld_dma_addr A
-9609:    2f 34                  dma_mode 3
+9609:    2f 34                  dma_mode #3
 960b:    2f 06                  enable_dma
 960d:    80 43                  ld AL, 0x43
 960f:    a2 01 14               st AL, @[0x0114]
@@ -716,7 +716,7 @@ L_9636:
 9639:    2f 00                  ld_dma_addr A
 963b:    90 ff fb               ld A, 0xfffb
 963e:    2f 02                  ld_dma_count A
-9640:    2f 34                  dma_mode 3
+9640:    2f 34                  dma_mode #3
 9642:    2f 06                  enable_dma
 9644:    80 43                  ld AL, 0x43
 9646:    a2 01 14               st AL, @[0x0114]
@@ -802,7 +802,7 @@ L_96e4:
 96e7:    2f 02                  ld_dma_count A
 96e9:    90 41 4d               ld A, 0x414d
 96ec:    2f 00                  ld_dma_addr A
-96ee:    2f 34                  dma_mode 3
+96ee:    2f 34                  dma_mode #3
 96f0:    2f 06                  enable_dma
 96f2:    80 43                  ld AL, 0x43
 96f4:    a2 01 14               st AL, @[0x0114]
@@ -819,7 +819,7 @@ L_9705:
 9708:    2f 02                  ld_dma_count A
 970a:    90 01 1c               ld A, 0x011c
 970d:    2f 00                  ld_dma_addr A
-970f:    2f 34                  dma_mode 3
+970f:    2f 34                  dma_mode #3
 9711:    2f 06                  enable_dma
 9713:    80 45                  ld AL, 0x45
 9715:    a2 01 14               st AL, @[0x0114]

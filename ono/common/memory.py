@@ -47,12 +47,14 @@ class Instruction:
     pass
 
 class InstructionMatch:
-    def __init__(self, start, end, instruction, mem=None):
+    def __init__(self, start, end, instruction):
         self.len = end - start
         assert self.len > 0
         self.pc = start
         self.inst = instruction
         self.valid = True
+
+        assert(len(instruction) == self.len)
 
     def __repr__(self):
         return f"<Match@{self.pc:04x}: {self.inst}>"

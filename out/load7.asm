@@ -2341,7 +2341,7 @@ L_8af3:
 8af6:    b5 a2                  st A, [--S]
 8af8:    3a                     clr A, #0
 8af9:    39                     dec A, #1
-8afa:    66 65                  jsys 65
+8afa:    66 65                  jsys 0x65
 8afc:    00                     HALT
 8afd:    00                     HALT
 8afe:    55 22                  mov B, B
@@ -2366,7 +2366,7 @@ L_8b10:
 8b16:    d5 a8 02               ld B, [S + 0x02]
 
 L_8b19:
-8b19:    66 65                  jsys 65
+8b19:    66 65                  jsys 0x65
 8b1b:    00                     HALT
 8b1c:    00                     HALT
 8b1d:    5d                     mov B, A
@@ -2846,7 +2846,7 @@ L_8e0f:
 8e28:    d5 08 1c               ld B, [A + 0x1c]
 8e2b:    85 08 1b               ld AL, [A + 0x1b]
 8e2e:    a3 24                  st AL, [0x8e54]
-8e30:    66 64                  jsys 64
+8e30:    66 64                  jsys 0x64
 8e32:    00                     HALT
 8e33:    00                     HALT
 8e34:    00                     HALT
@@ -3001,7 +3001,7 @@ L_8f07:
 8f07:    47 02 8f 14 08         unkblk0 [R_8f14|0x8f14], [Z]
 8f0c:    15 cb                  bnz R_8ed9
 8f0e:    13 06                  bnn L_8f16
-8f10:    66 09                  jsys 09
+8f10:    66 09                  jsys 0x09
 8f12:    03                     rf
 
 R_8f13:
@@ -3046,7 +3046,7 @@ L_8f31:
 L_8f43:
 8f43:    32 40                  clr X, #0
 8f45:    93 ba                  ld A, [R_8f01|0x8f01]
-8f47:    66 1a                  jsys 1a
+8f47:    66 1a                  jsys 0x1a
 
 L_8f49:
 8f49:    81 8e 71               ld AL, [R_8e71|0x8e71]
@@ -3971,7 +3971,7 @@ L_9491:
 9498:    09                     ret
 
 L_9499:
-9499:    66 1a                  jsys 1a
+9499:    66 1a                  jsys 0x1a
 
 R_949b:
 949b:    55 82                  mov B, Z
@@ -4731,7 +4731,7 @@ R_9907:
 9909:    73 c3                  jmp L_98ce
 
 R_990b:
-990b:    46 11 2d 01 90 80 04   unkbig2(1, 1) 0x01, [Z + 0x80]
+990b:    46 11 2d 01 90 80 04   unkbig2(1, 1) 0x01, [Z + 0x8004]
 9912:    11 06                  bnc L_991a
 9914:    85 88 03               ld AL, [Z + 0x03]
 9917:    29                     dec AL, #1
@@ -4856,7 +4856,7 @@ L_99d2:
 99d9:    14 ef                  bz L_99ca
 99db:    95 a8 09               ld A, [S + 0x09]
 99de:    d5 48 0c               ld B, [X + 0x0c]
-99e1:    66 09                  jsys 09
+99e1:    66 09                  jsys 0x09
 99e3:    0e                     dly
 
 R_99e4:
@@ -4889,7 +4889,7 @@ L_99fe:
 9a07:    14 c1                  bz L_99ca
 9a09:    95 a8 0d               ld A, [S + 0x0d]
 9a0c:    d5 a8 10               ld B, [S + 0x10]
-9a0f:    66 09                  jsys 09
+9a0f:    66 09                  jsys 0x09
 9a11:    0e                     dly
 
 L_9a12:
@@ -4914,7 +4914,7 @@ R_9a1d:
 9a2f:    85 a1                  ld AL, [S++]
 
 L_9a31:
-9a31:    66 ff                  jsys ff
+9a31:    66 ff                  jsys 0xff
 9a33:    09                     ret
 
 L_9a34:
@@ -5250,7 +5250,7 @@ R_9bd4:
 R_9beb:
 9beb:    08                     cl
 9bec:    97                     unknown
-9bed:    34 97 83 00            srl [Z + 0x0000], #8
+9bed:    34 97 83 00            srl [Z + 0x8300], #8
 9bf1:    00                     HALT
 9bf2:    00                     HALT
 9bf3:    00                     HALT
@@ -5442,7 +5442,7 @@ L_9cd7:
 9cf3:    58                     add B, A
 9cf4:    f3 05                  st B, [0x9cfb]
 9cf6:    9d                     ld A, [S]
-9cf7:    66 57                  jsys 57
+9cf7:    66 57                  jsys 0x57
 9cf9:    00                     HALT
 9cfa:    00                     HALT
 9cfb:    00                     HALT
@@ -5872,7 +5872,7 @@ Entry_0x9f98:
 9fae:    d1 a0 4a               ld B, [R_a04a|0xa04a]
 9fb1:    55 40                  mov A, X
 9fb3:    31 01                  dec A, #2
-9fb5:    66 09                  jsys 09
+9fb5:    66 09                  jsys 0x09
 9fb7:    17
 
 L_9fb8:
@@ -5927,7 +5927,7 @@ a00a:    95 88 1d               ld A, [Z + 0x1d]
 a00d:    b3 09                  st A, [0xa018]
 a00f:    80 00                  ld AL, 0x00
 a011:    d0 00 00               ld B, 0x0000
-a014:    66 64                  jsys 64
+a014:    66 64                  jsys 0x64
 a016:    a0 74                  st AL, 0x74
 a018:    00                     HALT
 a019:    00                     HALT
@@ -5948,7 +5948,7 @@ a032:    3d                     sll A, #1
 a033:    50 04                  add X, A
 
 L_a035:
-a035:    66 01                  jsys 01
+a035:    66 01                  jsys 0x01
 a037:    ff                     st B, [P]
 a038:    ff                     st B, [P]
 
@@ -5961,7 +5961,7 @@ L_a042:
 a042:    f5 a2                  st B, [--S]
 a044:    7b 28                  call L_a06e
 a046:    c3 c8                  ld BL, [0xa010]
-a048:    66 03                  jsys 03
+a048:    66 03                  jsys 0x03
 
 R_a04a:
 a04a:    00                     HALT
@@ -6152,7 +6152,7 @@ a1b2:    7b 19                  call L_a1cd
 a1b4:    3a                     clr A, #0
 a1b5:    39                     dec A, #1
 a1b6:    5d                     mov B, A
-a1b7:    66 09                  jsys 09
+a1b7:    66 09                  jsys 0x09
 
 L_a1b9:
 a1b9:    21 55                  dec XL, #6
@@ -6382,7 +6382,7 @@ a336:    8c                     ld AL, [Z]
 a337:    c0 80                  ld BL, 0x80
 a339:    4a                     and BL, AL
 a33a:    15 04                  bnz L_a340
-a33c:    32 90 00 10            clr [Z + 0x8cc0], #0
+a33c:    32 90 00 10            clr [Z + 0x0010], #0
 
 L_a340:
 a340:    8c                     ld AL, [Z]
@@ -6471,7 +6471,7 @@ a3ab:    00                     HALT
 
 R_a3ac:
 a3ac:    95 a4                  ld A, @[S]
-a3ae:    30 b1 00 00            inc [S + 0xf31d], #2
+a3ae:    30 b1 00 00            inc [S + 0x0000], #2
 
 R_a3b2:
 a3b2:    f3 1d                  st B, [0xa3d1]
@@ -6875,7 +6875,7 @@ a615:    b5 a2                  st A, [--S]
 a617:    85 41                  ld AL, [X++]
 a619:    79 cf 1d               call R_cf1d
 a61c:    15 03                  bnz L_a621
-a61e:    66 09                  jsys 09
+a61e:    66 09                  jsys 0x09
 a620:    06                     sl
 
 L_a621:
@@ -6898,7 +6898,7 @@ a63b:    42 31                  and AL, BL
 a63d:    a5 a2                  st AL, [--S]
 a63f:    21 11                  dec AL, #2
 a641:    19 03                  ble L_a646
-a643:    66 09                  jsys 09
+a643:    66 09                  jsys 0x09
 a645:    08                     cl
 
 L_a646:
@@ -7183,7 +7183,7 @@ L_a7d9:
 a7d9:    93 0f                  ld A, [R_a7ea|0xa7ea]
 a7db:    d0 ff ff               ld B, 0xffff
 a7de:    c0 05                  ld BL, 0x05
-a7e0:    66 6b                  jsys 6b
+a7e0:    66 6b                  jsys 0x6b
 
 R_a7e2:
 a7e2:    <null bytes>
@@ -7263,7 +7263,7 @@ a82e:    25 11                  sll AL, #2
 a830:    c0 04                  ld BL, 0x04
 a832:    48                     add BL, AL
 a833:    e3 01                  st BL, [0xa836]
-a835:    2f 04                  dma_mode 0
+a835:    2f 04                  dma_mode #0
 a837:    2f 06                  enable_dma
 a839:    e6 28                  mov A, IL2(Z)
 a83b:    f6 11 0e               mov Device[A + 0x0e], AL
@@ -7295,7 +7295,7 @@ a862:    3a                     clr A, #0
 a863:    83 8f                  ld AL, [R_a7f4|0xa7f4]
 a865:    d3 83                  ld B, [R_a7ea|0xa7ea]
 a867:    c0 1d                  ld BL, 0x1d
-a869:    66 6b                  jsys 6b
+a869:    66 6b                  jsys 0x6b
 
 L_a86b:
 a86b:    79 ce 41               call SetTimeout256
@@ -7425,7 +7425,7 @@ a961:    30 a1                  inc S, #2
 a963:    60 00 00               ld X, 0x0000
 a966:    ba                     st A, [X]
 a967:    7f 45                  pop {X, Y, Z}
-a969:    30 ba 00 02            inc [S + 0x0979], #11
+a969:    30 ba 00 02            inc [S + 0x0002], #11
 a96d:    09                     ret
 
 L_a96e:
@@ -7564,7 +7564,7 @@ aa57:    79 ab 8a               call R_ab8a
 aa5a:    ac                     st AL, [Z]
 
 L_aa5b:
-aa5b:    34 7b 51 7b            srl [Y + 0x2d80], #12
+aa5b:    34 7b 51 7b            srl [Y + 0x517b], #12
 aa5f:    2d                     sll AL, #1
 aa60:    80 03                  ld AL, 0x03
 aa62:    f6 19 08               mov Device[Z + 0x08], AL
@@ -7794,7 +7794,7 @@ ab9e:    3a                     clr A, #0
 ab9f:    39                     dec A, #1
 aba0:    5d                     mov B, A
 aba1:    c0 1c                  ld BL, 0x1c
-aba3:    66 6b                  jsys 6b
+aba3:    66 6b                  jsys 0x6b
 
 L_aba5:
 aba5:    79 a5 50               call R_a550
@@ -7803,7 +7803,7 @@ aba9:    00                     HALT
 abaa:    91 aa b9               ld A, [R_aab9|0xaab9]
 abad:    79 ce b3               call R_ceb3
 abb0:    ac                     st AL, [Z]
-abb1:    66 7b                  jsys 7b
+abb1:    66 7b                  jsys 0x7b
 abb3:    c3 b1                  ld BL, [0xab66]
 abb5:    ac                     st AL, [Z]
 abb6:    5e                     mov Z, A
@@ -7814,7 +7814,7 @@ abbe:    61 79 a5               ld X, [0x79a5]
 abc1:    50 ac                  add C, S
 abc3:    55 3a 39 5d            mov S, 0x395d
 abc7:    c0 0d                  ld BL, 0x0d
-abc9:    66 6b                  jsys 6b
+abc9:    66 6b                  jsys 0x6b
 
 L_abcb:
 abcb:    3a                     clr A, #0
@@ -8631,7 +8631,7 @@ b14d:    81 00 83               ld AL, [0x0083]
 b150:    00                     HALT
 
 R_b151:
-b151:    2f 34                  dma_mode 3
+b151:    2f 34                  dma_mode #3
 b153:    2f 06                  enable_dma
 b155:    2f 20                  ld_dma_addr B
 b157:    3b                     not A, #0
@@ -8674,7 +8674,7 @@ b186:    00                     HALT
 b187:    2a                     clr AL, #0
 b188:    a1 ae 5b               st AL, [R_ae5b|0xae5b]
 b18b:    c0 0d                  ld BL, 0x0d
-b18d:    66 6b                  jsys 6b
+b18d:    66 6b                  jsys 0x6b
 
 R_b18f:
 b18f:    95 41                  ld A, [X++]
@@ -9065,7 +9065,7 @@ L_b4d7:
 b4d7:    2e 0c f9 01 c5         wpf 0xf9, [R_01c5|0x01c5]
 b4dc:    a5 41                  st AL, [X++]
 b4de:    6d 68 2b               st X, [Y + 0x2b]
-b4e1:    30 70 00 35            inc [Y + 0x65a1], #1
+b4e1:    30 70 00 35            inc [Y + 0x0035], #1
 b4e5:    65 a1                  ld X, [S++]
 b4e7:    91 00 5a               ld A, [0x005a]
 b4ea:    c0 01                  ld BL, 0x01
@@ -9105,7 +9105,7 @@ b519:    d0 00 00               ld B, 0x0000
 b51c:    46 11 21 b5 10 60 35   unkbig2(1, 1) [R_b510|0xb510], [Y + 0x35]
 b523:    16 17                  blt L_b53c
 b525:    f5 68 2d               st B, [Y + 0x2d]
-b528:    31 70 00 35            dec [Y + 0xd568], #1
+b528:    31 70 00 35            dec [Y + 0x0035], #1
 b52c:    d5 68 35               ld B, [Y + 0x35]
 b52f:    17 04                  bp L_b535
 b531:    7b 0e                  call R_b541
@@ -9686,7 +9686,7 @@ b8c3:    10 06                  bc L_b8cb
 L_b8c5:
 b8c5:    7f 21                  pop {B}
 b8c7:    c0 05                  ld BL, 0x05
-b8c9:    66 6b                  jsys 6b
+b8c9:    66 6b                  jsys 0x6b
 
 L_b8cb:
 b8cb:    14 f8                  bz L_b8c5
@@ -9703,7 +9703,7 @@ b8da:    f1 b9 7f               st B, [R_b97f|0xb97f]
 b8dd:    85 a8 02               ld AL, [S + 0x02]
 b8e0:    14 38                  bz L_b91a
 b8e2:    d5 a8 0b               ld B, [S + 0x0b]
-b8e5:    30 b0 00 06            inc [S + 0x9001], #1
+b8e5:    30 b0 00 06            inc [S + 0x0006], #1
 b8e9:    90 01 90               ld A, 0x0190
 b8ec:    59                     sub B, A
 b8ed:    11 03                  bnc L_b8f2
@@ -10346,7 +10346,7 @@ bd64:    00                     HALT
 L_bd65:
 bd65:    d0 00 00               ld B, 0x0000
 bd68:    c0 0d                  ld BL, 0x0d
-bd6a:    66 6b                  jsys 6b
+bd6a:    66 6b                  jsys 0x6b
 
 R_bd6c:
 bd6c:    7e 21                  push {B}
@@ -10430,7 +10430,7 @@ bdd2:    81 00 82               ld AL, [0x0082]
 bdd5:    ff                     st B, [P]
 
 R_bdd6:
-bdd6:    2f 34                  dma_mode 3
+bdd6:    2f 34                  dma_mode #3
 bdd8:    2f 20                  ld_dma_addr B
 bdda:    3b                     not A, #0
 bddb:    2f 02                  ld_dma_count A
@@ -10656,7 +10656,7 @@ bf8d:    d5 a1                  ld B, [S++]
 bf8f:    51 20                  sub A, B
 bf91:    11 04                  bnc L_bf97
 bf93:    c0 05                  ld BL, 0x05
-bf95:    66 6b                  jsys 6b
+bf95:    66 6b                  jsys 0x6b
 
 L_bf97:
 bf97:    78 21 c2 8d            mul A, B, [R_c28d|0xc28d]
@@ -10686,7 +10686,7 @@ bfc1:    f1 c0 65               st B, [R_c065|0xc065]
 bfc4:    85 a8 02               ld AL, [S + 0x02]
 bfc7:    14 39                  bz L_c002
 bfc9:    d5 a8 0b               ld B, [S + 0x0b]
-bfcc:    30 b0 00 06            inc [S + 0x9001], #1
+bfcc:    30 b0 00 06            inc [S + 0x0006], #1
 bfd0:    90 01 90               ld A, 0x0190
 bfd3:    59                     sub B, A
 bfd4:    11 03                  bnc L_bfd9
@@ -11236,7 +11236,7 @@ c3ca:    90 00 00               ld A, 0x0000
 L_c3cd:
 c3cd:    d0 00 00               ld B, 0x0000
 c3d0:    c0 0d                  ld BL, 0x0d
-c3d2:    66 6b                  jsys 6b
+c3d2:    66 6b                  jsys 0x6b
 
 R_c3d4:
 c3d4:    31 10 c3 e0            dec [R_c3e0|0xc3e0], #1
@@ -11339,7 +11339,7 @@ c45f:    d6 67 01 3f            st Y, [0x013f]
 c463:    09                     ret
 
 R_c464:
-c464:    2f 34                  dma_mode 3
+c464:    2f 34                  dma_mode #3
 c466:    2f 20                  ld_dma_addr B
 c468:    3b                     not A, #0
 c469:    2f 02                  ld_dma_count A
@@ -11528,7 +11528,7 @@ c6c5:    d5 a1                  ld B, [S++]
 c6c7:    51 20                  sub A, B
 c6c9:    11 04                  bnc L_c6cf
 c6cb:    c0 05                  ld BL, 0x05
-c6cd:    66 6b                  jsys 6b
+c6cd:    66 6b                  jsys 0x6b
 
 L_c6cf:
 c6cf:    78 21 c9 71            mul A, B, [R_c971|0xc971]
@@ -11558,7 +11558,7 @@ c6f9:    f1 c7 9d               st B, [R_c79d|0xc79d]
 c6fc:    85 a8 02               ld AL, [S + 0x02]
 c6ff:    14 39                  bz L_c73a
 c701:    d5 a8 0b               ld B, [S + 0x0b]
-c704:    30 b0 00 06            inc [S + 0x9001], #1
+c704:    30 b0 00 06            inc [S + 0x0006], #1
 c708:    90 01 90               ld A, 0x0190
 c70b:    59                     sub B, A
 c70c:    11 03                  bnc L_c711
@@ -12134,7 +12134,7 @@ cab0:    00                     HALT
 L_cab1:
 cab1:    d0 00 00               ld B, 0x0000
 cab4:    c0 0d                  ld BL, 0x0d
-cab6:    66 6b                  jsys 6b
+cab6:    66 6b                  jsys 0x6b
 
 R_cab8:
 cab8:    31 10 ca c4            dec [R_cac4|0xcac4], #1
@@ -12225,7 +12225,7 @@ cb14:    d6 67 01 3f            st Y, [0x013f]
 cb18:    09                     ret
 
 R_cb19:
-cb19:    2f 34                  dma_mode 3
+cb19:    2f 34                  dma_mode #3
 cb1b:    2f 20                  ld_dma_addr B
 cb1d:    3b                     not A, #0
 cb1e:    2f 02                  ld_dma_count A
@@ -12402,7 +12402,7 @@ cd3a:    51 20                  sub A, B
 cd3c:    10 06                  bc L_cd44
 cd3e:    7f 01                  pop {A}
 cd40:    c0 24                  ld BL, 0x24
-cd42:    66 6b                  jsys 6b
+cd42:    66 6b                  jsys 0x6b
 
 L_cd44:
 cd44:    7f 01                  pop {A}
@@ -12452,7 +12452,7 @@ cd83:    15 04                  bnz L_cd89
 
 L_cd85:
 cd85:    c0 06                  ld BL, 0x06
-cd87:    66 6b                  jsys 6b
+cd87:    66 6b                  jsys 0x6b
 
 L_cd89:
 cd89:    85 68 13               ld AL, [Y + 0x13]
@@ -12477,7 +12477,7 @@ cda5:    a5 a2                  st AL, [--S]
 cda7:    21 11                  dec AL, #2
 cda9:    19 04                  ble L_cdaf
 cdab:    c0 08                  ld BL, 0x08
-cdad:    66 6b                  jsys 6b
+cdad:    66 6b                  jsys 0x6b
 
 L_cdaf:
 cdaf:    80 04                  ld AL, 0x04
@@ -12497,7 +12497,7 @@ cdc6:    7e 61                  push {Y}
 cdc8:    95 88 04               ld A, [Z + 0x04]
 cdcb:    b5 a2                  st A, [--S]
 cdcd:    55 82                  mov B, Z
-cdcf:    66 0c                  jsys 0c
+cdcf:    66 0c                  jsys 0x0c
 cdd1:    95 88 06               ld A, [Z + 0x06]
 cdd4:    30 01                  inc A, #2
 cdd6:    b3 17                  st A, [0xcdef]
@@ -12894,22 +12894,22 @@ d08c:    d6 89 01 73            st Z, [0x0173]
 d090:    d6 89 01 77            st Z, [0x0177]
 d094:    34 0a                  srl A, #11
 d096:    b1 d4 d0               st A, [R_d4d0|0xd4d0]
-d099:    47 4d 00 1e 10 01 c5   memcpy 0x01, 0x1e, [A + 0x01]
+d099:    47 4d 00 1e 10 01 c5   memcpy 0x01, 0x1e, [A + 0x01c5]
 d0a0:    2e 2c 00 d4 cd         wpf1 0x00, [R_d4cd|0xd4cd]
-d0a5:    47 4d 00 1e 10 01 c5   memcpy 0x01, 0x1e, [A + 0x01]
-d0ac:    47 4d 00 1e 10 01 85   memcpy 0x01, 0x1e, [A + 0x01]
+d0a5:    47 4d 00 1e 10 01 c5   memcpy 0x01, 0x1e, [A + 0x01c5]
+d0ac:    47 4d 00 1e 10 01 85   memcpy 0x01, 0x1e, [A + 0x0185]
 d0b3:    d2 01 07               ld B, @[0x0107]
 d0b6:    47 41 1f 01 85 20 36   memcpy 0x20, [R_0185|0x0185], [B + 0x36]
 d0bd:    2e 2c 00 d4 cb         wpf1 0x00, [R_d4cb|0xd4cb]
 d0c2:    5d                     mov B, A
 d0c3:    51 10 00 1c            sub A, A, 0x001c
-d0c7:    67 9d fd 30 01 c6      memset AL, 0xfd, [B + 0x01]
+d0c7:    67 9d fd 30 01 c6      memset AL, 0xfd, [B + 0x01c6]
 d0cd:    28                     inc AL, #1
-d0ce:    67 9d fd 30 01 a5      memset AL, 0xfd, [B + 0x01]
+d0ce:    67 9d fd 30 01 a5      memset AL, 0xfd, [B + 0x01a5]
 d0d4:    95 a1                  ld A, [S++]
 d0d6:    5d                     mov B, A
 d0d7:    51 10 00 1c            sub A, A, 0x001c
-d0db:    67 9d fd 30 01 86      memset AL, 0xfd, [B + 0x01]
+d0db:    67 9d fd 30 01 86      memset AL, 0xfd, [B + 0x0186]
 d0e1:    47 4c 02 c9 cf c4 d2 96 memcpy 0x03, 0xc9cfc4, [R_d296|0xd296]
 d0e9:    91 01 09               ld A, [DevicesPtr|0x0109]
 
@@ -13698,7 +13698,7 @@ d6f4:    2e 2c 00 d4 cb         wpf1 0x00, [R_d4cb|0xd4cb]
 d6f9:    2e 2c 78 d4 cd         wpf1 0x78, [R_d4cd|0xd4cd]
 d6fe:    32 20                  clr B, #0
 d700:    2f 28                  ld_isr B
-d702:    2f 04                  dma_mode 0
+d702:    2f 04                  dma_mode #0
 d704:    f1 00 6c               st B, [0x006c]
 d707:    f1 00 fc               st B, [0x00fc]
 d70a:    f1 00 ae               st B, [0x00ae]
@@ -13814,7 +13814,7 @@ d835:    19 35                  ble L_d86c
 d837:    91 e1 91               ld A, [R_e191|0xe191]
 d83a:    d1 e1 8f               ld B, [R_e18f|0xe18f]
 d83d:    47 4a c7 02            memcpy 0xc8, [A], [B]
-d841:    47 45 c7 10 00 c8 30 00 c8 memcpy 0xc8, [A + 0x00], [B + 0x00]
+d841:    47 45 c7 10 00 c8 30 00 c8 memcpy 0xc8, [A + 0x00c8], [B + 0x00c8]
 d84a:    d6 67 e1 9d            st Y, [R_e19d|0xe19d]
 d84e:    46 22 10 e1 99 e1 9c   subbig(2, 2) [R_e199|0xe199], [R_e19c|0xe19c]
 d855:    55 67 e1 9d            mov Y, [R_e19d|0xe19d]

@@ -1,9 +1,18 @@
 from common.memory import Instruction, ResumeExecution, TransferExecution
-from common.ref import MemRef
+from common.ref import Implicit, MemRef, RegRef
 import cpu6.cpu6_addr as AddrMode
 from cpu6.cpu6_ops import Flags
 from cpu6.info import Xargs
 
+
+def uses_operand(ref):
+    match ref:
+        case Implicit() | AddrMode.LiteralRef():
+            return False
+        case RegRef() | AddrMode.SmallLiteralRef():
+            return True
+        case ref:
+            return any(uses_operand(r) for r in ref.refs())
 
 class Cpu6Inst(Instruction):
     pass
@@ -18,12 +27,11 @@ class BasicCpu6Inst(Cpu6Inst):
     def __repr__(self):
         return f"<BasicCpu6Inst: {self.mnemonic} {self.dst}, {self.srcs}>"
 
-    def to_string(self, mem):
+    def to_string(self, mem, **kwargs):
         str = self.mnemonic
-        if self.dst:
-            str += f" {self.dst.to_string(mem)}"
-        for src in self.srcs:
-            str += f", {src.to_string(mem)}"
+        arg_str = ", ".join([arg.to_string(mem, **kwargs) for arg in self.refs() if arg])
+        if arg_str:
+            str += " " + arg_str
         return str
 
     def to_tree(self, cpu):
@@ -41,24 +49,90 @@ class BasicCpu6Inst(Cpu6Inst):
         if self.mnemonic == "st":
             return b.getNode(cpu).Eq(Flags(a.getNode(cpu)))
 
+    def refs(self):
+        if self.dst:
+            return [self.dst] + self.srcs
+        return self.srcs
+
+    def __len__(self):
+        sum = 0
+        operand = 0 # do refs use the operand byte?
+        for arg in self.refs():
+            if uses_operand(arg):
+                operand = 1
+            sum += len(arg)
+
+        return 1 + operand + sum
+
+class ImplicitLenInst(BasicCpu6Inst):
+    def __init__(self, mnemonic, length, fn=None):
+        self.length = length
+        super().__init__(mnemonic, None, fn=fn)
+
+    def __len__(self):
+        return self.length
+
+def mode2e_size(args):
+    size = 0
+    index_byte = False
+    for arg in args:
+        match arg:
+            case Implicit():
+                pass
+            case AddrMode.LiteralRef():
+                size += len(arg)
+            case AddrMode.ComplexRef() if arg.disp == None:
+                if not index_byte:
+                    index_byte = True
+                    size += 1
+            case AddrMode.ComplexRef():
+                size += len(arg) + 1
+            case AddrMode.DirectRef():
+                size += len(arg)
+            case _:
+                raise NotImplementedError(f"Unknown reference type: {arg}")
+    return size
+
+
+class BlockInst(BasicCpu6Inst):
+    def __init__(self, mnonomic, *sources, fn=None):
+        super().__init__(mnonomic, None, *sources, fn=fn)
+        self.size = 2 + mode2e_size(sources)
+
+    def __len__(self):
+        return self.size
+
+
+class BigNumInst(BasicCpu6Inst):
+    def __init__(self, mnonomic, *sources, fn=None):
+        super().__init__(mnonomic, None, *sources, fn=fn)
+        self.size = 3 + mode2e_size(sources)
+
+    def __len__(self):
+        return self.size
+
 class ControlFlowInst(Cpu6Inst):
-    def __init__(self, mnemonic, src, resume=True):
+    def __init__(self, mnemonic, target, resume=True):
         self.mnemonic = mnemonic
-        self.target = src
+        self.target = target
         self.resume = resume
 
     def __repr__(self):
         return f"<ControlFlowInst: {self.mnemonic} {self.target}>"
 
-    def mem_ref(self):
-        return self.target
+    def __len__(self):
+        operand_byte = 1 if uses_operand(self.target) else 0
+        return 1 + len(self.target) + operand_byte
+
+    def refs(self):
+        return [self.target]
 
     def get_target(self, mem):
         target = self.target
 
         # It looks nicer if we unwrap these
         if isinstance(target, AddrMode.DirectRef):
-            target = target.addr
+            target = target.ref
         elif isinstance(target, AddrMode.PcDisplacementRef):
             _, target = target.getLiteralRef(mem)
         return target
@@ -97,31 +171,44 @@ class SyscallInst(ControlFlowInst):
         self.num = num
         self.resume = True
 
+    def refs(self, mem):
+        return [self.num]
+
     def __repr__(self):
-        return f"<SyscallInst: {self.num:02x}>"
+        return f"<SyscallInst: {self.num}>"
 
     def get_dst(self, mem):
-        if self.num in mem.syscall_map:
-            return mem.syscall_map[self.num]
+        num = self.num.getValue(mem)
+        if num in mem.syscall_map:
+            return mem.syscall_map[num]
         return None
 
     def to_string(self, mem):
-        label = f"{self.num:02x}"
+        label = self.num.to_string(mem)
         if addr := self.get_dst(mem):
             if name := mem.get_label(addr):
                 label = name
         return f"jsys {label}"
+
+    def __len__(self):
+        return 2
 
 class TerminalInst(ControlFlowInst):
     def __init__(self, mnemonic):
         self.mnemonic = mnemonic
         self.resume = False
 
+    def refs(self, mem):
+        return []
+
     def get_dst(self, mem):
         return None
 
     def __repr__(self):
         return f"<TerminalInst: {self.mnemonic}>"
+
+    def __len__(self):
+        return 1
 
     def to_string(self, mem):
         return f"{self.mnemonic}"

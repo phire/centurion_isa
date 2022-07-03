@@ -5038,7 +5038,7 @@ L_9a5c:
 L_9a62:
 9a62:    c3 df                  ld BL, [R_9a43|0x9a43]
 9a64:    14 1a                  bz L_9a80
-9a66:    31 b0 00 00            dec [S + 0xc0a0], #1
+9a66:    31 b0 00 00            dec [S + 0x0000], #1
 9a6a:    c0 a0                  ld BL, 0xa0
 9a6c:    46 00 3a 88            unkbig3(0, 0) [Z], [Z]
 9a70:    17 09                  bp L_9a7b
@@ -5056,7 +5056,7 @@ L_9a80:
 9a83:    c0 ad                  ld BL, 0xad
 9a85:    e5 61                  st BL, [Y++]
 9a87:    46 55 40 97 f0 97 f0   unkbig4(5, 5) [R_97f0|0x97f0], [R_97f0|0x97f0]
-9a8e:    31 b0 00 00            dec [S + 0x479c], #1
+9a8e:    31 b0 00 00            dec [S + 0x0000], #1
 
 L_9a92:
 9a92:    47 9c 0f c0 97 e0      memset 0x10, 0xc0, [R_97e0|0x97e0]
@@ -6040,7 +6040,7 @@ a0a5:    7b f7                  call L_a09e
 a0a7:    73 c3                  jmp L_a06c
 
 R_a0a9:
-a0a9:    46 11 2d 01 90 80 04   unkbig2(1, 1) 0x01, [Z + 0x80]
+a0a9:    46 11 2d 01 90 80 04   unkbig2(1, 1) 0x01, [Z + 0x8004]
 a0b0:    11 06                  bnc L_a0b8
 a0b2:    85 88 03               ld AL, [Z + 0x03]
 a0b5:    29                     dec AL, #1
@@ -6223,7 +6223,7 @@ a1cb:    45 10                  mov AH, AL
 a1cd:    85 a1                  ld AL, [S++]
 
 L_a1cf:
-a1cf:    66 ff                  jsys ff
+a1cf:    66 ff                  jsys 0xff
 a1d1:    09                     ret
 
 L_a1d2:
@@ -8451,8 +8451,8 @@ b101:    d0 08 04               ld B, 0x0804
 b104:    c5 88 12               ld BL, [Z + 0x12]
 b107:    42 23                  and BL, BH
 b109:    15 13                  bnz L_b11e
-b10b:    32 90 00 34            clr [Z + 0x3290], #0
-b10f:    32 90 00 32            clr [Z + 0x8cc0], #0
+b10b:    32 90 00 34            clr [Z + 0x0034], #0
+b10f:    32 90 00 32            clr [Z + 0x0032], #0
 b113:    8c                     ld AL, [Z]
 b114:    c0 80                  ld BL, 0x80
 b116:    43 13                  or BL, AL
@@ -8736,7 +8736,7 @@ b2c8:    71 b2 09               jmp R_b209
 
 R_b2cb:
 b2cb:    95 a4                  ld A, @[S]
-b2cd:    30 b1 00 00            inc [S + 0xf31d], #2
+b2cd:    30 b1 00 00            inc [S + 0x0000], #2
 
 AssertIsSystemPtr:
     ; Checks if A is a pointer within the kernel memory range (0x8000 to 0xefff)
@@ -9661,7 +9661,7 @@ b7ed:    25 11                  sll AL, #2	 ; position into high nibble
 b7ef:    c0 04                  ld BL, 0x04
 b7f1:    48                     add BL, AL	 ; Low nibble = 4
 b7f2:    e3 01                  st BL, [0xb7f5]	 ; Patch the instruction below!
-b7f4:    2f 04                  dma_mode 0	 ; I wonder, why not just use register argument...
+b7f4:    2f 04                  dma_mode #0	 ; I wonder, why not just use register argument...
 b7f6:    2f 06                  enable_dma	 ; Enable DMA
                                           	 ; At this point, DMA address and DMA count haven't been
                                           	 ; set (as far as I can tell). Does this mean that enabling
@@ -9820,7 +9820,7 @@ b916:    30 a1                  inc S, #2
 b918:    60 00 00               ld X, 0x0000
 b91b:    ba                     st A, [X]
 b91c:    7f 45                  pop {X, Y, Z}
-b91e:    30 ba 00 02            inc [S + 0x0979], #11
+b91e:    30 ba 00 02            inc [S + 0x0002], #11
 b922:    09                     ret
 
 L_b923:
@@ -11035,7 +11035,7 @@ c100:    81 00 83               ld AL, [0x0083]
 c103:    00                     HALT
 
 R_c104:
-c104:    2f 34                  dma_mode 3
+c104:    2f 34                  dma_mode #3
 c106:    2f 06                  enable_dma
 c108:    2f 20                  ld_dma_addr B
 c10a:    3b                     not A, #0
@@ -11824,7 +11824,7 @@ c668:    f1 c7 0d               st B, [R_c70d|0xc70d]
 c66b:    85 a8 02               ld AL, [S + 0x02]
 c66e:    14 38                  bz L_c6a8
 c670:    d5 a8 0b               ld B, [S + 0x0b]
-c673:    30 b0 00 06            inc [S + 0x9001], #1
+c673:    30 b0 00 06            inc [S + 0x0006], #1
 c677:    90 01 90               ld A, 0x0190
 c67a:    59                     sub B, A
 c67b:    11 03                  bnc L_c680
@@ -12439,7 +12439,7 @@ ca90:    81 00 82               ld AL, [0x0082]
 ca93:    ff                     st B, [P]
 
 R_ca94:
-ca94:    2f 34                  dma_mode 3
+ca94:    2f 34                  dma_mode #3
 ca96:    2f 20                  ld_dma_addr B
 ca98:    3b                     not A, #0
 ca99:    2f 02                  ld_dma_count A
@@ -13278,7 +13278,7 @@ d096:    2e 2c 00 e1 18         wpf1 0x00, [LOS_Page0|0xe118]
 d09b:    2e 2c 78 e1 1a         wpf1 0x78, [OPSYS_Page0|0xe11a]
 d0a0:    32 20                  clr B, #0
 d0a2:    2f 28                  ld_isr B	 ; clear ISR
-d0a4:    2f 04                  dma_mode 0	 ; Decoded wrong. should be "ld_dma_mode 0",
+d0a4:    2f 04                  dma_mode #0	 ; Decoded wrong. should be "ld_dma_mode 0",
 d0a6:    f1 00 6c               st B, [0x006c]
 d0a9:    f1 00 fc               st B, [0x00fc]
 d0ac:    f1 00 ae               st B, [0x00ae]	 ; Clear timer interrupt handler
@@ -13570,7 +13570,7 @@ d3fe:    c1 e0 97               ld BL, [ConfigDisk_c|0xe097]
 d401:    78 32 00 06            mul B, B, 0x0006
 d405:    51 23 d4 1c            sub B, B, [R_d41c|0xd41c]
 d409:    14 42                  bz L_d44d
-d40b:    30 90 00 03            inc [Z + 0x3220], #1
+d40b:    30 90 00 03            inc [Z + 0x0003], #1
 d40f:    32 20                  clr B, #0
 d411:    c1 e0 97               ld BL, [ConfigDisk_c|0xe097]
 d414:    78 32 00 06            mul B, B, 0x0006
@@ -13618,7 +13618,7 @@ d475:    73 0f                  jmp L_d486
 L_d477:
 d477:    47 4d 01 00 0c 80 05   memcpy 0x02, 0x000c, [Z + 0x05]
 d47e:    30 10 e3 93            inc [ConfigDeviceCount|0xe393], #1
-d482:    30 90 00 03            inc [Z + 0x4741], #1
+d482:    30 90 00 03            inc [Z + 0x0003], #1
 
 L_d486:
 d486:    47 41 05 e0 8b 80 07   memcpy 0x06, [ConfigDisk_0|0xe08b], [Z + 0x07]
@@ -14193,20 +14193,20 @@ da6b:    52 10 f8 00            and A, A, 0xf800
 da6f:    50 10 08 00            add A, A, 0x0800
 da73:    5e                     mov Z, A
 da74:    34 0a                  srl A, #11
-da76:    47 4d 00 1e 10 01 81   memcpy 0x01, 0x1e, [A + 0x01]
+da76:    47 4d 00 1e 10 01 81   memcpy 0x01, 0x1e, [A + 0x0181]
 da7d:    2e 2c 00 e1 1a         wpf1 0x00, [OPSYS_Page0|0xe11a]
-da82:    47 4d 00 1e 10 01 81   memcpy 0x01, 0x1e, [A + 0x01]
-da89:    47 4d 00 1e 10 01 61   memcpy 0x01, 0x1e, [A + 0x01]
+da82:    47 4d 00 1e 10 01 81   memcpy 0x01, 0x1e, [A + 0x0181]
+da89:    47 4d 00 1e 10 01 61   memcpy 0x01, 0x1e, [A + 0x0161]
 da90:    d2 01 07               ld B, @[0x0107]
 da93:    47 41 1f 01 61 20 36   memcpy 0x20, [PageTableOne|0x0161], [B + 0x36]
 da9a:    2e 2c 00 e1 18         wpf1 0x00, [LOS_Page0|0xe118]
 da9f:    5d                     mov B, A
 daa0:    51 10 00 1c            sub A, A, 0x001c
-daa4:    67 9d fd 30 01 82      memset AL, 0xfd, [B + 0x01]
+daa4:    67 9d fd 30 01 82      memset AL, 0xfd, [B + 0x0182]
 daaa:    95 a1                  ld A, [S++]
 daac:    5d                     mov B, A
 daad:    51 10 00 1c            sub A, A, 0x001c
-dab1:    67 9d fd 30 01 62      memset AL, 0xfd, [B + 0x01]
+dab1:    67 9d fd 30 01 62      memset AL, 0xfd, [B + 0x0162]
 dab7:    47 40 00 db 19 dd 18   memcpy 0x01, [DiskNum|0xdb19], [R_dd18|0xdd18]
 dabe:    47 40 00 db 19 de 5b   memcpy 0x01, [DiskNum|0xdb19], [R_de5b|0xde5b]
 dac5:    91 01 09               ld A, [DevicesPtr|0x0109]
@@ -15907,7 +15907,7 @@ e867:    55 40                  mov A, X
 e869:    35 03                  sll A, #4
 e86b:    30 03                  inc A, #4
 e86d:    a3 01                  st AL, [0xe870]
-e86f:    2f 04                  dma_mode 0
+e86f:    2f 04                  dma_mode #0
 e871:    2f 80                  ld_dma_addr Z
 e873:    33 60                  not Y, #0
 e875:    2f 62                  ld_dma_count Y

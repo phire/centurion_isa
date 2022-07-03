@@ -5,30 +5,41 @@ from common.ref import *
 import cpu6.inst as inst
 
 class DirectRef(MemRef):
-    def __init__(self, addr, pc):
-        self.addr = LiteralRef(addr, 2, pc)
+    def __init__(self, addr, pc=None):
+        if isinstance(addr, LiteralRef):
+            self.ref = addr
+        else:
+            assert pc is not None, "pc or Literal is required for direct ref"
+            self.ref = LiteralRef(addr, 2, pc)
 
     def getValue(self, memory, **kwargs):
-        return self.addr.getValue(memory)
+        return self.ref.getValue(memory)
 
     def to_string(self, memory, **kwargs):
-        if label := memory.get_label(self.addr):
-            return f"[{label}|{self.addr:#06x}]"
-        return f"[{self.addr.to_string(memory, forceLabel=True)}]"
+        return f"[{self.ref.to_string(memory, forceLabel=True)}]"
 
     def getNode(self, cpu):
-        return cpu.getMem(self.addr.getNode(cpu))
+        return cpu.getMem(self.ref.getNode(cpu))
 
     def __repr__(self) -> str:
-        return f"<Direct {self.addr.val:04x} @ {self.addr.pc:04x}>"
+        return f"<Direct {self.ref} @ {self.ref.pc:04x}>"
 
 class ComplexRef(MemRef):
     def __init__(self, base, index=None, disp=None):
         self.base = base
         if isinstance(base, DirectRef): # unwrap
-            self.base = base.addr
+            self.base = base.ref
         self.index = index
         self.disp = disp
+
+    def refs(self):
+        return [x for x in [self.base, self.index, self.disp] if x]
+
+    def __len__(self):
+        return sum([len(x) for x in self.refs()])
+
+    def __repr__(self):
+        return f"<Complex base: {self.base}, index:{self.index}, disp:{self.disp}>"
 
     def to_string(self, memory, **kwargs):
         ret = f"[{self.base.to_string(memory, forceLabel=True)}"
@@ -53,6 +64,19 @@ class LiteralRef(Ref):
         self.pc = pc
         self.signed = signed
 
+    def __len__(self):
+        return self.size
+
+    def str_val(self):
+        if self.val is not None:
+            return f"{self.val:#0{self.size*2+2}x}"
+        return "##unknown##"
+
+    def __repr__(self):
+        if self.pc:
+            return f"<Literal_{self.size} {self.str_val()} @ {self.pc:04x}>"
+        return f"<Literal_{self.size} {self.str_val()}>"
+
     def to_string(self, memory, **kwargs):
         val = self.getValue(memory)
 
@@ -61,8 +85,8 @@ class LiteralRef(Ref):
             if label := memory.get_label(val):
                 if "suppressAlt" in kwargs:
                     return label
-                return f"{label}|{val:#0{self.size*2+2}x}"
-        return f"{val:#0{self.size*2+2}x}"
+                return f"{label}|{self.str_val()}"
+        return self.str_val()
 
     def getValue(self, memory, **kwargs):
         if self.pc:
@@ -82,11 +106,14 @@ class SmallLiteralRef(Ref):
     def __init__(self, val):
         self.val = val
 
-    def __str__(self):
+    def to_string(self, mem, **kwargs):
         return f"#{self.val:d}"
 
     def getNode(self, cpu):
         return LiteralValue(self.val, 4)
+
+    def __len__(self):
+        return 0
 
 class PcDisplacementRef(MemRef):
     def __init__(self, pc, disp, size=2):
@@ -94,8 +121,14 @@ class PcDisplacementRef(MemRef):
         self.disp = disp # disp is a literal ref
         self.size = size
 
+    def refs(self):
+        return [self.disp]
+
     def __str__(self):
         return f"[pc + {self.disp}]"
+
+    def __len__(self):
+        return len(self.disp)
 
     def getAddr(self, memory):
          # disp is a literal ref, just in case self-modifying code patches it
@@ -135,9 +168,9 @@ class PcDisplacementRef(MemRef):
         match memory.owned(addr):
             case (owner_addr, inst.Cpu6Inst() as o):
                 if o.mnemonic == "call" and isinstance(o.target, DirectRef):
-                    return self.via(o.target.addr, addr, memory, **kwargs)
+                    return self.via(o.target.ref, addr, memory, **kwargs)
                 if o.mnemonic in ["ld", "st"] and isinstance(o.srcs[0], DirectRef):
-                    return '[' + self.via(o.srcs[0].addr, addr, memory, **kwargs) + ']'
+                    return '[' + self.via(o.srcs[0].ref, addr, memory, **kwargs) + ']'
         return "@" + self.to_string(memory)
 
 
@@ -202,7 +235,7 @@ def Cpu6AddrMode(mode, pc, mem, prev=None, size = 1):
                 imm = signedOffset(pc, mem)
                 pc += 1
             else:
-                imm = LiteralRef(mem.get_be16(pc), 1, pc)
+                imm = LiteralRef(mem.get_be16(pc), 2, pc)
                 pc += 2
 
             # todo: This mode also does PC-relative addressing?
@@ -225,7 +258,7 @@ def Cpu6AddrMode(mode, pc, mem, prev=None, size = 1):
             ref.only_upper = upper
             return ref, pc
         case 3: # literal
-            ref = LiteralRef(None, size, pc)
+            ref = LiteralRef(mem.get(pc, size), size, pc)
             pc += size
             return ref, pc
 
@@ -272,7 +305,7 @@ def Cpu4AddrMode(mode, word, pc, mem):
             return None, pc
         case mode: # One byte indexed mode
             reg = (mode & 7) << 1
-            return ComplexRef(Reg16Ref(reg)), pc
+            return ComplexRef(Implicit(Reg16Ref(reg))), pc
 
 def TwoRegExtendedMode(mode, pc, mem):
     dst_reg = Reg16Ref(mode & 0xe)
@@ -303,13 +336,12 @@ def AluAddrMode(mode, inst, pc, mem):
             return Reg16Ref(mode >> 4), imm, None, pc
         case 0x30:
             # lower nibble set means we use a special address mode
-            addr = mem.get_be16(pc)
-            pc += 2
+            addr = LiteralRef(mem.get_be16(pc), 2, pc)
             match (mode >> 4) & 0xe:
                 case 0: # Direct
-                    return DirectRef(addr, pc-2), imm, None, pc
+                    return DirectRef(addr), imm, None, pc+2
                 case reg: # Indexed
-                    return ComplexRef(Reg16Ref(reg), LiteralRef(addr, 2, pc)), imm, None, pc
+                    return ComplexRef(Reg16Ref(reg), addr), imm, None, pc+2
         case 0x40:
             return Reg8Ref(mode & 0xf), Reg8Ref(mode >> 4), None, pc
         #case 0x50 if mode & 0x11 == 0: # neither lower nibble set

@@ -379,7 +379,7 @@ L_9aef:
 9afa:    2f 02                  ld_dma_count A
 9afc:    90 01 1c               ld A, 0x011c
 9aff:    2f 00                  ld_dma_addr A
-9b01:    2f 34                  dma_mode 3
+9b01:    2f 34                  dma_mode #3
 9b03:    2f 06                  enable_dma
 
     ; These are the only two commands, whose parameters are sent using the
@@ -415,7 +415,7 @@ L_9b32:
 9b3a:    2f 02                  ld_dma_count A
 9b3c:    90 01 1c               ld A, 0x011c
 9b3f:    2f 00                  ld_dma_addr A
-9b41:    2f 34                  dma_mode 3
+9b41:    2f 34                  dma_mode #3
 9b43:    2f 06                  enable_dma
 9b45:    80 47                  ld AL, 0x47	 ; Read AUX ?
 9b47:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
@@ -502,7 +502,7 @@ Entry_01133_CMD_SEEK_TEST:
 9bf4:    2f 02                  ld_dma_count A
 9bf6:    90 41 4d               ld A, 0x414d	 ; control packet base
 9bf9:    2f 00                  ld_dma_addr A
-9bfb:    2f 34                  dma_mode 3
+9bfb:    2f 34                  dma_mode #3
 9bfd:    2f 06                  enable_dma
 9bff:    80 43                  ld AL, 0x43
 9c01:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
@@ -541,7 +541,7 @@ L_9c32:
 9c35:    2f 00                  ld_dma_addr A
 9c37:    90 ff f7               ld A, 0xfff7	 ; -9 = 8 bytes
 9c3a:    2f 02                  ld_dma_count A
-9c3c:    2f 34                  dma_mode 3
+9c3c:    2f 34                  dma_mode #3
 9c3e:    2f 06                  enable_dma
 
     ; Seek operation consists of two commands
@@ -621,7 +621,7 @@ L_9cd5:
 9cd8:    2f 02                  ld_dma_count A
 9cda:    90 41 4d               ld A, 0x414d
 9cdd:    2f 00                  ld_dma_addr A
-9cdf:    2f 34                  dma_mode 3
+9cdf:    2f 34                  dma_mode #3
 9ce1:    2f 06                  enable_dma
 9ce3:    80 43                  ld AL, 0x43
 9ce5:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
@@ -636,7 +636,7 @@ L_9cf6:
 9cf9:    2f 02                  ld_dma_count A
 9cfb:    90 01 1c               ld A, 0x011c
 9cfe:    2f 00                  ld_dma_addr A
-9d00:    2f 34                  dma_mode 3
+9d00:    2f 34                  dma_mode #3
 9d02:    2f 06                  enable_dma
 9d04:    80 45                  ld AL, 0x45
 9d06:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
@@ -684,7 +684,7 @@ Entry_FINCH_SEEK_TEST:
 9d5c:    2f 02                  ld_dma_count A
 9d5e:    90 41 4d               ld A, 0x414d
 9d61:    2f 00                  ld_dma_addr A
-9d63:    2f 34                  dma_mode 3
+9d63:    2f 34                  dma_mode #3
 9d65:    2f 06                  enable_dma
 9d67:    80 43                  ld AL, 0x43
 9d69:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
@@ -723,7 +723,7 @@ L_9d9a:
 9d9d:    2f 00                  ld_dma_addr A
 9d9f:    90 ff f7               ld A, 0xfff7	 ; 9 bytes
 9da2:    2f 02                  ld_dma_count A
-9da4:    2f 34                  dma_mode 3
+9da4:    2f 34                  dma_mode #3
 9da6:    2f 06                  enable_dma
 9da8:    80 43                  ld AL, 0x43
 9daa:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
@@ -823,7 +823,7 @@ L_9e37:
 9e3a:    2f 02                  ld_dma_count A
 9e3c:    90 41 4d               ld A, 0x414d	 ; Send the request
 9e3f:    2f 00                  ld_dma_addr A
-9e41:    2f 34                  dma_mode 3
+9e41:    2f 34                  dma_mode #3
 9e43:    2f 06                  enable_dma
 9e45:    80 43                  ld AL, 0x43	 ; Execute
 9e47:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
@@ -838,7 +838,7 @@ L_9e58:
 9e5b:    2f 02                  ld_dma_count A
 9e5d:    90 01 1c               ld A, 0x011c	 ; Address to place data
 9e60:    2f 00                  ld_dma_addr A
-9e62:    2f 34                  dma_mode 3
+9e62:    2f 34                  dma_mode #3
 9e64:    2f 06                  enable_dma
 9e66:    80 45                  ld AL, 0x45	 ; Return data
 9e68:    a2 01 14               st AL, @[0x0114]	 ; COMMAND_REG
