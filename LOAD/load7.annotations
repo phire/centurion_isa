@@ -56,7 +56,7 @@
 0xa685, fnptr
 0xa6f5, label, WeirdExtra_HawkDeviceObj
 0xa6f5, >H
-0xa6f7, label, HawkDeviceObj
+0xa6f7, label, HawkDeviceFunctions
 0xa6f7, >H
 0xa6f9, fnptr
 0xa6fb, fnptr
@@ -67,6 +67,9 @@
 0xa705, fnptr
 0xa707, fnptr
 0xa709, fnptr
+0xa70b, label, HawkDevice_BlockIO
+0xa8ae, label, HawkDevice_CheckStatus
+0xa8d6, label, HawkDevice_Init
 0xac29, pstring16
 0xac2e, pstring16
 0xac34, pstring16
@@ -180,6 +183,7 @@
 0xc64c, fnptr
 0xc64e, fnptr
 0xc650, fnptr
+0xce9e, label, DiskDevice_Abort
 0xcb67, pstring16
 0xcb6a, pstring16
 0xcb87, pstring16
@@ -200,12 +204,17 @@
 0xcc9e, pstring16
 0xccb4, pstring16
 0xcccc, pstring16
+0xcdaf, label, DiskDevice_CallBlockIO
+0xcdf3, label, DiskDevice_Read
+0xcd74, label, DiskDevice_BlockIO_Special
+0xce23, label, DiskDevice_Write
 0xce2a, label, SetTimeout8
 0xce33, label, CheckTimeout
 0xce41, label, SetTimeout256
+0xcf1d, label, FindDiskDevice
 0xd4f5, pstring16
 0xd54e, label, LOS_WriteCRT
-0xd544, label, LOS_ReadCRT
+0xd544, label, LOS_RepyadCRT
 0xe1a9, pstring16
 0xe1b0, pstring16
 0xe1b9, pstring16
