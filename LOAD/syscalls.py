@@ -12,6 +12,7 @@ Syscalls = {
     0x0e: ("OpenFile?", {"arg1" : "ptr"}),
     0x10: ("DoFileOp", None),
     0x12: ("12", None), # same as 06, but takes arg in A
+	0x14: ("CheckDiskStatus", None),
     0x16: ("16", {"arg1": "word", "out": "word"}),
     0x17: ("17", {"arg1": "word"}),
     #19

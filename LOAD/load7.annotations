@@ -26,6 +26,8 @@
 0x0133, char[2]
 0x0136, label, ClockSeconds
 0x0136, char[2]
+0x013f, label, ActiveDiskDevice
+0x013f, <H
 0x0141, label, Timeout
 0x0141, B
 0x0161, label, PageTableOne
@@ -34,7 +36,9 @@
 0x04f2, label, EarlyInitDevices
 0x04f2, ptr
 0x8025, label, FindDeviceFunction
+0x8044, label, CallDeviceFunctionInternal
 0x8051, label, ExecuteDeviceFunction
+0x8081, label, MapCurrentProcess
 0x80e3, pstring16
 0x80ee, pstring16
 0x810d, pstring16
@@ -52,6 +56,9 @@
 0x8755, label, UptimeDays
 0xa1fd, pstring16
 0xa22b, pstring16
+0xa648, label, CallDiskDeviceFunctionInternal
+0xa657, label, InitDiskDevice
+0xa65c, label, CheckDiskDeviceStatus
 0xa685, label, CrtDeviceHooks
 0xa685, fnptr
 0xa6f5, label, WeirdExtra_HawkDeviceObj

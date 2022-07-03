@@ -36,8 +36,18 @@
 0x803c ,	comment	; Found
 0x803e ,	comment	; AH = -1, this also resets Z flag
 0x8040 ,	comment	; Not found
+0x8044,	pre_comment 	; This also calls a device function by a (number + 1) in A,
+	 	; It's used for internal needs, so it does no validation unlike FindDeviceFunction
+0x8044 ,	comment	; Offset = A * 2 - size of pointer
+0x8045 ,	comment	; device_obj.functions + offset
+0x8049 ,	comment	; I wonder how it can be zero...
+0x804b ,	comment	; Map current process ?
+0x804d ,	comment	; Call the I/O function
 0x8051 ,	comment	; Map current process ?
 0x8053 ,	comment	; Call the I/O function
+0x8081,	pre_comment 	; It looks like this function makes sure CurrentProcess' page table is active
+0x87b9 ,	comment	; Function #5
+0x87be ,	comment	; X = device_obj
 0x8bac ,	comment	; AL = function number
 0x8baf ,	comment	; Preserve function number
 0x8bb8 ,	comment	; Preserve pointer to a function address
@@ -51,6 +61,14 @@
 0xa515 ,	comment	; HoursOnes
 0xa52c ,	comment	; Stored X
 0xa54a ,	comment	; Stored X
+0xa646 ,	comment	; Function 3 = Write
+0xa648,	pre_comment 	; This calls a (private) disk driver function by number, bypassing publicity checks
+	 	; AL = function number + 1 (includes number of public funcs)
+0xa657,	pre_comment 	; Nothing jumps here directly, i can't find any references
+0xa658 ,	comment	; Init
+0xa65c,	pre_comment 	; CheckDiskDeviceStatus syscall implementation
+0xa663 ,	comment	; Function 4 - CheckStatus
+0xa677 ,	comment	; Function 5
 0xb2b9,	pre_comment 	; This function waits until device.state == 0
 0xb2b9 ,	comment	; device_obj.state
 0xb2eb ,	comment	; Serial port base
