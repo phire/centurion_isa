@@ -219,13 +219,25 @@
 0xce33, label, CheckTimeout
 0xce41, label, SetTimeout256
 0xcf1d, label, FindDiskDevice
+0xd27c, label, LOS_DiskNum
 0xd4f5, pstring16
 0xd54e, label, LOS_WriteCRT
-0xd544, label, LOS_RepyadCRT
+0xd544, label, LOS_ReadCRT
+0xd55a, label, LOS_Prompt
+0xd620, label, LOS_FindDiskDevice
+0xd679, label, LOS_DirHandle
+0xd6c4, label, LOS_FileHandle
+0xd6c6, label, LOS_DiskNum2
 0xe1a9, pstring16
 0xe1b0, pstring16
 0xe1b9, pstring16
 0xe1c0, pstring16
 0xe1e2, pstring16
 0xe1f4, pstring16
+0xe1fe, label, LOS_FilePart
+0xe1f9, label, LOS_DiskCode
+0xe1f9, <H
 0xe1fd, label, LOS_Autoboot
+0xe209, label, LOS_FileName
+0xe214, label, LOS_FilePath
+0xe214, pstring16

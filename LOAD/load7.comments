@@ -144,4 +144,18 @@
 0xd55a ,	comment	; "\r\nNAME="
 0xd58f ,	comment	; "DISK="
 0xd5e1 ,	comment	; "CODE="
+0xd612,	pre_comment 	; Find our user-supplied DISK= in the devices table
+0xd612 ,	comment	; table of all devices
+0xd616 ,	comment	; Skip over CRT0 entry
+0xd61e ,	comment	; Returns status in B, but we drop it
+0xd620 ,	comment	; Fetch device_obj from the table
+0xd622 ,	comment	; If hit the terminator, go back to prompt
+0xd627 ,	comment	; device_obj.disk_number
+0xd62c ,	comment	; Compare with the user-supplied number
+0xd631 ,	comment	; If not found, check the next pointer
+0xd63e ,	comment	; Look for '.' - directory separator
+0xd646 ,	comment	; If not found, just open the file
+0xd664 ,	comment	; File type
+0xd66a ,	comment	; 5 is a directory
+0xd68e,	pre_comment 	; File is open here
 0xd71e ,	comment	; Clear terminal

@@ -26,7 +26,7 @@ Syscalls = {
         "SectorNum" : "word",
         "Buffer" : "ptr",
         "arg6" : "byte"}),
-    0x4f: ("4f", {"arg1" : "word", "arg2" : "ptr" }),
+    0x4f: ("OpenFileInDir", {"arg1" : "word", "arg2" : "ptr" }),
     0x55: ("55", {"arg1" : "word" }),
     0x57: ("57", {"arg1" : "word", "arg2" : "word", "arg3" : "byte" }),
     0x59: ("59", None),
