@@ -64,7 +64,7 @@ def read_annotations(name, memory):
                # so that disassembly continues.
                if type[0:2] == ">B":
                    entry_points.append(address + 1)
-               elif type[0:2] == ">H":
+               elif type[0:2] == ">H" or type == "ptr":
                    entry_points.append(address + 2)
                elif type == "cstring":
                    while c := memory[address] & 0x7f:
