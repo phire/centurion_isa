@@ -1,4 +1,5 @@
 from common.memory import memory_addr_info, entry_points
+from common.strings import get_pstring16_length
 from depgen import add_dependency
 
 def read_annotations(name, memory):
@@ -71,8 +72,13 @@ def read_annotations(name, memory):
                        address += 1
                    entry_points.append(address + 1)
                elif type == "pstring16":
-                   pass
-                   #entry_points.append(address + 2 + get_pstring16_length(memory, address))
+                   strlen = 2 + get_pstring16_length(memory, address)
+                   # Mark inner offsets inside the pstring in case if we have a pointer into the middle.
+                   # It will be shown as "StringLabel+N"
+                   for i in range(1, strlen):
+                       memory.info(address + i).insn_offset = i
+                       memory.info(address + i).visited = True
+                   #entry_points.append(address + l)
 
            if comment is not None:
                memory.info(address).comment = comment

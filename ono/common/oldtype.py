@@ -29,7 +29,7 @@ def to_string(typestring, addr, mem):
         # 16 bit absolute pointer
         addr = memory.get_be16(addr)
         memory.create_label(addr)
-        label = memory.info(addr).label
+        label = memory.get_label(addr)
         return f"{label}"
 
     elif isinstance(typestring, str) and typestring.startswith("char["):
