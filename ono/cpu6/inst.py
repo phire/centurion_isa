@@ -42,10 +42,13 @@ class BasicCpu6Inst(Cpu6Inst):
             return b.getNode(cpu).Eq(Flags(a.getNode(cpu)))
 
 class ControlFlowInst(Cpu6Inst):
-    def __init__(self, mnemonic, src):
+    def __init__(self, mnemonic, src, resume=True):
         self.mnemonic = mnemonic
         self.target = src
-        self.resume = mnemonic == "call"
+        self.resume = resume
+
+    def __repr__(self):
+        return f"<ControlFlowInst: {self.mnemonic} {self.target}>"
 
     def mem_ref(self):
         return self.target
@@ -94,6 +97,9 @@ class SyscallInst(ControlFlowInst):
         self.num = num
         self.resume = True
 
+    def __repr__(self):
+        return f"<SyscallInst: {self.num:02x}>"
+
     def get_dst(self, mem):
         if self.num in mem.syscall_map:
             return mem.syscall_map[self.num]
@@ -106,3 +112,19 @@ class SyscallInst(ControlFlowInst):
                 label = name
         return f"jsys {label}"
 
+class TerminalInst(ControlFlowInst):
+    def __init__(self, mnemonic):
+        self.mnemonic = mnemonic
+        self.resume = False
+
+    def get_dst(self, mem):
+        return None
+
+    def __repr__(self):
+        return f"<TerminalInst: {self.mnemonic}>"
+
+    def to_string(self, mem):
+        return f"{self.mnemonic}"
+
+    def to_tree(self, cpu):
+        return None

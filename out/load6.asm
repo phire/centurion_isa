@@ -1121,7 +1121,7 @@ R_8048:
 804a:    75 20                  jmp [B]
 
 L_804c:
-804c:    c6                     unknown
+804c:    c6                     acquire_semaphore
 804d:    2e 0c 78 01 81         wpf 0x78, [PageTableTwo|0x0181]
 
 L_8052:
@@ -1129,7 +1129,7 @@ L_8052:
 
 L_8053:
 8053:    2e 0c 78 01 61         wpf 0x78, [PageTableOne|0x0161]
-8058:    b6                     unknown
+8058:    b6                     release_semaphore
 8059:    09                     ret
 
 SwitchToPageBase0:
@@ -1269,7 +1269,7 @@ R_833f:
 833f:    7e 03                  push {A, B}
 8341:    2a                     clr AL, #0
 8342:    a1 01 41               st AL, [Timeout|0x0141]
-8345:    b6                     unknown
+8345:    b6                     release_semaphore
 8346:    85 a8 04               ld AL, [S + 0x04]
 8349:    a3 71                  st AL, [L_83ba+2|0x83bc]
 834b:    16 6d                  blt L_83ba
@@ -8123,7 +8123,7 @@ aee4:    7f 41                  pop {X}
 aee6:    09                     ret
 
 L_aee7:
-aee7:    c6                     unknown
+aee7:    c6                     acquire_semaphore
 aee8:    90 af 03               ld A, R_af03|0xaf03
 aeeb:    73 ee                  jmp L_aedb
 
@@ -8248,7 +8248,7 @@ afc0:    c8                     ld BL, [A]
 afc1:    42 23                  and BL, BH
 afc3:    e8                     st BL, [A]
 afc4:    46 11 0d 08 00 00      addbig(1, 1) 0x08, [A + 0x00]
-afca:    0c                     unknown
+afca:    0c                     unknown_0c
 afcb:    5e                     mov Z, A
 afcc:    79 86 f5               call R_86f5
 afcf:    3a                     clr A, #0
@@ -8359,7 +8359,7 @@ b06e:    55 46                  mov Y, X
 
 L_b070:
 b070:    46 11 1d 08 00 00      subbig(1, 1) 0x08, [A + 0x00]
-b076:    0c                     unknown
+b076:    0c                     unknown_0c
 b077:    3f                     dec X
 b078:    18 f6                  bgt L_b070
 
@@ -8914,13 +8914,13 @@ b3c0:    d1 b4 14               ld B, [R_b414|0xb414]
 b3c3:    0f                     rsys
 
 R_b3c4:
-b3c4:    c6                     unknown
+b3c4:    c6                     acquire_semaphore
 b3c5:    e6 a4                  mov A, IL10(X)
 b3c7:    b3 49                  st A, [R_b412|0xb412]
 b3c9:    e6 a6                  mov A, IL10(Y)
 b3cb:    b3 47                  st A, [R_b414|0xb414]
 b3cd:    e6 a8                  mov A, IL10(Z)
-b3cf:    b6                     unknown
+b3cf:    b6                     release_semaphore
 b3d0:    a3 0d                  st AL, [0xb3df]	 ; Patches immediate in subbig
 b3d2:    91 00 5a               ld A, [0x005a]
 b3d5:    85 08 60               ld AL, [A + 0x60]	 ; Mains Power Frequency
@@ -9280,7 +9280,7 @@ b5de:    0f                     rsys
 Syscall_53:
 b5df:    79 83 a7               call CheckProcessPermission
 b5e2:    79 85 b9               call LockMutex?
-b5e5:    1f 9a                  b?F L_b581
+b5e5:    1f 9a                  branch_unlocked L_b581
 b5e7:    95 08 05               ld A, [A + 0x05]
 b5ea:    50 10 00 0e            add A, A, 0x000e
 b5ee:    79 80 42               call CallAinPageBase3
@@ -12392,7 +12392,7 @@ ca48:    4c                     mov YL, AL
 ca49:    00                     HALT
 ca4a:    ff                     st B, [P]
 ca4b:    01                     nop
-ca4c:    1f 90                  b?F L_c9de
+ca4c:    1f 90                  branch_unlocked L_c9de
 ca4e:    00                     HALT
 
 R_ca4f:
@@ -13273,7 +13273,7 @@ d092:    73 b5                  jmp L_d049
 L_d094:
     ; Loading complete, transfer execution to loaded binary
 d094:    05                     di
-d095:    c6                     unknown
+d095:    c6                     acquire_semaphore
 d096:    2e 2c 00 e1 18         wpf1 0x00, [LOS_Page0|0xe118]
 d09b:    2e 2c 78 e1 1a         wpf1 0x78, [OPSYS_Page0|0xe11a]
 d0a0:    32 20                  clr B, #0
@@ -15112,7 +15112,7 @@ e41a:    0a                     reti
 e41b:    73 c6                  jmp R_e3e3
 
 L_e41d:
-e41d:    1e 04                  b?E L_e423
+e41d:    1e 04                  unknown_branch L_e423
 e41f:    80 05                  ld AL, 0x05
 e421:    73 02                  jmp L_e425
 
@@ -15825,7 +15825,7 @@ e7f1:    66 09                  jsys Syscall_Abort
 e7f3:    01                         abort_code = (0x1)
 
 TosCmd_Launch:
-e7f4:    c6                     unknown
+e7f4:    c6                     acquire_semaphore
 e7f5:    05                     di
 e7f6:    32 c0                  clr C, #0	 ; Clear C, so our return level will be zero
 e7f8:    2e 2c 00 e8 30         wpf1 0x00, [R_e830|0xe830]

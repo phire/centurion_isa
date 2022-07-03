@@ -1175,7 +1175,7 @@ L_8cfe:
 8d08:    00                     HALT
 
 L_8d09:
-8d09:    0d                     unknown
+8d09:    0d                     mov_pc X
 8d0a:    90 05 0a               ld A, 0x050a
 8d0d:    50 80                  add A, Z
 8d0f:    51 04                  sub X, A

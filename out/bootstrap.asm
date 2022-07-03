@@ -354,6 +354,6 @@ fdf3:    65 a1                  ld X, [S++]
 fdf5:    73 be                  jmp L_fdb5
 fdf7:    d5 41                  ld B, [X++]
 fdf9:    7d 80                  call [Z]
-fdfb:    0c                     unknown
+fdfb:    0c                     unknown_0c
 fdfc:    d0 4b 65               ld B, 0x4b65
 fdff:    f5 00                  st B, [A]

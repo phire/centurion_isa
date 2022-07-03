@@ -3,7 +3,7 @@ from .cpu6_regs import Reg16Ref, Reg8Ref, MultiRegRef, LvlRegRef
 from .cpu6_addr import *
 from .cpu6_ops import *
 from common.memory import InstructionMatch as Match
-from .inst import BasicCpu6Inst, SyscallInst, ControlFlowInst
+from .inst import BasicCpu6Inst, SyscallInst, ControlFlowInst, TerminalInst
 
 
 def AluMatch(pc, mem):
@@ -282,57 +282,99 @@ def MemoryMatch(pc, mem):
         # Literal addressing mode isn't valid for call/jump
         return None
 
-    return Match(orig_pc, pc, ControlFlowInst(mode, operand), mem=mem)
+    resume = mode == 'call'
 
-# 00
-control_instructions = [
-    #B("00000000", "HALT", kill_branch),
-    I("00000000", "HALT"),
+    return Match(orig_pc, pc, ControlFlowInst(mode, operand, resume), mem=mem)
 
-    # Flag instructions:
-    I("00000001", "nop"),
-    I("00000010", "sf"), # set fault
-    I("00000011", "rf"), # clear fault
-    I("00000100", "ei"), # enable interrupts
-    I("00000101", "di"), # disable interrupts
-    I("00000110", "sl"), # set link/carry
-    I("00000111", "rl"), # clear link/carry
-    I("00001000", "cl"), # Complements carry
 
-    B("00001001", "ret", kill_branch),
-    I("00001010", "reti"), #, kill_branch),
-    B("00001011", "rim", kill_branch),
+# 00-0F
+def control_instructions(pc, inst):
+    match inst:
+        case 0x00:
+           # return Match(pc, pc+1, TerminalInst("HALT"))
+           return Match(pc, pc+1, BasicCpu6Inst("HALT"))
+        case 0x01:
+           return Match(pc, pc+1, BasicCpu6Inst("nop"))
+        case 0x02:
+           return Match(pc, pc+1, BasicCpu6Inst("sf"))  # set fault
+        case 0x03:
+           return Match(pc, pc+1, BasicCpu6Inst("rf")) # clear fault
+        case 0x04:
+           return Match(pc, pc+1, BasicCpu6Inst("ei")) # enable interrupts
+        case 0x05:
+            return Match(pc, pc+1, BasicCpu6Inst("di")) # disable interrupts
+        case 0x06:
+            return Match(pc, pc+1, BasicCpu6Inst("sl")) # set link/carry
+        case 0x07:
+            return Match(pc, pc+1, BasicCpu6Inst("rl")) # clear link/carry
+        case 0x08:
+            return Match(pc, pc+1, BasicCpu6Inst("cl")) # Complements carry
+        case 0x09:
+            return Match(pc, pc+1, TerminalInst("ret"))
+        case 0x0a:
+            # not terminal, because execution resumes here
+            return Match(pc, pc+1, BasicCpu6Inst("reti"))
+        case 0x0b:
+            return Match(pc, pc+1, TerminalInst("rim"))
+        case 0x0c:
+            return Match(pc, pc+1, BasicCpu6Inst("unknown_0c"))
+        case 0x0d:
+            return Match(pc, pc+1, BasicCpu6Inst("mov_pc", Reg16Ref(4)))
+        case 0x0e:
+            return Match(pc, pc+1, BasicCpu6Inst("dly"))
+        case 0x0f:
+            return Match(pc, pc+1, TerminalInst("rsys"))
 
-    I("00001110", "dly"),
-    B("00001111", "rsys", kill_branch),
-    I("xxxxxxxx"),
-]
 
-# 10
-branch_instructions = [
-    B("00010000 SSSSSSSS", "bc", relative_branch),
-    B("00010001 SSSSSSSS", "bnc", relative_branch),
-    B("00010010 SSSSSSSS", "bn", relative_branch),
-    B("00010011 SSSSSSSS", "bnn", relative_branch),
-    B("00010100 SSSSSSSS", "bz", relative_branch),
-    B("00010101 SSSSSSSS", "bnz", relative_branch),
-    B("00010110 SSSSSSSS", "blt", relative_branch),
-    B("00010111 SSSSSSSS", "bp", relative_branch), # positive
-    B("00011000 SSSSSSSS", "bgt", relative_branch),
-    B("00011001 SSSSSSSS", "ble", relative_branch), # lessthan or equal
-    B("00011010 SSSSSSSS", "bs1", relative_branch),
-    B("00011011 SSSSSSSS", "bs2", relative_branch),
-    B("00011100 SSSSSSSS", "bs3", relative_branch),
-    B("00011101 SSSSSSSS", "bs4", relative_branch),
-    B("00011110 SSSSSSSS", "b?E", relative_branch),
-    B("00011111 SSSSSSSS", "b?F", relative_branch),
-    I("xxxxxxxx"),
-]
+
+def branch_instructions(pc, inst, mem):
+    offset = signedOffset(pc+1, mem)
+    target = PcDisplacementRef(pc+2, offset, size=0)
+
+    match inst:
+        case 0x10:
+            return Match(pc, pc+2, ControlFlowInst("bc", target))
+        case 0x11:
+            return Match(pc, pc+2, ControlFlowInst("bnc", target))
+        case 0x12:
+            return Match(pc, pc+2, ControlFlowInst("bn", target))
+        case 0x13:
+            return Match(pc, pc+2, ControlFlowInst("bnn", target))
+        case 0x14:
+            return Match(pc, pc+2, ControlFlowInst("bz", target))
+        case 0x15:
+            return Match(pc, pc+2, ControlFlowInst("bnz", target))
+        case 0x16:
+            return Match(pc, pc+2, ControlFlowInst("blt", target))
+        case 0x17:
+            return Match(pc, pc+2, ControlFlowInst("bp", target)) # positive
+        case 0x18:
+            return Match(pc, pc+2, ControlFlowInst("bgt", target))
+        case 0x19:
+            return Match(pc, pc+2, ControlFlowInst("ble", target)) # lessthan or equal
+        case 0x1a:
+            return Match(pc, pc+2, ControlFlowInst("bs1", target))
+        case 0x1b:
+            return Match(pc, pc+2, ControlFlowInst("bs2", target))
+        case 0x1c:
+            return Match(pc, pc+2, ControlFlowInst("bs3", target))
+        case 0x1d:
+            return Match(pc, pc+2, ControlFlowInst("bs4", target))
+        case 0x1e:
+            # previously TTY Mark on the ee200. But that functionality appears to be gone
+            return Match(pc, pc+2, ControlFlowInst("unknown_branch", target))
+        case 0x1f:
+            # Branches when bit 1 of Level1's AH register is set
+            # Just a guess that this is semaphore
+            return Match(pc, pc+2, ControlFlowInst("branch_unlocked", target))
+
 
 instructions  = [
     I("01110110", "enable_parity_trap"),
     I("10000110", "disable_parity_trap"),
     I("11110111", "memcpy16"),
+    I("10110110", "release_semaphore"),   # write 0xff to Level1's AH register
+    I("11000110", "acquire_semaphore"), # write 0x00 to Level1's AH register
     I("01101110 NNNNNNNN NNNNNNNN", "ldcc [{N:#06x}]"),
     I("01101111 NNNNNNNN NNNNNNNN", "stcc [{N:#06x}]"),
 
@@ -344,9 +386,9 @@ def disassemble_instruction(mem, pc):
 
     match byte >> 4:
         case 0:
-            return scan(control_instructions, mem, pc, 1)
+            return control_instructions(pc, byte)
         case 1:
-            return scan(branch_instructions, mem, pc, 2)
+            return branch_instructions(pc, byte, mem)
         case 2 | 3 | 4 | 5:
             match byte:
                 case 0x2e:

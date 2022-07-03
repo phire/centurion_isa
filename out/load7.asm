@@ -111,7 +111,7 @@ PageTableTwo:
 0184:    00
 
 R_0185:
-0185:    1f 01                  b?F L_0188
+0185:    1f 01                  branch_unlocked L_0188
 0187:    02                     sf
 
 L_0188:
@@ -158,7 +158,7 @@ Devices:
 
 
 R_01c5:
-01c5:    1f 01                  b?F L_01c8
+01c5:    1f 01                  branch_unlocked L_01c8
 01c7:    02                     sf
 
 L_01c8:
@@ -1261,7 +1261,7 @@ ExecuteDeviceFunction:
 8053:    75 20                  jmp [B]	 ; Call the I/O function
 
 L_8055:
-8055:    c6                     unknown
+8055:    c6                     acquire_semaphore
 8056:    2e 1c 78 80 d3         rpf 0x78, [R_80d3|0x80d3]
 805b:    2e 0c 78 01 c5         wpf 0x78, [R_01c5|0x01c5]
 
@@ -1270,7 +1270,7 @@ L_8060:
 
 L_8061:
 8061:    2e 0c 78 80 d3         wpf 0x78, [R_80d3|0x80d3]
-8066:    b6                     unknown
+8066:    b6                     release_semaphore
 8067:    09                     ret
 
 R_8068:
@@ -1451,7 +1451,7 @@ R_850a:
 850a:    7e 03                  push {A, B}
 850c:    2a                     clr AL, #0
 850d:    a1 01 41               st AL, [Timeout|0x0141]
-8510:    b6                     unknown
+8510:    b6                     release_semaphore
 8511:    85 a8 04               ld AL, [S + 0x04]
 8514:    a3 71                  st AL, [L_8585+2|0x8587]
 8516:    16 6d                  blt L_8585
@@ -2621,7 +2621,7 @@ L_8cc3:
 8cc3:    9c                     ld A, [Z]
 8cc4:    d0 00 00               ld B, 0x0000
 8cc7:    79 86 12               call R_8612
-8cca:    0c                     unknown
+8cca:    0c                     unknown_0c
 
 L_8ccb:
 8ccb:    7b 7d                  call L_8d4a
@@ -4067,7 +4067,7 @@ L_9520:
 9520:    9c                     ld A, [Z]
 9521:    d3 a4                  ld B, [R_94c7|0x94c7]
 9523:    79 86 12               call R_8612
-9526:    11 80                  bnc L_95a8
+9526:    11 80                  bnc L_94a8
 9528:    09                     ret
 9529:    41
 952a:    01
@@ -4191,10 +4191,10 @@ L_957c:
 95a5:    21
 95a6:    73
 95a7:    46
-
-L_95a8:
-95a8:    7b 05                  call R_95af
-95aa:    73 42                  jmp R_95ee
+95a8:    7b
+95a9:    05
+95aa:    73
+95ab:    42
 
 R_95ac:
 95ac:    00
@@ -5197,7 +5197,7 @@ R_9baf:
 9bb5:    9b                     ld A, [Y]
 9bb6:    fc                     st B, [Z]
 9bb7:    9c                     ld A, [Z]
-9bb8:    0d                     unknown
+9bb8:    0d                     mov_pc X
 9bb9:    9c                     ld A, [Z]
 9bba:    24 9c                  srl ZL, #13
 
@@ -6135,7 +6135,7 @@ a19b:    7f 41                  pop {X}
 a19d:    09                     ret
 
 L_a19e:
-a19e:    c6                     unknown
+a19e:    c6                     acquire_semaphore
 a19f:    90 a1 ba               ld A, R_a1ba|0xa1ba
 a1a2:    73 ee                  jmp L_a192
 
@@ -6258,7 +6258,7 @@ a275:    c8                     ld BL, [A]
 a276:    42 23                  and BL, BH
 a278:    e8                     st BL, [A]
 a279:    46 11 0d 08 00 00      addbig(1, 1) 0x08, [A + 0x00]
-a27f:    0c                     unknown
+a27f:    0c                     unknown_0c
 a280:    5e                     mov Z, A
 a281:    79 88 6a               call R_886a
 a284:    3a                     clr A, #0
@@ -6550,13 +6550,13 @@ a410:    4e
 a411:    0f
 
 L_a412:
-a412:    c6                     unknown
+a412:    c6                     acquire_semaphore
 a413:    e6 a4                  mov A, IL10(X)
 a415:    b3 46                  st A, [R_a45d|0xa45d]
 a417:    e6 a6                  mov A, IL10(Y)
 a419:    b3 44                  st A, [0xa45f]
 a41b:    e6 a8                  mov A, IL10(Z)
-a41d:    b6                     unknown
+a41d:    b6                     release_semaphore
 a41e:    a3 0a                  st AL, [0xa42a]
 a420:    81 01 70               ld AL, [0x0170]
 a423:    22 00                  clr AH, #0
@@ -10337,7 +10337,7 @@ bd5d:    4c                     mov YL, AL
 bd5e:    00                     HALT
 bd5f:    ff                     st B, [P]
 bd60:    01                     nop
-bd61:    1f 90                  b?F L_bcf3
+bd61:    1f 90                  branch_unlocked L_bcf3
 bd63:    00                     HALT
 
 R_bd64:
@@ -10448,7 +10448,7 @@ bdeb:    38                     inc A, #1
 bdec:    14 04                  bz L_bdf2
 bdee:    7b 11                  call R_be01
 bdf0:    be                     st A, [C]
-bdf1:    c6                     unknown
+bdf1:    c6                     acquire_semaphore
 
 L_bdf2:
 bdf2:    2f 03                  st_dma_count A
@@ -10524,7 +10524,7 @@ beb2:    8d                     ld AL, [S]
 
 R_beb3:
 beb3:    00                     HALT
-beb4:    0c                     unknown
+beb4:    0c                     unknown_0c
 beb5:    c5                     unknown
 beb6:    c3 ba                  ld BL, [0xbe72]
 
@@ -10561,7 +10561,7 @@ bed8:    c4 8d                  ld BL, @[0xbe67]
 
 R_beda:
 beda:    00                     HALT
-bedb:    0c                     unknown
+bedb:    0c                     unknown_0c
 bedc:    c4 cd                  ld BL, @[0xbeab]
 bede:    c1 a0 c6               ld BL, [0xa0c6]
 bee1:    c1 c9 cc               ld BL, [0xc9cc]
@@ -10580,7 +10580,7 @@ bef6:    d5 d2                  ld B, [--C]
 
 L_bef8:
 bef8:    c5 8d 00               ld BL, @[Z++ + 0x00]
-befb:    0c                     unknown
+befb:    0c                     unknown_0c
 befc:    d2 d4 da               ld B, @[0xd4da]
 beff:    a0 c6                  st AL, 0xc6
 bf01:    c1 c9 cc               ld BL, [0xc9cc]
@@ -11289,8 +11289,8 @@ c410:    d1 c5 f6               ld B, [R_c5f6|0xc5f6]
 
 R_c413:
 c413:    7b cd                  call L_c3e2
-c415:    c6                     unknown
-c416:    0c                     unknown
+c415:    c6                     acquire_semaphore
+c416:    0c                     unknown_0c
 
 R_c417:
 c417:    47 44 05 60 07 c4 b8   memcpy 0x06, [Y + 0x07], [R_c4b8|0xc4b8]
@@ -12125,7 +12125,7 @@ caa4:    7c db                  call R_a550 (via 0xca80+1)
 caa6:    cb                     ld BL, [Y]
 caa7:    67 47 4c 00 ff         memcpy AL, [X + C + 0x00], 0xff
 caac:    01                     nop
-caad:    1f 90                  b?F L_ca3f
+caad:    1f 90                  branch_unlocked L_ca3f
 caaf:    00                     HALT
 
 R_cab0:
@@ -12243,7 +12243,7 @@ cb2e:    38                     inc A, #1
 cb2f:    14 04                  bz L_cb35
 cb31:    7b 11                  call R_cb44
 cb33:    cc                     ld BL, [Z]
-cb34:    0c                     unknown
+cb34:    0c                     unknown_0c
 
 L_cb35:
 cb35:    2f 03                  st_dma_count A
@@ -13400,7 +13400,7 @@ R_d4cc:
 d4cc:    0f                     rsys
 
 R_d4cd:
-d4cd:    1f 00                  b?F L_d4cf
+d4cd:    1f 00                  branch_unlocked L_d4cf
 
 L_d4cf:
 d4cf:    00                     HALT
@@ -13417,7 +13417,7 @@ R_d4d4:
 d4d4:    00                     HALT
 
 R_d4d5:
-d4d5:    1e c0                  b?E L_d497
+d4d5:    1e c0                  unknown_branch L_d497
 d4d7:    d3 d9                  ld B, [0xd4b2]
 d4d9:    d3 ae                  ld B, [0xd489]
 d4db:    cf                     ld BL, [P]
@@ -13693,7 +13693,7 @@ d6f0:    73 b2                  jmp L_d6a4
 
 L_d6f2:
 d6f2:    05                     di
-d6f3:    c6                     unknown
+d6f3:    c6                     acquire_semaphore
 d6f4:    2e 2c 00 d4 cb         wpf1 0x00, [R_d4cb|0xd4cb]
 d6f9:    2e 2c 78 d4 cd         wpf1 0x78, [R_d4cd|0xd4cd]
 d6fe:    32 20                  clr B, #0
@@ -15051,7 +15051,7 @@ e2b2:    00                     HALT
 e2b3:    01                     nop
 e2b4:    c4 b6                  ld BL, @[0xe26c]
 e2b6:    a0 a0                  st AL, 0xa0
-e2b8:    0c                     unknown
+e2b8:    0c                     unknown_0c
 e2b9:    06                     sl
 e2ba:    00                     HALT
 e2bb:    60 06 ff               ld X, 0x06ff
@@ -15060,7 +15060,7 @@ e2bf:    ff                     st B, [P]
 e2c0:    01                     nop
 e2c1:    c4 b7                  ld BL, @[0xe27a]
 e2c3:    a0 a0                  st AL, 0xa0
-e2c5:    0c                     unknown
+e2c5:    0c                     unknown_0c
 e2c6:    07                     rl
 e2c7:    00                     HALT
 e2c8:    c0 06                  ld BL, 0x06
