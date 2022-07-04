@@ -1552,13 +1552,13 @@ L_84e7:
 8507:    16 5a                  blt L_8563
 8509:    9d                     ld A, [S]
 850a:    79 cd 4d               call FormatHexWord
-850d:    80 e4                  ld AL, 0xe4
+850d:    80 e4                      dest = R_80e4
 850f:    95 a8 02               ld A, [S + 0x02]
 8512:    79 cd 4d               call FormatHexWord
-8515:    80 ea                  ld AL, 0xea
+8515:    80 ea                      dest = R_80ea
 8517:    55 40                  mov A, X
 8519:    79 cd 4d               call FormatHexWord
-851c:    80 de                  ld AL, 0xde
+851c:    80 de                      dest = R_80de
 851e:    90 80 d0               ld A, R_80d0|0x80d0
 8521:    b1 80 b7               st A, [R_80b7|0x80b7]
 8524:    d0 80 b1               ld B, R_80b1|0x80b1
@@ -2039,7 +2039,7 @@ GetProcessPermission:
 R_8811:
 8811:    55 ba 88 cc            mov S, SyscallTable|0x88cc
 8815:    79 85 b9               call LockMutex?
-8818:    3b                     not A, #0
+8818:    3b                         arg1 = (0x3b)
 8819:    55 ba 82 34            mov S, R_8234|0x8234
 881d:    7b e6                  call GetProcessPermission
 881f:    80 02                  ld AL, 0x02
@@ -2264,7 +2264,8 @@ Syscall_19:
 89ae:    39                     dec A, #1
 89af:    7e 03                  push {A, B}
 89b1:    79 85 b9               call LockMutex?
-89b4:    1c 3a                  bs3 L_89f0
+89b4:    1c                         arg1 = (0x1c)
+89b5:    3a                     clr A, #0
 89b6:    71 aa 25               jmp R_aa25
 
 Syscall_66:
@@ -2309,8 +2310,6 @@ L_89e7:
 89ea:    14 4a                  bz L_8a36
 89ec:    3a                     clr A, #0
 89ed:    d5 a8 02               ld B, [S + 0x02]
-
-L_89f0:
 89f0:    66 65                  jsys Syscall_65
 89f2:    00 00                      arg1 = (0x0)
 89f4:    5d                     mov B, A
@@ -2596,7 +2595,7 @@ L_8ba3:
 8bbb:    41 01                  sub AL, AH
 8bbd:    15 0e                  bnz L_8bcd
 8bbf:    95 a1                  ld A, [S++]
-8bc1:    93 51                  ld A, [L_8c12+2|0x8c14]
+8bc1:    93 51                  ld A, [0x8c14]
 8bc3:    38                     inc A, #1
 8bc4:    b5 48 09               st A, [X + 0x09]
 8bc7:    3a                     clr A, #0
@@ -2650,22 +2649,20 @@ L_8c03:
 8c0c:    79 b5 f2               call R_b5f2
 
 R_8c0f:
-8c0f:    00                     HALT
-8c10:    00                     HALT
-8c11:    01                     nop
+8c0f:    00 00                      fileHandle = L_0000
+8c11:    01 90                      size = (0x190)
 
-L_8c12:
-8c12:    90 00 00               ld A, 0x0000
-8c15:    00                     HALT
-8c16:    00                     HALT
-8c17:    00                     HALT
-8c18:    00                     HALT
+R_8c13:
+8c13:    00                         diskNum = (0x0)
+8c14:    00 00                      SectorNum = (0x0)
+8c16:    00 00                      Buffer = L_0000
+8c18:    00                         arg6 = (0x0)
 8c19:    09                     ret
 
 L_8c1a:
 8c1a:    9d                     ld A, [S]
 8c1b:    95 08 09               ld A, [A + 0x09]
-8c1e:    b3 f4                  st A, [L_8c12+2|0x8c14]
+8c1e:    b3 f4                  st A, [0x8c14]
 8c20:    d5 88 06               ld B, [Z + 0x06]
 8c23:    f5 a2                  st B, [--S]
 8c25:    d1 01 1d               ld B, [0x011d]
@@ -2705,7 +2702,7 @@ L_8c45:
 8c60:    95 a1                  ld A, [S++]
 8c62:    3a                     clr A, #0
 8c63:    b5 48 0b               st A, [X + 0x0b]
-8c66:    93 ac                  ld A, [L_8c12+2|0x8c14]
+8c66:    93 ac                  ld A, [0x8c14]
 8c68:    38                     inc A, #1
 8c69:    b5 48 09               st A, [X + 0x09]
 8c6c:    73 c9                  jmp R_8c37
@@ -2960,7 +2957,7 @@ LockMutex?3B:
     ; Not entirely sure, but this appears to be locking a mutex
 8de4:    7e 03                  push {A, B}
 8de6:    79 85 b9               call LockMutex?
-8de9:    3b                     not A, #0
+8de9:    3b                         arg1 = (0x3b)
 8dea:    7f 03                  pop {A, B}
 8dec:    09                     ret
 
@@ -3008,18 +3005,18 @@ R_8e15:
 8e1c:    79 b5 f2               call R_b5f2
 
 R_8e1f:
-8e1f:    00                     HALT
-8e20:    00                     HALT
-8e21:    01                     nop
+8e1f:    00 00                      fileHandle = L_0000
+8e21:    01 90                      size = (0x190)
 
-L_8e22:
-8e22:    90 00 00               ld A, 0x0000
-8e25:    00                     HALT
+R_8e23:
+8e23:    00                         diskNum = (0x0)
+
+R_8e24:
+8e24:    00 00                      SectorNum = (0x0)
 
 R_8e26:
-8e26:    00                     HALT
-8e27:    00                     HALT
-8e28:    01                     nop
+8e26:    00 00                      Buffer = L_0000
+8e28:    01                         arg6 = (0x1)
 8e29:    30 10 8e 24            inc [R_8e24|0x8e24], #1
 8e2d:    93 f7                  ld A, [R_8e26|0x8e26]
 8e2f:    5e                     mov Z, A
@@ -3330,7 +3327,7 @@ Syscall_65:
 900e:    f5 a2                  st B, [--S]
 9010:    a5 a2                  st AL, [--S]
 9012:    79 85 b9               call LockMutex?
-9015:    3c                     srl A, #1
+9015:    3c                         arg1 = (0x3c)
 9016:    85 a1                  ld AL, [S++]
 9018:    a1 92 89               st AL, [R_9289|0x9289]
 901b:    dd                     ld B, [S]
@@ -3672,22 +3669,20 @@ R_9245:
 9245:    79 b5 f2               call R_b5f2
 
 R_9248:
-9248:    00                     HALT
-9249:    00                     HALT
-924a:    01                     nop
+9248:    00 00                      fileHandle = L_0000
+924a:    01 90                      size = (0x190)
 
-L_924b:
-924b:    90 00 00               ld A, 0x0000
+R_924c:
+924c:    00                         diskNum = (0x0)
 
-R_924e:
-924e:    00                     HALT
+R_924d:
+924d:    00 00                      SectorNum = (0x0)
 
 R_924f:
-924f:    00                     HALT
-9250:    00                     HALT
+924f:    00 00                      Buffer = L_0000
 
 R_9251:
-9251:    01                     nop
+9251:    01                         arg6 = (0x1)
 9252:    09                     ret
 
 R_9253:
@@ -3799,7 +3794,7 @@ Syscall_67:
 92e4:    79 b2 d1               call AssertIsSystemPtr
 92e7:    b5 a2                  st A, [--S]
 92e9:    79 85 b9               call LockMutex?
-92ec:    3c                     srl A, #1
+92ec:    3c                         arg1 = (0x3c)
 92ed:    66 16                  jsys Syscall_16
 92ef:    01 90                      arg1 = (0x190)
 92f1:    00 00                      out = (0x0)
@@ -5574,8 +5569,7 @@ L_9db3:
 9db7:    79 85 fa               call FlushFn
 
 R_9dba:
-9dba:    00                     HALT
-9dbb:    00                     HALT
+9dba:    00 00                      fileop = L_0000
 9dbc:    09                     ret
 
 R_9dbd:
@@ -6058,7 +6052,7 @@ a0c5:    10 35                  bc L_a0fc
 a0c7:    59                     sub B, A
 a0c8:    f5 a2                  st B, [--S]
 a0ca:    79 85 b9               call LockMutex?
-a0cd:    3b                     not A, #0
+a0cd:    3b                         arg1 = (0x3b)
 a0ce:    d5 88 06               ld B, [Z + 0x06]
 a0d1:    9d                     ld A, [S]
 a0d2:    fd                     st B, [S]
@@ -7452,7 +7446,7 @@ aa53:    58                     add B, A
 aa54:    99                     ld A, [B]
 aa55:    b5 a2                  st A, [--S]
 aa57:    79 85 b9               call LockMutex?
-aa5a:    3d                     sll A, #1
+aa5a:    3d                         arg1 = (0x3d)
 aa5b:    9d                     ld A, [S]
 
 L_aa5c:
@@ -7463,7 +7457,7 @@ aa62:    71 aa f0               jmp R_aaf0
 
 L_aa65:
 aa65:    79 85 b9               call LockMutex?
-aa68:    3b                     not A, #0
+aa68:    3b                         arg1 = (0x3b)
 aa69:    79 ab 11               call R_ab11
 aa6c:    d1 01 03               ld B, [CurrentProcess|0x0103]
 aa6f:    c5 28 01               ld BL, [B + 0x01]
@@ -7522,7 +7516,7 @@ aacb:    29                     dec AL, #1
 aacc:    a3 44                  st AL, [R_ab12|0xab12]
 aace:    79 86 12               call Yield
 aad1:    79 85 b9               call LockMutex?
-aad4:    3b                     not A, #0
+aad4:    3b                         arg1 = (0x3b)
 aad5:    7b 3a                  call R_ab11
 aad7:    d1 01 03               ld B, [CurrentProcess|0x0103]
 aada:    c5 28 01               ld BL, [B + 0x01]
@@ -8149,10 +8143,11 @@ af07:    80 01                  ld AL, 0x01
 af09:    a1 01 25               st AL, [0x0125]
 af0c:    7b 08                  call L_af16
 af0e:    79 b4 f8               call PrintStringToErrorDevice
-af11:    af                     st AL, [P]	 ; Opsys Aborted
-af12:    74 05                  jmp @[0xaf19]
-af14:    73
-af15:    fe '~'
+af11:    af 74                      string = R_af74	 ; Opsys Aborted
+af13:    05                     di
+
+L_af14:
+af14:    73 fe                  jmp L_af14
 
 L_af16:
 af16:    d0 00 00               ld B, 0x0000	 ; B should be SystemInfoPtr, 01ea
@@ -8505,7 +8500,7 @@ b15d:    95 68 08               ld A, [Y + 0x08]
 b160:    d0 80 bb               ld B, R_80bb|0x80bb
 b163:    79 8b 00               call R_8b00
 b166:    79 85 fa               call FlushFn
-b169:    80 bb                  ld AL, 0xbb
+b169:    80 bb                      fileop = R_80bb
 b16b:    83 d6                  ld AL, [0xb143]
 b16d:    29                     dec AL, #1
 b16e:    a3 d3                  st AL, [0xb143]
@@ -9242,18 +9237,14 @@ b5ac:    f3 0d                  st B, [0xb5bb]
 b5ae:    47 48 05 40 b5 bd      memcpy 0x06, [X], [R_b5bd|0xb5bd]	 ; The rest get copied, unmodified
 b5b4:    30 45                  inc X, #6
 b5b6:    79 b5 f2               call R_b5f2
-b5b9:    00                     HALT
-b5ba:    00                     HALT
-b5bb:    00                     HALT
-b5bc:    00                     HALT
+b5b9:    00 00                      fileHandle = L_0000
+b5bb:    00 00                      size = (0x0)
 
 R_b5bd:
-b5bd:    ff                     st B, [P]
-b5be:    00                     HALT
-b5bf:    00                     HALT
-b5c0:    00                     HALT
-b5c1:    00                     HALT
-b5c2:    00                     HALT
+b5bd:    ff                         diskNum = (0xff)
+b5be:    00 00                      SectorNum = (0x0)
+b5c0:    00 00                      Buffer = L_0000
+b5c2:    00                         arg6 = (0x0)
 b5c3:    0f                     rsys
 
 Syscall_14:
@@ -9280,7 +9271,8 @@ b5de:    0f                     rsys
 Syscall_53:
 b5df:    79 83 a7               call CheckProcessPermission
 b5e2:    79 85 b9               call LockMutex?
-b5e5:    1f 9a                  branch_unlocked L_b581
+b5e5:    1f                         arg1 = (0x1f)
+b5e6:    9a                     ld A, [X]
 b5e7:    95 08 05               ld A, [A + 0x05]
 b5ea:    50 10 00 0e            add A, A, 0x000e
 b5ee:    79 80 42               call CallAinPageBase3
@@ -10129,10 +10121,7 @@ baf6:    90 bb f6               ld A, R_bbf6|0xbbf6
 L_baf9:
 baf9:    b3 0a                  st A, [0xbb05]
 bafb:    7b 2f                  call L_bb2c
-bafd:    d3 'S'
-
-L_bafe:
-bafe:    06                     sl
+bafd:    d3 06                  ld B, [0xbb05]
 baff:    b5 28 06               st A, [B + 0x06]
 
 L_bb02:
@@ -10199,23 +10188,17 @@ bb58:    66 6b                  jsys Syscall_AbortAL
 
 L_bb5a:
 bb5a:    79 b4 f8               call PrintStringToErrorDevice
-bb5d:    00                     HALT
-bb5e:    00                     HALT
+bb5d:    00 00                      string = L_0000
 bb5f:    91 ba 6e               ld A, [R_ba6e|0xba6e]
 bb62:    79 cd 4d               call FormatHexWord
-bb65:    bc                     st A, [Z]
-bb66:    1b 7b                  bs2 R_bbe3
-bb68:    c3 b1                  ld BL, [0xbb1b]
-bb6a:    bc                     st A, [Z]
-bb6b:    13 91                  bnn L_bafe
-bb6d:    ba                     st A, [X]
-bb6e:    68 79 cd               st X, 0x79cd
-bb71:    4d                     mov BL, AL
-bb72:    bc                     st A, [Z]
-bb73:    16 79                  blt L_bbee
-bb75:    b4 f8                  st A, @[0xbb6f]
-bb77:    bc                     st A, [Z]	 ; " FAIL:  X XXXX XXXX\x07\r"
-bb78:    0a                     reti
+bb65:    bc 1b                      dest = R_bc1b
+bb67:    7b c3                  call L_bb2c
+bb69:    b1 bc 13               st A, [R_bc13|0xbc13]
+bb6c:    91 ba 68               ld A, [R_ba68|0xba68]
+bb6f:    79 cd 4d               call FormatHexWord
+bb72:    bc 16                      dest = R_bc16
+bb74:    79 b4 f8               call PrintStringToErrorDevice
+bb77:    bc 0a                      string = R_bc0a	 ; " FAIL:  X XXXX XXXX\x07\r"
 bb79:    3a                     clr A, #0
 bb7a:    39                     dec A, #1
 bb7b:    5d                     mov B, A
@@ -11258,8 +11241,8 @@ c2d9:    14 dd                  bz L_c2b8
 
 AttnPrint:
 c2db:    79 b4 f8               call PrintStringToErrorDevice
-c2de:    c2 e2 73               ld BL, @[0xe273]	 ; "ATTN PRINT\n\r"
-c2e1:    cd                     ld BL, [S]
+c2de:    c2 e2                      string = R_c2e2	 ; "ATTN PRINT\n\r"
+c2e0:    73 cd                  jmp L_c2af
 
 R_c2e2:
 c2e2:    12, "ATTN PRINT\n\r"
@@ -12183,8 +12166,6 @@ c90f:    d5 68 0f               ld B, [Y + 0x0f]
 c912:    f6 32 01               mov BL, Device[B + 0x01]
 c915:    8d                     ld AL, [S]
 c916:    4a                     and BL, AL
-
-L_c917:
 c917:    49                     sub BL, AL
 c918:    14 0c                  bz L_c926
 c91a:    79 cc 89               call CheckTimeout
@@ -12255,9 +12236,8 @@ c97b:    b1 cb 3d               st A, [R_cb3d|0xcb3d]
 c97e:    80 02                  ld AL, 0x02
 c980:    46 80 91 cb 3d 60 02   baseconv(8, 0) [R_cb3d|0xcb3d], [Y + 0x02]
 c987:    79 b4 f8               call PrintStringToErrorDevice
-c98a:    cb                     ld BL, [Y]
-c98b:    37 60                  rlc Y, #1
-c98d:    13 88                  bnn L_c917
+c98a:    cb 37                      string = R_cb37
+c98c:    60 13 88               ld X, 0x1388
 
 L_c98f:
 c98f:    66 07                  jsys Syscall_Yield
@@ -12363,12 +12343,10 @@ R_ca1a:
 ca1a:    00                     HALT
 ca1b:    00                     HALT
 ca1c:    79 b4 f8               call PrintStringToErrorDevice
-ca1f:    cb                     ld BL, [Y]	 ; "EC:XX CMDS: "
-ca20:    75 90                  jmp [Z]
+ca1f:    cb 75                      string = R_cb75	 ; "EC:XX CMDS: "
 
-R_ca22:
-ca22:    c7                     unknown
-ca23:    05                     di
+L_ca21:
+ca21:    90 c7 05               ld A, R_c705|0xc705
 ca24:    5c                     mov Y, A
 ca25:    3a                     clr A, #0
 ca26:    85 68 02               ld AL, [Y + 0x02]
