@@ -160,10 +160,16 @@
 0xb4c7 ,	comment	; A - 10
 0xb4cd ,	comment	; ascii "00"
 0xb4f8,	pre_comment 	; Is hardcoded to assume Error device is a mux port
+0xb4fd ,	comment	; Use default process number 0 if CurrentProcess isn't set
+0xb500,	pre_comment 	; A is process descriptor
 0xb500 ,	comment	; B = string
 0xb506 ,	comment	; Error device
 0xb509 ,	comment	; MMIO address 0xf200
 0xb523 ,	comment	; Wait for UART to be ready
+0xb554,	pre_comment 	; This function takes a numeric value in AL and converts it to decimal ASCII,
+	 	; arranging the result in the buffer, specified by a literal argument, in a
+	 	; reverse order. This means that the given address points at the last character
+	 	; (last digit) and the remaining ones will be arranged at negative offset
 0xb5a1 ,	comment	; Return addresses above 0x8000 are already privileged
 0xb5a6 ,	comment	; Length
 0xb5a8 ,	comment	; FileHandle
@@ -203,12 +209,14 @@
 0xb6ca,	pre_comment 	; This is the actual main function, which does the job on a particular device
 0xb6ca ,	comment	; X before call
 0xb6cf ,	comment	; Arg6 & 0x7f - function code
+0xb6d1 ,	comment	; 1 - read, 2 - write
 0xb6d4 ,	comment	; Arg6 & 0x80 - bit 7 of the function code
 0xb6d9 ,	comment	; Buffer
 0xb6de ,	comment	; SectorNum
 0xb6e3 ,	comment	; Y + 13
 0xb6ee ,	comment	; FileHandle
 0xb6f3 ,	comment	; MMIOBase
+0xb6f8 ,	comment	; Write low byte of sector number to [IOBASE + 0x0f)
 0xb6fb ,	comment	; Size
 0xb703 ,	comment	; Setup PageBase2
 0xb70f ,	comment	; Switch to PageBase2?
@@ -217,14 +225,24 @@
 0xb722 ,	comment	; patch (PhysicalSector - 1)
 0xb727 ,	comment	; B = Sectors/Heads
 0xb72a ,	comment	; X = Remaining Sectors/Heads in Cyclnder
+0xb72c ,	comment	; Start with DMASize == DataSize
 0xb734 ,	comment	; Calculate Physical Sector, Again???
 0xb737 ,	comment	; Cache lookup?
 0xb73a ,	comment	; (PhysicalSector - 1)
 0xb73e ,	comment	; increment (PhysicalSector -1)
+0xb746 ,	comment	; CurrentSector++
+0xb74b ,	comment	; DMASize -= 400
+0xb753 ,	comment	; Stop if DMASize has reached 0
+0xb755 ,	comment	; Or positive ? I don't understand...
+0xb757 ,	comment	; SectorsInCylinder--
+0xb758 ,	comment	; Repeat while (SectorsInCylinder > 0)
 0xb776 ,	comment	; Abort
-0xb7d6 ,	comment	; AL = function code
-0xb7da ,	comment	; 0 gets substitute with 0x0d
-0xb7dc ,	comment	; Preserve the translated function code
+0xb7c4 ,	comment	; One sector remains to read/write
+0xb7ce ,	comment	; B = A - B
+0xb7d1 ,	comment	; If _DataSize < 400 _DMASize = 400
+0xb7d6 ,	comment	; AL = function code & 0x80
+0xb7da ,	comment	; 0 gets substitute with 13 (default retry count)
+0xb7dc ,	comment	; Set up retry counters
 0xb7e4 ,	comment	; Install interrupt handler
 0xb7e6 ,	comment	; device_obj.IOBase
 0xb7e9 ,	comment	; dma_mode = bits 2 and 3 of IOBase. Is it for multiple cards ?
@@ -236,11 +254,15 @@
 		; At this point, DMA address and DMA count haven't been
 		; set (as far as I can tell). Does this mean that enabling
 		; DMA with 0 count instantly tiggeres the interrupt?
+0xb7f8 ,	comment	; Supply device_obj.IOBase to the interrupt handler in Z
+0xb7fa ,	comment	; Write lower part of the card address to the card itself.
+0xb7fd ,	comment	; Does this enable interrupts ?
 0xb803 ,	comment	; BL = function code
-0xb807,	pre_comment 	; We will loop here until this inline variable becomes nonzero
+0xb809 ,	comment	; :loop here until this inline variable becomes nonzero
 0xb80b ,	comment	; AL = function code
 0xb80f ,	comment	; Function code 0 prints an error message
-0xb85a ,	comment	; X
+0xb85a ,	comment	; This was original X when we entered the function
+0xb85d ,	comment	; Put it back on stack
 0xb868 ,	comment	; IOBase
 0xb86b ,	comment	; HW unit number
 0xb86e ,	comment	; Select unit
@@ -249,8 +271,167 @@
 0xb877 ,	comment	; We know what bit 4 is (probably) drive ready; bit 7 isn't known yet
 0xb884 ,	comment	; IOBase
 0xb887 ,	comment	; Unknown register
-0xbb4f ,	comment	; Patch PrintStringToErrorDevice arg
+0xb8a7 ,	comment	; device_obj.IOBase
+0xb8aa ,	comment	; Supply to the interrupt handler
+0xb8ac ,	comment	; Write low byte of the card address to [IOBASE + 0xf]
+0xb926 ,	comment	; "DISK"
+0xb92e ,	comment	; Clear write enable mask
+0xb931 ,	comment	; Maybe disable interrupts ?
+0xb936 ,	comment	; IRQ ACK ?
+0xb93a ,	comment	; Note once we've entered here, we'll only leave if someone else resets the IPL2 vector
+0xb93c,	pre_comment 	; Z = Hawk IOBase
+0xb93c ,	comment	; IRQ ACK
+0xb93f ,	comment	; This probably orders an interrupt on DMA completion
+		; It looks like the value isn't important, only the fact of write itself
+0xb947 ,	comment	; Place the stack below FfcDeviceFunctions
+0xb948 ,	comment	; Variable name is temporary, it's more like retry count
+0xb94a ,	comment	; Decrement it
+0xb94d ,	comment	; If was zero, report an error
+0xb952 ,	comment	; Select unit
+0xb958 ,	comment	; Set sector number
+0xb95b ,	comment	; Set DMA address and size
+0xb961 ,	comment	; Check for bit 10
+0xb965 ,	comment	; If set, need to recalibrate
+0xb96a ,	comment	; Check status bit 5 - on cylinder
+0xb96e ,	comment	; If not set, wait for head to finish positioning
+0xb970 ,	comment	; (assuming RTZ in progress)
+0xb973 ,	comment	; Seek
+0xb97b ,	comment	; Check status after Seek command
+0xb97e ,	comment	; If bit 10 is set,
+0xb98a ,	comment	; Original function code
+0xb98d ,	comment	; 0 => seek
+0xb98f ,	comment	; 1 => Multi sector read
+0xb993 ,	comment	; 2 => Multi sector write
+0xb996 ,	comment	; 3 => Verify
+0xb998 ,	comment	; 4 => Format and verify
+0xb99a,	pre_comment 	; Check Write Enable logic.
+	 	; According to Ken, the value in "write enable mask" register has to match the unit select.
+0xb99d ,	comment	; BL = 1 << unit
+0xb9a0 ,	comment	; Preserve BL
+0xb9a2 ,	comment	; Invert BL, so that no match occurs
+0xb9a4 ,	comment	; Register 3 - write enable mask
+0xb9aa ,	comment	; Check bit 6 - WE
+0xb9ae ,	comment	; If set, it's an error
+0xb9b0 ,	comment	; Restore 1 << unit in AL.
+0xb9b2 ,	comment	; Register 3 - write enable mask
+0xb9b8 ,	comment	; Check bit 6 - WE
+0xb9bc ,	comment	; Must be set this time
+0xb9be ,	comment	; Bit 7 - write protect
+0xb9c7 ,	comment	; Command 1 - multi sector write
+0xb9cd ,	comment	; Bit 7 - write protected
+0xb9d1 ,	comment	; If not, proceed
+0xb9dd ,	comment	; Set write mask
+0xb9e0 ,	comment	; Format is two bytes: 6 then 5
+0xb9e2 ,	comment	; Command 6
+0xb9e5 ,	comment	; Command 5
+0xb9ed ,	comment	; Check the original function code
+0xb9f0 ,	comment	; If 1 and 2 (read ow write), we're done
+0xb9f4 ,	comment	; Code 4 will fall through here
+0xb9fd ,	comment	; Set sector number
+0xba02 ,	comment	; Command 4 - format sector
+0xba0f ,	comment	; "WE"
+0xba13 ,	comment	; Check for critical errors
+0xba15 ,	comment	; Recalibrate
+0xba17 ,	comment	; Write Hawk command
+0xba1f,	pre_comment 	; This is called after issuing a seek or RTZ, and supposedly waits for
+	 	; the drive to complete the seek.
+	 	; It looks like drives have "seek done" signals, which are wired to 4 low bits
+	 	; of the status register. One bit belongs to one physical drive (consisting of 2 units)
+0xba1f ,	comment	; Y= return address
+0xba21 ,	comment	; Restore X before the call
+0xba23 ,	comment	; Interrupt yields here
+0xba24 ,	comment	; Another interrupt, ACK
+0xba2c ,	comment	; PysicalUnit / 2 - will this become PhysicalDrive ?
+0xba2d ,	comment	; BL = 1 << PhysicalDrive
+0xba2f ,	comment	; Status register
+0xba32 ,	comment	; Check for the respective bit to become 1
+0xba33 ,	comment	; Loop if not
+0xba35 ,	comment	; Return
+0xba37,	pre_comment 	; This routine effectively does BL = 1 << AL
+0xba42,	pre_comment 	; Reads Hawk status register and returns the value in A.
+	 	; Critical conditions are checked and handled immediately
+0xba42 ,	comment	; Read status register
+0xba45 ,	comment	; Check bit 9 (drive fault)
+0xba49 ,	comment	; If yes, print "FLT XX", where XX - drive number
+0xba4b ,	comment	; Check bit 4 (drive ready)
+0xba4f ,	comment	; Return if ready is reported
+0xba51 ,	comment	; If not ready, print "ATN XX", where XX - drive number
+0xba55 ,	comment	; Size for this DMA transaction
+0xba5b ,	comment	; Data buffer
+0xba61 ,	comment	; Expected dma_addr after completion
+0xba64,	pre_comment 	; Read drive status and set variables for error reporting
+0xba64 ,	comment	; Supposedly current sector
+0xba6a ,	comment	; Status register
+0xba73,	pre_comment 	; This routine waits for the drive operation to complete
+0xba73 ,	comment	; Y = return address
+0xba75 ,	comment	; Restore X before the call
+0xba7a ,	comment	; The interrupt yields control here
+0xba7b ,	comment	; Another interrupt, ACK
+0xba7e ,	comment	; Get status value from IL1 handler
+0xba83 ,	comment	; A is preserved
+0xba85 ,	comment	; Overwrite status value with the one from IL1
+0xba8a ,	comment	; "DMA STAT"
+0xba8e ,	comment	; Bit 8 - dma_busy
+0xba92 ,	comment	; If yes, keep waiting
+0xba94 ,	comment	; Check for bits 12 - 15 (error bits)
+0xba9a ,	comment	; Check for seek error
+0xbaa0 ,	comment	; If yes, go to recalibrate
+0xbaa3 ,	comment	; Current sector from the Hawk drive
+0xbaa9 ,	comment	; Verify
+0xbaaa ,	comment	; If mismatch, "DMA LAG" error will be printer
+0xbab1 ,	comment	; "DMA LAG"
+0xbab3 ,	comment	; This is an inline variable
+0xbab6 ,	comment	; Verfy that the DMA has completed
+0xbabc ,	comment	; If not, "DMA ERR" is reported
+0xbac2 ,	comment	; "DMA"
+0xbac7 ,	comment	; Go there if there's more data for DMA
+0xbac9 ,	comment	; Return
+0xbad7 ,	comment	; "WP xx" string
+0xbadd ,	comment	; "WP"
+0xbadf ,	comment	; A = Hawk status value, check "write protect" bit
+0xbae2 ,	comment	; Keep spinning until set
+0xbaea ,	comment	; Increment retry count, this actually brings it to original value
+0xbaee ,	comment	; Go to the beginning
+0xbaf6 ,	comment	; "FLT NN"
+0xbaf9 ,	comment	; Store the string as Hawk_PrintWarning argument
+0xbaff ,	comment	; Insert device number
+0xbb07 ,	comment	; Check drive fault bit
+0xbb0b ,	comment	; Keep spinning until set
+0xbb0d ,	comment	; Check dma_busy
+0xbb11 ,	comment	; Keep spinning until not set, wait for DMA to resume
+0xbb18 ,	comment	; Increment retry count, this brings it back to the original value
+0xbb23 ,	comment	; Process.timeout
+0xbb27 ,	comment	; "ATN NN" string
+0xbb2c ,	comment	; Preset the second digit to space
+0xbb37 ,	comment	; Convert in reverse direction, end in 0xbb3e
+0xbb39 ,	comment	; Return both digits
+0xbb3f,	pre_comment 	; Set result status and leave the Hawk interrupt.
+	 	; This function doesn't return
+0xbb3f ,	comment	; Result string
+0xbb43 ,	comment	; Operation is complete, HawkDevice_BlockIO is waiting for this
+0xbb48 ,	comment	; Pop all nonzero arguments, i wonder why
+0xbb4c ,	comment	; Complete the interrupt
+0xbb53 ,	comment	; Abort if the error string isn't set
+0xbb65 ,	comment	; Second "XXXX"
+0xbb69 ,	comment	; Replace " X" with a device number
+0xbb72 ,	comment	; First "XXXX"
 0xbb77 ,	comment	; " FAIL:  X XXXX XXXX\x07\r"
+0xbb80,	pre_comment 	; Returns a Process from the table, specified by index.
+	 	; Process pointer in A
+	 	; Throughout the code a value of 0xff is written into ProcessTableIdx,
+	 	; so probably we're missing something, but anyways this code is indexing into
+	 	; a table of all processed, which for us only consists of StartProcess.
+0xbb8b,	pre_comment 	; Print a warning message from the driver, then check for some process flags.
+	 	; May either complete the operation or return in order to retry.
+	 	; If returns, provides status register value in A
+0xbb8b ,	comment	; Get string address
+0xbb8d ,	comment	; Set argument for PrintStringToErrorDeviceForProcess
+0xbbb2 ,	comment	; Wait until the timeout expires
+0xbbb6 ,	comment	; This checks for some flags
+0xbbbd ,	comment	; Jump to continue (and retry)
+0xbbd2 ,	comment	; process.timeout = 256
+0xbbd8 ,	comment	; OK, no error
+0xbbda ,	comment	; Read status
 0xc085 ,	comment	; "EC:XX CP:XX CMDS: "
 0xc21f,	pre_comment 	; Device functions table.
 	 	; The first word is the maximum (publicly) available function number. Other entries are
@@ -567,7 +748,8 @@
 0xcd2a ,	comment	; B = Total tracks on disk
 0xcd31,	pre_comment 	; Shift Total Tracks up by 4, overflowig into A (which gets discarded, anyway)
 0xcd4d,	pre_comment 	; Looks like this function converts a 16bit word to hex and writes
-	 	; it to the ascii buffer specified at [X]
+	 	; it to the ascii buffer specified as a literal argument
+0xcd51 ,	comment	; Buffer address is a literal argument
 0xcd67,	pre_comment 	; A is sectorNum
 	 	; B is FileHandle
 	 	; B + 0 is 16bit file size (in sectors)
