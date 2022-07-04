@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Converts from centurion ASCII files to modern PC ASCII files
 import sys
 
