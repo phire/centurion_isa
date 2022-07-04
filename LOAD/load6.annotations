@@ -1,12 +1,19 @@
 0x0100, label, SyscallVector
 0x0103, label, CurrentProcess
 0x0103, ptr
+0x0105, ptr
+0x0107, label, ProcessTablePtr
+0x0107, ptr
 0x0109, label, DevicesPtr
 0x0109, ptr
 0x010b, label, CrtInstancesPtr
 0x010b,	ptr
+0x01aa, ptr
+0x01b6, ptr
+0x01b8, >H
 0x01ba, label, Devices
 0x011d, fnptr
+0x011f, label, ProcessTableIdx
 0x0126, label, EarlyInitDevicesPtr
 0x0126, ptr
 0x0130, label, ClockHours
@@ -21,6 +28,7 @@
 0x0141, B
 0x0161, label, PageTableOne
 0x0181, label, PageTableTwo
+0x01b6, label, ProcessTable
 0x01e4,	label, CrtInstances
 0x01e4,	>H
 0x01e6, ptr
@@ -57,7 +65,6 @@
 0x8234, pstring16
 0x8237, pstring16
 0x825e, pstring16
-0x8235, pstring16
 0x8285, pstring16
 0x8299, pstring16
 0x82b1, pstring16
@@ -114,6 +121,8 @@
 0xb2d1, label, AssertIsSystemPtr
 0xb446, label, InitLevel10Device
 0xb461, code, Level10_InterruptHandler
+0xb500, label, PrintStringToErrorDeviceForProcess
+0xb554, label, NumToStrReverse
 0xb656, label, CrtDeviceHooks
 0xb656, fnptr
 0xb6b6, label, HawkDeviceFunctions
@@ -129,27 +138,73 @@
 0xb6c8, fnptr
 0xb6ca, label, HawkDevice_BlockIO
 0xb7a1, label, _FileHandle
-0xb7a3, label, _DevicePlus13
-0xb7a4, label, _Arg6LowBits
+0xb7a3, label, _PhysicalUnit
+0xb7a4, label, _FunctionCode
 0xb7a5, label, _SectorNum
 0xb7a9, label, _CurrentSectorNum
 0xb7ab, label, _DestBuffer
+0xb7af, label, _RemainingSectorNum
+0xb7b1, label, _ExpectedPhysicalSector
 0xb7b3, label, _DeviceNum
-0xb7a7, label, _ReadSize
-0xb7ad, label, _AlsoReadSize
-0xb7d6, label, Hawk_OriginalFunctionCode
+0xb7a7, label, _DataSize
+0xb7ad, label, _DMASize
+0xb7d6, label, _FunctionCodeBit7
 0xb7d7, label, _Arg6Bit7
-0xb803, label, Hawk_TranslatedFunctionCode2
+0xb803, label, Hawk_NumRetries2
+0xb807, label, Hawk_OperationCompleteFlag
 0xb863, label, HawkDevice_CheckStatus
 0xb88b, code, HawkDevice_Init
+0xb923, label, HawkLevel2Handler_DiskError
+0xb926, ptr
+0xb92d, label, HawkLevel2Handler_Done
 0xb93c, code, HawkLevel2_Handler
-0xb948, label, Hawk_TranslatedFunctionCode
+0xb948, label, Hawk_NumRetries
+0xb99a, label, Hawk_DoWrite
+0xb9cb, label, Hawk_DoFormatAndVerify
+0xb9e7, label, Hawk_DoCommand
+0xb9f6, label, Hawk_DoVerify
+0xba07, label, Hawk_CommandDone
+0xba0a, label, Hawk_WriteError
+0xba0f, ptr
+0xba11, label, Hawk_Recalibrate
+0xba1f, label, Hawk_WaitForSeek
+0xba37, label, BitFromNumber
+0xba42, label, Hawk_GetAndCheckStatus
+0xba55, label, Hawk_SetupDMA
+0xba64, label, Hawk_ReportDriveStatus
+0xba67, label, Hawk_Reg1Value
+0xba6d, label, Hawk_StatusValue
+0xba71, label, Hawk_DriveFault
+0xba73, label, Hawk_WaitForCompletion
+0xba8a, ptr
+0xbab1, ptr
+0xbab3, label, Hawk_CheckDMAEnd
+0xbac2, ptr
+0xbacd, label, Hawk_Retry
+0xbad5, label, Hawk_WriteProtected
+0xbadd, ptr
+0xbaf1, label, Hawk_PrintFltWarning
+0xbaf9, label, Hawk_PrintDeviceWarning
+0xbb1f, label, Hawk_SetTimeout5
+0xbb27, label, Hawk_PrintAttnWarning
+0xbb2c, label, DeviceNumToStr
+0xbb37, ptr
+0xbb3f, label, Hawk_SetResult
+0xbb4f, label, Hawk_PrintError
+0xbb5d, label, Hawk_ErrorStringPtr
+0xbb5d, >H
+0xbb65, ptr
+0xbb72, ptr
+0xbb77, ptr
+0xbb80, label, GetProcessByTableIndex
+0xbb8b, label, Hawk_PrintWarning
 0xbbde, pstring16
 0xbbe3, pstring16
 0xbbe9, pstring16
 0xbbed, pstring16
 0xbbf6, pstring16
 0xbc00, pstring16
+0xbc0a, label, FailString
 0xbc0a, pstring16
 0xbc21, pstring16
 0xbc2a, pstring16

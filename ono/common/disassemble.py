@@ -40,11 +40,6 @@ def disassemble_basicblock(mem, entry, isa):
 
             for i in range(1, length):
                 mem.info(pc + i).insn_offset = i
-                if mem.info(pc + i).label:
-                    # There could be a label inside an instruction, perhaps
-                    # from wecb fixups. This means there's an inline variable here,
-                    # let's put the label at the instruction itself
-                    mem.create_label(pc)
 
         next = match.next_pc(mem)
 

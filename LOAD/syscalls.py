@@ -12,6 +12,7 @@ Syscalls = {
     0x0e: ("OpenFile?", {"arg1" : "ptr"}),
     0x10: ("DoFileOp", None),
     0x12: ("12", None), # same as 06, but takes arg in A
+	0x14: ("CheckDiskStatus", None),
     0x16: ("16", {"arg1": "word", "out": "word"}),
     0x17: ("17", {"arg1": "word"}),
     #19
@@ -25,7 +26,7 @@ Syscalls = {
         "SectorNum" : "word",
         "Buffer" : "ptr",
         "arg6" : "byte"}),
-    0x4f: ("4f", {"arg1" : "word", "arg2" : "ptr" }),
+    0x4f: ("OpenFileInDir", {"arg1" : "word", "arg2" : "ptr" }),
     0x55: ("55", {"arg1" : "word" }),
     0x57: ("57", {"arg1" : "word", "arg2" : "word", "arg3" : "byte" }),
     0x59: ("59", None),

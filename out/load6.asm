@@ -4,33 +4,37 @@ SyscallVector:
 
 CurrentProcess:
 0103:    01 ea                  StartProcess
-0105:    01
-0106:    19
-0107:    01
-0108:    b6 '6'
+0105:    01 19                  L_0119
+
+ProcessTablePtr:
+0107:    01 b6                  ProcessTable
 
 DevicesPtr:
 0109:    01 ba                  Devices
 
 CrtInstancesPtr:
 010b:    01 e4                  CrtInstances
-010d:    04
-010e:    45
-010f:    88
-0110:    cc 'L'
-0111:    00
-0112:    13
-0113:    00
-0114:    00
-0115:    28
-0116:    01
-0117:    ea 'j'
-0118:    00
-0119:    00
-011a:    00
-011b:    00
-011c:    ff
+010d:    04                     ei
+010e:    45 88                  mov ZH, ZH
+0110:    cc                     ld BL, [Z]
+0111:    00                     HALT
+0112:    13 00                  bnn L_0114
+
+L_0114:
+0114:    00                     HALT
+0115:    28                     inc AL, #1
+0116:    01                     nop
+0117:    ea                     st BL, [X]
+0118:    00                     HALT
+
+L_0119:
+0119:    00                     HALT
+011a:    00                     HALT
+011b:    00                     HALT
+011c:    ff                     st B, [P]
 011d:    04 5b                  CenturionVI_String
+
+ProcessTableIdx:
 011f:    ff
 0120:    04
 0121:    43
@@ -163,16 +167,22 @@ R_01a1:
 01a7:    00
 01a8:    00
 01a9:    00
-01aa:    b6 '6'
-01ab:    56
+01aa:    b6 56                  CrtDeviceHooks
 01ac:    <null bytes>
 
+01ad:    00                     HALT
+01ae:    00                     HALT
+01af:    00                     HALT
+01b0:    00                     HALT
+01b1:    00                     HALT
+01b2:    00                     HALT
+01b3:    00                     HALT
+01b4:    00                     HALT
+01b5:    00                     HALT
 
-R_01b6:
-01b6:    01                     nop
-01b7:    ea                     st BL, [X]
-01b8:    00                     HALT
-01b9:    00                     HALT
+ProcessTable:
+01b6:    01 ea                  StartProcess
+01b8:    00 00                  (0x0)
 
 Devices:
 01ba:    02 46                  Device_CRT0
@@ -209,8 +219,8 @@ CrtInstances:
     ; The function is only called once during early init, and will initialize
     ; all the device instances, listed here.
 01e6:    02 46                  Device_CRT0	 ; The only CRT instance we have
-01e8:    00
-01e9:    00
+01e8:    00                     HALT
+01e9:    00                     HALT
 
 StartProcess:
 01ea:    01                     nop
@@ -220,13 +230,15 @@ StartProcess:
 
 StartProcess_File?:
 01ee:    04 45                  R_0445
-01f0:    04
+01f0:    04                     ei
 01f1:    13
 
 StartProcess_ErrorDevice:
 01f2:    02 46                  Device_CRT0
-01f4:    00
-01f5:    00
+01f4:    00                     HALT
+
+L_01f5:
+01f5:    00                     HALT
 
 StartProcess_TopOfMemory:
 01f6:    ef ff                  (0xefff)
@@ -310,18 +322,18 @@ Device_CRT0_number:
 0260:    00
 0261:    00 00                  L_0000	 ; Offset +0x1b - low-level character read routine, called in interrupt
 0263:    b6 56                  CrtDeviceHooks	 ; Offset +0x1d - customization table
-0265:    00
-0266:    00
-0267:    00
-0268:    00
-0269:    00
-026a:    00
-026b:    ff
-026c:    ff
-026d:    ff
-026e:    ff
-026f:    ff
-0270:    ff
+0265:    00                     HALT
+0266:    00                     HALT
+0267:    00                     HALT
+0268:    00                     HALT
+0269:    00                     HALT
+026a:    00                     HALT
+026b:    ff                     st B, [P]
+026c:    ff                     st B, [P]
+026d:    ff                     st B, [P]
+026e:    ff                     st B, [P]
+026f:    ff                     st B, [P]
+0270:    ff                     st B, [P]
 
 Device_DISK0:
 0271:    57                     (0x57)
@@ -737,9 +749,9 @@ R_043d:
 EarlyInitDevices:
     ; Null terminated list of Device objects to early-initialize at boot
 043e:    c2 1f                  CrtDeviceFunctions
-0440:    00
-0441:    00
-0442:    ff
+0440:    00                     HALT
+0441:    00                     HALT
+0442:    ff                     st B, [P]
 
 R_0443:
 0443:    ff                     st B, [P]
@@ -1502,7 +1514,7 @@ L_84b5:
 84b9:    95 a1                  ld A, [S++]
 84bb:    5e                     mov Z, A
 84bc:    9c                     ld A, [Z]
-84bd:    c1 01 1f               ld BL, [0x011f]
+84bd:    c1 01 1f               ld BL, [ProcessTableIdx|0x011f]
 84c0:    49                     sub BL, AL
 84c1:    15 03                  bnz L_84c6
 84c3:    79 b6 4c               call R_b64c
@@ -1539,8 +1551,8 @@ L_84e7:
 84e7:    22 00                  clr AH, #0
 84e9:    a3 79                  st AL, [L_8563+1|0x8564]
 84eb:    d0 a0 a0               ld B, 0xa0a0
-84ee:    f1 80 d8               st B, [R_80d8|0x80d8]
-84f1:    79 b5 54               call R_b554
+84ee:    f1 80 d8               st B, [R_80d0+8|0x80d8]
+84f1:    79 b5 54               call NumToStrReverse
 84f4:    80 da                  ld AL, 0xda
 84f6:    91 01 03               ld A, [CurrentProcess|0x0103]
 84f9:    5e                     mov Z, A
@@ -1552,13 +1564,13 @@ L_84e7:
 8507:    16 5a                  blt L_8563
 8509:    9d                     ld A, [S]
 850a:    79 cd 4d               call FormatHexWord
-850d:    80 e4                      dest = R_80e4
+850d:    80 e4                      dest = R_80d0+20
 850f:    95 a8 02               ld A, [S + 0x02]
 8512:    79 cd 4d               call FormatHexWord
-8515:    80 ea                      dest = R_80ea
+8515:    80 ea                      dest = R_80d0+26
 8517:    55 40                  mov A, X
 8519:    79 cd 4d               call FormatHexWord
-851c:    80 de                      dest = R_80de
+851c:    80 de                      dest = R_80d0+14
 851e:    90 80 d0               ld A, R_80d0|0x80d0
 8521:    b1 80 b7               st A, [R_80b7|0x80b7]
 8524:    d0 80 b1               ld B, R_80b1|0x80b1
@@ -1774,7 +1786,7 @@ L_8645:
 8645:    95 41                  ld A, [X++]
 8647:    15 17                  bnz L_8660
 8649:    a1 01 41               st AL, [Timeout|0x0141]
-864c:    61 01 07               ld X, [0x0107]
+864c:    61 01 07               ld X, [ProcessTablePtr|0x0107]
 864f:    6b f2                  st X, [R_8642+1|0x8643]
 8651:    82 01 5c               ld AL, @[0x015c]
 8654:    16 03                  blt R_8659
@@ -1835,12 +1847,10 @@ R_86a9:
 86a9:    f1 87 f6               st B, [R_87f6|0x87f6]
 86ac:    45 71                  mov AL, YL
 86ae:    29                     dec AL, #1
-
-L_86af:
 86af:    a0 00                  st AL, 0x00
 86b1:    2a                     clr AL, #0
 86b2:    a5 28 13               st AL, [B + 0x13]
-86b5:    61 01 07               ld X, [0x0107]
+86b5:    61 01 07               ld X, [ProcessTablePtr|0x0107]
 
 L_86b8:
 86b8:    95 41                  ld A, [X++]
@@ -1911,7 +1921,7 @@ R_8730:
 8739:    71 86 a9               jmp R_86a9
 
 R_873c:
-873c:    91 01 07               ld A, [0x0107]
+873c:    91 01 07               ld A, [ProcessTablePtr|0x0107]
 873f:    5c                     mov Y, A
 
 L_8740:
@@ -2016,8 +2026,6 @@ L_87e6:
 87ee:    a9                     st AL, [B]
 87ef:    90 80 c5               ld A, R_80c5|0x80c5
 87f2:    b1 80 b7               st A, [R_80b7|0x80b7]
-
-L_87f5:
 87f5:    90 00 00               ld A, 0x0000
 87f8:    d0 80 b1               ld B, R_80b1|0x80b1
 87fb:    79 8b 00               call R_8b00
@@ -2163,7 +2171,7 @@ SyscallTable:
 88ee:    ab 87                  Syscall_11
 88f0:    85 e2                  Syscall_12
 88f2:    ab f3                  Syscall_13
-88f4:    b5 c4                  Syscall_14
+88f4:    b5 c4                  Syscall_CheckDiskStatus
 88f6:    b3 ba                  Syscall_GetUptimeAB
 88f8:    ab 92                  Syscall_16
 88fa:    ab fc                  Syscall_17
@@ -2222,7 +2230,7 @@ SyscallTable:
 8964:    b5 9b                  Syscall_4c
 8966:    94 56                  Syscall_4d
 8968:    94 d5                  Syscall_4e
-896a:    8f ec                  Syscall_4f
+896a:    8f ec                  Syscall_OpenFileInDir
 896c:    90 40                  Syscall_50
 896e:    8f e1                  Syscall_51
 8970:    8c a3                  Syscall_52
@@ -2423,7 +2431,7 @@ LookupDeviceInstance:
 8aa6:    6d a2                  st X, [--S]
 8aa8:    61 01 03               ld X, [CurrentProcess|0x0103]
 8aab:    99                     ld A, [B]
-8aac:    b3 0f                  st A, [R_8abd|0x8abd]
+8aac:    b3 0f                  st A, [abort_code0A+1|0x8abd]
 8aae:    3a                     clr A, #0
 8aaf:    85 28 01               ld AL, [B + 0x01]	 ; 0x81
 8ab2:    17 12                  bp L_8ac6	 ; if B < 0x80
@@ -2517,7 +2525,7 @@ Syscall_DoFileOp:
 DoFileOpInner:
 8b33:    f5 a2                  st B, [--S]
 8b35:    99                     ld A, [B]
-8b36:    b1 8a bd               st A, [R_8abd|0x8abd]
+8b36:    b1 8a bd               st A, [abort_code0A+1|0x8abd]
 8b39:    79 8a a6               call LookupDeviceInstance
 8b3c:    f5 a2                  st B, [--S]
 8b3e:    d5 08 01               ld B, [A + 0x01]	 ; FileOp+01, device type?
@@ -2805,7 +2813,7 @@ Syscall_57:
 8d00:    73 16                  jmp L_8d18
 
 L_8d02:
-8d02:    d1 01 14               ld B, [0x0114]
+8d02:    d1 01 14               ld B, [L_0114|0x0114]
 8d05:    59                     sub B, A
 8d06:    18 e6                  bgt L_8cee
 8d08:    d1 01 18               ld B, [0x0118]
@@ -2923,8 +2931,6 @@ L_8da4:
 8da8:    b3 75                  st A, [R_8e1f|0x8e1f]	 ; FileHandle
 8daa:    b1 8e 7b               st A, [R_8e7b|0x8e7b]
 8dad:    e3 74                  st BL, [R_8e23|0x8e23]	 ; DiskNum
-
-L_8daf:
 8daf:    f0 00 00               st B, 0x0000
 8db2:    7e 63                  push {Y, Z}
 8db4:    91 01 03               ld A, [CurrentProcess|0x0103]
@@ -2935,7 +2941,7 @@ L_8daf:
 8dbf:    95 41                  ld A, [X++]	 ; DestinationBuffer
 
 L_8dc1:
-8dc1:    b1 8e 52               st A, [R_8e52|0x8e52]
+8dc1:    b1 8e 52               st A, [R_8e50+2|0x8e52]
 8dc4:    c5 48 02               ld BL, [X + 0x02]	 ; arg4
 8dc7:    15 2b                  bnz L_8df4
 8dc9:    55 ba 83 10            mov S, R_8310|0x8310	 ; Change stack; Overwrites strings at 8237
@@ -3040,8 +3046,6 @@ R_8e50:
 8e50:    51 3e 00 00            sub P, B, 0x0000	 ; patched with Destination Buffer
                                                 	 ; Um, this decoding is suspect, it should be using P
 8e54:    11 51                  bnc L_8ea7
-
-L_8e56:
 8e56:    51 3e 00 00            sub P, B, 0x0000
 8e5a:    17 02                  bp L_8e5e
 8e5c:    f3 fa                  st B, [R_8e58|0x8e58]
@@ -3065,7 +3069,7 @@ L_8e6d:
 
 L_8e6f:
 8e6f:    b5 a2                  st A, [--S]
-8e71:    91 aa 46               ld A, [R_aa46|0xaa46]
+8e71:    91 aa 46               ld A, [R_aa45+1|0xaa46]
 8e74:    d3 05                  ld B, [R_8e7b|0x8e7b]
 8e76:    59                     sub B, A
 8e77:    18 04                  bgt L_8e7d
@@ -3085,8 +3089,6 @@ L_8e88:
 8e88:    d5 a1                  ld B, [S++]
 8e8a:    80 ff                  ld AL, 0xff
 8e8c:    a1 01 3b               st AL, [0x013b]
-
-L_8e8f:
 8e8f:    80 00                  ld AL, 0x00
 8e91:    14 03                  bz L_8e96
 8e93:    71 8f 6d               jmp R_8f6d
@@ -3111,7 +3113,7 @@ L_8ea7:
 8ead:    73 c0                  jmp L_8e6f
 
 L_8eaf:
-8eaf:    93 a1                  ld A, [R_8e52|0x8e52]
+8eaf:    93 a1                  ld A, [R_8e50+2|0x8e52]
 8eb1:    b3 23                  st A, [R_8ed6|0x8ed6]
 8eb3:    46 12 0c 08 00 8e      addbig(1, 2) 0x08, [0x008e]
 8eb9:    d5                     unknown
@@ -3124,7 +3126,7 @@ L_8ebe:
 
 L_8ec5:
 8ec5:    93 0f                  ld A, [R_8ed6|0x8ed6]
-8ec7:    b3 89                  st A, [R_8e52|0x8e52]
+8ec7:    b3 89                  st A, [R_8e50+2|0x8e52]
 8ec9:    7e 21                  push {B}
 8ecb:    91 01 03               ld A, [CurrentProcess|0x0103]
 8ece:    66 59                  jsys Syscall_59
@@ -3168,7 +3170,7 @@ R_8f01:
 8f09:    b3 4c                  st A, [0x8f57]
 8f0b:    d5 41                  ld B, [X++]
 8f0d:    8d                     ld AL, [S]
-8f0e:    66 4f                  jsys Syscall_4f
+8f0e:    66 4f                  jsys Syscall_OpenFileInDir
 8f10:    00 00                      arg1 = (0x0)
 
 R_8f12:
@@ -3200,7 +3202,7 @@ L_8f33:
 8f39:    c5 a1                  ld BL, [S++]
 8f3b:    e1 8e 23               st BL, [R_8e23|0x8e23]
 8f3e:    95 68 0c               ld A, [Y + 0x0c]
-8f41:    b1 8e 52               st A, [R_8e52|0x8e52]
+8f41:    b1 8e 52               st A, [R_8e50+2|0x8e52]
 8f44:    d5 41                  ld B, [X++]
 8f46:    f1 8e 6b               st B, [R_8e6b|0x8e6b]
 8f49:    f1 8e 58               st B, [R_8e58|0x8e58]
@@ -3254,7 +3256,7 @@ Syscall_OpenFile?:
 8f95:    3c                     srl A, #1
 8f96:    79 83 a7               call CheckProcessPermission
 8f99:    3a                     clr A, #0
-8f9a:    a4 7d                  st AL, [R_9289 (via 0x9018+1)]
+8f9a:    a4 7d                  st AL, [L_9288+1 (via 0x9018+1)]
 8f9c:    5d                     mov B, A
 8f9d:    71 90 65               jmp R_9065
 
@@ -3264,8 +3266,8 @@ Syscall_54:
 8fa4:    7c 6d                  call LockMutex? (via 0x9012+1)
 8fa6:    3c                     srl A, #1
 8fa7:    3a                     clr A, #0
-8fa8:    a4 6f                  st AL, [R_9289 (via 0x9018+1)]
-8faa:    b1 92 57               st A, [R_9257|0x9257]
+8fa8:    a4 6f                  st AL, [L_9288+1 (via 0x9018+1)]
+8faa:    b1 92 57               st A, [R_9256+1|0x9257]
 8fad:    39                     dec A, #1
 8fae:    b1 91 78               st A, [R_9178|0x9178]
 8fb1:    c0 0f                  ld BL, 0x0f
@@ -3273,7 +3275,7 @@ Syscall_54:
 8fb6:    38                     inc A, #1
 8fb7:    b1 93 a5               st A, [R_93a5|0x93a5]
 8fba:    b1 91 03               st A, [R_9103|0x9103]
-8fbd:    b1 92 00               st A, [R_9200|0x9200]
+8fbd:    b1 92 00               st A, [L_91ff+1|0x9200]
 8fc0:    32 20                  clr B, #0
 8fc2:    85 a1                  ld AL, [S++]
 8fc4:    17 02                  bp L_8fc8
@@ -3282,9 +3284,9 @@ Syscall_54:
 
 L_8fc8:
 8fc8:    a1 92 4c               st AL, [R_924c|0x924c]
-8fcb:    e1 92 7a               st BL, [R_927a|0x927a]
+8fcb:    e1 92 7a               st BL, [L_9279+1|0x927a]
 8fce:    d5 a1                  ld B, [S++]
-8fd0:    f1 91 bb               st B, [R_91bb|0x91bb]
+8fd0:    f1 91 bb               st B, [L_91ba+1|0x91bb]
 8fd3:    d6 67 92 d6            st Y, [R_92d6|0x92d6]
 8fd7:    d6 89 92 da            st Z, [R_92da|0x92da]
 8fdb:    79 cd a8               call FindDiskDevice
@@ -3298,7 +3300,7 @@ Syscall_51:
 8fe8:    95 41                  ld A, [X++]
 8fea:    73 08                  jmp L_8ff4
 
-Syscall_4f:
+Syscall_OpenFileInDir:
 8fec:    f5 a2                  st B, [--S]
 8fee:    a5 a2                  st AL, [--S]
 8ff0:    7c 21                  call LockMutex? (via 0x9012+1)
@@ -3306,10 +3308,10 @@ Syscall_4f:
 8ff3:    3a                     clr A, #0
 
 L_8ff4:
-8ff4:    b4 70                  st A, [R_9257 (via R_9065+1)]
+8ff4:    b4 70                  st A, [R_9256+1 (via R_9065+1)]
 8ff6:    7c 9f                  call CheckProcessPermission (via 0x8f96+1)
 8ff8:    32 20                  clr B, #0
-8ffa:    e4 1d                  st BL, [R_9289 (via 0x9018+1)]
+8ffa:    e4 1d                  st BL, [L_9288+1 (via 0x9018+1)]
 8ffc:    95 41                  ld A, [X++]
 8ffe:    73 68                  jmp L_9068
 
@@ -3320,7 +3322,7 @@ Syscall_64:
 9006:    3c                     srl A, #1
 9007:    d5 41                  ld B, [X++]	 ; Filename
 9009:    3a                     clr A, #0
-900a:    a4 0d                  st AL, [R_9289 (via 0x9018+1)]	 ; R_9289|0x9289
+900a:    a4 0d                  st AL, [L_9288+1 (via 0x9018+1)]	 ; R_9289|0x9289
 900c:    73 22                  jmp L_9030
 
 Syscall_65:
@@ -3329,7 +3331,7 @@ Syscall_65:
 9012:    79 85 b9               call LockMutex?
 9015:    3c                         arg1 = (0x3c)
 9016:    85 a1                  ld AL, [S++]
-9018:    a1 92 89               st AL, [R_9289|0x9289]
+9018:    a1 92 89               st AL, [L_9288+1|0x9289]
 901b:    dd                     ld B, [S]
 901c:    95 28 06               ld A, [B + 0x06]
 901f:    ba                     st A, [X]
@@ -3343,7 +3345,7 @@ Syscall_65:
 L_9030:
 9030:    51 50 80 00            sub A, X, 0x8000
 9034:    10 18                  bc L_904e
-9036:    84 e1                  ld AL, [R_9289 (via 0x9018+1)]	 ; R_9289|0x9289
+9036:    84 e1                  ld AL, [L_9288+1 (via 0x9018+1)]	 ; R_9289|0x9289
 9038:    14 11                  bz L_904b
 903a:    9a                     ld A, [X]
 903b:    79 b2 d1               call AssertIsSystemPtr
@@ -3356,7 +3358,7 @@ Syscall_50:
 9046:    3c                     srl A, #1
 9047:    3a                     clr A, #0
 9048:    5d                     mov B, A
-9049:    a4 ce                  st AL, [R_9289 (via 0x9018+1)]
+9049:    a4 ce                  st AL, [L_9288+1 (via 0x9018+1)]
 
 L_904b:
 904b:    79 83 a7               call CheckProcessPermission
@@ -3375,7 +3377,7 @@ L_904e:
 9064:    3a                     clr A, #0
 
 R_9065:
-9065:    b1 92 57               st A, [R_9257|0x9257]
+9065:    b1 92 57               st A, [R_9256+1|0x9257]
 
 L_9068:
 9068:    31 20                  dec B, #1
@@ -3413,7 +3415,7 @@ L_9068:
 L_908f:
 908f:    f1 93 a5               st B, [R_93a5|0x93a5]
 9092:    b3 6f                  st A, [R_9103|0x9103]
-9094:    b1 92 00               st A, [R_9200|0x9200]
+9094:    b1 92 00               st A, [L_91ff+1|0x9200]
 9097:    22 30                  clr BL, #0
 9099:    85 a1                  ld AL, [S++]
 909b:    17 02                  bp L_909f
@@ -3422,9 +3424,9 @@ L_908f:
 
 L_909f:
 909f:    a1 92 4c               st AL, [R_924c|0x924c]
-90a2:    e1 92 7a               st BL, [R_927a|0x927a]
+90a2:    e1 92 7a               st BL, [L_9279+1|0x927a]
 90a5:    d5 a1                  ld B, [S++]
-90a7:    f1 91 bb               st B, [R_91bb|0x91bb]
+90a7:    f1 91 bb               st B, [L_91ba+1|0x91bb]
 90aa:    d6 67 92 d6            st Y, [R_92d6|0x92d6]
 90ae:    d6 89 92 da            st Z, [R_92da|0x92da]
 90b2:    79 cd a8               call FindDiskDevice
@@ -3443,7 +3445,7 @@ R_90bd:
 L_90c8:
 90c8:    b1 92 4f               st A, [R_924f|0x924f]
 90cb:    3a                     clr A, #0
-90cc:    b1 92 9d               st A, [R_929d|0x929d]
+90cc:    b1 92 9d               st A, [L_929c+1|0x929d]
 90cf:    b1 80 ae               st A, [R_80ae|0x80ae]
 90d2:    a1 80 b0               st AL, [R_80b0|0x80b0]
 90d5:    a1 91 67               st AL, [R_9167|0x9167]
@@ -3463,8 +3465,6 @@ L_90c8:
 90f8:    d1 92 4f               ld B, [R_924f|0x924f]
 90fb:    55 77 00 14            mov Y, [Y + 0x0014]
 90ff:    79 80 06               call R_8006
-
-L_9102:
 9102:    90 00 00               ld A, 0x0000
 9105:    14 05                  bz R_910c
 9107:    b1 92 48               st A, [R_9248|0x9248]
@@ -3509,8 +3509,6 @@ L_9142:
 9145:    44 10                  xor AH, AL
 9147:    d0 3c b1               ld B, 0x3cb1
 914a:    54 02                  xor B, A
-
-L_914c:
 914c:    90 00 00               ld A, 0x0000
 914f:    58                     add B, A
 9150:    90 10 00               ld A, 0x1000
@@ -3526,8 +3524,6 @@ R_915f:
 915f:    3a                     clr A, #0
 9160:    b1 92 4d               st A, [R_924d|0x924d]
 9163:    79 92 45               call R_9245
-
-L_9166:
 9166:    80 00                  ld AL, 0x00
 9168:    14 03                  bz L_916d
 916a:    71 93 2b               jmp R_932b
@@ -3535,16 +3531,12 @@ L_9166:
 L_916d:
 916d:    61 92 4f               ld X, [R_924f|0x924f]
 9170:    47 44 02 40 0d 92 53   memcpy 0x03, [X + 0x0d], [R_9253|0x9253]
-
-L_9177:
 9177:    90 00 00               ld A, 0x0000
 917a:    16 1f                  blt L_919b
 917c:    b1 92 4d               st A, [R_924d|0x924d]
 917f:    3a                     clr A, #0
 9180:    39                     dec A, #1
 9181:    b3 f5                  st A, [R_9178|0x9178]
-
-L_9183:
 9183:    90 00 00               ld A, 0x0000
 9186:    d1 92 4f               ld B, [R_924f|0x924f]
 9189:    58                     add B, A
@@ -3552,7 +3544,7 @@ L_9183:
 918c:    79 92 45               call R_9245
 918f:    9a                     ld A, [X]
 9190:    14 20                  bz L_91b2
-9192:    55 67 91 bb            mov Y, [R_91bb|0x91bb]
+9192:    55 67 91 bb            mov Y, [L_91ba+1|0x91bb]
 9196:    15 58                  bnz L_91f0
 9198:    71 92 56               jmp R_9256
 
@@ -3639,15 +3631,15 @@ L_91ff:
 920e:    34 03                  srl A, #4
 9210:    39                     dec A, #1
 9211:    58                     add B, A
-9212:    f1 92 9d               st B, [R_929d|0x929d]
+9212:    f1 92 9d               st B, [L_929c+1|0x929d]
 9215:    55 60                  mov A, Y
-9217:    b3 a2                  st A, [R_91bb|0x91bb]
+9217:    b3 a2                  st A, [L_91ba+1|0x91bb]
 9219:    91 93 a5               ld A, [R_93a5|0x93a5]
 921c:    b5 a2                  st A, [--S]
 921e:    79 93 6b               call R_936b
 9221:    91 93 a5               ld A, [R_93a5|0x93a5]
 9224:    b3 22                  st A, [R_9248|0x9248]
-9226:    b3 d8                  st A, [R_9200|0x9200]
+9226:    b3 d8                  st A, [L_91ff+1|0x9200]
 9228:    95 a1                  ld A, [S++]
 922a:    b1 93 a5               st A, [R_93a5|0x93a5]
 922d:    71 91 5f               jmp R_915f
@@ -3745,7 +3737,7 @@ R_929f:
 92a4:    15 11                  bnz L_92b7
 
 L_92a6:
-92a6:    91 92 00               ld A, [R_9200|0x9200]
+92a6:    91 92 00               ld A, [L_91ff+1|0x9200]
 92a9:    14 0c                  bz L_92b7
 92ab:    d1 93 a5               ld B, [R_93a5|0x93a5]
 92ae:    59                     sub B, A
@@ -3766,7 +3758,7 @@ L_92bf:
 92bf:    3a                     clr A, #0
 92c0:    39                     dec A, #1
 92c1:    a1 01 3c               st AL, [0x013c]
-92c4:    d3 91                  ld B, [R_9257|0x9257]
+92c4:    d3 91                  ld B, [R_9256+1|0x9257]
 92c6:    14 07                  bz L_92cf
 92c8:    30 20                  inc B, #1
 92ca:    14 03                  bz L_92cf
@@ -3774,14 +3766,8 @@ L_92bf:
 
 L_92cf:
 92cf:    d5 a1                  ld B, [S++]
-
-L_92d1:
 92d1:    60 00 00               ld X, 0x0000
-
-L_92d4:
 92d4:    55 76 00 00            mov Y, 0x0000
-
-L_92d8:
 92d8:    55 98 00 00            mov Z, 0x0000
 92dc:    91 93 a5               ld A, [R_93a5|0x93a5]
 
@@ -3908,7 +3894,7 @@ L_93a7:
 93c3:    a5 41                  st AL, [X++]
 93c5:    80 00                  ld AL, 0x00
 93c7:    a5 41                  st AL, [X++]
-93c9:    91 92 9d               ld A, [R_929d|0x929d]
+93c9:    91 92 9d               ld A, [L_929c+1|0x929d]
 93cc:    b5 41                  st A, [X++]
 93ce:    3a                     clr A, #0
 93cf:    b5 41                  st A, [X++]
@@ -3957,7 +3943,7 @@ L_941c:
 941c:    d0 00 00               ld B, 0x0000
 941f:    51 42                  sub B, X
 9421:    14 1d                  bz L_9440
-9423:    d1 92 00               ld B, [R_9200|0x9200]
+9423:    d1 92 00               ld B, [L_91ff+1|0x9200]
 9426:    15 09                  bnz L_9431
 9428:    b5 41                  st A, [X++]
 942a:    c5 68 02               ld BL, [Y + 0x02]
@@ -3966,7 +3952,7 @@ L_941c:
 
 L_9431:
 9431:    95 68 01               ld A, [Y + 0x01]
-9434:    d1 92 00               ld B, [R_9200|0x9200]
+9434:    d1 92 00               ld B, [L_91ff+1|0x9200]
 9437:    79 cd 67               call R_cd67
 943a:    a5 41                  st AL, [X++]
 943c:    f5 41                  st B, [X++]
@@ -3978,8 +3964,6 @@ L_9440:
 9442:    b5 41                  st A, [X++]
 9444:    a5 41                  st AL, [X++]
 9446:    68 00 00               st X, 0x0000
-
-L_9449:
 9449:    71 00 00               jmp L_0000
 
 R_944c:
@@ -4513,8 +4497,8 @@ L_9765:
 9767:    49                     sub BL, AL
 9768:    15 0e                  bnz L_9778
 976a:    3a                     clr A, #0
-976b:    46 01 30 9a 47 97 a2   unkbig3(0, 1) [R_9a47|0x9a47], [R_97a2|0x97a2]
-9772:    30 10 97 a2            inc [R_97a2|0x97a2], #1
+976b:    46 01 30 9a 47 97 a2   unkbig3(0, 1) [R_9a46+1|0x9a47], [L_97a1+1|0x97a2]
+9772:    30 10 97 a2            inc [L_97a1+1|0x97a2], #1
 9776:    73 20                  jmp L_9798
 
 L_9778:
@@ -4533,7 +4517,7 @@ L_9783:
 9788:    c0 ba                  ld BL, 0xba
 978a:    49                     sub BL, AL
 978b:    10 b0                  bc R_973d
-978d:    31 10 97 a2            dec [R_97a2|0x97a2], #1
+978d:    31 10 97 a2            dec [L_97a1+1|0x97a2], #1
 9791:    14 0e                  bz L_97a1
 9793:    cc                     ld BL, [Z]
 9794:    14 a7                  bz R_973d
@@ -4557,17 +4541,11 @@ L_97a1:
 L_97aa:
 97aa:    90 97 e0               ld A, R_97e0|0x97e0
 97ad:    51 80                  sub A, Z
-
-L_97af:
 97af:    c0 00                  ld BL, 0x00
 97b1:    14 15                  bz L_97c8
-
-L_97b3:
 97b3:    d0 00 00               ld B, 0x0000
 97b6:    46 83 82 97 e0 02      unkbig8(8, 3) [R_97e0|0x97e0], [B]
 97bc:    12 c3                  bn L_9781
-
-L_97be:
 97be:    80 00                  ld AL, 0x00
 97c0:    19 18                  ble L_97da
 97c2:    46 33 4a 22            unkbig4(3, 3) [B], [B]
@@ -4836,7 +4814,7 @@ L_994b:
 9952:    17                         abort_code = (0x17)
 
 R_9953:
-9953:    b1 9a dd               st A, [R_9add|0x9add]
+9953:    b1 9a dd               st A, [L_9adc+1|0x9add]
 9956:    b1 9b 08               st A, [R_9b08|0x9b08]
 9959:    3a                     clr A, #0
 995a:    b1 9b 6a               st A, [R_9b6a|0x9b6a]
@@ -5004,8 +4982,6 @@ L_9a3d:
 
 R_9a40:
 9a40:    c0 01                  ld BL, 0x01
-
-L_9a42:
 9a42:    e0 00                  st BL, 0x00
 
 R_9a44:
@@ -5020,8 +4996,6 @@ R_9a48:
 9a4b:    f5 a2                  st B, [--S]
 9a4d:    b5 a2                  st A, [--S]
 9a4f:    39                     dec A, #1
-
-L_9a50:
 9a50:    c0 00                  ld BL, 0x00
 9a52:    14 08                  bz L_9a5c
 9a54:    46 35 38 80 97 f0      unkbig3(3, 5) [Z], [R_97f0|0x97f0]
@@ -5056,7 +5030,7 @@ L_9a80:
 L_9a92:
 9a92:    47 9c 0f c0 97 e0      memset 0x10, 0xc0, [R_97e0|0x97e0]
 9a98:    90 00 0e               ld A, 0x000e
-9a9b:    c3 aa                  ld BL, [R_9a47|0x9a47]
+9a9b:    c3 aa                  ld BL, [R_9a46+1|0x9a47]
 9a9d:    19 0f                  ble L_9aae
 9a9f:    38                     inc A, #1
 9aa0:    49                     sub BL, AL
@@ -5117,15 +5091,13 @@ R_9af2:
 L_9af4:
 9af4:    3a                     clr A, #0
 9af5:    39                     dec A, #1
-9af6:    a1 9a 47               st AL, [R_9a47|0x9a47]
-9af9:    b1 97 a2               st A, [R_97a2|0x97a2]
+9af6:    a1 9a 47               st AL, [R_9a46+1|0x9a47]
+9af9:    b1 97 a2               st A, [L_97a1+1|0x97a2]
 9afc:    28                     inc AL, #1
 9afd:    a1 9a 43               st AL, [R_9a43|0x9a43]
 9b00:    28                     inc AL, #1
 9b01:    a1 97 b0               st AL, [R_97b0|0x97b0]
 9b04:    a1 9a 51               st AL, [R_9a51|0x9a51]
-
-L_9b07:
 9b07:    90 00 00               ld A, 0x0000
 9b0a:    5e                     mov Z, A
 9b0b:    85 81                  ld AL, [Z++]
@@ -5149,7 +5121,7 @@ L_9b07:
 9b2c:    4a                     and BL, AL
 
 L_9b2d:
-9b2d:    e1 9a 47               st BL, [R_9a47|0x9a47]
+9b2d:    e1 9a 47               st BL, [R_9a46+1|0x9a47]
 9b30:    80 08                  ld AL, 0x08
 9b32:    73 03                  jmp L_9b37
 
@@ -5188,8 +5160,6 @@ L_9b61:
 9b64:    14 ce                  bz L_9b34
 9b66:    d3 02                  ld B, [R_9b6a|0x9b6a]
 9b68:    58                     add B, A
-
-L_9b69:
 9b69:    f0 00 00               st B, 0x0000
 9b6c:    91 01 03               ld A, [CurrentProcess|0x0103]
 9b6f:    95 0c 19               ld A, @[A + 0x19]
@@ -6215,8 +6185,6 @@ a1c5:    95 88 16               ld A, [Z + 0x16]
 a1c8:    79 cd 67               call R_cd67
 a1cb:    45 10                  mov AH, AL
 a1cd:    85 a1                  ld AL, [S++]
-
-L_a1cf:
 a1cf:    66 ff                  jsys 0xff
 a1d1:    09                     ret
 
@@ -7131,8 +7099,6 @@ a7b4:    73 e1                  jmp L_a797
 
 R_a7b6:
 a7b6:    79 a6 41               call R_a641
-
-L_a7b9:
 a7b9:    24 79                  srl YL, #10
 a7bb:    a6                     unknown
 a7bc:    11 79                  bnc L_a837
@@ -7156,8 +7122,6 @@ a7e7:    09                     ret
 
 R_a7e8:
 a7e8:    79 a6 41               call R_a641
-
-L_a7eb:
 a7eb:    24 85                  srl ZH, #6
 a7ed:    68 31 15               st X, 0x3115
 a7f0:    15 7c                  bnz L_a86e
@@ -7441,15 +7405,13 @@ aa4e:    1e                         abort_code = (0x1e)
 L_aa4f:
 aa4f:    3d                     sll A, #1
 aa50:    38                     inc A, #1
-aa51:    d3 f3                  ld B, [R_aa46|0xaa46]
+aa51:    d3 f3                  ld B, [R_aa45+1|0xaa46]
 aa53:    58                     add B, A
 aa54:    99                     ld A, [B]
 aa55:    b5 a2                  st A, [--S]
 aa57:    79 85 b9               call LockMutex?
 aa5a:    3d                         arg1 = (0x3d)
 aa5b:    9d                     ld A, [S]
-
-L_aa5c:
 aa5c:    d0 00 00               ld B, 0x0000
 aa5f:    59                     sub B, A
 aa60:    15 03                  bnz L_aa65
@@ -7461,7 +7423,7 @@ aa68:    3b                         arg1 = (0x3b)
 aa69:    79 ab 11               call R_ab11
 aa6c:    d1 01 03               ld B, [CurrentProcess|0x0103]
 aa6f:    c5 28 01               ld BL, [B + 0x01]
-aa72:    e1 ab 12               st BL, [R_ab12|0xab12]
+aa72:    e1 ab 12               st BL, [R_ab11+1|0xab12]
 aa75:    d0 ad c6               ld B, R_adc6|0xadc6
 
 L_aa78:
@@ -7513,14 +7475,14 @@ aac5:    79 ac 83               call R_ac83
 aac8:    14 c5                  bz L_aa8f
 aaca:    2a                     clr AL, #0
 aacb:    29                     dec AL, #1
-aacc:    a3 44                  st AL, [R_ab12|0xab12]
+aacc:    a3 44                  st AL, [R_ab11+1|0xab12]
 aace:    79 86 12               call Yield
 aad1:    79 85 b9               call LockMutex?
 aad4:    3b                         arg1 = (0x3b)
 aad5:    7b 3a                  call R_ab11
 aad7:    d1 01 03               ld B, [CurrentProcess|0x0103]
 aada:    c5 28 01               ld BL, [B + 0x01]
-aadd:    e3 33                  st BL, [R_ab12|0xab12]
+aadd:    e3 33                  st BL, [R_ab11+1|0xab12]
 aadf:    73 ae                  jmp L_aa8f
 
 L_aae1:
@@ -7540,7 +7502,7 @@ aaf5:    7b 0a                  call L_ab01
 L_aaf7:
 aaf7:    2a                     clr AL, #0
 aaf8:    29                     dec AL, #1
-aaf9:    a3 17                  st AL, [R_ab12|0xab12]
+aaf9:    a3 17                  st AL, [R_ab11+1|0xab12]
 aafb:    7f 03                  pop {A, B}
 aafd:    60 00 00               ld X, 0x0000
 ab00:    0f                     rsys
@@ -7678,8 +7640,6 @@ abd2:    73 be                  jmp Syscall_16
 L_abd4:
 abd4:    5d                     mov B, A
 abd5:    93 ed                  ld A, [R_abc3+1|0xabc4]
-
-L_abd7:
 abd7:    b0 ad c6               st A, R_adc6|0xadc6
 abda:    98                     ld A, [A]
 abdb:    5b                     mov X, A
@@ -7862,8 +7822,6 @@ L_ad0c:
 ad0c:    d5 48 02               ld B, [X + 0x02]
 ad0f:    58                     add B, A
 ad10:    15 d2                  bnz L_ace4
-
-L_ad12:
 ad12:    68 00 00               st X, 0x0000
 ad15:    73 e3                  jmp L_acfa
 
@@ -7938,13 +7896,13 @@ ad87:    09                     ret
 R_ad88:
 ad88:    6d a2                  st X, [--S]
 ad8a:    a5 a2                  st AL, [--S]
-ad8c:    c1 ab 12               ld BL, [R_ab12|0xab12]
+ad8c:    c1 ab 12               ld BL, [R_ab11+1|0xab12]
 ad8f:    49                     sub BL, AL
 ad90:    e3 24                  st BL, [0xadb6]
 ad92:    15 05                  bnz L_ad99
 ad94:    2a                     clr AL, #0
 ad95:    29                     dec AL, #1
-ad96:    a1 ab 12               st AL, [R_ab12|0xab12]
+ad96:    a1 ab 12               st AL, [R_ab11+1|0xab12]
 
 L_ad99:
 ad99:    79 ab 11               call R_ab11
@@ -8039,29 +7997,27 @@ ae37:    35 02                  sll A, #3
 ae39:    a1 af 45               st AL, [R_af45|0xaf45]
 ae3c:    2e 30 af 45 ae 44      rpf1 [R_af45|0xaf45], [R_ae44|0xae44]
 ae42:    3a                     clr A, #0
-
-L_ae43:
 ae43:    80 00                  ld AL, 0x00
 ae45:    35 02                  sll A, #3
 ae47:    58                     add B, A
 ae48:    f1 af 42               st B, [Abort_EAD|0xaf42]
 
 L_ae4b:
-ae4b:    47 9c 01 c0 af 4b      memset 0x02, 0xc0, [AbortString_CD|0xaf4b]
-ae51:    47 9c 01 c0 af 53      memset 0x02, 0xc0, [AbortString_LVL|0xaf53]
-ae57:    47 9c 01 c0 af 5b      memset 0x02, 0xc0, [AbortString_MAP|0xaf5b]
-ae5d:    47 9c 03 c0 af 63      memset 0x04, 0xc0, [AbortString_IAD|0xaf63]
-ae63:    47 9c 05 c0 af 6d      memset 0x06, 0xc0, [AbortString_EAD|0xaf6d]
+ae4b:    47 9c 01 c0 af 4b      memset 0x02, 0xc0, [AbortString+5|0xaf4b]
+ae51:    47 9c 01 c0 af 53      memset 0x02, 0xc0, [AbortString+13|0xaf53]
+ae57:    47 9c 01 c0 af 5b      memset 0x02, 0xc0, [AbortString+21|0xaf5b]
+ae5d:    47 9c 03 c0 af 63      memset 0x04, 0xc0, [AbortString+29|0xaf63]
+ae63:    47 9c 05 c0 af 6d      memset 0x06, 0xc0, [AbortString+39|0xaf6d]
 ae69:    80 06                  ld AL, 0x06
-ae6b:    46 e2 90 af 6d af 42   baseconv(e, 2) [AbortString_EAD|0xaf6d], [Abort_EAD|0xaf42]
+ae6b:    46 e2 90 af 6d af 42   baseconv(e, 2) [AbortString+39|0xaf6d], [Abort_EAD|0xaf42]
 ae72:    80 04                  ld AL, 0x04
-ae74:    46 e1 90 af 63 af 40   baseconv(e, 1) [AbortString_IAD|0xaf63], [Abort_IAD|0xaf40]
+ae74:    46 e1 90 af 63 af 40   baseconv(e, 1) [AbortString+29|0xaf63], [Abort_IAD|0xaf40]
 ae7b:    80 02                  ld AL, 0x02
-ae7d:    46 e0 90 af 5b af 3f   baseconv(e, 0) [AbortString_MAP|0xaf5b], [Abort_MAP|0xaf3f]
+ae7d:    46 e0 90 af 5b af 3f   baseconv(e, 0) [AbortString+21|0xaf5b], [Abort_MAP|0xaf3f]
 ae84:    80 02                  ld AL, 0x02
-ae86:    46 80 90 af 53 af 3d   baseconv(8, 0) [AbortString_LVL|0xaf53], [Abort_LVL|0xaf3d]
+ae86:    46 80 90 af 53 af 3d   baseconv(8, 0) [AbortString+13|0xaf53], [Abort_LVL|0xaf3d]
 ae8d:    80 02                  ld AL, 0x02
-ae8f:    46 80 90 af 4b af 3e   baseconv(8, 0) [AbortString_CD|0xaf4b], [Abort_CD|0xaf3e]
+ae8f:    46 80 90 af 4b af 3e   baseconv(8, 0) [AbortString+5|0xaf4b], [Abort_CD|0xaf3e]
 ae96:    81 af 3d               ld AL, [Abort_LVL|0xaf3d]
 ae99:    15 05                  bnz L_aea0
 ae9b:    61 01 03               ld X, [CurrentProcess|0x0103]
@@ -8071,7 +8027,7 @@ L_aea0:
 aea0:    3a                     clr A, #0
 aea1:    81 01 3b               ld AL, [0x013b]
 aea4:    3d                     sll A, #1
-aea5:    d1 01 07               ld B, [0x0107]
+aea5:    d1 01 07               ld B, [ProcessTablePtr|0x0107]
 aea8:    58                     add B, A
 aea9:    65 20                  ld X, [B]
 aeab:    91 af 40               ld A, [Abort_IAD|0xaf40]
@@ -8334,8 +8290,6 @@ b047:    51 20                  sub A, B
 b049:    a3 3b                  st AL, [L_b085+1|0xb086]
 b04b:    16 14                  blt L_b061
 b04d:    55 26                  mov Y, B
-
-L_b04f:
 b04f:    90 00 00               ld A, 0x0000
 b052:    d5 08 0c               ld B, [A + 0x0c]
 b055:    78 32 08 00            mul B, B, 0x0800
@@ -8423,7 +8377,7 @@ b0d9:    e3 58                  st BL, [L_b132+1|0xb133]
 b0db:    c0 20                  ld BL, 0x20
 b0dd:    43 13                  or BL, AL
 b0df:    eb                     st BL, [Y]
-b0e0:    55 67 01 07            mov Y, [0x0107]
+b0e0:    55 67 01 07            mov Y, [ProcessTablePtr|0x0107]
 b0e4:    83 59                  ld AL, [0xb13f]
 b0e6:    14 03                  bz L_b0eb
 b0e8:    2a                     clr AL, #0
@@ -8578,10 +8532,10 @@ b1c6:    73 e1                  jmp L_b1a9
 
 L_b1c8:
 b1c8:    85 41                  ld AL, [X++]
-b1ca:    b3 e6                  st A, [R_b1b2|0xb1b2]
+b1ca:    b3 e6                  st A, [R_b1b1+1|0xb1b2]
 b1cc:    85 41                  ld AL, [X++]
-b1ce:    b3 db                  st A, [R_b1ab|0xb1ab]
-b1d0:    50 01 b1 b2            add A, A, [R_b1b2|0xb1b2]
+b1ce:    b3 db                  st A, [L_b1a9+2|0xb1ab]
+b1d0:    50 01 b1 b2            add A, A, [R_b1b1+1|0xb1b2]
 b1d4:    39                     dec A, #1
 b1d5:    5c                     mov Y, A
 b1d6:    79 8a a6               call LookupDeviceInstance
@@ -8635,7 +8589,7 @@ b223:    7b 46                  call R_b26b
 b225:    79 b2 cb               call R_b2cb
 b228:    5d                     mov B, A
 b229:    61 01 03               ld X, [CurrentProcess|0x0103]
-b22c:    50 45 b1 ab            add X, X, [R_b1ab|0xb1ab]
+b22c:    50 45 b1 ab            add X, X, [L_b1a9+2|0xb1ab]
 b230:    71 b1 b1               jmp R_b1b1
 
 L_b233:
@@ -8651,18 +8605,18 @@ b244:    4a                     and BL, AL
 b245:    15 1d                  bnz L_b264
 b247:    3a                     clr A, #0
 b248:    85 41                  ld AL, [X++]
-b24a:    b1 b1 b2               st A, [R_b1b2|0xb1b2]
+b24a:    b1 b1 b2               st A, [R_b1b1+1|0xb1b2]
 b24d:    39                     dec A, #1
 b24e:    18 b9                  bgt R_b209
 b250:    85 41                  ld AL, [X++]
 b252:    15 b5                  bnz R_b209
-b254:    b1 b1 ab               st A, [R_b1ab|0xb1ab]
+b254:    b1 b1 ab               st A, [L_b1a9+2|0xb1ab]
 
 L_b257:
 b257:    7b 72                  call R_b2cb
 b259:    5d                     mov B, A
 b25a:    60 00 00               ld X, 0x0000
-b25d:    50 45 b1 ab            add X, X, [R_b1ab|0xb1ab]
+b25d:    50 45 b1 ab            add X, X, [L_b1a9+2|0xb1ab]
 b261:    71 b1 b1               jmp R_b1b1
 
 L_b264:
@@ -8676,18 +8630,18 @@ b26c:    6b 58                  st X, [0xb2c6]
 b26e:    65 a1                  ld X, [S++]
 b270:    3a                     clr A, #0
 b271:    85 48 01               ld AL, [X + 0x01]
-b274:    b1 b1 ab               st A, [R_b1ab|0xb1ab]
+b274:    b1 b1 ab               st A, [L_b1a9+2|0xb1ab]
 b277:    78 10 00 08            mul A, A, 0x0008
 b27b:    b3 24                  st A, [0xb2a1]
 b27d:    f3 1f                  st B, [0xb29e]
 b27f:    85 41                  ld AL, [X++]
 b281:    14 45                  bz L_b2c8
-b283:    b1 b1 b2               st A, [R_b1b2|0xb1b2]
+b283:    b1 b1 b2               st A, [R_b1b1+1|0xb1b2]
 b286:    3e                     inc X
 b287:    6b 3a                  st X, [L_b2c2+1|0xb2c3]
 b289:    78 10 00 08            mul A, A, 0x0008
 b28d:    50 62                  add B, Y
-b28f:    50 23 b1 ab            add B, B, [R_b1ab|0xb1ab]
+b28f:    50 23 b1 ab            add B, B, [L_b1a9+2|0xb1ab]
 b293:    3a                     clr A, #0
 b294:    8b                     ld AL, [Y]
 b295:    50 60                  add A, Y
@@ -8706,7 +8660,7 @@ b2aa:    3d                     sll A, #1
 b2ab:    73 f8                  jmp L_b2a5
 
 L_b2ad:
-b2ad:    d1 b1 b2               ld B, [R_b1b2|0xb1b2]
+b2ad:    d1 b1 b2               ld B, [R_b1b1+1|0xb1b2]
 
 L_b2b0:
 b2b0:    60 00 10               ld X, 0x0010
@@ -9057,9 +9011,9 @@ b4ad:    15 0c                  bnz L_b4bb
 b4af:    3a                     clr A, #0
 b4b0:    b5 a8 02               st A, [S + 0x02]	 ; X before call
 b4b3:    5c                     mov Y, A
-b4b4:    91 86 2e               ld A, [UptimeDays|0x862e]
+b4b4:    91 86 2e               ld A, [Syscall_UptimeDays+1|0x862e]
 b4b7:    38                     inc A, #1
-b4b8:    b1 86 2e               st A, [UptimeDays|0x862e]
+b4b8:    b1 86 2e               st A, [Syscall_UptimeDays+1|0x862e]
 
 L_b4bb:
 b4bb:    65 a1                  ld X, [S++]
@@ -9090,7 +9044,7 @@ b4d5:    09                     ret
 
 L_b4d6:
 b4d6:    6b 1d                  st X, [L_b4f4+1|0xb4f5]
-b4d8:    61 01 07               ld X, [0x0107]
+b4d8:    61 01 07               ld X, [ProcessTablePtr|0x0107]
 
 L_b4db:
 b4db:    95 41                  ld A, [X++]
@@ -9113,10 +9067,11 @@ b4f7:    09                     ret
 PrintStringToErrorDevice:
     ; Is hardcoded to assume Error device is a mux port
 b4f8:    91 01 03               ld A, [CurrentProcess|0x0103]
-b4fb:    15 03                  bnz R_b500
-b4fd:    92 01 07               ld A, @[0x0107]
+b4fb:    15 03                  bnz PrintStringToErrorDeviceForProcess
+b4fd:    92 01 07               ld A, @[ProcessTablePtr|0x0107]	 ; Use default process number 0 if CurrentProcess isn't set
 
-R_b500:
+PrintStringToErrorDeviceForProcess:
+    ; A is process descriptor
 b500:    d5 41                  ld B, [X++]	 ; B = string
 b502:    7e 45                  push {X, Y, Z}
 b504:    65 21                  ld X, [B++]
@@ -9175,7 +9130,11 @@ b551:    0f                     rsys
 b552:    95
 b553:    41
 
-R_b554:
+NumToStrReverse:
+    ; This function takes a numeric value in AL and converts it to decimal ASCII,
+    ; arranging the result in the buffer, specified by a literal argument, in a
+    ; reverse order. This means that the given address points at the last character
+    ; (last digit) and the remaining ones will be arranged at negative offset
 b554:    d5 41                  ld B, [X++]
 
 L_b556:
@@ -9247,7 +9206,7 @@ b5c0:    00 00                      Buffer = L_0000
 b5c2:    00                         arg6 = (0x0)
 b5c3:    0f                     rsys
 
-Syscall_14:
+Syscall_CheckDiskStatus:
 b5c4:    79 b6 41               call R_b641
 b5c7:    0f                     rsys
 
@@ -9467,26 +9426,26 @@ b6c8:    b5 4b                  Syscall_2e
 HawkDevice_BlockIO:
     ; This is the actual main function, which does the job on a particular device
 b6ca:    7f 01                  pop {A}	 ; X before call
-b6cc:    b1 b8 5b               st A, [R_b85b|0xb85b]
+b6cc:    b1 b8 5b               st A, [L_b85a+1|0xb85b]
 b6cf:    85 a1                  ld AL, [S++]	 ; Arg6 & 0x7f - function code
-b6d1:    a1 b7 a4               st AL, [_Arg6LowBits|0xb7a4]
+b6d1:    a1 b7 a4               st AL, [_FunctionCode|0xb7a4]	 ; 1 - read, 2 - write
 b6d4:    85 a1                  ld AL, [S++]	 ; Arg6 & 0x80 - bit 7 of the function code
-b6d6:    a1 b7 d7               st AL, [_Arg6Bit7|0xb7d7]
+b6d6:    a1 b7 d7               st AL, [_FunctionCodeBit7+1|0xb7d7]
 b6d9:    d5 a1                  ld B, [S++]	 ; Buffer
 b6db:    f1 b7 ab               st B, [_DestBuffer|0xb7ab]
 b6de:    d5 a1                  ld B, [S++]	 ; SectorNum
 b6e0:    f1 b7 a5               st B, [_SectorNum|0xb7a5]
 b6e3:    85 a1                  ld AL, [S++]	 ; Y + 13
-b6e5:    a1 b7 a3               st AL, [_DevicePlus13|0xb7a3]
+b6e5:    a1 b7 a3               st AL, [_PhysicalUnit|0xb7a3]
 b6e8:    85 68 02               ld AL, [Y + 0x02]
 b6eb:    a1 b7 b3               st AL, [_DeviceNum|0xb7b3]
 b6ee:    95 a1                  ld A, [S++]	 ; FileHandle
 b6f0:    b1 b7 a1               st A, [_FileHandle|0xb7a1]
 b6f3:    95 68 0f               ld A, [Y + 0x0f]	 ; MMIOBase
 b6f6:    d7 28                  mov IL2(Z), A
-b6f8:    f6 31 0f               mov Device[A + 0x0f], BL
+b6f8:    f6 31 0f               mov Device[A + 0x0f], BL	 ; Write low byte of sector number to [IOBASE + 0x0f)
 b6fb:    95 a1                  ld A, [S++]	 ; Size
-b6fd:    b1 b7 a7               st A, [_ReadSize|0xb7a7]
+b6fd:    b1 b7 a7               st A, [_DataSize|0xb7a7]
 b700:    91 01 03               ld A, [CurrentProcess|0x0103]
 b703:    2e 0d fa 00 36         wpf 0xfa, [A + 0x36]	 ; Setup PageBase2
 b708:    2e 0c 7a 01 81         wpf 0x7a, [PageTableTwo|0x0181]
@@ -9507,8 +9466,8 @@ b727:    5a                     and B, A	 ; B = Sectors/Heads
 b728:    38                     inc A, #1
 b729:    59                     sub B, A
 b72a:    55 24                  mov X, B	 ; X = Remaining Sectors/Heads in Cyclnder
-b72c:    93 79                  ld A, [_ReadSize|0xb7a7]
-b72e:    b3 7d                  st A, [_AlsoReadSize|0xb7ad]
+b72c:    93 79                  ld A, [_DataSize|0xb7a7]	 ; Start with DMASize == DataSize
+b72e:    b3 7d                  st A, [_DMASize|0xb7ad]
 
 L_b730:
 b730:    93 77                  ld A, [_CurrentSectorNum|0xb7a9]
@@ -9520,42 +9479,42 @@ b73d:    38                     inc A, #1
 b73e:    b3 fb                  st A, [0xb73b]	 ; increment (PhysicalSector -1)
 b740:    51 20                  sub A, B
 b742:    15 70                  bnz L_b7b4
-b744:    f3 6b                  st B, [R_b7b1|0xb7b1]
-b746:    93 61                  ld A, [_CurrentSectorNum|0xb7a9]
+b744:    f3 6b                  st B, [_ExpectedPhysicalSector|0xb7b1]
+b746:    93 61                  ld A, [_CurrentSectorNum|0xb7a9]	 ; CurrentSector++
 b748:    38                     inc A, #1
 b749:    b3 5e                  st A, [_CurrentSectorNum|0xb7a9]
-b74b:    93 60                  ld A, [_AlsoReadSize|0xb7ad]
+b74b:    93 60                  ld A, [_DMASize|0xb7ad]	 ; DMASize -= 400
 b74d:    d0 01 90               ld B, 0x0190
 b750:    59                     sub B, A
-b751:    f3 5a                  st B, [_AlsoReadSize|0xb7ad]
-b753:    14 06                  bz L_b75b
-b755:    11 04                  bnc L_b75b
-b757:    3f                     dec X
-b758:    18 d6                  bgt L_b730
+b751:    f3 5a                  st B, [_DMASize|0xb7ad]
+b753:    14 06                  bz L_b75b	 ; Stop if DMASize has reached 0
+b755:    11 04                  bnc L_b75b	 ; Or positive ? I don't understand...
+b757:    3f                     dec X	 ; SectorsInCylinder--
+b758:    18 d6                  bgt L_b730	 ; Repeat while (SectorsInCylinder > 0)
 
 L_b75a:
 b75a:    06                     sl
 
 L_b75b:
-b75b:    93 4a                  ld A, [_ReadSize|0xb7a7]
-b75d:    d3 4e                  ld B, [_AlsoReadSize|0xb7ad]
+b75b:    93 4a                  ld A, [_DataSize|0xb7a7]
+b75d:    d3 4e                  ld B, [_DMASize|0xb7ad]
 b75f:    10 02                  bc L_b763
 b761:    32 20                  clr B, #0
 
 L_b763:
 b763:    59                     sub B, A
-b764:    f3 47                  st B, [_AlsoReadSize|0xb7ad]
+b764:    f3 47                  st B, [_DMASize|0xb7ad]
 b766:    93 41                  ld A, [_CurrentSectorNum|0xb7a9]
 b768:    d3 3b                  ld B, [_SectorNum|0xb7a5]
 b76a:    59                     sub B, A
-b76b:    f3 42                  st B, [R_b7af|0xb7af]
+b76b:    f3 42                  st B, [_RemainingSectorNum|0xb7af]
 b76d:    93 36                  ld A, [_SectorNum|0xb7a5]
 b76f:    d3 30                  ld B, [_FileHandle|0xb7a1]
 b771:    79 cd 67               call R_cd67
 b774:    f3 33                  st B, [_CurrentSectorNum|0xb7a9]
 b776:    16 20                  blt L_b798	 ; Abort
 b778:    2a                     clr AL, #0
-b779:    a1 b8 08               st AL, [R_b808|0xb808]
+b779:    a1 b8 08               st AL, [Hawk_OperationCompleteFlag+1|0xb808]
 b77c:    95 68 11               ld A, [Y + 0x11]
 b77f:    35 03                  sll A, #4
 b781:    32 20                  clr B, #0
@@ -9565,9 +9524,9 @@ b78a:    58                     add B, A
 b78b:    30 21                  inc B, #2
 b78d:    55 20                  mov A, B
 b78f:    d3 18                  ld B, [_CurrentSectorNum|0xb7a9]
-b791:    50 23 b7 af            add B, B, [R_b7af|0xb7af]
+b791:    50 23 b7 af            add B, B, [_RemainingSectorNum|0xb7af]
 b795:    59                     sub B, A
-b796:    10 3e                  bc Hawk_OriginalFunctionCode
+b796:    10 3e                  bc _FunctionCodeBit7
 
 L_b798:
 b798:    93 0f                  ld A, [_CurrentSectorNum|0xb7a9]
@@ -9579,11 +9538,11 @@ _FileHandle:
 b7a1:    <null bytes>
 
 
-_DevicePlus13:
+_PhysicalUnit:
 b7a3:    <null bytes>
 
 
-_Arg6LowBits:
+_FunctionCode:
 b7a4:    <null bytes>
 
 
@@ -9591,7 +9550,7 @@ _SectorNum:
 b7a5:    <null bytes>
 
 
-_ReadSize:
+_DataSize:
 b7a7:    <null bytes>
 
 
@@ -9603,15 +9562,15 @@ _DestBuffer:
 b7ab:    00
 b7ac:    00
 
-_AlsoReadSize:
+_DMASize:
 b7ad:    00
 b7ae:    00
 
-R_b7af:
+_RemainingSectorNum:
 b7af:    00
 b7b0:    00
 
-R_b7b1:
+_ExpectedPhysicalSector:
 b7b1:    00
 b7b2:    00
 
@@ -9626,24 +9585,24 @@ b7ba:    59                     sub B, A
 b7bb:    15 9d                  bnz L_b75a
 b7bd:    90 00 00               ld A, 0x0000
 b7c0:    b3 e7                  st A, [_CurrentSectorNum|0xb7a9]
-b7c2:    b3 ed                  st A, [R_b7b1|0xb7b1]
-b7c4:    90 00 01               ld A, 0x0001
-b7c7:    b3 e6                  st A, [R_b7af|0xb7af]
-b7c9:    93 dc                  ld A, [_ReadSize|0xb7a7]
+b7c2:    b3 ed                  st A, [_ExpectedPhysicalSector|0xb7b1]
+b7c4:    90 00 01               ld A, 0x0001	 ; One sector remains to read/write
+b7c7:    b3 e6                  st A, [_RemainingSectorNum|0xb7af]
+b7c9:    93 dc                  ld A, [_DataSize|0xb7a7]
 b7cb:    d0 01 90               ld B, 0x0190
-b7ce:    59                     sub B, A
-b7cf:    11 05                  bnc Hawk_OriginalFunctionCode
-b7d1:    90 01 90               ld A, 0x0190
-b7d4:    b3 d7                  st A, [_AlsoReadSize|0xb7ad]
+b7ce:    59                     sub B, A	 ; B = A - B
+b7cf:    11 05                  bnc _FunctionCodeBit7
+b7d1:    90 01 90               ld A, 0x0190	 ; If _DataSize < 400 _DMASize = 400
+b7d4:    b3 d7                  st A, [_DMASize|0xb7ad]
 
-Hawk_OriginalFunctionCode:
-b7d6:    80 00                  ld AL, 0x00	 ; AL = function code
+_FunctionCodeBit7:
+b7d6:    80 00                  ld AL, 0x00	 ; AL = function code & 0x80
 b7d8:    15 02                  bnz L_b7dc
-b7da:    80 0d                  ld AL, 0x0d	 ; 0 gets substitute with 0x0d
+b7da:    80 0d                  ld AL, 0x0d	 ; 0 gets substitute with 13 (default retry count)
 
 L_b7dc:
-b7dc:    a1 b9 49               st AL, [R_b949|0xb949]	 ; Preserve the translated function code
-b7df:    a3 23                  st AL, [R_b804|0xb804]
+b7dc:    a1 b9 49               st AL, [Hawk_NumRetries+1|0xb949]	 ; Set up retry counters
+b7df:    a3 23                  st AL, [Hawk_NumRetries2+1|0xb804]
 b7e1:    90 b9 3c               ld A, HawkLevel2_Handler|0xb93c
 b7e4:    d7 2e                  mov IL2(P), A	 ; Install interrupt handler
 b7e6:    85 68 0f               ld AL, [Y + 0x0f]	 ; device_obj.IOBase
@@ -9658,26 +9617,25 @@ b7f6:    2f 06                  enable_dma	 ; Enable DMA
                                           	 ; At this point, DMA address and DMA count haven't been
                                           	 ; set (as far as I can tell). Does this mean that enabling
                                           	 ; DMA with 0 count instantly tiggeres the interrupt?
-b7f8:    e6 28                  mov A, IL2(Z)
-b7fa:    f6 11 0e               mov Device[A + 0x0e], AL
-b7fd:    f6 11 0c               mov Device[A + 0x0c], AL
+b7f8:    e6 28                  mov A, IL2(Z)	 ; Supply device_obj.IOBase to the interrupt handler in Z
+b7fa:    f6 11 0e               mov Device[A + 0x0e], AL	 ; Write lower part of the card address to the card itself.
+b7fd:    f6 11 0c               mov Device[A + 0x0c], AL	 ; Does this enable interrupts ?
 b800:    79 cc 80               call SetTimeout8
 
-Hawk_TranslatedFunctionCode2:
+Hawk_NumRetries2:
 b803:    c0 00                  ld BL, 0x00	 ; BL = function code
 b805:    16 19                  blt L_b820
 
-L_b807:
-    ; We will loop here until this inline variable becomes nonzero
+Hawk_OperationCompleteFlag:
 b807:    80 00                  ld AL, 0x00
-b809:    14 07                  bz L_b812
-b80b:    83 ca                  ld AL, [_Arg6Bit7|0xb7d7]	 ; AL = function code
+b809:    14 07                  bz L_b812	 ; :loop here until this inline variable becomes nonzero
+b80b:    83 ca                  ld AL, [_FunctionCodeBit7+1|0xb7d7]	 ; AL = function code
 b80d:    15 36                  bnz L_b845
-b80f:    71 bb 4f               jmp R_bb4f	 ; Function code 0 prints an error message
+b80f:    71 bb 4f               jmp Hawk_PrintError	 ; Function code 0 prints an error message
 
 L_b812:
 b812:    79 cc 89               call CheckTimeout
-b815:    14 ec                  bz Hawk_TranslatedFunctionCode2
+b815:    14 ec                  bz Hawk_NumRetries2
 b817:    3a                     clr A, #0
 b818:    83 99                  ld AL, [_DeviceNum|0xb7b3]
 b81a:    d3 8d                  ld B, [_CurrentSectorNum|0xb7a9]
@@ -9686,17 +9644,17 @@ b81e:    66 6b                  jsys Syscall_AbortAL
 
 L_b820:
 b820:    79 cc 97               call SetTimeout256
-b823:    93 8a                  ld A, [R_b7af|0xb7af]
+b823:    93 8a                  ld A, [_RemainingSectorNum|0xb7af]
 b825:    d1 b7 a5               ld B, [_SectorNum|0xb7a5]
 b828:    58                     add B, A
 b829:    f1 b7 a5               st B, [_SectorNum|0xb7a5]
-b82c:    91 b7 ad               ld A, [_AlsoReadSize|0xb7ad]
+b82c:    91 b7 ad               ld A, [_DMASize|0xb7ad]
 b82f:    d1 b7 ab               ld B, [_DestBuffer|0xb7ab]
 b832:    58                     add B, A
 b833:    f1 b7 ab               st B, [_DestBuffer|0xb7ab]
-b836:    d1 b7 a7               ld B, [_ReadSize|0xb7a7]
+b836:    d1 b7 a7               ld B, [_DataSize|0xb7a7]
 b839:    51 20                  sub A, B
-b83b:    b1 b7 a7               st A, [_ReadSize|0xb7a7]
+b83b:    b1 b7 a7               st A, [_DataSize|0xb7a7]
 b83e:    14 05                  bz L_b845
 b840:    11 03                  bnc L_b845
 b842:    71 b7 13               jmp R_b713
@@ -9704,25 +9662,25 @@ b842:    71 b7 13               jmp R_b713
 L_b845:
 b845:    79 cc 97               call SetTimeout256
 b848:    c0 ff                  ld BL, 0xff
-b84a:    e1 01 1f               st BL, [0x011f]
+b84a:    e1 01 1f               st BL, [ProcessTableIdx|0x011f]
 b84d:    65 a1                  ld X, [S++]
 b84f:    95 a1                  ld A, [S++]
 b851:    5c                     mov Y, A
 b852:    3a                     clr A, #0
-b853:    c3 b3                  ld BL, [R_b808|0xb808]
+b853:    c3 b3                  ld BL, [Hawk_OperationCompleteFlag+1|0xb808]
 b855:    14 03                  bz L_b85a
-b857:    91 ba 6e               ld A, [R_ba6e|0xba6e]
+b857:    91 ba 6e               ld A, [Hawk_StatusValue+1|0xba6e]
 
 L_b85a:
-b85a:    d0 00 00               ld B, 0x0000	 ; X
-b85d:    7e 21                  push {B}
-b85f:    d1 ba 68               ld B, [R_ba68|0xba68]
+b85a:    d0 00 00               ld B, 0x0000	 ; This was original X when we entered the function
+b85d:    7e 21                  push {B}	 ; Put it back on stack
+b85f:    d1 ba 68               ld B, [Hawk_Reg1Value+1|0xba68]
 b862:    09                     ret
 
 HawkDevice_CheckStatus:
 b863:    2a                     clr AL, #0
 b864:    29                     dec AL, #1
-b865:    a1 01 1f               st AL, [0x011f]
+b865:    a1 01 1f               st AL, [ProcessTableIdx|0x011f]
 b868:    d5 68 0f               ld B, [Y + 0x0f]	 ; IOBase
 b86b:    85 68 13               ld AL, [Y + 0x13]	 ; HW unit number
 b86e:    f6 13 00               mov Device[B + 0x00], AL	 ; Select unit
@@ -9735,8 +9693,8 @@ b87a:    09                     ret
 R_b87b:
 b87b:    2a                     clr AL, #0
 b87c:    29                     dec AL, #1
-b87d:    a4 e7                  st AL, [0x011f (via 0xb865+1)]
-b87f:    c1 b8 04               ld BL, [R_b804|0xb804]
+b87d:    a4 e7                  st AL, [ProcessTableIdx (via 0xb865+1)]
+b87f:    c1 b8 04               ld BL, [Hawk_NumRetries2+1|0xb804]
 b882:    16 06                  blt L_b88a
 b884:    95 68 0f               ld A, [Y + 0x0f]	 ; IOBase
 b887:    f6 31 0b               mov Device[A + 0x0b], BL	 ; Unknown register
@@ -9755,56 +9713,56 @@ b89f:    2f 28                  ld_isr B
 b8a1:    95 41                  ld A, [X++]
 b8a3:    5c                     mov Y, A
 b8a4:    b1 01 3f               st A, [ActiveDiskDevice|0x013f]
-b8a7:    95 68 0f               ld A, [Y + 0x0f]
-b8aa:    d7 28                  mov IL2(Z), A
-b8ac:    f6 11 0f               mov Device[A + 0x0f], AL
+b8a7:    95 68 0f               ld A, [Y + 0x0f]	 ; device_obj.IOBase
+b8aa:    d7 28                  mov IL2(Z), A	 ; Supply to the interrupt handler
+b8ac:    f6 11 0f               mov Device[A + 0x0f], AL	 ; Write low byte of the card address to [IOBASE + 0xf]
 b8af:    95 41                  ld A, [X++]
 b8b1:    b1 b7 a9               st A, [_CurrentSectorNum|0xb7a9]
 b8b4:    b1 b7 a5               st A, [_SectorNum|0xb7a5]
 b8b7:    95 41                  ld A, [X++]
-b8b9:    b1 b7 ad               st A, [_AlsoReadSize|0xb7ad]
-b8bc:    b1 b7 a7               st A, [_ReadSize|0xb7a7]
+b8b9:    b1 b7 ad               st A, [_DMASize|0xb7ad]
+b8bc:    b1 b7 a7               st A, [_DataSize|0xb7a7]
 b8bf:    78 10 01 90            mul A, A, 0x0190
 b8c3:    55 00                  mov A, A
 b8c5:    14 02                  bz L_b8c9
 b8c7:    30 20                  inc B, #1
 
 L_b8c9:
-b8c9:    f1 b7 af               st B, [R_b7af|0xb7af]
+b8c9:    f1 b7 af               st B, [_RemainingSectorNum|0xb7af]
 b8cc:    91 b7 a9               ld A, [_CurrentSectorNum|0xb7a9]
 b8cf:    39                     dec A, #1
 b8d0:    58                     add B, A
-b8d1:    f1 b7 b1               st B, [R_b7b1|0xb7b1]
+b8d1:    f1 b7 b1               st B, [_ExpectedPhysicalSector|0xb7b1]
 b8d4:    95 41                  ld A, [X++]
 b8d6:    b1 b7 ab               st A, [_DestBuffer|0xb7ab]
 b8d9:    85 68 02               ld AL, [Y + 0x02]
 b8dc:    a1 b7 b3               st AL, [_DeviceNum|0xb7b3]
 b8df:    85 68 13               ld AL, [Y + 0x13]
-b8e2:    a1 b7 a3               st AL, [_DevicePlus13|0xb7a3]
+b8e2:    a1 b7 a3               st AL, [_PhysicalUnit|0xb7a3]
 b8e5:    85 41                  ld AL, [X++]
 b8e7:    6b 30                  st X, [0xb919]
 b8e9:    20 12                  inc AL, #3
-b8eb:    a1 b7 a4               st AL, [_Arg6LowBits|0xb7a4]
+b8eb:    a1 b7 a4               st AL, [_FunctionCode|0xb7a4]
 b8ee:    21 12                  dec AL, #3
 b8f0:    15 05                  bnz L_b8f7
 b8f2:    32 01                  clr A, #1
-b8f4:    a1 b7 d7               st AL, [_Arg6Bit7|0xb7d7]
+b8f4:    a1 b7 d7               st AL, [_FunctionCodeBit7+1|0xb7d7]
 
 L_b8f7:
 b8f7:    3a                     clr A, #0
-b8f8:    a1 b8 08               st AL, [R_b808|0xb808]
+b8f8:    a1 b8 08               st AL, [Hawk_OperationCompleteFlag+1|0xb808]
 b8fb:    55 60                  mov A, Y
 b8fd:    b5 a2                  st A, [--S]
 b8ff:    b5 a2                  st A, [--S]
 b901:    90 b9 09               ld A, R_b909|0xb909
 b904:    b5 a2                  st A, [--S]
-b906:    71 b7 d6               jmp Hawk_OriginalFunctionCode
+b906:    71 b7 d6               jmp _FunctionCodeBit7
 
 R_b909:
 b909:    b5 a2                  st A, [--S]
 b90b:    52 10 a0 00            and A, A, 0xa000
 b90f:    14 03                  bz L_b914
-b911:    71 bb 4f               jmp R_bb4f
+b911:    71 bb 4f               jmp Hawk_PrintError
 
 L_b914:
 b914:    95 a1                  ld A, [S++]
@@ -9815,169 +9773,176 @@ b91c:    7f 45                  pop {X, Y, Z}
 b91e:    30 ba 00 02            inc [S + 0x0002], #11
 b922:    09                     ret
 
-L_b923:
-b923:    79 bb 3f               call R_bb3f
-b926:    bb                     st A, [Y]
+HawkLevel2Handler_DiskError:
+b923:    79 bb 3f               call Hawk_SetResult
+b926:    bb e3                  R_bbe3	 ; "DISK"
 
-L_b927:
-b927:    e3 80                  st BL, [0xb8a9]
-b929:    ff                     st B, [P]
-b92a:    a1 b8 04               st AL, [R_b804|0xb804]
+R_b928:
+b928:    80 ff                  ld AL, 0xff
+b92a:    a1 b8 04               st AL, [Hawk_NumRetries2+1|0xb804]
 
-R_b92d:
+HawkLevel2Handler_Done:
 b92d:    2a                     clr AL, #0
-b92e:    f6 19 03               mov Device[Z + 0x03], AL
-b931:    f6 19 0d               mov Device[Z + 0x0d], AL
-b934:    2f 07                  st_ A
-b936:    f6 19 0f               mov Device[Z + 0x0f], AL
+b92e:    f6 19 03               mov Device[Z + 0x03], AL	 ; Clear write enable mask
+b931:    f6 19 0d               mov Device[Z + 0x0d], AL	 ; Maybe disable interrupts ?
+b934:    2f 07                  disable_dma
+b936:    f6 19 0f               mov Device[Z + 0x0f], AL	 ; IRQ ACK ?
 b939:    0a                     reti
-b93a:    73 f1                  jmp R_b92d
+b93a:    73 f1                  jmp HawkLevel2Handler_Done	 ; Note once we've entered here, we'll only leave if someone else resets the IPL2 vector
 
 HawkLevel2_Handler:
-b93c:    f6 19 0f               mov Device[Z + 0x0f], AL
-b93f:    f6 19 0e               mov Device[Z + 0x0e], AL
+    ; Z = Hawk IOBase
+b93c:    f6 19 0f               mov Device[Z + 0x0f], AL	 ; IRQ ACK
+b93f:    f6 19 0e               mov Device[Z + 0x0e], AL	 ; This probably orders an interrupt on DMA completion
+                                                        	 ; It looks like the value isn't important, only the fact of write itself
 b942:    32 40                  clr X, #0
 b944:    90 bc 5c               ld A, FfcDeviceFunctions|0xbc5c
-b947:    5f                     mov S, A
+b947:    5f                     mov S, A	 ; Place the stack below FfcDeviceFunctions
 
-Hawk_TranslatedFunctionCode:
-b948:    80 00                  ld AL, 0x00
-b94a:    29                     dec AL, #1
-b94b:    a3 fc                  st AL, [R_b949|0xb949]
-b94d:    16 d4                  blt L_b923
-b94f:    81 b7 a3               ld AL, [_DevicePlus13|0xb7a3]
-b952:    f6 19 00               mov Device[Z + 0x00], AL
+Hawk_NumRetries:
+b948:    80 00                  ld AL, 0x00	 ; Variable name is temporary, it's more like retry count
+b94a:    29                     dec AL, #1	 ; Decrement it
+b94b:    a3 fc                  st AL, [Hawk_NumRetries+1|0xb949]
+b94d:    16 d4                  blt HawkLevel2Handler_DiskError	 ; If was zero, report an error
+b94f:    81 b7 a3               ld AL, [_PhysicalUnit|0xb7a3]
+b952:    f6 19 00               mov Device[Z + 0x00], AL	 ; Select unit
 b955:    91 b7 a9               ld A, [_CurrentSectorNum|0xb7a9]
-b958:    f6 09 01               mov Device[Z + 0x01], A
-b95b:    79 ba 55               call R_ba55
-b95e:    79 ba 42               call R_ba42
-b961:    d0 04 00               ld B, 0x0400
+b958:    f6 09 01               mov Device[Z + 0x01], A	 ; Set sector number
+b95b:    79 ba 55               call Hawk_SetupDMA	 ; Set DMA address and size
+b95e:    79 ba 42               call Hawk_GetAndCheckStatus
+b961:    d0 04 00               ld B, 0x0400	 ; Check for bit 10
 b964:    5a                     and B, A
-b965:    14 03                  bz L_b96a
+b965:    14 03                  bz L_b96a	 ; If set, need to recalibrate
 
 L_b967:
-b967:    71 ba 11               jmp R_ba11
+b967:    71 ba 11               jmp Hawk_Recalibrate
 
 L_b96a:
-b96a:    d0 00 20               ld B, 0x0020
+b96a:    d0 00 20               ld B, 0x0020	 ; Check status bit 5 - on cylinder
 b96d:    5a                     and B, A
-b96e:    15 03                  bnz L_b973
-b970:    79 ba 1f               call R_ba1f
+b96e:    15 03                  bnz L_b973	 ; If not set, wait for head to finish positioning
+b970:    79 ba 1f               call Hawk_WaitForSeek	 ; (assuming RTZ in progress)
 
 L_b973:
-b973:    80 02                  ld AL, 0x02
+b973:    80 02                  ld AL, 0x02	 ; Seek
 b975:    f6 19 08               mov Device[Z + 0x08], AL
-b978:    79 ba 1f               call R_ba1f
-b97b:    79 ba 42               call R_ba42
-b97e:    d0 04 00               ld B, 0x0400
+b978:    79 ba 1f               call Hawk_WaitForSeek
+b97b:    79 ba 42               call Hawk_GetAndCheckStatus	 ; Check status after Seek command
+b97e:    d0 04 00               ld B, 0x0400	 ; If bit 10 is set,
 b981:    5a                     and B, A
 b982:    15 e3                  bnz L_b967
 b984:    d0 00 20               ld B, 0x0020
 b987:    5a                     and B, A
 b988:    14 dd                  bz L_b967
-b98a:    81 b7 a4               ld AL, [_Arg6LowBits|0xb7a4]
-b98d:    14 78                  bz L_ba07
-b98f:    29                     dec AL, #1
-b990:    14 55                  bz L_b9e7
+b98a:    81 b7 a4               ld AL, [_FunctionCode|0xb7a4]	 ; Original function code
+b98d:    14 78                  bz Hawk_CommandDone	 ; 0 => seek
+b98f:    29                     dec AL, #1	 ; 1 => Multi sector read
+b990:    14 55                  bz Hawk_DoCommand
 b992:    29                     dec AL, #1
-b993:    14 05                  bz L_b99a
+b993:    14 05                  bz Hawk_DoWrite	 ; 2 => Multi sector write
 b995:    29                     dec AL, #1
-b996:    14 5e                  bz L_b9f6
-b998:    73 31                  jmp L_b9cb
+b996:    14 5e                  bz Hawk_DoVerify	 ; 3 => Verify
+b998:    73 31                  jmp Hawk_DoFormatAndVerify	 ; 4 => Format and verify
 
-L_b99a:
-b99a:    81 b7 a3               ld AL, [_DevicePlus13|0xb7a3]
-b99d:    79 ba 37               call R_ba37
-b9a0:    e0 00                  st BL, 0x00
-b9a2:    23 30                  not BL, #0
-b9a4:    f6 39 03               mov Device[Z + 0x03], BL
-b9a7:    79 ba 42               call R_ba42
-b9aa:    d0 00 40               ld B, 0x0040
+Hawk_DoWrite:
+    ; Check Write Enable logic.
+    ; According to Ken, the value in "write enable mask" register has to match the unit select.
+b99a:    81 b7 a3               ld AL, [_PhysicalUnit|0xb7a3]
+b99d:    79 ba 37               call BitFromNumber	 ; BL = 1 << unit
+b9a0:    e0 00                  st BL, 0x00	 ; Preserve BL
+b9a2:    23 30                  not BL, #0	 ; Invert BL, so that no match occurs
+b9a4:    f6 39 03               mov Device[Z + 0x03], BL	 ; Register 3 - write enable mask
+b9a7:    79 ba 42               call Hawk_GetAndCheckStatus
+b9aa:    d0 00 40               ld B, 0x0040	 ; Check bit 6 - WE
 b9ad:    5a                     and B, A
-b9ae:    15 5a                  bnz L_ba0a
-b9b0:    83 ef                  ld AL, [0xb9a1]
-b9b2:    f6 19 03               mov Device[Z + 0x03], AL
-b9b5:    79 ba 42               call R_ba42
-b9b8:    d0 00 40               ld B, 0x0040
+b9ae:    15 5a                  bnz Hawk_WriteError	 ; If set, it's an error
+b9b0:    83 ef                  ld AL, [0xb9a1]	 ; Restore 1 << unit in AL.
+b9b2:    f6 19 03               mov Device[Z + 0x03], AL	 ; Register 3 - write enable mask
+b9b5:    79 ba 42               call Hawk_GetAndCheckStatus
+b9b8:    d0 00 40               ld B, 0x0040	 ; Check bit 6 - WE
 b9bb:    5a                     and B, A
-b9bc:    14 4c                  bz L_ba0a
-b9be:    d0 00 80               ld B, 0x0080
+b9bc:    14 4c                  bz Hawk_WriteError	 ; Must be set this time
+b9be:    d0 00 80               ld B, 0x0080	 ; Bit 7 - write protect
 b9c1:    5a                     and B, A
 b9c2:    14 03                  bz L_b9c7
-b9c4:    71 ba d5               jmp R_bad5
+b9c4:    71 ba d5               jmp Hawk_WriteProtected
 
 L_b9c7:
-b9c7:    80 01                  ld AL, 0x01
-b9c9:    73 1c                  jmp L_b9e7
+b9c7:    80 01                  ld AL, 0x01	 ; Command 1 - multi sector write
+b9c9:    73 1c                  jmp Hawk_DoCommand
 
-L_b9cb:
-b9cb:    7b 75                  call R_ba42
-b9cd:    d0 00 80               ld B, 0x0080
+Hawk_DoFormatAndVerify:
+b9cb:    7b 75                  call Hawk_GetAndCheckStatus
+b9cd:    d0 00 80               ld B, 0x0080	 ; Bit 7 - write protected
 b9d0:    5a                     and B, A
-b9d1:    14 03                  bz L_b9d6
-b9d3:    71 ba d5               jmp R_bad5
+b9d1:    14 03                  bz L_b9d6	 ; If not, proceed
+b9d3:    71 ba d5               jmp Hawk_WriteProtected
 
 L_b9d6:
-b9d6:    7b 7d                  call R_ba55
-b9d8:    81 b7 a3               ld AL, [_DevicePlus13|0xb7a3]
-b9db:    7b 5a                  call R_ba37
-b9dd:    f6 39 03               mov Device[Z + 0x03], BL
-b9e0:    80 06                  ld AL, 0x06
-b9e2:    f6 19 08               mov Device[Z + 0x08], AL
-b9e5:    80 05                  ld AL, 0x05
+b9d6:    7b 7d                  call Hawk_SetupDMA
+b9d8:    81 b7 a3               ld AL, [_PhysicalUnit|0xb7a3]
+b9db:    7b 5a                  call BitFromNumber
+b9dd:    f6 39 03               mov Device[Z + 0x03], BL	 ; Set write mask
+b9e0:    80 06                  ld AL, 0x06	 ; Format is two bytes: 6 then 5
+b9e2:    f6 19 08               mov Device[Z + 0x08], AL	 ; Command 6
+b9e5:    80 05                  ld AL, 0x05	 ; Command 5
 
-L_b9e7:
+Hawk_DoCommand:
 b9e7:    f6 19 08               mov Device[Z + 0x08], AL
-b9ea:    79 ba 73               call R_ba73
-b9ed:    81 b7 a4               ld AL, [_Arg6LowBits|0xb7a4]
-b9f0:    29                     dec AL, #1
-b9f1:    14 14                  bz L_ba07
+b9ea:    79 ba 73               call Hawk_WaitForCompletion
+b9ed:    81 b7 a4               ld AL, [_FunctionCode|0xb7a4]	 ; Check the original function code
+b9f0:    29                     dec AL, #1	 ; If 1 and 2 (read ow write), we're done
+b9f1:    14 14                  bz Hawk_CommandDone
 b9f3:    29                     dec AL, #1
-b9f4:    15 11                  bnz L_ba07
+b9f4:    15 11                  bnz Hawk_CommandDone	 ; Code 4 will fall through here
 
-L_b9f6:
-b9f6:    7b 5d                  call R_ba55
-b9f8:    7b 48                  call R_ba42
+Hawk_DoVerify:
+b9f6:    7b 5d                  call Hawk_SetupDMA
+b9f8:    7b 48                  call Hawk_GetAndCheckStatus
 b9fa:    91 b7 a9               ld A, [_CurrentSectorNum|0xb7a9]
-b9fd:    f6 09 01               mov Device[Z + 0x01], A
+b9fd:    f6 09 01               mov Device[Z + 0x01], A	 ; Set sector number
 ba00:    80 04                  ld AL, 0x04
-ba02:    f6 19 08               mov Device[Z + 0x08], AL
-ba05:    7b 6c                  call R_ba73
+ba02:    f6 19 08               mov Device[Z + 0x08], AL	 ; Command 4 - format sector
+ba05:    7b 6c                  call Hawk_WaitForCompletion
 
-L_ba07:
+Hawk_CommandDone:
 ba07:    71 b9 28               jmp R_b928
 
-L_ba0a:
-ba0a:    7b 58                  call L_ba64
-ba0c:    79 bb 3f               call R_bb3f
-ba0f:    bb                     st A, [Y]
-ba10:    e9                     st BL, [B]
+Hawk_WriteError:
+ba0a:    7b 58                  call Hawk_ReportDriveStatus
+ba0c:    79 bb 3f               call Hawk_SetResult
+ba0f:    bb e9                  R_bbe9	 ; "WE"
 
-R_ba11:
-ba11:    7b 51                  call L_ba64
-ba13:    7b 2d                  call R_ba42
-ba15:    80 03                  ld AL, 0x03
-ba17:    f6 19 08               mov Device[Z + 0x08], AL
-ba1a:    7b 03                  call R_ba1f
-ba1c:    71 ba cd               jmp R_bacd
+Hawk_Recalibrate:
+ba11:    7b 51                  call Hawk_ReportDriveStatus
+ba13:    7b 2d                  call Hawk_GetAndCheckStatus	 ; Check for critical errors
+ba15:    80 03                  ld AL, 0x03	 ; Recalibrate
+ba17:    f6 19 08               mov Device[Z + 0x08], AL	 ; Write Hawk command
+ba1a:    7b 03                  call Hawk_WaitForSeek
+ba1c:    71 ba cd               jmp Hawk_Retry
 
-R_ba1f:
-ba1f:    55 46                  mov Y, X
-ba21:    65 a1                  ld X, [S++]
+Hawk_WaitForSeek:
+    ; This is called after issuing a seek or RTZ, and supposedly waits for
+    ; the drive to complete the seek.
+    ; It looks like drives have "seek done" signals, which are wired to 4 low bits
+    ; of the status register. One bit belongs to one physical drive (consisting of 2 units)
+ba1f:    55 46                  mov Y, X	 ; Y= return address
+ba21:    65 a1                  ld X, [S++]	 ; Restore X before the call
 
 L_ba23:
-ba23:    0a                     reti
-ba24:    f6 19 0f               mov Device[Z + 0x0f], AL
-ba27:    7b 19                  call R_ba42
-ba29:    81 b7 a3               ld AL, [_DevicePlus13|0xb7a3]
-ba2c:    2c                     srl AL, #1
-ba2d:    7b 08                  call R_ba37
-ba2f:    f6 08 04               mov A, Device[Z + 0x04]
-ba32:    4a                     and BL, AL
-ba33:    14 ee                  bz L_ba23
-ba35:    75 60                  jmp [Y]
+ba23:    0a                     reti	 ; Interrupt yields here
+ba24:    f6 19 0f               mov Device[Z + 0x0f], AL	 ; Another interrupt, ACK
+ba27:    7b 19                  call Hawk_GetAndCheckStatus
+ba29:    81 b7 a3               ld AL, [_PhysicalUnit|0xb7a3]
+ba2c:    2c                     srl AL, #1	 ; PysicalUnit / 2 - will this become PhysicalDrive ?
+ba2d:    7b 08                  call BitFromNumber	 ; BL = 1 << PhysicalDrive
+ba2f:    f6 08 04               mov A, Device[Z + 0x04]	 ; Status register
+ba32:    4a                     and BL, AL	 ; Check for the respective bit to become 1
+ba33:    14 ee                  bz L_ba23	 ; Loop if not
+ba35:    75 60                  jmp [Y]	 ; Return
 
-R_ba37:
+BitFromNumber:
+    ; This routine effectively does BL = 1 << AL
 ba37:    c0 01                  ld BL, 0x01
 ba39:    73 03                  jmp L_ba3e
 
@@ -9990,175 +9955,174 @@ ba3e:    29                     dec AL, #1
 ba3f:    17 fa                  bp L_ba3b
 ba41:    09                     ret
 
-R_ba42:
-ba42:    f6 08 04               mov A, Device[Z + 0x04]
-ba45:    d0 02 00               ld B, 0x0200
+Hawk_GetAndCheckStatus:
+    ; Reads Hawk status register and returns the value in A.
+    ; Critical conditions are checked and handled immediately
+ba42:    f6 08 04               mov A, Device[Z + 0x04]	 ; Read status register
+ba45:    d0 02 00               ld B, 0x0200	 ; Check bit 9 (drive fault)
 ba48:    5a                     and B, A
-ba49:    15 26                  bnz L_ba71
-ba4b:    d0 00 10               ld B, 0x0010
+ba49:    15 26                  bnz Hawk_DriveFault	 ; If yes, print "FLT XX", where XX - drive number
+ba4b:    d0 00 10               ld B, 0x0010	 ; Check bit 4 (drive ready)
 ba4e:    5a                     and B, A
-ba4f:    15 03                  bnz L_ba54
-ba51:    71 bb 27               jmp R_bb27
+ba4f:    15 03                  bnz L_ba54	 ; Return if ready is reported
+ba51:    71 bb 27               jmp Hawk_PrintAttnWarning	 ; If not ready, print "ATN XX", where XX - drive number
 
 L_ba54:
 ba54:    09                     ret
 
-R_ba55:
-ba55:    91 b7 ad               ld A, [_AlsoReadSize|0xb7ad]
+Hawk_SetupDMA:
+ba55:    91 b7 ad               ld A, [_DMASize|0xb7ad]	 ; Size for this DMA transaction
 ba58:    3b                     not A, #0
 ba59:    2f 02                  ld_dma_count A
-ba5b:    d1 b7 ab               ld B, [_DestBuffer|0xb7ab]
+ba5b:    d1 b7 ab               ld B, [_DestBuffer|0xb7ab]	 ; Data buffer
 ba5e:    2f 20                  ld_dma_addr B
 ba60:    59                     sub B, A
-ba61:    f3 51                  st B, [L_bab3+1|0xbab4]
+ba61:    f3 51                  st B, [Hawk_CheckDMAEnd+1|0xbab4]	 ; Expected dma_addr after completion
 ba63:    09                     ret
 
-L_ba64:
-ba64:    f6 28 01               mov B, Device[Z + 0x01]
+Hawk_ReportDriveStatus:
+    ; Read drive status and set variables for error reporting
+ba64:    f6 28 01               mov B, Device[Z + 0x01]	 ; Supposedly current sector
 
-L_ba67:
+Hawk_Reg1Value:
 ba67:    f0 00 00               st B, 0x0000
-ba6a:    f6 28 04               mov B, Device[Z + 0x04]
+ba6a:    f6 28 04               mov B, Device[Z + 0x04]	 ; Status register
 
-L_ba6d:
+Hawk_StatusValue:
 ba6d:    f0 00 00               st B, 0x0000
 ba70:    09                     ret
 
-L_ba71:
-ba71:    73 7e                  jmp L_baf1
+Hawk_DriveFault:
+ba71:    73 7e                  jmp Hawk_PrintFltWarning
 
-R_ba73:
-ba73:    55 46                  mov Y, X
-ba75:    65 a1                  ld X, [S++]
+Hawk_WaitForCompletion:
+    ; This routine waits for the drive operation to complete
+ba73:    55 46                  mov Y, X	 ; Y = return address
+ba75:    65 a1                  ld X, [S++]	 ; Restore X before the call
 
 L_ba77:
 ba77:    3a                     clr A, #0
 ba78:    d7 12                  mov IL1(B), A
-ba7a:    0a                     reti
-ba7b:    f6 19 0f               mov Device[Z + 0x0f], AL
-ba7e:    e6 12                  mov A, IL1(B)
+ba7a:    0a                     reti	 ; The interrupt yields control here
+ba7b:    f6 19 0f               mov Device[Z + 0x0f], AL	 ; Another interrupt, ACK
+ba7e:    e6 12                  mov A, IL1(B)	 ; Get status value from IL1 handler
 ba80:    5d                     mov B, A
 ba81:    14 09                  bz L_ba8c
-ba83:    7b df                  call L_ba64
-ba85:    b3 e7                  st A, [R_ba6e|0xba6e]
-ba87:    79 bb 3f               call R_bb3f
-ba8a:    bc                     st A, [Z]
-ba8b:    2a                     clr AL, #0
+ba83:    7b df                  call Hawk_ReportDriveStatus	 ; A is preserved
+ba85:    b3 e7                  st A, [Hawk_StatusValue+1|0xba6e]	 ; Overwrite status value with the one from IL1
+ba87:    79 bb 3f               call Hawk_SetResult
+ba8a:    bc 2a                  R_bc2a	 ; "DMA STAT"
 
 L_ba8c:
-ba8c:    7b b4                  call R_ba42
-ba8e:    d0 01 00               ld B, 0x0100
+ba8c:    7b b4                  call Hawk_GetAndCheckStatus
+ba8e:    d0 01 00               ld B, 0x0100	 ; Bit 8 - dma_busy
 ba91:    5a                     and B, A
-ba92:    15 e3                  bnz L_ba77
-ba94:    d0 f0 00               ld B, 0xf000
+ba92:    15 e3                  bnz L_ba77	 ; If yes, keep waiting
+ba94:    d0 f0 00               ld B, 0xf000	 ; Check for bits 12 - 15 (error bits)
 ba97:    5a                     and B, A
 ba98:    14 09                  bz L_baa3
-ba9a:    d0 20 00               ld B, 0x2000
+ba9a:    d0 20 00               ld B, 0x2000	 ; Check for seek error
 ba9d:    5a                     and B, A
 ba9e:    14 2b                  bz L_bacb
-baa0:    71 ba 11               jmp R_ba11
+baa0:    71 ba 11               jmp Hawk_Recalibrate	 ; If yes, go to recalibrate
 
 L_baa3:
-baa3:    f6 08 01               mov A, Device[Z + 0x01]
-baa6:    d1 b7 b1               ld B, [R_b7b1|0xb7b1]
-baa9:    59                     sub B, A
-baaa:    14 07                  bz L_bab3
-baac:    7b b6                  call L_ba64
-baae:    79 bb 3f               call R_bb3f
-bab1:    bc                     st A, [Z]
-bab2:    21
+baa3:    f6 08 01               mov A, Device[Z + 0x01]	 ; Current sector from the Hawk drive
+baa6:    d1 b7 b1               ld B, [_ExpectedPhysicalSector|0xb7b1]
+baa9:    59                     sub B, A	 ; Verify
+baaa:    14 07                  bz Hawk_CheckDMAEnd	 ; If mismatch, "DMA LAG" error will be printer
+baac:    7b b6                  call Hawk_ReportDriveStatus
+baae:    79 bb 3f               call Hawk_SetResult
+bab1:    bc 21                  R_bc21	 ; "DMA LAG"
 
-L_bab3:
-bab3:    90 00 00               ld A, 0x0000
-bab6:    2f 21                  st_dma_addr B
+Hawk_CheckDMAEnd:
+bab3:    90 00 00               ld A, 0x0000	 ; This is an inline variable
+bab6:    2f 21                  st_dma_addr B	 ; Verfy that the DMA has completed
 bab8:    58                     add B, A
 bab9:    2f 03                  st_dma_count A
 babb:    59                     sub B, A
-babc:    14 06                  bz L_bac4
+babc:    14 06                  bz L_bac4	 ; If not, "DMA ERR" is reported
 
 L_babe:
-babe:    7b a4                  call L_ba64
-bac0:    7b 7d                  call R_bb3f
-bac2:    bb                     st A, [Y]
-bac3:    de                     ld B, [C]
+babe:    7b a4                  call Hawk_ReportDriveStatus
+bac0:    7b 7d                  call Hawk_SetResult
+bac2:    bb de                  R_bbde	 ; "DMA"
 
 L_bac4:
 bac4:    38                     inc A, #1
 bac5:    18 f7                  bgt L_babe
-bac7:    16 02                  blt L_bacb
-bac9:    75 60                  jmp [Y]
+bac7:    16 02                  blt L_bacb	 ; Go there if there's more data for DMA
+bac9:    75 60                  jmp [Y]	 ; Return
 
 L_bacb:
-bacb:    7b 97                  call L_ba64
+bacb:    7b 97                  call Hawk_ReportDriveStatus
 
-R_bacd:
+Hawk_Retry:
 bacd:    f6 19 0b               mov Device[Z + 0x0b], AL
-bad0:    7b 4d                  call R_bb1f
+bad0:    7b 4d                  call Hawk_SetTimeout5
 bad2:    71 b9 3c               jmp HawkLevel2_Handler
 
-R_bad5:
-bad5:    7b 55                  call L_bb2c
-bad7:    b1 bb f2               st A, [R_bbf2|0xbbf2]
+Hawk_WriteProtected:
+bad5:    7b 55                  call DeviceNumToStr
+bad7:    b1 bb f2               st A, [R_bbed+5|0xbbf2]	 ; "WP xx" string
 
 L_bada:
-bada:    79 bb 8b               call R_bb8b
-badd:    bb                     st A, [Y]
-bade:    ed                     st BL, [S]
-badf:    d0 00 80               ld B, 0x0080
-bae2:    5a                     and B, A
+bada:    79 bb 8b               call Hawk_PrintWarning
+badd:    bb ed                  R_bbed	 ; "WP"
+badf:    d0 00 80               ld B, 0x0080	 ; A = Hawk status value, check "write protect" bit
+bae2:    5a                     and B, A	 ; Keep spinning until set
 bae3:    15 f5                  bnz L_bada
-bae5:    7b 38                  call R_bb1f
-bae7:    81 b9 49               ld AL, [R_b949|0xb949]
-baea:    28                     inc AL, #1
-baeb:    a1 b9 49               st AL, [R_b949|0xb949]
-baee:    71 b9 3c               jmp HawkLevel2_Handler
+bae5:    7b 38                  call Hawk_SetTimeout5
+bae7:    81 b9 49               ld AL, [Hawk_NumRetries+1|0xb949]
+baea:    28                     inc AL, #1	 ; Increment retry count, this actually brings it to original value
+baeb:    a1 b9 49               st AL, [Hawk_NumRetries+1|0xb949]
+baee:    71 b9 3c               jmp HawkLevel2_Handler	 ; Go to the beginning
 
-L_baf1:
+Hawk_PrintFltWarning:
 baf1:    80 03                  ld AL, 0x03
 baf3:    f6 19 08               mov Device[Z + 0x08], AL
-baf6:    90 bb f6               ld A, R_bbf6|0xbbf6
+baf6:    90 bb f6               ld A, R_bbf6|0xbbf6	 ; "FLT NN"
 
-L_baf9:
-baf9:    b3 0a                  st A, [0xbb05]
-bafb:    7b 2f                  call L_bb2c
+Hawk_PrintDeviceWarning:
+baf9:    b3 0a                  st A, [0xbb05]	 ; Store the string as Hawk_PrintWarning argument
+bafb:    7b 2f                  call DeviceNumToStr
 bafd:    d3 06                  ld B, [0xbb05]
-baff:    b5 28 06               st A, [B + 0x06]
+baff:    b5 28 06               st A, [B + 0x06]	 ; Insert device number
 
 L_bb02:
-bb02:    79 bb 8b               call R_bb8b
+bb02:    79 bb 8b               call Hawk_PrintWarning
 bb05:    00                     HALT
 bb06:    00                     HALT
-bb07:    d0 02 00               ld B, 0x0200
+bb07:    d0 02 00               ld B, 0x0200	 ; Check drive fault bit
 bb0a:    5a                     and B, A
-bb0b:    15 f5                  bnz L_bb02
-bb0d:    d0 00 10               ld B, 0x0010
+bb0b:    15 f5                  bnz L_bb02	 ; Keep spinning until set
+bb0d:    d0 00 10               ld B, 0x0010	 ; Check dma_busy
 bb10:    5a                     and B, A
-bb11:    14 ef                  bz L_bb02
-bb13:    7b 0a                  call R_bb1f
-bb15:    81 b9 49               ld AL, [R_b949|0xb949]
-bb18:    28                     inc AL, #1
-bb19:    a1 b9 49               st AL, [R_b949|0xb949]
+bb11:    14 ef                  bz L_bb02	 ; Keep spinning until not set, wait for DMA to resume
+bb13:    7b 0a                  call Hawk_SetTimeout5
+bb15:    81 b9 49               ld AL, [Hawk_NumRetries+1|0xb949]
+bb18:    28                     inc AL, #1	 ; Increment retry count, this brings it back to the original value
+bb19:    a1 b9 49               st AL, [Hawk_NumRetries+1|0xb949]
 bb1c:    71 b9 3c               jmp HawkLevel2_Handler
 
-R_bb1f:
-bb1f:    7b 5f                  call L_bb80
+Hawk_SetTimeout5:
+bb1f:    7b 5f                  call GetProcessByTableIndex
 bb21:    32 25                  clr B, #5
-bb23:    f5 08 32               st B, [A + 0x32]
+bb23:    f5 08 32               st B, [A + 0x32]	 ; Process.timeout
 bb26:    09                     ret
 
-R_bb27:
-bb27:    90 bc 00               ld A, R_bc00|0xbc00
-bb2a:    73 cd                  jmp L_baf9
+Hawk_PrintAttnWarning:
+bb27:    90 bc 00               ld A, R_bc00|0xbc00	 ; "ATN NN" string
+bb2a:    73 cd                  jmp Hawk_PrintDeviceWarning
 
-L_bb2c:
-bb2c:    80 a0                  ld AL, 0xa0
+DeviceNumToStr:
+bb2c:    80 a0                  ld AL, 0xa0	 ; Preset the second digit to space
 bb2e:    a3 0d                  st AL, [0xbb3d]
 bb30:    3a                     clr A, #0
 bb31:    81 b7 b3               ld AL, [_DeviceNum|0xb7b3]
-bb34:    79 b5 54               call R_b554
-bb37:    bb                     st A, [Y]
-bb38:    3e                     inc X
-bb39:    93 02                  ld A, [0xbb3d]
+bb34:    79 b5 54               call NumToStrReverse
+bb37:    bb 3e                  R_bb3e	 ; Convert in reverse direction, end in 0xbb3e
+bb39:    93 02                  ld A, [0xbb3d]	 ; Return both digits
 bb3b:    09                     ret
 bb3c:    00
 bb3d:    a0 ' '
@@ -10166,21 +10130,23 @@ bb3d:    a0 ' '
 R_bb3e:
 bb3e:    a0 ' '
 
-R_bb3f:
-bb3f:    95 41                  ld A, [X++]
-bb41:    b3 1a                  st A, [0xbb5d]
-bb43:    80 01                  ld AL, 0x01
-bb45:    a1 b8 08               st AL, [R_b808|0xb808]
+Hawk_SetResult:
+    ; Set result status and leave the Hawk interrupt.
+    ; This function doesn't return
+bb3f:    95 41                  ld A, [X++]	 ; Result string
+bb41:    b3 1a                  st A, [Hawk_ErrorStringPtr|0xbb5d]
+bb43:    80 01                  ld AL, 0x01	 ; Operation is complete, HawkDevice_BlockIO is waiting for this
+bb45:    a1 b8 08               st AL, [Hawk_OperationCompleteFlag+1|0xb808]
 
 L_bb48:
-bb48:    65 a1                  ld X, [S++]
+bb48:    65 a1                  ld X, [S++]	 ; Pop all nonzero arguments, i wonder why
 bb4a:    15 fc                  bnz L_bb48
-bb4c:    71 b9 2d               jmp R_b92d
+bb4c:    71 b9 2d               jmp HawkLevel2Handler_Done	 ; Complete the interrupt
 
-R_bb4f:
-bb4f:    93 0c                  ld A, [0xbb5d]	 ; Patch PrintStringToErrorDevice arg
+Hawk_PrintError:
+bb4f:    93 0c                  ld A, [Hawk_ErrorStringPtr|0xbb5d]
 bb51:    15 07                  bnz L_bb5a
-bb53:    3a                     clr A, #0
+bb53:    3a                     clr A, #0	 ; Abort if the error string isn't set
 bb54:    39                     dec A, #1
 bb55:    5d                     mov B, A
 bb56:    c0 1c                  ld BL, 0x1c
@@ -10188,74 +10154,84 @@ bb58:    66 6b                  jsys Syscall_AbortAL
 
 L_bb5a:
 bb5a:    79 b4 f8               call PrintStringToErrorDevice
+
+Hawk_ErrorStringPtr:
 bb5d:    00 00                      string = L_0000
-bb5f:    91 ba 6e               ld A, [R_ba6e|0xba6e]
+bb5f:    91 ba 6e               ld A, [Hawk_StatusValue+1|0xba6e]
 bb62:    79 cd 4d               call FormatHexWord
-bb65:    bc 1b                      dest = R_bc1b
-bb67:    7b c3                  call L_bb2c
-bb69:    b1 bc 13               st A, [R_bc13|0xbc13]
-bb6c:    91 ba 68               ld A, [R_ba68|0xba68]
+bb65:    bc 1b                      dest = FailString+17	 ; Second "XXXX"
+bb67:    7b c3                  call DeviceNumToStr
+bb69:    b1 bc 13               st A, [FailString+9|0xbc13]	 ; Replace " X" with a device number
+bb6c:    91 ba 68               ld A, [Hawk_Reg1Value+1|0xba68]
 bb6f:    79 cd 4d               call FormatHexWord
-bb72:    bc 16                      dest = R_bc16
+bb72:    bc 16                      dest = FailString+12	 ; First "XXXX"
 bb74:    79 b4 f8               call PrintStringToErrorDevice
-bb77:    bc 0a                      string = R_bc0a	 ; " FAIL:  X XXXX XXXX\x07\r"
+bb77:    bc 0a                      string = FailString	 ; " FAIL:  X XXXX XXXX\x07\r"
 bb79:    3a                     clr A, #0
 bb7a:    39                     dec A, #1
 bb7b:    5d                     mov B, A
 bb7c:    c0 0d                  ld BL, 0x0d
 bb7e:    66 6b                  jsys Syscall_AbortAL
 
-L_bb80:
+GetProcessByTableIndex:
+    ; Returns a Process from the table, specified by index.
+    ; Process pointer in A
+    ; Throughout the code a value of 0xff is written into ProcessTableIdx,
+    ; so probably we're missing something, but anyways this code is indexing into
+    ; a table of all processed, which for us only consists of StartProcess.
 bb80:    3a                     clr A, #0
-bb81:    81 01 1f               ld AL, [0x011f]
+bb81:    81 01 1f               ld AL, [ProcessTableIdx|0x011f]
 bb84:    3d                     sll A, #1
-bb85:    d1 01 07               ld B, [0x0107]
+bb85:    d1 01 07               ld B, [ProcessTablePtr|0x0107]
 bb88:    58                     add B, A
 bb89:    99                     ld A, [B]
 bb8a:    09                     ret
 
-R_bb8b:
-bb8b:    95 41                  ld A, [X++]
-bb8d:    b3 0f                  st A, [0xbb9e]
+Hawk_PrintWarning:
+    ; Print a warning message from the driver, then check for some process flags.
+    ; May either complete the operation or return in order to retry.
+    ; If returns, provides status register value in A
+bb8b:    95 41                  ld A, [X++]	 ; Get string address
+bb8d:    b3 0f                  st A, [0xbb9e]	 ; Set argument for PrintStringToErrorDeviceForProcess
 bb8f:    81 01 25               ld AL, [0x0125]
 bb92:    a5 a2                  st AL, [--S]
 bb94:    32 01                  clr A, #1
 bb96:    a1 01 25               st AL, [0x0125]
-bb99:    7b e5                  call L_bb80
-bb9b:    79 b5 00               call R_b500
+bb99:    7b e5                  call GetProcessByTableIndex
+bb9b:    79 b5 00               call PrintStringToErrorDeviceForProcess
 bb9e:    00                     HALT
 bb9f:    00                     HALT
-bba0:    79 bb 1f               call R_bb1f
+bba0:    79 bb 1f               call Hawk_SetTimeout5
 bba3:    85 a1                  ld AL, [S++]
 bba5:    a1 01 25               st AL, [0x0125]
 
 L_bba8:
 bba8:    22 30                  clr BL, #0
 bbaa:    e1 01 41               st BL, [Timeout|0x0141]
-bbad:    7b d1                  call L_bb80
+bbad:    7b d1                  call GetProcessByTableIndex
 bbaf:    95 08 32               ld A, [A + 0x32]
-bbb2:    18 f4                  bgt L_bba8
-bbb4:    7b ca                  call L_bb80
-bbb6:    d5 08 08               ld B, [A + 0x08]
+bbb2:    18 f4                  bgt L_bba8	 ; Wait until the timeout expires
+bbb4:    7b ca                  call GetProcessByTableIndex
+bbb6:    d5 08 08               ld B, [A + 0x08]	 ; This checks for some flags
 bbb9:    85 28 13               ld AL, [B + 0x13]
 bbbc:    2d                     sll AL, #1
-bbbd:    14 1b                  bz L_bbda
+bbbd:    14 1b                  bz L_bbda	 ; Jump to continue (and retry)
 bbbf:    10 19                  bc L_bbda
 bbc1:    2a                     clr AL, #0
 bbc2:    a5 28 13               st AL, [B + 0x13]
 bbc5:    81 01 3e               ld AL, [0x013e]
 bbc8:    29                     dec AL, #1
 bbc9:    a1 01 3e               st AL, [0x013e]
-bbcc:    7b b2                  call L_bb80
+bbcc:    7b b2                  call GetProcessByTableIndex
 bbce:    32 20                  clr B, #0
 bbd0:    31 20                  dec B, #1
-bbd2:    f5 08 32               st B, [A + 0x32]
-bbd5:    79 bb 3f               call R_bb3f
-bbd8:    00                     HALT
+bbd2:    f5 08 32               st B, [A + 0x32]	 ; process.timeout = 256
+bbd5:    79 bb 3f               call Hawk_SetResult
+bbd8:    00                     HALT	 ; OK, no error
 bbd9:    00                     HALT
 
 L_bbda:
-bbda:    f6 08 04               mov A, Device[Z + 0x04]
+bbda:    f6 08 04               mov A, Device[Z + 0x04]	 ; Read status
 bbdd:    09                     ret
 
 R_bbde:
@@ -10276,7 +10252,7 @@ bbf6:    8, "FLT NN\x07\r"
 R_bc00:
 bc00:    8, "ATN NN\x07\r"
 
-R_bc0a:
+FailString:
 bc0a:    21, " FAIL:  X XXXX XXXX\x07\r"
 
 R_bc21:
@@ -10356,7 +10332,7 @@ bcd5:    71 bd 73               jmp R_bd73
 
 L_bcd8:
 bcd8:    80 ff                  ld AL, 0xff
-bcda:    a1 bd 9f               st AL, [R_bd9f|0xbd9f]
+bcda:    a1 bd 9f               st AL, [R_bd9e+1|0xbd9f]
 
 L_bcdd:
 bcdd:    80 00                  ld AL, 0x00
@@ -10366,13 +10342,13 @@ bce4:    d5 a8 09               ld B, [S + 0x09]
 bce7:    79 cd 67               call R_cd67
 bcea:    78 30 00 14            mul A, B, 0x0014
 bcee:    a5 81                  st AL, [Z++]
-bcf0:    81 bd 9f               ld AL, [R_bd9f|0xbd9f]
+bcf0:    81 bd 9f               ld AL, [R_bd9e+1|0xbd9f]
 bcf3:    16 04                  blt L_bcf9
 bcf5:    41 31                  sub AL, BL
 bcf7:    15 39                  bnz L_bd32
 
 L_bcf9:
-bcf9:    e1 bd 9f               st BL, [R_bd9f|0xbd9f]
+bcf9:    e1 bd 9f               st BL, [R_bd9e+1|0xbd9f]
 bcfc:    85 a8 02               ld AL, [S + 0x02]
 bcff:    14 31                  bz L_bd32
 bd01:    d5 a8 0b               ld B, [S + 0x0b]
@@ -10409,7 +10385,7 @@ bd3b:    90 bd 9e               ld A, R_bd9e|0xbd9e
 bd3e:    51 80                  sub A, Z
 bd40:    a3 59                  st AL, [0xbd9b]
 bd42:    85 a8 03               ld AL, [S + 0x03]
-bd45:    a1 be f9               st AL, [R_bef9|0xbef9]
+bd45:    a1 be f9               st AL, [R_bef8+1|0xbef9]
 
 L_bd48:
 bd48:    79 be f8               call R_bef8
@@ -10451,11 +10427,9 @@ bd83:    50 0a                  add S, A
 bd85:    95 a1                  ld A, [S++]
 bd87:    5c                     mov Y, A
 bd88:    80 ff                  ld AL, 0xff
-bd8a:    a1 01 1f               st AL, [0x011f]
+bd8a:    a1 01 1f               st AL, [ProcessTableIdx|0x011f]
 bd8d:    2a                     clr AL, #0
-bd8e:    a3 7c                  st AL, [R_be0c|0xbe0c]
-
-L_bd90:
+bd8e:    a3 7c                  st AL, [L_be0b+1|0xbe0c]
 bd90:    90 00 00               ld A, 0x0000
 bd93:    7e 01                  push {A}
 bd95:    90 00 00               ld A, 0x0000
@@ -10490,7 +10464,7 @@ be14:    71 bf c5               jmp R_bfc5
 L_be17:
 be17:    79 cc 97               call SetTimeout256
 be1a:    80 01                  ld AL, 0x01
-be1c:    a3 ee                  st AL, [R_be0c|0xbe0c]
+be1c:    a3 ee                  st AL, [L_be0b+1|0xbe0c]
 be1e:    09                     ret
 
 R_be1f:
@@ -10506,9 +10480,9 @@ be2e:    79 bf b1               call R_bfb1
 be31:    45 11                  mov AL, AL
 be33:    15 0b                  bnz L_be40
 be35:    7f 41                  pop {X}
-be37:    a3 d3                  st AL, [R_be0c|0xbe0c]
+be37:    a3 d3                  st AL, [L_be0b+1|0xbe0c]
 be39:    29                     dec AL, #1
-be3a:    a1 01 1f               st AL, [0x011f]
+be3a:    a1 01 1f               st AL, [ProcessTableIdx|0x011f]
 be3d:    32 20                  clr B, #0
 be3f:    09                     ret
 
@@ -10551,9 +10525,9 @@ be85:    f6 15 00               mov Device[X + 0x00], AL
 be88:    85 a1                  ld AL, [S++]
 be8a:    7f 41                  pop {X}
 be8c:    d0 10 ff               ld B, 0x10ff
-be8f:    e1 01 1f               st BL, [0x011f]
+be8f:    e1 01 1f               st BL, [ProcessTableIdx|0x011f]
 be92:    22 30                  clr BL, #0
-be94:    e1 be 0c               st BL, [R_be0c|0xbe0c]
+be94:    e1 be 0c               st BL, [L_be0b+1|0xbe0c]
 be97:    c5 68 13               ld BL, [Y + 0x13]
 be9a:    42 12                  and BH, AL
 be9c:    4a                     and BL, AL
@@ -10562,7 +10536,7 @@ be9d:    09                     ret
 R_be9e:
 be9e:    79 bf b1               call R_bfb1
 bea1:    80 ff                  ld AL, 0xff
-bea3:    a1 01 1f               st AL, [0x011f]
+bea3:    a1 01 1f               st AL, [ProcessTableIdx|0x011f]
 bea6:    d5 68 0f               ld B, [Y + 0x0f]
 bea9:    f6 12 01               mov AL, Device[B + 0x01]
 beac:    24 13                  srl AL, #4
@@ -10571,7 +10545,7 @@ beb0:    f6 13 01               mov Device[B + 0x01], AL
 
 L_beb3:
 beb3:    2a                     clr AL, #0
-beb4:    a1 be 0c               st AL, [R_be0c|0xbe0c]
+beb4:    a1 be 0c               st AL, [L_be0b+1|0xbe0c]
 beb7:    09                     ret
 
 FfcDevice_Init:
@@ -10583,7 +10557,7 @@ bec2:    d6 89 be d1            st Z, [R_bed1|0xbed1]
 bec6:    c5 68 13               ld BL, [Y + 0x13]
 bec9:    e5 88 04               st BL, [Z + 0x04]
 becc:    2a                     clr AL, #0
-becd:    a3 2a                  st AL, [R_bef9|0xbef9]
+becd:    a3 2a                  st AL, [R_bef8+1|0xbef9]
 becf:    7b 27                  call R_bef8
 
 R_bed1:
@@ -10591,7 +10565,7 @@ bed1:    00                     HALT
 bed2:    00                     HALT
 bed3:    b5 a2                  st A, [--S]
 bed5:    80 ff                  ld AL, 0xff
-bed7:    a1 01 1f               st AL, [0x011f]
+bed7:    a1 01 1f               st AL, [ProcessTableIdx|0x011f]
 beda:    80 17                  ld AL, 0x17
 bedc:    d5 68 0f               ld B, [Y + 0x0f]
 bedf:    f6 13 00               mov Device[B + 0x00], AL
@@ -10754,8 +10728,6 @@ R_bfd4:
 bfd4:    c0 21                  ld BL, 0x21
 bfd6:    49                     sub BL, AL
 bfd7:    15 12                  bnz L_bfeb
-
-L_bfd9:
 bfd9:    c0 02                  ld BL, 0x02
 bfdb:    14 46                  bz L_c023
 bfdd:    21 30                  dec BL, #1
@@ -10779,11 +10751,11 @@ bff8:    15 29                  bnz L_c023
 bffa:    90 d7 d0               ld A, 0xd7d0
 
 L_bffd:
-bffd:    b1 c1 9c               st A, [R_c19c|0xc19c]
+bffd:    b1 c1 9c               st A, [R_c199+3|0xc19c]
 c000:    90 c0 c0               ld A, 0xc0c0
-c003:    b1 c1 9f               st A, [R_c19f|0xc19f]
+c003:    b1 c1 9f               st A, [R_c199+6|0xc19f]
 c006:    80 02                  ld AL, 0x02
-c008:    46 80 91 c1 9f 60 02   baseconv(8, 0) [R_c19f|0xc19f], [Y + 0x02]
+c008:    46 80 91 c1 9f 60 02   baseconv(8, 0) [R_c199+6|0xc19f], [Y + 0x02]
 c00f:    79 c1 42               call R_c142
 c012:    c1 99 60               ld BL, [0x9960]
 c015:    13 88                  bnn L_bf9f
@@ -10801,8 +10773,8 @@ c020:    71 bf 21               jmp R_bf21
 L_c023:
 c023:    a5 a2                  st AL, [--S]
 c025:    90 c0 c0               ld A, 0xc0c0
-c028:    b1 c1 d6               st A, [R_c1d6|0xc1d6]
-c02b:    b1 c1 d0               st A, [R_c1d0|0xc1d0]
+c028:    b1 c1 d6               st A, [R_c1cb+11|0xc1d6]
+c02b:    b1 c1 d0               st A, [R_c1cb+5|0xc1d0]
 c02e:    80 18                  ld AL, 0x18
 c030:    f6 19 00               mov Device[Z + 0x00], AL
 c033:    79 bf 96               call R_bf96
@@ -11028,7 +11000,7 @@ c10e:    f0 00 00               st B, 0x0000
 c111:    09                     ret
 
 R_c112:
-c112:    2f 07                  st_ A
+c112:    2f 07                  disable_dma
 c114:    2f 03                  st_dma_count A
 c116:    38                     inc A, #1
 c117:    14 04                  bz L_c11d
@@ -11059,7 +11031,7 @@ c136:    7b 0a                  call R_c142
 c138:    00                     HALT
 c139:    00                     HALT
 c13a:    2a                     clr AL, #0
-c13b:    a1 be 0c               st AL, [R_be0c|0xbe0c]
+c13b:    a1 be 0c               st AL, [L_be0b+1|0xbe0c]
 c13e:    c0 0d                  ld BL, 0x0d
 c140:    66 6b                  jsys Syscall_AbortAL
 
@@ -11477,8 +11449,6 @@ c461:    29                     dec AL, #1
 c462:    14 07                  bz L_c46b
 c464:    29                     dec AL, #1
 c465:    15 9b                  bnz CrtDevice_InterruptHandler_End
-
-L_c467:
 c467:    80 00                  ld AL, 0x00	 ; A character is stored here
 c469:    73 9d                  jmp L_c408
 
@@ -11752,7 +11722,7 @@ c602:    b1 c6 fa               st A, [R_c6fa|0xc6fa]
 c605:    85 a8 06               ld AL, [S + 0x06]
 c608:    79 c7 8c               call R_c78c
 c60b:    a1 c7 09               st AL, [R_c709|0xc709]
-c60e:    e1 c7 0b               st BL, [R_c70b|0xc70b]
+c60e:    e1 c7 0b               st BL, [R_c70a+1|0xc70b]
 c611:    55 80                  mov A, Z
 c613:    b5 a2                  st A, [--S]
 
@@ -11843,8 +11813,6 @@ c6a8:    31 80                  dec Z, #1
 L_c6aa:
 c6aa:    80 ff                  ld AL, 0xff
 c6ac:    a5 81                  st AL, [Z++]
-
-L_c6ae:
 c6ae:    90 00 00               ld A, 0x0000
 c6b1:    b5 81                  st A, [Z++]
 c6b3:    93 df                  ld A, [0xc694]
@@ -11853,7 +11821,7 @@ c6b6:    90 c7 0a               ld A, R_c70a|0xc70a
 c6b9:    51 80                  sub A, Z
 c6bb:    a3 4a                  st AL, [R_c707|0xc707]
 c6bd:    85 a8 03               ld AL, [S + 0x03]
-c6c0:    a1 c8 5c               st AL, [R_c85c|0xc85c]
+c6c0:    a1 c8 5c               st AL, [R_c85b+1|0xc85c]
 
 L_c6c3:
 c6c3:    79 c8 5b               call R_c85b
@@ -11886,9 +11854,7 @@ c6ef:    50 0a                  add S, A
 c6f1:    95 a1                  ld A, [S++]
 c6f3:    5c                     mov Y, A
 c6f4:    80 ff                  ld AL, 0xff
-c6f6:    a1 01 1f               st AL, [0x011f]
-
-L_c6f9:
+c6f6:    a1 01 1f               st AL, [ProcessTableIdx|0x011f]
 c6f9:    90 00 00               ld A, 0x0000
 c6fc:    7e 01                  push {A}
 c6fe:    d1 ca 51               ld B, [R_ca51|0xca51]
@@ -11907,9 +11873,7 @@ R_c709:
 c709:    00
 
 R_c70a:
-c70a:    84 00                  ld AL, @[L_c70c|0xc70c]
-
-L_c70c:
+c70a:    84 00                  ld AL, @[0xc70c]
 c70c:    83 00                  ld AL, [0xc70e]
 c70e:    <null bytes>
 
@@ -11948,9 +11912,9 @@ c7a6:    09                     ret
 
 R_c7a7:
 c7a7:    7e 45                  push {X, Y, Z}
-c7a9:    d6 ab c8 13            st S, [R_c813|0xc813]
+c7a9:    d6 ab c8 13            st S, [L_c811+2|0xc813]
 c7ad:    80 ff                  ld AL, 0xff
-c7af:    a1 c8 5c               st AL, [R_c85c|0xc85c]
+c7af:    a1 c8 5c               st AL, [R_c85b+1|0xc85c]
 c7b2:    79 c9 2c               call R_c92c
 c7b5:    08                     cl
 c7b6:    95 68 0f               ld A, [Y + 0x0f]
@@ -11965,7 +11929,7 @@ c7c9:    49                     sub BL, AL
 c7ca:    15 31                  bnz R_c7fd
 c7cc:    85 68 13               ld AL, [Y + 0x13]
 c7cf:    7b bb                  call R_c78c
-c7d1:    e1 c7 0b               st BL, [R_c70b|0xc70b]
+c7d1:    e1 c7 0b               st BL, [R_c70a+1|0xc70b]
 c7d4:    a1 c7 09               st AL, [R_c709|0xc709]
 c7d7:    2a                     clr AL, #0
 c7d8:    a1 c7 0d               st AL, [R_c70d|0xc70d]
@@ -11999,7 +11963,7 @@ c806:    d0 ff ff               ld B, 0xffff
 
 L_c809:
 c809:    80 ff                  ld AL, 0xff
-c80b:    a1 01 1f               st AL, [0x011f]
+c80b:    a1 01 1f               st AL, [ProcessTableIdx|0x011f]
 c80e:    f6 19 01               mov Device[Z + 0x01], AL
 
 L_c811:
@@ -12014,7 +11978,7 @@ R_c819:
 c819:    79 c9 2c               call R_c92c
 c81c:    08                     cl
 c81d:    80 ff                  ld AL, 0xff
-c81f:    a1 01 1f               st AL, [0x011f]
+c81f:    a1 01 1f               st AL, [ProcessTableIdx|0x011f]
 c822:    95 68 0f               ld A, [Y + 0x0f]
 c825:    f6 11 01               mov Device[A + 0x01], AL
 c828:    79 c9 2c               call R_c92c
@@ -12023,7 +11987,7 @@ c82c:    09                     ret
 
 CmdDevice_Init:
 c82d:    7e 45                  push {X, Y, Z}
-c82f:    d6 ab c8 13            st S, [R_c813|0xc813]
+c82f:    d6 ab c8 13            st S, [L_c811+2|0xc813]
 c833:    d6 89 c8 4f            st Z, [R_c84f|0xc84f]
 c837:    85 68 13               ld AL, [Y + 0x13]
 c83a:    79 c7 8c               call R_c78c
@@ -12033,13 +11997,13 @@ c841:    a5 28 04               st AL, [B + 0x04]
 c844:    45 01                  mov AL, AH
 c846:    a5 28 06               st AL, [B + 0x06]
 c849:    80 01                  ld AL, 0x01
-c84b:    a3 0f                  st AL, [R_c85c|0xc85c]
+c84b:    a3 0f                  st AL, [R_c85b+1|0xc85c]
 c84d:    7b 0c                  call R_c85b
 
 R_c84f:
 c84f:    00                     HALT
 c850:    00                     HALT
-c851:    47 4c 00 ff 01 1f      memcpy 0x01, 0xff, [0x011f]
+c851:    47 4c 00 ff 01 1f      memcpy 0x01, 0xff, [ProcessTableIdx|0x011f]
 c857:    45 11                  mov AL, AL
 c859:    73 b6                  jmp L_c811
 
@@ -12052,7 +12016,7 @@ L_c861:
 c861:    a1 c9 ba               st AL, [R_c9ba|0xc9ba]
 c864:    7e 45                  push {X, Y, Z}
 c866:    55 a0                  mov A, S
-c868:    b1 c8 f2               st A, [R_c8f2|0xc8f2]
+c868:    b1 c8 f2               st A, [R_c8f1+1|0xc8f2]
 c86b:    95 68 0f               ld A, [Y + 0x0f]
 c86e:    5e                     mov Z, A
 c86f:    91 01 03               ld A, [CurrentProcess|0x0103]
@@ -12205,7 +12169,7 @@ c94e:    09                     ret
 
 R_c94f:
 c94f:    f6 19 01               mov Device[Z + 0x01], AL
-c952:    c1 c8 5c               ld BL, [R_c85c|0xc85c]
+c952:    c1 c8 5c               ld BL, [R_c85b+1|0xc85c]
 c955:    17 02                  bp L_c959
 c957:    73 98                  jmp R_c8f1
 
@@ -12230,11 +12194,11 @@ c970:    15 29                  bnz L_c99b
 c972:    90 d7 d0               ld A, 0xd7d0
 
 L_c975:
-c975:    b1 cb 3a               st A, [R_cb3a|0xcb3a]
+c975:    b1 cb 3a               st A, [R_cb37+3|0xcb3a]
 c978:    90 c0 c0               ld A, 0xc0c0
-c97b:    b1 cb 3d               st A, [R_cb3d|0xcb3d]
+c97b:    b1 cb 3d               st A, [R_cb37+6|0xcb3d]
 c97e:    80 02                  ld AL, 0x02
-c980:    46 80 91 cb 3d 60 02   baseconv(8, 0) [R_cb3d|0xcb3d], [Y + 0x02]
+c980:    46 80 91 cb 3d 60 02   baseconv(8, 0) [R_cb37+6|0xcb3d], [Y + 0x02]
 c987:    79 b4 f8               call PrintStringToErrorDevice
 c98a:    cb 37                      string = R_cb37
 c98c:    60 13 88               ld X, 0x1388
@@ -12262,12 +12226,10 @@ c9a4:    79 ca 57               call R_ca57
 L_c9a7:
 c9a7:    a5 a2                  st AL, [--S]
 c9a9:    90 c0 c0               ld A, 0xc0c0
-c9ac:    b1 cb 7a               st A, [R_cb7a|0xcb7a]
+c9ac:    b1 cb 7a               st A, [R_cb75+5|0xcb7a]
 c9af:    80 02                  ld AL, 0x02
-c9b1:    46 e0 92 cb 7a 0a      baseconv(e, 0) [R_cb7a|0xcb7a], [S]
+c9b1:    46 e0 92 cb 7a 0a      baseconv(e, 0) [R_cb75+5|0xcb7a], [S]
 c9b7:    85 a1                  ld AL, [S++]
-
-L_c9b9:
 c9b9:    c0 00                  ld BL, 0x00
 c9bb:    21 30                  dec BL, #1
 c9bd:    e3 fb                  st BL, [R_c9ba|0xc9ba]
@@ -12329,7 +12291,7 @@ ca07:    d0 cb 50               ld B, R_cb50|0xcb50
 
 L_ca0a:
 ca0a:    f3 0e                  st B, [R_ca1a|0xca1a]
-ca0c:    c1 c8 5c               ld BL, [R_c85c|0xc85c]
+ca0c:    c1 c8 5c               ld BL, [R_c85b+1|0xc85c]
 ca0f:    14 03                  bz R_ca14
 ca11:    71 c8 f1               jmp R_c8f1
 
@@ -12344,8 +12306,6 @@ ca1a:    00                     HALT
 ca1b:    00                     HALT
 ca1c:    79 b4 f8               call PrintStringToErrorDevice
 ca1f:    cb 75                      string = R_cb75	 ; "EC:XX CMDS: "
-
-L_ca21:
 ca21:    90 c7 05               ld A, R_c705|0xc705
 ca24:    5c                     mov Y, A
 ca25:    3a                     clr A, #0
@@ -12355,9 +12315,9 @@ ca2b:    5b                     mov X, A
 
 L_ca2c:
 ca2c:    90 c0 c0               ld A, 0xc0c0
-ca2f:    b1 cb 85               st A, [R_cb85|0xcb85]
+ca2f:    b1 cb 85               st A, [R_cb83+2|0xcb85]
 ca32:    80 02                  ld AL, 0x02
-ca34:    46 e0 92 cb 85 06      baseconv(e, 0) [R_cb85|0xcb85], [Y]
+ca34:    46 e0 92 cb 85 06      baseconv(e, 0) [R_cb83+2|0xcb85], [Y]
 ca3a:    30 60                  inc Y, #1
 ca3c:    7c df                  call PrintStringToErrorDevice (via 0xca1c+1)
 ca3e:    cb                     ld BL, [Y]
@@ -12375,8 +12335,6 @@ ca4e:    00                     HALT
 
 R_ca4f:
 ca4f:    00                     HALT
-
-L_ca50:
 ca50:    d0 00 00               ld B, 0x0000
 ca53:    c0 0d                  ld BL, 0x0d
 ca55:    66 6b                  jsys Syscall_AbortAL
@@ -12429,7 +12387,7 @@ caa2:    d7 12                  mov IL1(B), A
 caa4:    09                     ret
 
 R_caa5:
-caa5:    2f 07                  st_ A
+caa5:    2f 07                  disable_dma
 caa7:    2f 03                  st_dma_count A
 caa9:    38                     inc A, #1
 caaa:    14 04                  bz L_cab0
@@ -12455,7 +12413,7 @@ cac2:    9c                     ld A, [Z]
 
 R_cac3:
 cac3:    f6 19 01               mov Device[Z + 0x01], AL
-cac6:    81 c8 5c               ld AL, [R_c85c|0xc85c]
+cac6:    81 c8 5c               ld AL, [R_c85b+1|0xc85c]
 cac9:    17 03                  bp L_cace
 cacb:    71 c7 fd               jmp R_c7fd
 
@@ -12468,7 +12426,7 @@ L_cad5:
 cad5:    95 41                  ld A, [X++]
 cad7:    b1 ca 1a               st A, [R_ca1a|0xca1a]
 cada:    90 d8 d8               ld A, 0xd8d8
-cadd:    b1 cb 7a               st A, [R_cb7a|0xcb7a]
+cadd:    b1 cb 7a               st A, [R_cb75+5|0xcb7a]
 cae0:    71 ca 14               jmp R_ca14
 
 R_cae3:
@@ -12787,10 +12745,10 @@ cd4c:    09                     ret
 
 FormatHexWord:
     ; Looks like this function converts a 16bit word to hex and writes
-    ; it to the ascii buffer specified at [X]
+    ; it to the ascii buffer specified as a literal argument
 cd4d:    7e 05                  push {A, B, X}
 cd4f:    b3 14                  st A, [FormatHexWord_Temp|0xcd65]
-cd51:    65 41                  ld X, [X++]
+cd51:    65 41                  ld X, [X++]	 ; Buffer address is a literal argument
 cd53:    47 9e 03 c0 04         memset 0x04, 0xc0, [X]
 cd58:    80 04                  ld AL, 0x04
 cd5a:    46 e1 98 40 cd 65      baseconv(e, 1) [X], [FormatHexWord_Temp|0xcd65]
@@ -12952,7 +12910,7 @@ ce52:    90 78 05               ld A, 0x7805
 ce55:    b1 ad c6               st A, [R_adc6|0xadc6]
 ce58:    47 4c 04 00 00 00 05 7f 78 00 memcpy 0x05, 0x000000057f, [0x7800]	 ; Not sure what this data is
 ce62:    47 4c 04 78 00 07 f0 ff 78 05 memcpy 0x05, 0x780007f0ff, [0x7805]
-ce6c:    92 01 07               ld A, @[0x0107]	 ; StartProcess
+ce6c:    92 01 07               ld A, @[ProcessTablePtr|0x0107]	 ; StartProcess
 ce6f:    2e 0d f9 00 36         wpf 0xf9, [A + 0x36]	 ; Copy 32 entries to Page Table base 1
 ce74:    2e 0d fb 00 36         wpf 0xfb, [A + 0x36]	 ; Copy Same 32 entries to Page Table base 3
 ce79:    47 44 0f 00 36 01 81   memcpy 0x10, [A + 0x36], [PageTableTwo|0x0181]	 ; Active page table?
@@ -13147,7 +13105,7 @@ d008:    71 ce e5               jmp DiskPrompt
 L_d00b:
 d00b:    81 db 19               ld AL, [DiskNum|0xdb19]
 d00e:    d0 e3 46               ld B, R_e346|0xe346
-d011:    66 4f                  jsys Syscall_4f	 ; Same as Syscall_0e, but within a subdirectory
+d011:    66 4f                  jsys Syscall_OpenFileInDir	 ; Same as Syscall_0e, but within a subdirectory
 d013:    00 00                      arg1 = (0x0)
 d015:    e1 21                      arg2 = ReadBuffer
 d017:    73 0f                  jmp L_d028
@@ -13358,9 +13316,9 @@ d199:    47 9c 60 00 01 00      memset 0x61, 0x00, [SyscallVector|0x0100]	 ; Thi
 d19f:    47 4c 00 71 01 00      memcpy 0x01, 0x71, [SyscallVector|0x0100]	 ; Jump instruction
 d1a5:    80 ff                  ld AL, 0xff
 d1a7:    a1 01 1c               st AL, [0x011c]
-d1aa:    a1 01 1f               st AL, [0x011f]
+d1aa:    a1 01 1f               st AL, [ProcessTableIdx|0x011f]
 d1ad:    90 01 d1               ld A, 0x01d1
-d1b0:    b1 01 07               st A, [0x0107]	 ; 107 is a pointer to a two byte object
+d1b0:    b1 01 07               st A, [ProcessTablePtr|0x0107]	 ; 107 is a pointer to a two byte object
 d1b3:    47 4c 00 01 01 25      memcpy 0x01, 0x01, [0x0125]
 d1b9:    47 4c 02 ff ff ff 01 3b memcpy 0x03, 0xffffff, [0x013b]
 d1c1:    47 40 01 e0 77 01 42   memcpy 0x02, [ConfigSystem01|0xe077], [0x0142]
@@ -13374,7 +13332,7 @@ d1f0:    3a                     clr A, #0
 d1f1:    81 e0 7a               ld AL, [ConfigNumTibs|0xe07a]
 d1f4:    3d                     sll A, #1	 ; TIBs are two bytes each?
 d1f5:    30 01                  inc A, #2
-d1f7:    50 01 01 07            add A, A, [0x0107]
+d1f7:    50 01 01 07            add A, A, [ProcessTablePtr|0x0107]
 d1fb:    b1 01 09               st A, [DevicesPtr|0x0109]
 d1fe:    d1 e0 7a               ld B, [ConfigNumTibs|0xe07a]
 d201:    50 23 e0 7b            add B, B, [ConfigNumDisks|0xe07b]
@@ -13471,7 +13429,7 @@ d2b7:    47 48 03 60 e0 87      memcpy 0x04, [Y], [ConfigTib0|0xe087]
 d2bd:    30 63                  inc Y, #4
 d2bf:    91 e3 8b               ld A, [ConfigLoadedTIBs|0xe38b]
 d2c2:    3d                     sll A, #1
-d2c3:    50 01 01 07            add A, A, [0x0107]	 ; SystemProcess? SystemObject?
+d2c3:    50 01 01 07            add A, A, [ProcessTablePtr|0x0107]	 ; SystemProcess? SystemObject?
 d2c7:    d6 19 00 00            st A, [Z + 0x0000]
 d2cb:    47 4d 01 00 00 00 02   memcpy 0x02, 0x0000, [A + 0x02]
 d2d2:    47 9e 5c 00 08         memset 0x5d, 0x00, [Z]
@@ -13982,7 +13940,7 @@ d89e:    47 9e 03 00 08         memset 0x04, 0x00, [Z]
 d8a3:    30 83                  inc Z, #4
 d8a5:    d6 89 01 5c            st Z, [0x015c]
 d8a9:    d1 01 09               ld B, [DevicesPtr|0x0109]
-d8ac:    91 01 07               ld A, [0x0107]
+d8ac:    91 01 07               ld A, [ProcessTablePtr|0x0107]
 d8af:    51 20                  sub A, B
 d8b1:    3c                     srl A, #1
 d8b2:    39                     dec A, #1
@@ -14002,7 +13960,7 @@ d8ce:    18 f5                  bgt L_d8c5
 d8d0:    47 4e 01 ff 00 08      memcpy 0x02, 0xff00, [Z]
 d8d6:    30 81                  inc Z, #2
 d8d8:    d6 89 01 0d            st Z, [0x010d]
-d8dc:    55 67 01 07            mov Y, [0x0107]
+d8dc:    55 67 01 07            mov Y, [ProcessTablePtr|0x0107]
 d8e0:    d0 e3 96               ld B, R_e396|0xe396
 
 L_d8e3:
@@ -14043,7 +14001,7 @@ d940:    51 82                  sub B, Z
 d942:    78 32 00 03            mul B, B, 0x0003
 d946:    31 20                  dec B, #1
 d948:    f1 01 11               st B, [0x0111]
-d94b:    55 67 01 07            mov Y, [0x0107]
+d94b:    55 67 01 07            mov Y, [ProcessTablePtr|0x0107]
 
 L_d94f:
 d94f:    95 61                  ld A, [Y++]
@@ -14072,9 +14030,9 @@ d991:    31 01                  dec A, #2
 d993:    d1 e3 8f               ld B, [R_e38f|0xe38f]
 d996:    51 20                  sub A, B
 d998:    b2 01 0b               st A, @[CrtInstancesPtr|0x010b]
-d99b:    92 01 07               ld A, @[0x0107]
+d99b:    92 01 07               ld A, @[ProcessTablePtr|0x0107]
 d99e:    b1 01 03               st A, [CurrentProcess|0x0103]
-d9a1:    91 01 07               ld A, [0x0107]
+d9a1:    91 01 07               ld A, [ProcessTablePtr|0x0107]
 
 L_d9a4:
 d9a4:    d1 e3 95               ld B, [R_e395|0xe395]
@@ -14123,7 +14081,7 @@ da02:    00                         DiskNum = (0x0)
 da03:    e3 76                      Filename = R_e376	 ; @SYS.OSN
 da05:    00 00                      Buffer = (0x0)
 da07:    01                         arg4 = (0x1)
-da08:    b1 e0 6b               st A, [R_e06b|0xe06b]
+da08:    b1 e0 6b               st A, [L_e06a+1|0xe06b]
 da0b:    2e 2c 00 e1 18         wpf1 0x00, [LOS_Page0|0xe118]
 da10:    2e 1c f8 01 61         rpf 0xf8, [PageTableOne|0x0161]
 da15:    2e 1c f8 01 81         rpf 0xf8, [PageTableTwo|0x0181]
@@ -14151,7 +14109,7 @@ da45:    15 fa                  bnz L_da41
 da47:    ab                     st AL, [Y]
 
 L_da48:
-da48:    91 e0 6b               ld A, [R_e06b|0xe06b]
+da48:    91 e0 6b               ld A, [L_e06a+1|0xe06b]
 da4b:    78 10 08 00            mul A, A, 0x0800
 da4f:    f5 a2                  st B, [--S]
 da51:    3a                     clr A, #0
@@ -14175,7 +14133,7 @@ da76:    47 4d 00 1e 10 01 81   memcpy 0x01, 0x1e, [A + 0x0181]
 da7d:    2e 2c 00 e1 1a         wpf1 0x00, [OPSYS_Page0|0xe11a]
 da82:    47 4d 00 1e 10 01 81   memcpy 0x01, 0x1e, [A + 0x0181]
 da89:    47 4d 00 1e 10 01 61   memcpy 0x01, 0x1e, [A + 0x0161]
-da90:    d2 01 07               ld B, @[0x0107]
+da90:    d2 01 07               ld B, @[ProcessTablePtr|0x0107]
 da93:    47 41 1f 01 61 20 36   memcpy 0x20, [PageTableOne|0x0161], [B + 0x36]
 da9a:    2e 2c 00 e1 18         wpf1 0x00, [LOS_Page0|0xe118]
 da9f:    5d                     mov B, A
@@ -14446,7 +14404,7 @@ df64:    e8                     st BL, [A]
 df65:    2e 2c 00 e1 1a         wpf1 0x00, [OPSYS_Page0|0xe11a]
 df6a:    e8                     st BL, [A]
 df6b:    e5 08 e0               st BL, [A + -0x20]
-df6e:    92 01 07               ld A, @[0x0107]
+df6e:    92 01 07               ld A, @[ProcessTablePtr|0x0107]
 df71:    47 41 1f 01 61 00 36   memcpy 0x20, [PageTableOne|0x0161], [A + 0x36]
 df78:    80 80                  ld AL, 0x80
 df7a:    07                     rl
@@ -14522,7 +14480,7 @@ e000:    52 10 ff fe            and A, A, 0xfffe
 e004:    b1 01 44               st A, [0x0144]
 e007:    32 02                  clr A, #2
 e009:    b1 01 46               st A, [0x0146]
-e00c:    93 5d                  ld A, [R_e06b|0xe06b]
+e00c:    93 5d                  ld A, [L_e06a+1|0xe06b]
 e00e:    95 08 ff               ld A, [A + -0x1]
 e011:    55 82                  mov B, Z
 e013:    59                     sub B, A
@@ -15174,7 +15132,7 @@ e4a6:    91 e5 36               ld A, [Debug_Regs_PC|0xe536]
 e4a9:    79 e5 dd               call Mux0_WriteHexWord
 e4ac:    80 a8                  ld AL, 0xa8	 ; "("
 e4ae:    79 e6 3e               call Mux0_WriteByte
-e4b1:    91 e8 5e               ld A, [R_e85e|0xe85e]
+e4b1:    91 e8 5e               ld A, [L_e85d+1|0xe85e]
 e4b4:    d1 e5 36               ld B, [Debug_Regs_PC|0xe536]
 e4b7:    51 20                  sub A, B
 e4b9:    79 e5 dd               call Mux0_WriteHexWord
@@ -15361,8 +15319,6 @@ e5c9:    6e e5 38               ldcc [0xe538]
 
 R_e5cc:
 e5cc:    04                     ei
-
-L_e5cd:
 e5cd:    71 00 00               jmp L_0000
 
 R_e5d0:
@@ -15397,8 +15353,6 @@ e5eb:    e5 a2                  st BL, [--S]
 e5ed:    34 03                  srl A, #4
 e5ef:    3e                     inc X
 e5f0:    15 f6                  bnz L_e5e8
-
-L_e5f2:
 e5f2:    80 a0                  ld AL, 0xa0	 ; ' '
 e5f4:    7b 48                  call Mux0_WriteByte	 ; Write leading space
 
@@ -15580,7 +15534,7 @@ e6d5:    71 e4 d6               jmp TosPrompt
 
 L_e6d8:
 e6d8:    a3 c6                  st AL, [0xe6a0]
-e6da:    91 e8 5e               ld A, [R_e85e|0xe85e]
+e6da:    91 e8 5e               ld A, [L_e85d+1|0xe85e]
 e6dd:    d3 bd                  ld B, [0xe69c]
 e6df:    55 44                  mov X, X
 e6e1:    14 02                  bz L_e6e5
@@ -15905,7 +15859,7 @@ TOS_CommandW:
 e886:    80 ff                  ld AL, 0xff
 e888:    a3 58                  st AL, [0xe8e2]
 e88a:    80 b0                  ld AL, 0xb0
-e88c:    a3 16                  st AL, [L_e8a2+2|0xe8a4]
+e88c:    a3 16                  st AL, [0xe8a4]
 e88e:    2a                     clr AL, #0
 e88f:    a3 53                  st AL, [R_e8e4|0xe8e4]
 
@@ -15920,8 +15874,6 @@ e89b:    7b df                  call R_e87c
 e89d:    8d                     ld AL, [S]
 e89e:    a0 a0                  st AL, 0xa0
 e8a0:    a0 cd                  st AL, 0xcd
-
-L_e8a2:
 e8a2:    c1 d0 b0               ld BL, [0xd0b0]
 e8a5:    a0 ad                  st AL, 0xad
 e8a7:    a0 00                  st AL, 0x00

@@ -106,10 +106,10 @@ def Match2f(pc, mem):
                 reg_ref = SmallLiteralRef(reg)
             return Match(pc, pc+2, BasicCpu6Inst(mnemonic, reg_ref))
         case 3:
-            if reg == 0 and op & 1 == 0:
+            if reg == 0:
                 mnemonic = "enable_dma" if (op & 1 == 0) else "disable_dma"
                 return Match(pc, pc+2, ImplicitLenInst(mnemonic, 2))
-            if reg != 0: # Illegal if reg != 0
+            else: # Illegal if reg != 0
                 return None
         case 4:
             mnemonic += "isr"
