@@ -193,7 +193,7 @@ def MatchMul(pc, mem):
 
     dst, src, src2, pc = AluAddrMode(mode, inst, pc, mem)
 
-    mnemonic = "mul" if inst == 0x78 else "div"
+    mnemonic = "div" if inst == 0x78 else "mul"
     return Match(orig_pc, pc, BasicCpu6Inst(mnemonic, dst, src, src2))
 
 def MatchD6(pc, mem):
