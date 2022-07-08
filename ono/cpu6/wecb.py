@@ -125,3 +125,20 @@ if __name__ == "__main__":
             print("Checksum Error")
             sys.exit(1)
         print("Valid")
+    if sys.argv[1] == "strings":
+        print(f"===={sys.argv[2]}:")
+        for type, addr, data in loader.sections():
+            if type == 0 and len(data) != 0:
+                str = ''
+
+                for byte in data:
+                    c = chr(byte&0x7f)
+                    printable = c.isprintable() or c in "\t\n\r"
+                    if byte < 0x80 or not c.isprintable():
+                        if len(str) > 3:
+                            print(f"'{str}'")
+                        str = ''
+                    else:
+                        str += c
+                if len(str) > 3:
+                    print(f"'{str}'")
