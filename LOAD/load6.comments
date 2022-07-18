@@ -441,7 +441,10 @@
 	 	; an operation code) and are only called directly in some special scenarios
 0xc231 ,	comment	; Set first byte of the function table to 0
 0xc241 ,	comment	; device_obj.state = 1
-0xc25b ,	comment	; MUX_REG[8] = port_offset + 0, we don't know the purpose
+0xc25b ,	comment	; MUX_REG[8] = port_offset + 0
+		; This sets RTS for this port to 1.
+		; Bit 0 is an inverted RTS value
+		; Bits 1 - 2 specify port number (0 - 3)
 0xc269 ,	comment	; jmp SwitchToPageBase0
 0xc26c,	pre_comment 	; This waits for (device_obj + 0x11) to become 0
 0xc276,	pre_comment 	; Normal write function
@@ -469,7 +472,9 @@
 0xc2b5 ,	comment	; Set device_obj.Process
 0xc2ba ,	comment	; [Z] = 0x80 - this will enable timeout check below
 0xc2bb ,	comment	; A = MUXBase
-0xc2c0 ,	comment	; MUX_REG[0x0c] = something
+0xc2c0 ,	comment	; MUX_REG[0x0c] = BL
+		; According to schematics, BL should be (1 << unit), and this
+		; forces a "TX buffer empty" IRQ on the specified unit
 0xc2c3,	pre_comment 	; And here we're waiting for device_obj.state to become 0 or 1
 	 	; The output is interrupt-driven, see CrtDevice_InterruptHandler
 0xc2cb ,	comment	; [WriteStruct + 0] & 0x80
@@ -645,8 +650,10 @@
 0xc5cc ,	comment	; Set baud rate
 0xc5d1 ,	comment	; This should output 0x84 character
 0xc5d6 ,	comment	; AL is now card address instead of a port adddess
-0xc5d8 ,	comment	; Configure IPL 6 interrupt
-0xc5e2 ,	comment	; MUX_REG[0x0b] = 0xe0
+0xc5da ,	comment	; Configure IPL 6 interrupt
+0xc5dd ,	comment	; Enable interrupts, written value is ignored here
+0xc5e0 ,	comment	; MUX_REG[0x0b] = 0xe0
+0xc5e2 ,	comment	; According to Meisaka, this programs custom baud rate
 0xc701 ,	comment	; The first word in CRT0 descriptor points here
 0xca1f ,	comment	; "EC:XX CMDS: "
 0xcbca,	pre_comment 	; This function doesn't do anything new, it's just yet another form of

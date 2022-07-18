@@ -62,6 +62,7 @@
 0x4fb ,	 label,		WaitForHawkCmdCompletion
 0x506 ,	 code,		AbortHandler
 0x507 ,  label,		CopyMem
+0x516 ,  >B
 0x536 ,	 label,		PrintString
 0x564 ,	 label,		PrintChar
 0x5a6 ,  code,		SerialIntHandler
