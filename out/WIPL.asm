@@ -735,9 +735,10 @@ L_050d:
 0510:    19 21                  ble L_0533
 0512:    da                     ld B, [X]	 ; arg[2, 3]
 0513:    79 06 9a               call L_069a
+0516:    a0                     (0xa0)
 
-L_0516:
-0516:    a0 dd                  st AL, 0xdd
+L_0517:
+0517:    dd                     ld B, [S]	 ; B = length
 0518:    55 60                  mov A, Y	 ; Preserve Y
 051a:    bd                     st A, [S]
 051b:    95 41                  ld A, [X++]	 ; dest
@@ -805,9 +806,8 @@ L_0563:
 PrintChar:
 0564:    7e 81                  push {Z}
 0566:    55 98 f2 00            mov Z, 0xf200	 ; Serisl port 0 base address
-056a:    f6 19 0d               mov Device[Z + 0x0d], AL	 ; Write the unprocessed character to MUX_REG[0x0D]
-                                                        	 ; The purpose is unknown, probably some kind of debug port.
-                                                        	 ; May be even not all cards really support it.
+056a:    f6 19 0d               mov Device[Z + 0x0d], AL	 ; This disables interrupts from the MUX card
+                                                        	 ; The value is ignored, only the fact of writing is important
 056d:    c0 c5                  ld BL, 0xc5	 ; Set up baud rate ?
 056f:    f6 39 00               mov Device[Z + 0x00], BL
 0572:    c0 8c                  ld BL, 0x8c
@@ -881,9 +881,9 @@ ReadChar:
 05d2:    d7 6e                  mov IL6(P), A
 05d4:    3a                     clr A, #0	 ; Clear A at IPL6
 05d5:    d7 60                  mov IL6(A), A
-05d7:    80 06                  ld AL, 0x06	 ; 6 is an IPL number, could be a coincidence
-05d9:    f6 19 0a               mov Device[Z + 0x0a], AL	 ; But anyways we need to set the serial port up to
-05dc:    f6 19 0e               mov Device[Z + 0x0e], AL	 ; generate a daisy chain interrupt
+05d7:    80 06                  ld AL, 0x06
+05d9:    f6 19 0a               mov Device[Z + 0x0a], AL	 ; Configure the IPL number to 6
+05dc:    f6 19 0e               mov Device[Z + 0x0e], AL	 ; Enable interrupts. The value is ignored for this write.
 
 L_05df:
 05df:    e6 60                  mov A, IL6(A)	 ; This waits for the character to arrive

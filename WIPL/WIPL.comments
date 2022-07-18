@@ -393,9 +393,8 @@
 0x55c ,	comment	; last_char
 0x55e ,	comment	; Don't print CR if already done
 0x566 ,	comment	; Serisl port 0 base address
-0x56a ,	comment	; Write the unprocessed character to MUX_REG[0x0D]
-		; The purpose is unknown, probably some kind of debug port.
-		; May be even not all cards really support it.
+0x56a ,	comment	; This disables interrupts from the MUX card
+		; The value is ignored, only the fact of writing is important
 0x56d ,	comment	; Set up baud rate ?
 0x574 ,	comment	; If character is 0x0c (form feed)...
 0x575 ,	comment	; Print with a delay
@@ -427,9 +426,8 @@
 0x5cc ,	comment	; Baud rate ?
 0x5cf ,	comment	; Install the interrupt handler
 0x5d4 ,	comment	; Clear A at IPL6
-0x5d7 ,	comment	; 6 is an IPL number, could be a coincidence
-0x5d9 ,	comment	; But anyways we need to set the serial port up to
-0x5dc ,	comment	; generate a daisy chain interrupt
+0x5d9 ,	comment	; Configure the IPL number to 6
+0x5dc ,	comment	; Enable interrupts. The value is ignored for this write.
 0x5df ,	comment	; This waits for the character to arrive
 0x5e1 ,	comment	; from within an interrupt handler
 0x5e5 ,	comment	; Note we always set 8th bit by hands
