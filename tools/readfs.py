@@ -1,3 +1,4 @@
+import argparse
 import sys
 import os
 from construct import *
@@ -43,7 +44,17 @@ MetadataEntry = Union(0,
 )
 
 
-with open(sys.argv[1], "rb") as f:
+def arguments():
+    all_args = argparse.ArgumentParser()
+
+    all_args.add_argument("-i", "--input", required=True, help="input file")
+    all_args.add_argument("-x", "--extract", action='store_true', help="extract files")
+    all_args.add_argument("-f", "--filter", action='store_true', help="filter names (for Windows)")
+    return vars(all_args.parse_args())
+
+args = arguments()
+
+with open(args["input"], "rb") as f:
     # I'm lazy. Read the entire drive into memory
     drive_data = f.read()
 
@@ -112,6 +123,23 @@ class File:
 
 metadataBase = 0
 diskname = ""
+
+
+def sanitize_name(name):
+    if not args["filter"]:
+        return name
+
+    # On Windows file name can't contain '?', substitute with 'q'
+    # Use small letters because it seems file names only use capitals
+    name = name.replace('?', 'q')
+    
+    # These names are reserved for devices on Windows, prefixing helps
+    for reserved in ["CON", "AUX", "PRN", "NIL"]:
+        if name == reserved or name.startswith(reserved + "."):
+            return "prefix." + name
+
+    return name
+
 def listDirectory(sector, sectorFn, indent='', dir=None):
     data = readSector(sectorFn(sector, False))
     if len(data) == 0:
@@ -141,19 +169,22 @@ def listDirectory(sector, sectorFn, indent='', dir=None):
                 #os.makedirs(os.path.join(diskname, file.name))
                 listDirectory(0, lambda x, _: file.sectors[x], '   ', file)
             else:
-                continue
-                # path = file.name
-                # if dir:
-                #     path = os.path.join(dir.name, path)
-                # path = os.path.join(diskname, path)
+                if not args["extract"]:
+                    continue
+                path = sanitize_name(diskname)
+                if dir:
+                    path = os.path.join(path, sanitize_name(dir.name))
+                if not os.path.exists(path):
+                    os.makedirs(path)
+                path = os.path.join(path, sanitize_name(file.name))
 
-                # with open(f"{path}.{file.type}.bin", "wb") as f:
-                #     f.write(file.getData())
-                # if file.type == 2:
-                #     # ascii file
-                #     ascii = bytes([c & 0x7f for c in file.getData()])
-                #     with open(f"{path}.{file.type}.txt", "wb") as f:
-                #         f.write(ascii)
+                with open(f"{path}.{file.type}.bin", "wb") as f:
+                    f.write(file.getData())
+                if file.type == 2:
+                    # ascii file
+                    ascii = bytes([c & 0x7f for c in file.getData()])
+                    with open(f"{path}.{file.type}.txt", "wb") as f:
+                        f.write(ascii)
 
 
         sector += 1 # Directories can cross multiple sectors
