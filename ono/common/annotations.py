@@ -1,5 +1,6 @@
 from common.memory import memory_addr_info, entry_points
 from common.strings import get_pstring16_length
+from cpu6.info import FunctionInfo
 from depgen import add_dependency
 
 def read_annotations(name, memory):
@@ -58,6 +59,12 @@ def read_annotations(name, memory):
 
            elif type == "label":
                memory.info(address).label = items[2].strip()
+           elif type == "xargs":
+                xargs = {}
+                for xarg in items[2].strip().split(','):
+                    parts = xarg.split(':')
+                    xargs[parts[0]] = parts[1]
+                memory.info(address).func_info = FunctionInfo(xargs)
            elif type != "":
                memory.info(address).visited = True
                memory.info(address).type = type

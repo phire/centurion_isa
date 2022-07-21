@@ -21,6 +21,7 @@ class Xargs():
                     info.type = "cstring"
                     while mem[pc] != 0:
                         pc += 1
+                    pc += 1
         return pc
 
 class FunctionInfo:
