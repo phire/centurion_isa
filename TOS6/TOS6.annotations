@@ -1,0 +1,9 @@
+0x0100, label, Start
+0x010d, label, intState
+0x0110, label, ccFlags
+0x02e4, label, ReadChar
+0x0313, label, WriteChar
+0x0391, label, NumBuffer
+0x036e, label, AddHexDigitToNumBuffer
+0x07af, label, WriteString
+0x07af, xargs, str:cstring

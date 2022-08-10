@@ -1,6 +1,7 @@
 DEPDIR = .deps
 
 OUTPUTS = \
+        out/TOS6.asm \
 	out/WIPL.asm \
 	out/load6.asm \
 	out/load7.asm \
@@ -36,6 +37,9 @@ out/bootstrap.asm: roms/bootstrap_unscrambled.bin
 
 out/autoload.asm: roms/DSK-MM1702A
 	$(DISASSEMBLE) -s 0xef00
+
+out/TOS6.asm: TOS6/TOS6.bin TOS6/TOS6.annotations TOS6/TOS6.comments
+	$(DISASSEMBLE) -t wecb -a TOS6/TOS6.annotations -a TOS6/TOS6.comments
 
 out/WIPL.asm: WIPL/WIPL.bin
 	$(DISASSEMBLE) -s 0x100 -a WIPL/WIPL.annotations -a WIPL/WIPL.comments

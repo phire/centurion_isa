@@ -127,7 +127,7 @@ def Match46(pc, mem):
 
     op = mem[pc+2] >> 4
     ops = [
-        "addbig", "subbig", "unkbig2", "unkbig3", "unkbig4", "unkbig5",
+        "addbig", "subbig", "unkbig2", "unkbig3", "unkbig4", "mulbig",
         "unkbig6", "unkbig7", "unkbig8", "baseconv", "unkbigA", "unkbigB",
         "unkbigC", "unkbigD", "unkbigE", "unkbigF"
     ]
@@ -361,8 +361,8 @@ def branch_instructions(pc, inst, mem):
         case 0x1d:
             return Match(pc, pc+2, ControlFlowInst("bs4", target))
         case 0x1e:
-            # previously TTY Mark on the ee200. But that functionality appears to be gone
-            return Match(pc, pc+2, ControlFlowInst("unknown_branch", target))
+            # Branch if interrupts enabled. Previously TTY Mark on the ee200.
+            return Match(pc, pc+2, ControlFlowInst("bie", target))
         case 0x1f:
             # Branches when bit 1 of Level1's AH register is set
             # Just a guess that this is semaphore
